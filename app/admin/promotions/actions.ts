@@ -27,7 +27,11 @@ export async function createPromotion(data: {
   emoji?: string;
   button_text?: string;
   button_link?: string;
-  placement?: "announcement_bar" | "shop_inline" | "both";
+  placement?: "announcement_bar" | "shop_inline" | "shop_hero" | "both";
+  brand_name?: string;
+  customer_type_target?: "all" | "b2c" | "b2b";
+  discount_pct?: number;
+  promo_code?: string;
   is_active?: boolean;
   start_date?: string;
   end_date?: string;
@@ -69,7 +73,11 @@ export async function updatePromotion(
     emoji?: string;
     button_text?: string;
     button_link?: string;
-    placement?: "announcement_bar" | "shop_inline" | "both";
+    placement?: "announcement_bar" | "shop_inline" | "shop_hero" | "both";
+    brand_name?: string;
+    customer_type_target?: "all" | "b2c" | "b2b";
+    discount_pct?: number;
+    promo_code?: string;
     is_active?: boolean;
     start_date?: string;
     end_date?: string;
