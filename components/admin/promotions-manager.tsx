@@ -141,80 +141,76 @@ function PromotionForm({
           </select>
         </div>
 
-        {/* Campaign fields — only for shop_hero */}
-        {form.placement === "shop_hero" && (
-          <>
-            <div>
-              <label className="mb-1 block text-[0.75rem] font-semibold text-[#5c5e62]">
-                Brand Name
-              </label>
-              <input
-                type="text"
-                value={form.brand_name}
-                onChange={(e) => set("brand_name", e.target.value)}
-                placeholder="e.g. Rapid"
-                className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/15"
-              />
-              <p className="mt-1 text-[0.72rem] text-[#9ca3af]">
-                Must match the brand name on products exactly — used to show discount badges.
-              </p>
-            </div>
+        {/* Campaign fields — always visible */}
+        <div>
+          <label className="mb-1 block text-[0.75rem] font-semibold text-[#5c5e62]">
+            Brand Name
+          </label>
+          <input
+            type="text"
+            value={form.brand_name}
+            onChange={(e) => set("brand_name", e.target.value)}
+            placeholder="e.g. Rapid"
+            className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/15"
+          />
+          <p className="mt-1 text-[0.72rem] text-[#9ca3af]">
+            Must match the brand name on products exactly — used to show discount badges.
+          </p>
+        </div>
 
-            <div>
-              <label className="mb-1 block text-[0.75rem] font-semibold text-[#5c5e62]">
-                Customer Target
-              </label>
-              <select
-                value={form.customer_type_target}
-                onChange={(e) => set("customer_type_target", e.target.value as FormState["customer_type_target"])}
-                className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/15"
-              >
-                <option value="">— No targeting (show to all) —</option>
-                <option value="all">All customers</option>
-                <option value="b2c">B2C customers only</option>
-                <option value="b2b">B2B customers only</option>
-              </select>
-              <p className="mt-1 text-[0.72rem] text-[#9ca3af]">
-                B2C campaigns are hidden from B2B accounts.
-              </p>
-            </div>
+        <div>
+          <label className="mb-1 block text-[0.75rem] font-semibold text-[#5c5e62]">
+            Customer Target
+          </label>
+          <select
+            value={form.customer_type_target}
+            onChange={(e) => set("customer_type_target", e.target.value as FormState["customer_type_target"])}
+            className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/15"
+          >
+            <option value="">— No targeting (show to all) —</option>
+            <option value="all">All customers</option>
+            <option value="b2c">B2C customers only</option>
+            <option value="b2b">B2B customers only</option>
+          </select>
+          <p className="mt-1 text-[0.72rem] text-[#9ca3af]">
+            B2C campaigns are hidden from B2B accounts.
+          </p>
+        </div>
 
-            <div>
-              <label className="mb-1 block text-[0.75rem] font-semibold text-[#5c5e62]">
-                Discount %
-              </label>
-              <input
-                type="number"
-                min="0"
-                max="100"
-                step="0.1"
-                value={form.discount_pct}
-                onChange={(e) => set("discount_pct", e.target.value)}
-                placeholder="e.g. 5"
-                className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/15"
-              />
-              <p className="mt-1 text-[0.72rem] text-[#9ca3af]">
-                Shown as a badge on matching brand products in the shop.
-              </p>
-            </div>
+        <div>
+          <label className="mb-1 block text-[0.75rem] font-semibold text-[#5c5e62]">
+            Discount %
+          </label>
+          <input
+            type="number"
+            min="0"
+            max="100"
+            step="0.1"
+            value={form.discount_pct}
+            onChange={(e) => set("discount_pct", e.target.value)}
+            placeholder="e.g. 5"
+            className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/15"
+          />
+          <p className="mt-1 text-[0.72rem] text-[#9ca3af]">
+            Shown as a badge on matching brand products in the shop.
+          </p>
+        </div>
 
-            <div>
-              <label className="mb-1 block text-[0.75rem] font-semibold text-[#5c5e62]">
-                Promo Code
-              </label>
-              <input
-                type="text"
-                value={form.promo_code}
-                onChange={(e) => set("promo_code", e.target.value.toUpperCase())}
-                placeholder="e.g. RAPID5"
-                className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 font-mono text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/15"
-              />
-              <p className="mt-1 text-[0.72rem] text-[#9ca3af]">
-                Displayed on the campaign banner with a copy button. Customers apply it at checkout.
-              </p>
-            </div>
-          </>
-        )}
+        <div>
+          <label className="mb-1 block text-[0.75rem] font-semibold text-[#5c5e62]">
+            Promo Code
+          </label>
+          <input
+            type="text"
+            value={form.promo_code}
+            onChange={(e) => set("promo_code", e.target.value.toUpperCase())}
+            placeholder="e.g. RAPID5"
+            className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 font-mono text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/15"
+          />
+          <p className="mt-1 text-[0.72rem] text-[#9ca3af]">
+            Displayed on the campaign banner with a copy button. Customers apply it at checkout.
+          </p>
+        </div>
 
         {/* Title */}
         <div className="sm:col-span-2">
