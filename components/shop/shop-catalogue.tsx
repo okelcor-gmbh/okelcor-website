@@ -191,12 +191,22 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
       .then((json) => {
         const all: RawPromotion[] = Array.isArray(json?.data) ? json.data : [];
 
+        if (process.env.NODE_ENV === "development") {
+          console.log("[shop-promotions] active count:", all.length);
+          all.forEach((p) => console.log(`  • id=${p.id} placement=${p.placement} title="${p.title}" customer_type_target=${p.customer_type_target} brand_name=${p.brand_name}`));
+        }
+
         setInlinePromos(
           all.filter((p) => !p.placement || p.placement === "shop_inline" || p.placement === "both")
         );
 
         const hero = all.find((p) => p.placement === "shop_hero");
-        if (hero?.brand_name) {
+
+        if (process.env.NODE_ENV === "development") {
+          console.log("[shop-promotions] shopHeroCampaign:", hero ?? "none");
+        }
+
+        if (hero) {
           setCampaignPromoRaw({
             id:                   hero.id,
             title:                hero.title,
@@ -204,7 +214,7 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
             button_text:          hero.button_text ?? null,
             button_link:          hero.button_link ?? null,
             image_url:            hero.image_url ?? null,
-            brand_name:           hero.brand_name,
+            brand_name:           hero.brand_name ?? null,
             discount_pct:         hero.discount_pct ?? null,
             promo_code:           hero.promo_code ?? null,
             customer_type_target: (hero.customer_type_target as CampaignPromotion["customer_type_target"]) ?? null,
@@ -351,12 +361,18 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
     selWidth || selHeight || selRim || selSeason || selSpeed || selLoad;
 
   // ── Campaign targeting (re-derived on every render when customerType changes) ──
+  // B2C campaigns: visible to guests + b2c, hidden from b2b.
+  // B2B campaigns: visible only to b2b.
+  // "all" or no target: visible to everyone.
 
   const campaignPromo: CampaignPromotion | null = (() => {
     if (!campaignPromoRaw) return null;
     const ct = campaignPromoRaw.customer_type_target;
     if (ct === "b2c" && customerType === "b2b") return null;
     if (ct === "b2b" && customerType !== "b2b") return null;
+    if (process.env.NODE_ENV === "development") {
+      console.log(`[shop-promotions] campaignPromo resolved — ct=${ct} customerType=${customerType} title="${campaignPromoRaw.title}"`);
+    }
     return campaignPromoRaw;
   })();
 
