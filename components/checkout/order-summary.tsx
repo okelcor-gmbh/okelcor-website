@@ -205,7 +205,7 @@ export default function OrderSummary({
   const displayTotal    = taxPreview ? taxPreview.total : cartTotal;
 
   return (
-    <div className="overflow-hidden rounded-[22px] bg-[#efefef]">
+    <div className="overflow-hidden rounded-[18px] bg-[#efefef] sm:rounded-[22px]">
       {/* Dev-only diagnostic bar — not visible in production (remove after confirmed) */}
       {process.env.NODE_ENV === "development" && (
         <div className="border-b border-amber-300 bg-amber-50 px-4 py-2 text-[0.68rem] font-mono text-amber-800">
@@ -213,22 +213,22 @@ export default function OrderSummary({
         </div>
       )}
       {/* Header */}
-      <div className="border-b border-black/[0.07] px-6 py-4">
-        <p className="text-[1rem] font-extrabold text-[var(--foreground)]">
+      <div className="border-b border-black/[0.07] px-4 py-3.5 sm:px-6 sm:py-4">
+        <p className="text-[0.95rem] font-extrabold text-[var(--foreground)] sm:text-[1rem]">
           {c.summaryTitle}
         </p>
-        <p className="mt-0.5 text-[0.82rem] text-[var(--muted)]">
+        <p className="mt-0.5 text-[0.8rem] text-[var(--muted)] sm:text-[0.82rem]">
           {totalItems} {totalItems === 1 ? c.item : c.items}
         </p>
       </div>
 
       {/* Product list */}
-      <div className="divide-y divide-black/[0.06] px-6">
+      <div className="divide-y divide-black/[0.06] px-4 sm:px-6">
         {items.map((item) => {
           const lineTotal = item.product.price * item.quantity;
           return (
             <div key={item.product.id} className="flex gap-3 py-4">
-              <div className="h-[56px] w-[56px] shrink-0 overflow-hidden rounded-[10px] bg-white">
+              <div className="h-[48px] w-[48px] shrink-0 overflow-hidden rounded-[10px] bg-white sm:h-[56px] sm:w-[56px]">
                 <img
                   src={item.product.image}
                   alt={item.product.name}
@@ -266,7 +266,7 @@ export default function OrderSummary({
         {/* FET add-on line item */}
         {fetAddon && (
           <div className="flex gap-3 py-4">
-            <div className="flex h-[56px] w-[56px] shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-[#dcfce7]">
+            <div className="flex h-[48px] w-[48px] shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-[#dcfce7] sm:h-[56px] sm:w-[56px]">
               <span className="text-center text-[10px] font-extrabold leading-tight text-[#166534]">FET</span>
             </div>
             <div className="flex min-w-0 flex-1 flex-col justify-between">
@@ -295,7 +295,7 @@ export default function OrderSummary({
       </div>
 
       {/* Totals */}
-      <div className="flex flex-col gap-3 border-t border-black/[0.07] px-6 py-5">
+      <div className="flex flex-col gap-3 border-t border-black/[0.07] px-4 py-4 sm:px-6 sm:py-5">
         {/* Subtotal */}
         <SummaryRow label={c.subtotal} value={`€${displaySubtotal.toFixed(2)}`} />
 

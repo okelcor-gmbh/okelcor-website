@@ -60,7 +60,7 @@ function FetUpsellCard({
   return (
     <div className="relative overflow-hidden rounded-[22px] border border-[#d1fae5] bg-[#f0fdf4]">
       <div className="absolute inset-y-0 left-0 w-1 bg-[#10b981]" aria-hidden="true" />
-      <div className="px-5 py-5 pl-7 sm:px-6 sm:pl-8">
+      <div className="px-4 py-4 pl-6 sm:px-5 sm:py-5 sm:pl-7 md:pl-8">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
             <span className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-[#dcfce7] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-[#166534]">
@@ -140,8 +140,8 @@ function Field({ label, htmlFor, error, children }: {
 
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-[22px] bg-[#efefef] p-6">
-      <p className="mb-4 text-[1rem] font-extrabold text-[var(--foreground)]">{title}</p>
+    <div className="rounded-[18px] bg-[#efefef] p-4 sm:rounded-[22px] sm:p-6">
+      <p className="mb-3.5 text-[0.95rem] font-extrabold text-[var(--foreground)] sm:mb-4 sm:text-[1rem]">{title}</p>
       {children}
     </div>
   );
@@ -379,7 +379,7 @@ export default function CheckoutFlow() {
   // ── Render ──────────────────────────────────────────────────────────────────
 
   return (
-    <div className="tesla-shell py-8 md:py-12">
+    <div className="tesla-shell py-6 md:py-10">
       {/* Breadcrumb */}
       <nav className="mb-6 flex items-center gap-1.5 text-[0.82rem] text-[var(--muted)]">
         <Link href="/" className="transition hover:text-[var(--foreground)]">{c.breadcrumbHome}</Link>
@@ -537,7 +537,7 @@ export default function CheckoutFlow() {
             type="button"
             onClick={handleSubmit}
             disabled={submitting}
-            className="flex h-[54px] w-full items-center justify-center gap-2.5 rounded-full bg-[var(--primary)] text-[1rem] font-semibold text-white transition hover:bg-[var(--primary-hover)] disabled:opacity-60"
+            className="flex h-[50px] w-full items-center justify-center gap-2.5 rounded-full bg-[var(--primary)] text-[0.95rem] font-semibold text-white transition hover:bg-[var(--primary-hover)] disabled:opacity-60 sm:h-[54px] sm:text-[1rem]"
           >
             {submitting ? (
               <>
@@ -577,7 +577,7 @@ export default function CheckoutFlow() {
           />
 
           {/* Promo code input */}
-          <div className="overflow-hidden rounded-[22px] bg-[#efefef] px-5 py-4">
+          <div className="overflow-hidden rounded-[18px] bg-[#efefef] px-4 py-4 sm:rounded-[22px] sm:px-5">
             <p className="mb-3 text-[0.85rem] font-semibold text-[var(--foreground)]">Promo code</p>
             <div className="flex gap-2">
               <input
@@ -590,13 +590,13 @@ export default function CheckoutFlow() {
                 onKeyDown={(e) => { if (e.key === "Enter" && !appliedPromoCode) handleApplyPromo(); }}
                 placeholder="e.g. RAPID5"
                 disabled={!!appliedPromoCode}
-                className="h-10 flex-1 rounded-full border border-black/[0.08] bg-white px-4 font-mono text-[0.88rem] font-bold uppercase tracking-widest text-[var(--foreground)] outline-none placeholder:font-sans placeholder:normal-case placeholder:tracking-normal placeholder:text-[var(--muted)] transition focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]/10 disabled:cursor-not-allowed disabled:opacity-60"
+                className="h-[44px] flex-1 rounded-full border border-black/[0.08] bg-white px-4 font-mono text-[0.88rem] font-bold uppercase tracking-widest text-[var(--foreground)] outline-none placeholder:font-sans placeholder:normal-case placeholder:tracking-normal placeholder:text-[var(--muted)] transition focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]/10 disabled:cursor-not-allowed disabled:opacity-60"
               />
               {appliedPromoCode ? (
                 <button
                   type="button"
                   onClick={handleRemovePromo}
-                  className="flex h-10 shrink-0 items-center rounded-full border border-black/[0.08] bg-white px-4 text-[0.82rem] font-semibold text-[var(--foreground)] transition hover:bg-[#f0f0f0]"
+                  className="flex h-[44px] shrink-0 items-center rounded-full border border-black/[0.08] bg-white px-4 text-[0.82rem] font-semibold text-[var(--foreground)] transition hover:bg-[#f0f0f0]"
                 >
                   Remove
                 </button>
@@ -605,7 +605,7 @@ export default function CheckoutFlow() {
                   type="button"
                   onClick={handleApplyPromo}
                   disabled={!promoInput.trim()}
-                  className="flex h-10 shrink-0 items-center rounded-full bg-[var(--primary)] px-5 text-[0.82rem] font-semibold text-white transition hover:bg-[var(--primary-hover)] disabled:opacity-40"
+                  className="flex h-[44px] shrink-0 items-center rounded-full bg-[var(--primary)] px-5 text-[0.82rem] font-semibold text-white transition hover:bg-[var(--primary-hover)] disabled:opacity-40"
                 >
                   Apply
                 </button>

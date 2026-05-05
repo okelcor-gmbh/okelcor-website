@@ -19,7 +19,7 @@ export default function ProductGrid({ products, total, sortBy, onSortChange, cus
     <div>
       {/* Sort bar */}
       <div className="mb-5 flex items-center justify-between">
-        <p className="hidden text-[0.9rem] text-[var(--muted)] md:block">
+        <p className="hidden text-[0.9rem] text-[var(--muted)] sm:block">
           <span className="font-semibold text-[var(--foreground)]">{total}</span>{" "}
           {total === 1 ? t.shop.catalogue.product : t.shop.catalogue.products}
         </p>
@@ -48,7 +48,7 @@ export default function ProductGrid({ products, total, sortBy, onSortChange, cus
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {products.map((product, i) => (
             <ProductCard key={product.id} product={product} priority={i < 3} customerType={customerType} activeCampaign={activeCampaign} />
           ))}

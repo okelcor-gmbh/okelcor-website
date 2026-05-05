@@ -32,7 +32,7 @@ export default async function CheckoutPage() {
   return (
     <main>
       <Navbar />
-      <div className="min-h-screen w-full bg-[#f5f5f5] pt-[76px] lg:pt-20">
+      <div className="min-h-screen w-full bg-[#f5f5f5] pt-[72px] sm:pt-[80px] lg:pt-20">
         <CheckoutFlow />
       </div>
       <Footer />

@@ -53,7 +53,7 @@ export default function ProductCard({
       className="group flex flex-col overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md"
     >
       {/* Image area — full tyre visible, no cropping */}
-      <div className="relative flex h-52 items-center justify-center bg-white p-4">
+      <div className="relative flex h-44 items-center justify-center bg-white p-4 sm:h-52">
         <img
           src={imageUrl}
           alt={`${product.brand} ${product.name}`}

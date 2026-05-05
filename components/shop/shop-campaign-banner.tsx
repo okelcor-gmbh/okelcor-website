@@ -49,7 +49,7 @@ export default function ShopCampaignBanner({
   );
 
   const ctaClass =
-    "inline-flex h-9 items-center gap-2 rounded-full bg-[#f4511e] px-5 text-[0.82rem] font-bold text-white shadow-sm transition hover:bg-[#e04018] active:scale-[0.97]";
+    "inline-flex h-[44px] items-center gap-2 rounded-full bg-[#f4511e] px-5 text-[0.82rem] font-bold text-white shadow-sm transition hover:bg-[#e04018] active:scale-[0.97] sm:h-9";
 
   return (
     <div className="mb-6 overflow-hidden rounded-2xl border border-[#f4511e]/20 bg-white shadow-[0_2px_12px_rgba(244,81,30,0.06)]">
@@ -107,9 +107,9 @@ export default function ShopCampaignBanner({
           {/* Promo code row */}
           {promo.promo_code && (
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <div className="flex items-center gap-1.5 rounded-full border border-[#f4511e]/20 bg-[#fff8f6] px-3 py-1.5">
+              <div className="flex items-center gap-1.5 rounded-full border border-[#f4511e]/20 bg-[#fff8f6] px-3 py-2">
                 <Tag size={10} className="shrink-0 text-[#f4511e]" />
-                <span className="text-[0.7rem] text-[#5c5e62]">Code:</span>
+                <span className="text-[0.72rem] text-[#5c5e62]">Code:</span>
                 <span className="font-mono text-[0.82rem] font-extrabold tracking-widest text-[#171a20]">
                   {promo.promo_code}
                 </span>
@@ -117,7 +117,7 @@ export default function ShopCampaignBanner({
               <button
                 type="button"
                 onClick={handleCopy}
-                className="inline-flex items-center gap-1.5 rounded-full border border-[#f4511e]/20 bg-[#fff8f6] px-3 py-1.5 text-[0.73rem] font-semibold text-[#f4511e] transition hover:bg-[#fee2d8] active:scale-[0.97]"
+                className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full border border-[#f4511e]/20 bg-[#fff8f6] px-3 py-2 text-[0.73rem] font-semibold text-[#f4511e] transition hover:bg-[#fee2d8] active:scale-[0.97]"
               >
                 {copied ? <Check size={11} strokeWidth={2.5} /> : <Copy size={11} strokeWidth={2.2} />}
                 {copied ? "Copied!" : "Copy code"}
