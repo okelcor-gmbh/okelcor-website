@@ -211,17 +211,18 @@ export default function CheckoutFlow() {
     fetch("/api/promotions/active", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((json) => {
-        type P = { brand_name?: string | null; discount_pct?: number | null; customer_type_target?: string | null; promo_code?: string | null };
+        type P = { brand_name?: string | null; brand?: string | null; discount_pct?: number | null; customer_type_target?: string | null; promo_code?: string | null; code?: string | null };
         const all: P[] = Array.isArray(json?.data) ? json.data : [];
         const campaign = all.find(
-          (p) => p.brand_name &&
+          (p) => (p.brand_name ?? p.brand) &&
             (!p.customer_type_target || p.customer_type_target === "b2c" || p.customer_type_target === "all")
         );
-        if (campaign?.brand_name) {
+        const campaignBrand = campaign?.brand_name ?? campaign?.brand ?? null;
+        if (campaignBrand) {
           setCartCampaign({
-            brand_name:  campaign.brand_name,
-            discount_pct: campaign.discount_pct ?? null,
-            promo_code:  campaign.promo_code ?? null,
+            brand_name:   campaignBrand,
+            discount_pct: campaign?.discount_pct ?? null,
+            promo_code:   campaign?.promo_code ?? campaign?.code ?? null,
           });
         }
       })

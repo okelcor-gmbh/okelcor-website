@@ -32,6 +32,7 @@ export async function createPromotion(data: {
   customer_type_target?: "all" | "b2c" | "b2b";
   discount_pct?: number;
   promo_code?: string;
+  code?: string;
   is_active?: boolean;
   start_date?: string;
   end_date?: string;
@@ -78,6 +79,7 @@ export async function updatePromotion(
     customer_type_target?: "all" | "b2c" | "b2b";
     discount_pct?: number;
     promo_code?: string;
+    code?: string;
     is_active?: boolean;
     start_date?: string;
     end_date?: string;

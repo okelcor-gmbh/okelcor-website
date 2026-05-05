@@ -66,7 +66,7 @@ export default function ProductCard({
             Out of Stock
           </span>
         )}
-        {activeCampaign && product.brand === activeCampaign.brand_name && (
+        {activeCampaign && product.brand.trim().toLowerCase() === activeCampaign.brand_name.trim().toLowerCase() && (
           <span className="absolute right-2 top-2 rounded-full bg-[#f4511e] px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide text-white shadow">
             {activeCampaign.discount_pct}% OFF
           </span>
