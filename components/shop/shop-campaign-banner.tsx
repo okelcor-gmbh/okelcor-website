@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Copy, Check } from "lucide-react";
+import { ArrowRight, Copy, Check, Tag } from "lucide-react";
 
 export type CampaignPromotion = {
   id: number;
@@ -18,10 +18,20 @@ export type CampaignPromotion = {
   customer_type_target?: "b2c" | "b2b" | "all" | null;
 };
 
-export default function ShopCampaignBanner({ promo }: { promo: CampaignPromotion }) {
+export default function ShopCampaignBanner({
+  promo,
+  onCtaClick,
+}: {
+  promo: CampaignPromotion;
+  onCtaClick?: (url: string) => void;
+}) {
   const discountLabel = promo.discount_pct != null ? `${promo.discount_pct}% OFF` : null;
   const hasCta = !!(promo.button_text && promo.button_link);
   const [copied, setCopied] = useState(false);
+
+  const targetLabel =
+    promo.customer_type_target === "b2c" ? "For private customers" :
+    promo.customer_type_target === "b2b" ? "For business customers" : null;
 
   const handleCopy = () => {
     if (!promo.promo_code) return;
@@ -30,6 +40,16 @@ export default function ShopCampaignBanner({ promo }: { promo: CampaignPromotion
       setTimeout(() => setCopied(false), 2000);
     }).catch(() => {});
   };
+
+  const ctaContent = (
+    <>
+      {promo.button_text}
+      <ArrowRight size={13} strokeWidth={2.5} />
+    </>
+  );
+
+  const ctaClass =
+    "inline-flex h-9 items-center gap-2 rounded-full bg-[#f4511e] px-5 text-[0.82rem] font-bold text-white shadow-sm transition hover:bg-[#e04018] active:scale-[0.97]";
 
   return (
     <div className="mb-6 overflow-hidden rounded-2xl border border-[#f4511e]/20 bg-white shadow-[0_2px_12px_rgba(244,81,30,0.06)]">
@@ -54,6 +74,8 @@ export default function ShopCampaignBanner({ promo }: { promo: CampaignPromotion
 
         {/* Text */}
         <div className="flex flex-1 flex-col justify-center py-6 pl-7 pr-5 sm:pl-8">
+
+          {/* Brand + pills row */}
           <div className="flex flex-wrap items-center gap-2">
             <p className="text-[0.62rem] font-bold uppercase tracking-[0.22em] text-[#f4511e]">
               {promo.brand_name ?? "Campaign"}
@@ -63,22 +85,30 @@ export default function ShopCampaignBanner({ promo }: { promo: CampaignPromotion
                 {discountLabel}
               </span>
             )}
+            {targetLabel && (
+              <span className="rounded-full border border-[#f4511e]/25 bg-[#fff8f6] px-2.5 py-0.5 text-[0.65rem] font-semibold text-[#f4511e]">
+                {targetLabel}
+              </span>
+            )}
           </div>
 
+          {/* Title */}
           <p className="mt-1.5 text-[1.05rem] font-extrabold leading-snug text-[#171a20] sm:text-[1.15rem]">
             {promo.title}
           </p>
 
+          {/* Subheadline */}
           {promo.subheadline && (
             <p className="mt-1 text-[0.83rem] leading-relaxed text-[#5c5e62]">
               {promo.subheadline}
             </p>
           )}
 
-          {/* Promo code copy row */}
+          {/* Promo code row */}
           {promo.promo_code && (
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <div className="flex items-center gap-1.5 rounded-full border border-[#f4511e]/20 bg-[#fff8f6] px-3 py-1.5">
+                <Tag size={10} className="shrink-0 text-[#f4511e]" />
                 <span className="text-[0.7rem] text-[#5c5e62]">Code:</span>
                 <span className="font-mono text-[0.82rem] font-extrabold tracking-widest text-[#171a20]">
                   {promo.promo_code}
@@ -95,15 +125,22 @@ export default function ShopCampaignBanner({ promo }: { promo: CampaignPromotion
             </div>
           )}
 
+          {/* CTA */}
           {hasCta && (
             <div className="mt-4">
-              <Link
-                href={promo.button_link!}
-                className="inline-flex h-9 items-center gap-2 rounded-full bg-[#f4511e] px-5 text-[0.82rem] font-bold text-white shadow-sm transition hover:bg-[#e04018] active:scale-[0.97]"
-              >
-                {promo.button_text}
-                <ArrowRight size={13} strokeWidth={2.5} />
-              </Link>
+              {onCtaClick ? (
+                <button
+                  type="button"
+                  onClick={() => onCtaClick(promo.button_link!)}
+                  className={ctaClass}
+                >
+                  {ctaContent}
+                </button>
+              ) : (
+                <Link href={promo.button_link!} className={ctaClass}>
+                  {ctaContent}
+                </Link>
+              )}
             </div>
           )}
         </div>

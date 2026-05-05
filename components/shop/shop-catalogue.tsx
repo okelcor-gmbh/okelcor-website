@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Search, Loader2, RotateCcw } from "lucide-react";
 import ProductGrid from "./product-grid";
 import ShopPromoBanner, { type ShopPromotion } from "./shop-promo-banner";
@@ -101,6 +102,7 @@ type Props = {
 export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, initialFilters }: Props) {
   const { locale, t } = useLanguage();
   const { customer } = useCustomerAuth();
+  const router = useRouter();
   const customerType: "b2b" | "b2c" | "guest" =
     customer?.customer_type === "b2b" ? "b2b" : customer ? "b2c" : "guest";
 
@@ -191,20 +193,11 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
       .then((json) => {
         const all: RawPromotion[] = Array.isArray(json?.data) ? json.data : [];
 
-        if (process.env.NODE_ENV === "development") {
-          console.log("[shop-promotions] active count:", all.length);
-          all.forEach((p) => console.log(`  • id=${p.id} placement=${p.placement} title="${p.title}" customer_type_target=${p.customer_type_target} brand_name=${p.brand_name}`));
-        }
-
         setInlinePromos(
           all.filter((p) => !p.placement || p.placement === "shop_inline" || p.placement === "both")
         );
 
         const hero = all.find((p) => p.placement === "shop_hero");
-
-        if (process.env.NODE_ENV === "development") {
-          console.log("[shop-promotions] shopHeroCampaign:", hero ?? "none");
-        }
 
         if (hero) {
           setCampaignPromoRaw({
@@ -370,9 +363,6 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
     const ct = campaignPromoRaw.customer_type_target;
     if (ct === "b2c" && customerType === "b2b") return null;
     if (ct === "b2b" && customerType !== "b2b") return null;
-    if (process.env.NODE_ENV === "development") {
-      console.log(`[shop-promotions] campaignPromo resolved — ct=${ct} customerType=${customerType} title="${campaignPromoRaw.title}"`);
-    }
     return campaignPromoRaw;
   })();
 
@@ -381,6 +371,27 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
       ? { brand_name: campaignPromo.brand_name, discount_pct: campaignPromo.discount_pct }
       : null;
 
+  // ── CTA handler: apply URL params as filters without full navigation ──────────
+
+  const handleCampaignCta = useCallback((url: string) => {
+    try {
+      const parsed = new URL(url, window.location.origin);
+      const brand = parsed.searchParams.get("brand");
+      if (brand) setSelBrand(brand);
+      const q = parsed.searchParams.get("q");
+      if (q) setSearchText(q);
+      const type = parsed.searchParams.get("type");
+      if (type) setSelType(type);
+    } catch { /* malformed url — still proceed */ }
+    setPendingAutoSearch(true);
+    // Push so the URL reflects the active filter (bookmarkable / back-button)
+    router.push(url, { scroll: false });
+    // Scroll catalogue into view so results are visible
+    setTimeout(() => {
+      document.getElementById("shop-catalogue")?.scrollIntoView({ behavior: "smooth" });
+    }, 80);
+  }, [router]);
+
   // ─────────────────────────────────────────────────────────────────────────────
 
   return (
@@ -388,7 +399,9 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
       <div className="tesla-shell">
 
         {/* ── Campaign hero banner — below intro, above filters ── */}
-        {campaignPromo && <ShopCampaignBanner promo={campaignPromo} />}
+        {campaignPromo && (
+          <ShopCampaignBanner promo={campaignPromo} onCtaClick={handleCampaignCta} />
+        )}
 
         {/* ── Filter bar ── */}
         <div className="mb-6 overflow-hidden rounded-2xl border border-[#e5e7eb] bg-white shadow-sm">
