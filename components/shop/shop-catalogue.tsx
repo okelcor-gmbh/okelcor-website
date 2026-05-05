@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Search, Loader2, RotateCcw } from "lucide-react";
 import ProductGrid from "./product-grid";
 import ShopPromoBanner, { type ShopPromotion } from "./shop-promo-banner";
@@ -102,7 +101,6 @@ type Props = {
 export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, initialFilters }: Props) {
   const { locale, t } = useLanguage();
   const { customer } = useCustomerAuth();
-  const router = useRouter();
   const customerType: "b2b" | "b2c" | "guest" =
     customer?.customer_type === "b2b" ? "b2b" : customer ? "b2c" : "guest";
 
@@ -384,13 +382,15 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
       if (type) setSelType(type);
     } catch { /* malformed url — still proceed */ }
     setPendingAutoSearch(true);
-    // Push so the URL reflects the active filter (bookmarkable / back-button)
-    router.push(url, { scroll: false });
-    // Scroll catalogue into view so results are visible
+    // Update URL bar without triggering a Next.js navigation.
+    // router.push() causes a server re-render which races with the state updates
+    // above and prevents runSearch() from seeing the new selBrand value.
+    try { window.history.pushState(null, "", url); } catch { /* SSR / unsupported */ }
+    // Scroll catalogue into view after the search result renders
     setTimeout(() => {
       document.getElementById("shop-catalogue")?.scrollIntoView({ behavior: "smooth" });
     }, 80);
-  }, [router]);
+  }, []);
 
   // ─────────────────────────────────────────────────────────────────────────────
 

@@ -126,7 +126,7 @@ export default function OrderSummary({
       vat_number: vatValid ? vatNumberRef.current : undefined,
       vat_valid: vatValid,
       customer_type: customerType,
-      ...(promoCode ? { promo_code: promoCode } : {}),
+      ...(promoCode ? { promo_code: promoCode, code: promoCode } : {}),
     };
 
     const timer = setTimeout(async () => {

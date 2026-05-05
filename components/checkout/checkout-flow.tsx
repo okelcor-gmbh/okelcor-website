@@ -296,7 +296,7 @@ export default function CheckoutFlow() {
         quantity:     fetQty,
       },
     }),
-    ...(appliedPromoCode ? { promo_code: appliedPromoCode } : {}),
+    ...(appliedPromoCode ? { promo_code: appliedPromoCode, code: appliedPromoCode } : {}),
   });
 
   // Submit -> Stripe Checkout redirect via Laravel /api/v1/payments/create-session.
