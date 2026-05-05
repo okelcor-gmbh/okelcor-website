@@ -125,174 +125,193 @@ export default async function OrdersPage() {
     <main className="min-h-screen bg-[#f5f5f5]">
       <Navbar />
 
-      <div className="tesla-shell pb-16 pt-[96px]">
+      <div className="tesla-shell pb-16 pt-[88px] sm:pt-[96px]">
+
         {/* Page header */}
-        <div className="mb-8">
-          <nav className="mb-4 flex items-center gap-1.5 text-[0.82rem] text-[var(--muted)]">
+        <div className="mb-6 sm:mb-8">
+          <nav className="mb-3 flex items-center gap-1.5 text-[0.8rem] text-[var(--muted)] sm:mb-4 sm:text-[0.82rem]">
             <Link href="/" className="transition hover:text-[var(--foreground)]">Home</Link>
-            <ChevronRight size={13} className="opacity-50" />
+            <ChevronRight size={12} className="opacity-50" />
             <span className="font-medium text-[var(--foreground)]">My Orders</span>
           </nav>
-          <h1 className="text-2xl font-extrabold tracking-tight text-[var(--foreground)] md:text-3xl">
+          <h1 className="text-[1.6rem] font-extrabold tracking-tight text-[var(--foreground)] sm:text-2xl md:text-3xl">
             My Orders
           </h1>
-          <p className="mt-1 text-[0.88rem] text-[var(--muted)]">{customer.email}</p>
+          <p className="mt-1 text-[0.85rem] text-[var(--muted)] sm:text-[0.88rem]">{customer.email}</p>
         </div>
 
         {orders.length === 0 ? (
-          <div className="flex flex-col items-center rounded-[22px] bg-[#efefef] px-8 py-16 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#e0e0e0]">
-              <Package size={30} strokeWidth={1.5} className="text-[var(--muted)]" />
+          <div className="flex flex-col items-center rounded-[22px] bg-[#efefef] px-6 py-14 text-center sm:px-8 sm:py-16">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#e0e0e0] sm:h-16 sm:w-16">
+              <Package size={26} strokeWidth={1.5} className="text-[var(--muted)] sm:hidden" />
+              <Package size={30} strokeWidth={1.5} className="hidden text-[var(--muted)] sm:block" />
             </div>
-            <h2 className="mt-5 text-xl font-extrabold text-[var(--foreground)]">No orders yet</h2>
-            <p className="mt-2 max-w-[340px] text-[0.9rem] text-[var(--muted)]">
+            <h2 className="mt-4 text-lg font-extrabold text-[var(--foreground)] sm:mt-5 sm:text-xl">No orders yet</h2>
+            <p className="mt-2 max-w-[300px] text-[0.88rem] text-[var(--muted)] sm:max-w-[340px] sm:text-[0.9rem]">
               When you place an order it will appear here.
             </p>
             <Link
               href="/shop"
-              className="mt-6 inline-flex h-[46px] items-center rounded-full bg-[var(--primary)] px-7 text-[0.9rem] font-semibold text-white transition hover:bg-[var(--primary-hover)]"
+              className="mt-5 inline-flex h-[44px] items-center rounded-full bg-[var(--primary)] px-6 text-[0.88rem] font-semibold text-white transition hover:bg-[var(--primary-hover)] sm:mt-6 sm:h-[46px] sm:px-7 sm:text-[0.9rem]"
             >
               Browse Catalogue
             </Link>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-[22px] bg-[#efefef]">
+          <div className="overflow-hidden rounded-[18px] bg-[#efefef] sm:rounded-[22px]">
 
-            {/* Desktop table */}
-            <div className="hidden overflow-x-auto md:block">
-              <table className="w-full text-left">
+            {/* ── Desktop / wide-tablet table (≥ 1024px) ── */}
+            <div className="hidden overflow-x-auto lg:block">
+              <table className="w-full min-w-[720px] text-left">
                 <thead>
                   <tr className="border-b border-black/[0.07]">
-                    {["Order Ref", "Date", "Items", "Total", "Status", ""].map((h) => (
-                      <th key={h} className="px-6 py-4 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--muted)]">
-                        {h}
-                      </th>
-                    ))}
+                    <th className="w-[180px] px-5 py-4 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--muted)] xl:px-6">Order Ref</th>
+                    <th className="w-[110px] px-5 py-4 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--muted)] xl:px-6">Date</th>
+                    <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--muted)] xl:px-6">Items</th>
+                    <th className="w-[100px] px-5 py-4 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--muted)] xl:px-6">Total</th>
+                    <th className="w-[150px] px-5 py-4 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--muted)] xl:px-6">Status</th>
+                    <th className="w-[140px] px-5 py-4 text-right text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--muted)] xl:px-6" />
                   </tr>
                 </thead>
                 <tbody>
-                  {orders.map((order, i) => (
-                    <tr
-                      key={order.ref}
-                      className={`border-b border-black/[0.05] transition hover:bg-white/60 ${i % 2 === 0 ? "bg-white/30" : ""}`}
-                    >
-                      <td className="px-6 py-4 font-mono text-[0.88rem] font-bold text-[var(--foreground)]">
-                        {order.ref}
-                      </td>
-                      <td className="px-6 py-4 text-[0.88rem] text-[var(--muted)]">
-                        {formatDate(order.created_at)}
-                      </td>
-                      <td className="max-w-[220px] px-6 py-4 text-[0.88rem] text-[var(--muted)]">
-                        <span className="font-medium text-[var(--foreground)]">
-                          {order.items.length} item{order.items.length !== 1 ? "s" : ""}
-                        </span>
-                        {order.items[0] && (
-                          <span className="ml-1 truncate">
-                            · {[order.items[0].brand, order.items[0].product_name].filter(Boolean).join(" ")}
-                            {order.items.length > 1 ? ` +${order.items.length - 1} more` : ""}
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 text-[0.88rem] font-semibold text-[var(--foreground)]">
-                        €{Number(order.total).toFixed(2)}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col items-start gap-1.5">
-                          <StatusBadge status={order.status} />
-                          {order.payment_method === "stripe" && order.payment_status === "pending" && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-amber-700">
-                              <CreditCard size={10} strokeWidth={2.5} />
-                              Payment due
+                  {orders.map((order, i) => {
+                    const paymentUrl = order.payment_url ?? order.checkout_url ?? null;
+                    const showPayNow = order.payment_method === "stripe" && order.payment_status === "pending" && paymentUrl;
+                    return (
+                      <tr
+                        key={order.ref}
+                        className={`border-b border-black/[0.05] transition hover:bg-white/60 ${i % 2 === 0 ? "bg-white/30" : ""}`}
+                      >
+                        <td className="px-5 py-4 font-mono text-[0.88rem] font-bold text-[var(--foreground)] xl:px-6">
+                          {order.ref}
+                        </td>
+                        <td className="whitespace-nowrap px-5 py-4 text-[0.88rem] text-[var(--muted)] xl:px-6">
+                          {formatDate(order.created_at)}
+                        </td>
+                        <td className="max-w-[200px] px-5 py-4 xl:px-6">
+                          <p className="truncate text-[0.88rem] text-[var(--muted)]">
+                            <span className="font-medium text-[var(--foreground)]">
+                              {order.items.length} item{order.items.length !== 1 ? "s" : ""}
                             </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        {(() => {
-                          const paymentUrl = order.payment_url ?? order.checkout_url ?? null;
-                          if (order.payment_method === "stripe" && order.payment_status === "pending" && paymentUrl) {
-                            return (
-                              <a
-                                href={paymentUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex h-[36px] items-center gap-1.5 rounded-full bg-[var(--primary)] px-4 text-[0.8rem] font-semibold text-white transition hover:bg-[var(--primary-hover)]"
-                              >
-                                <CreditCard size={13} strokeWidth={2.2} /> Pay Now
-                              </a>
-                            );
-                          }
-                          return (
+                            {order.items[0] && (
+                              <span>
+                                {" · "}
+                                {[order.items[0].brand, order.items[0].product_name].filter(Boolean).join(" ")}
+                                {order.items.length > 1 ? ` +${order.items.length - 1}` : ""}
+                              </span>
+                            )}
+                          </p>
+                        </td>
+                        <td className="whitespace-nowrap px-5 py-4 text-[0.88rem] font-semibold text-[var(--foreground)] xl:px-6">
+                          €{Number(order.total).toFixed(2)}
+                        </td>
+                        <td className="px-5 py-4 xl:px-6">
+                          <div className="flex flex-col items-start gap-1.5">
+                            <StatusBadge status={order.status} />
+                            {order.payment_method === "stripe" && order.payment_status === "pending" && (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-amber-700">
+                                <CreditCard size={10} strokeWidth={2.5} />
+                                Payment due
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-5 py-4 text-right xl:px-6">
+                          {showPayNow ? (
+                            <a
+                              href={paymentUrl!}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex h-[34px] items-center gap-1.5 rounded-full bg-[var(--primary)] px-4 text-[0.8rem] font-semibold text-white transition hover:bg-[var(--primary-hover)]"
+                            >
+                              <CreditCard size={13} strokeWidth={2.2} /> Pay Now
+                            </a>
+                          ) : (
                             <Link
                               href={`/account/orders/${order.ref}`}
-                              className="inline-flex h-[36px] items-center gap-1.5 rounded-full bg-[var(--primary)] px-4 text-[0.8rem] font-semibold text-white transition hover:bg-[var(--primary-hover)]"
+                              className="inline-flex h-[34px] items-center gap-1.5 rounded-full bg-[var(--primary)] px-4 text-[0.8rem] font-semibold text-white transition hover:bg-[var(--primary-hover)]"
                             >
-                              Track Order <ChevronRight size={14} strokeWidth={2.2} />
+                              Track Order <ChevronRight size={13} strokeWidth={2.2} />
                             </Link>
-                          );
-                        })()}
-                      </td>
-                    </tr>
-                  ))}
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
 
-            {/* Mobile cards */}
-            <div className="flex flex-col divide-y divide-black/[0.06] md:hidden">
-              {orders.map((order) => (
-                <div key={order.ref} className="px-5 py-5">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="font-mono text-[0.88rem] font-bold text-[var(--foreground)]">{order.ref}</p>
-                      <p className="mt-0.5 text-[0.78rem] text-[var(--muted)]">{formatDate(order.created_at)}</p>
+            {/* ── Mobile / tablet cards (< 1024px) ── */}
+            <div className="flex flex-col divide-y divide-black/[0.06] lg:hidden">
+              {orders.map((order) => {
+                const paymentUrl = order.payment_url ?? order.checkout_url ?? null;
+                const showPayNow = order.payment_method === "stripe" && order.payment_status === "pending" && paymentUrl;
+                const firstItem  = order.items[0];
+
+                return (
+                  <div key={order.ref} className="px-4 py-5 sm:px-6 sm:py-5">
+
+                    {/* Top: ref + badges */}
+                    <div className="flex min-w-0 items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-mono text-[0.88rem] font-bold text-[var(--foreground)] sm:text-[0.9rem]">
+                          {order.ref}
+                        </p>
+                        <p className="mt-0.5 text-[0.76rem] text-[var(--muted)] sm:text-[0.78rem]">
+                          {formatDate(order.created_at)}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 flex-col items-end gap-1.5">
+                        <StatusBadge status={order.status} />
+                        {order.payment_method === "stripe" && order.payment_status === "pending" && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-amber-700">
+                            <CreditCard size={10} strokeWidth={2.5} />
+                            Payment due
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex flex-col items-end gap-1.5">
-                      <StatusBadge status={order.status} />
-                      {order.payment_method === "stripe" && order.payment_status === "pending" && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-amber-700">
-                          <CreditCard size={10} strokeWidth={2.5} />
-                          Payment due
+
+                    {/* Items preview */}
+                    {firstItem && (
+                      <p className="mt-2 truncate text-[0.82rem] text-[var(--muted)]">
+                        <span className="font-medium text-[var(--foreground)]">
+                          {order.items.length} item{order.items.length !== 1 ? "s" : ""}
                         </span>
-                      )}
-                    </div>
-                  </div>
-                  <p className="mt-2 text-[0.82rem] text-[var(--muted)]">
-                    {order.items.length} item{order.items.length !== 1 ? "s" : ""}
-                    {order.items[0] && (
-                      <> · {[order.items[0].brand, order.items[0].product_name].filter(Boolean).join(" ")}</>
+                        {" · "}
+                        {[firstItem.brand, firstItem.product_name].filter(Boolean).join(" ")}
+                        {order.items.length > 1 ? ` +${order.items.length - 1} more` : ""}
+                      </p>
                     )}
-                  </p>
-                  <div className="mt-3 flex items-center justify-between">
-                    <p className="text-[0.95rem] font-extrabold text-[var(--foreground)]">
-                      €{Number(order.total).toFixed(2)}
-                    </p>
-                    {(() => {
-                      const paymentUrl = order.payment_url ?? order.checkout_url ?? null;
-                      if (order.payment_method === "stripe" && order.payment_status === "pending" && paymentUrl) {
-                        return (
-                          <a
-                            href={paymentUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex h-[36px] items-center gap-1.5 rounded-full bg-[var(--primary)] px-4 text-[0.8rem] font-semibold text-white transition hover:bg-[var(--primary-hover)]"
-                          >
-                            <CreditCard size={13} strokeWidth={2.2} /> Pay Now
-                          </a>
-                        );
-                      }
-                      return (
+
+                    {/* Bottom: total + action */}
+                    <div className="mt-3.5 flex items-center justify-between gap-3">
+                      <p className="text-[1rem] font-extrabold text-[var(--foreground)] sm:text-[1.05rem]">
+                        €{Number(order.total).toFixed(2)}
+                      </p>
+                      {showPayNow ? (
+                        <a
+                          href={paymentUrl!}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex h-[36px] items-center gap-1.5 rounded-full bg-[var(--primary)] px-4 text-[0.8rem] font-semibold text-white transition hover:bg-[var(--primary-hover)]"
+                        >
+                          <CreditCard size={13} strokeWidth={2.2} /> Pay Now
+                        </a>
+                      ) : (
                         <Link
                           href={`/account/orders/${order.ref}`}
                           className="inline-flex h-[36px] items-center gap-1.5 rounded-full bg-[var(--primary)] px-4 text-[0.8rem] font-semibold text-white transition hover:bg-[var(--primary-hover)]"
                         >
-                          Track <ChevronRight size={13} strokeWidth={2.2} />
+                          View Order <ChevronRight size={13} strokeWidth={2.2} />
                         </Link>
-                      );
-                    })()}
+                      )}
+                    </div>
+
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
           </div>
