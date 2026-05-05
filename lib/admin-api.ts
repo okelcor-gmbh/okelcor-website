@@ -274,7 +274,10 @@ export type AdminPromotion = {
   button_text?: string | null;
   button_link?: string | null;
   image_url?: string | null;
-  placement?: "announcement_bar" | "shop_inline" | "both" | null;
+  placement?: "announcement_bar" | "shop_inline" | "shop_hero" | "both" | null;
+  brand_name?: string | null;
+  customer_type_target?: "b2c" | "b2b" | "all" | null;
+  discount_pct?: number | null;
   is_active: boolean;
   start_date?: string | null; // ISO date "YYYY-MM-DD"
   end_date?: string | null;   // ISO date "YYYY-MM-DD"

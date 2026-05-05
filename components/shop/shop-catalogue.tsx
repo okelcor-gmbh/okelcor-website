@@ -4,7 +4,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Search, Loader2, RotateCcw } from "lucide-react";
 import ProductGrid from "./product-grid";
 import ShopPromoBanner, { type ShopPromotion } from "./shop-promo-banner";
+import ShopCampaignBanner, { type CampaignPromotion } from "./shop-campaign-banner";
 import { type Product } from "./data";
+import { type ActiveCampaign } from "./product-card";
 import { useLanguage } from "@/context/language-context";
 import { useCustomerAuth } from "@/context/CustomerAuthContext";
 import { getProductImageUrl } from "@/lib/utils";
@@ -53,6 +55,14 @@ function toProduct(p: any): Product {
     in_stock:      p.in_stock != null ? Boolean(p.in_stock) : undefined,
   };
 }
+
+// ── Promotion type (superset of ShopPromotion + campaign fields) ──────────────
+
+type RawPromotion = ShopPromotion & {
+  brand_name?: string | null;
+  customer_type_target?: string | null;
+  discount_pct?: number | null;
+};
 
 // ── Fallback filter values (used until /products/specs loads) ─────────────────
 
@@ -114,8 +124,9 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
   const [resultCount, setResultCount] = useState(0);
   const [apiError,    setApiError]    = useState<string | null>(null);
 
-  // ── Inline promotions ────────────────────────────────────────────────────────
+  // ── Inline + campaign promotions ─────────────────────────────────────────────
   const [inlinePromos, setInlinePromos] = useState<ShopPromotion[]>([]);
+  const [campaignPromoRaw, setCampaignPromoRaw] = useState<CampaignPromotion | null>(null);
 
   // ── Dynamic filter options ───────────────────────────────────────────────────
   const [brands,      setBrands]      = useState<string[]>([]);
@@ -172,16 +183,31 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pendingAutoSearch]);
 
-  // Load inline promotions on mount
+  // Load promotions on mount — split into inline banner + campaign hero
   useEffect(() => {
     fetch("/api/promotions/active", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((json) => {
-        const all: ShopPromotion[] = Array.isArray(json?.data) ? json.data : [];
-        const inline = all.filter(
-          (p) => !p.placement || p.placement === "shop_inline" || p.placement === "both"
+        const all: RawPromotion[] = Array.isArray(json?.data) ? json.data : [];
+
+        setInlinePromos(
+          all.filter((p) => !p.placement || p.placement === "shop_inline" || p.placement === "both")
         );
-        setInlinePromos(inline);
+
+        const hero = all.find((p) => p.placement === "shop_hero");
+        if (hero?.brand_name) {
+          setCampaignPromoRaw({
+            id:                   hero.id,
+            title:                hero.title,
+            subheadline:          hero.subheadline ?? null,
+            button_text:          hero.button_text ?? null,
+            button_link:          hero.button_link ?? null,
+            image_url:            hero.image_url ?? null,
+            brand_name:           hero.brand_name,
+            discount_pct:         hero.discount_pct ?? null,
+            customer_type_target: (hero.customer_type_target as CampaignPromotion["customer_type_target"]) ?? null,
+          });
+        }
       })
       .catch(() => {});
   }, []);
@@ -322,11 +348,29 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
     searchText.trim() || priceMin || priceMax || selBrand || selType ||
     selWidth || selHeight || selRim || selSeason || selSpeed || selLoad;
 
+  // ── Campaign targeting (re-derived on every render when customerType changes) ──
+
+  const campaignPromo: CampaignPromotion | null = (() => {
+    if (!campaignPromoRaw) return null;
+    const ct = campaignPromoRaw.customer_type_target;
+    if (ct === "b2c" && customerType === "b2b") return null;
+    if (ct === "b2b" && customerType !== "b2b") return null;
+    return campaignPromoRaw;
+  })();
+
+  const activeCampaign: ActiveCampaign | null =
+    campaignPromo?.brand_name && campaignPromo?.discount_pct != null
+      ? { brand_name: campaignPromo.brand_name, discount_pct: campaignPromo.discount_pct }
+      : null;
+
   // ─────────────────────────────────────────────────────────────────────────────
 
   return (
     <section className="w-full bg-[#f5f5f5] py-6 md:py-10">
       <div className="tesla-shell">
+
+        {/* ── Campaign hero banner — below intro, above filters ── */}
+        {campaignPromo && <ShopCampaignBanner promo={campaignPromo} />}
 
         {/* ── Filter bar ── */}
         <div className="mb-6 overflow-hidden rounded-2xl border border-[#e5e7eb] bg-white shadow-sm">
@@ -497,6 +541,7 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
                   sortBy={sortBy}
                   onSortChange={setSortBy}
                   customerType={customerType}
+                  activeCampaign={activeCampaign}
                 />
               </>
             )}

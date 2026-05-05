@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, ChevronRight, Lock, ShieldCheck } from "lucide-react";
+import { CheckCircle2, ChevronRight, Lock, ShieldCheck, Tag } from "lucide-react";
 import { useCart } from "@/context/cart-context";
 import { useLanguage } from "@/context/language-context";
 import { useCustomerAuth } from "@/context/CustomerAuthContext";
@@ -203,6 +203,26 @@ export default function CheckoutFlow() {
   const [fetAdded, setFetAdded]         = useState(false);
   const [fetQty, setFetQty]             = useState(1);
   const [fetDismissed, setFetDismissed] = useState(false);
+
+  type CartCampaign = { brand_name: string; discount_pct: number | null };
+  const [cartCampaign, setCartCampaign] = useState<CartCampaign | null>(null);
+
+  useEffect(() => {
+    fetch("/api/promotions/active", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json) => {
+        type P = { brand_name?: string | null; discount_pct?: number | null; customer_type_target?: string | null };
+        const all: P[] = Array.isArray(json?.data) ? json.data : [];
+        const campaign = all.find(
+          (p) => p.brand_name &&
+            (!p.customer_type_target || p.customer_type_target === "b2c" || p.customer_type_target === "all")
+        );
+        if (campaign?.brand_name) {
+          setCartCampaign({ brand_name: campaign.brand_name, discount_pct: campaign.discount_pct ?? null });
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Stable object reference — recreated only when fetAdded/fetQty actually change.
   // Without useMemo, every CheckoutFlow render creates a new object, causing
@@ -422,6 +442,19 @@ export default function CheckoutFlow() {
               onRemove={() => setFetAdded(false)}
               onDismiss={() => { setFetDismissed(true); setFetAdded(false); }}
             />
+          )}
+
+          {/* Campaign reminder — B2C/guest only, when cart has matching brand */}
+          {!showVatField && cartCampaign && items.some((item) =>
+            item.product.brand.toLowerCase().trim() === cartCampaign.brand_name.toLowerCase().trim()
+          ) && (
+            <div className="flex items-start gap-3 rounded-[14px] border border-[#f4511e]/20 bg-[#fff8f6] px-4 py-3.5">
+              <Tag size={14} strokeWidth={1.8} className="mt-0.5 shrink-0 text-[#f4511e]" />
+              <p className="text-[0.85rem] leading-relaxed text-[#171a20]">
+                <span className="font-semibold">{cartCampaign.brand_name} campaign</span>
+                {cartCampaign.discount_pct != null && ` — ${cartCampaign.discount_pct}% discount`} applies at checkout.
+              </p>
+            </div>
           )}
 
           {/* Secure payment */}

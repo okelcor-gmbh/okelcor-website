@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowUpDown } from "lucide-react";
-import ProductCard, { type Product } from "./product-card";
+import ProductCard, { type Product, type ActiveCampaign } from "./product-card";
 import { useLanguage } from "@/context/language-context";
 
 type Props = {
@@ -10,9 +10,10 @@ type Props = {
   sortBy: string;
   onSortChange: (sort: string) => void;
   customerType?: "b2b" | "b2c" | "guest";
+  activeCampaign?: ActiveCampaign | null;
 };
 
-export default function ProductGrid({ products, total, sortBy, onSortChange, customerType }: Props) {
+export default function ProductGrid({ products, total, sortBy, onSortChange, customerType, activeCampaign }: Props) {
   const { t } = useLanguage();
   return (
     <div>
@@ -49,7 +50,7 @@ export default function ProductGrid({ products, total, sortBy, onSortChange, cus
       ) : (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {products.map((product, i) => (
-            <ProductCard key={product.id} product={product} priority={i < 3} customerType={customerType} />
+            <ProductCard key={product.id} product={product} priority={i < 3} customerType={customerType} activeCampaign={activeCampaign} />
           ))}
         </div>
       )}

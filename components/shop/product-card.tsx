@@ -10,6 +10,11 @@ const PLACEHOLDER = "/images/tyre-placeholder.png";
 
 type CustomerType = "b2b" | "b2c" | "guest";
 
+export type ActiveCampaign = {
+  brand_name: string;
+  discount_pct: number;
+};
+
 function resolvePrice(product: Product, customerType: CustomerType) {
   if (customerType === "b2b") {
     const wholesalePrice = product.price_b2b ?? product.price;
@@ -29,10 +34,12 @@ export default function ProductCard({
   product,
   priority = false,
   customerType = "guest",
+  activeCampaign,
 }: {
   product: Product;
   priority?: boolean;
   customerType?: CustomerType;
+  activeCampaign?: ActiveCampaign | null;
 }) {
   const { t } = useLanguage();
   const cardRef = useDepthTilt<HTMLDivElement>({ maxRotate: 4, maxShift: 6, scale: 1.008 });
@@ -57,6 +64,11 @@ export default function ProductCard({
         {product.in_stock === false && (
           <span className="absolute left-2 top-2 rounded-full bg-red-600 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow">
             Out of Stock
+          </span>
+        )}
+        {activeCampaign && product.brand === activeCampaign.brand_name && (
+          <span className="absolute right-2 top-2 rounded-full bg-[#f4511e] px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide text-white shadow">
+            {activeCampaign.discount_pct}% OFF
           </span>
         )}
       </div>
