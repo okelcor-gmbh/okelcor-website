@@ -278,6 +278,7 @@ export type AdminPromotion = {
   brand_name?: string | null;
   customer_type_target?: "b2c" | "b2b" | "all" | null;
   discount_pct?: number | null;
+  promo_code?: string | null;
   is_active: boolean;
   start_date?: string | null; // ISO date "YYYY-MM-DD"
   end_date?: string | null;   // ISO date "YYYY-MM-DD"

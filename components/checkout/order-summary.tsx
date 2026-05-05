@@ -20,6 +20,8 @@ type TaxPreview = {
   tax_amount: number;
   tax_treatment: string;
   is_reverse_charge: boolean;
+  discount_amount: number;
+  discount_label: string | null;
   total: number;
   note: string | null;
 };
@@ -31,6 +33,8 @@ type Props = {
   vatNumber: string;
   vatValid: boolean;
   customerType?: string;
+  promoCode?: string;
+  onPromoError?: (msg: string | null) => void;
 };
 
 // ─── SummaryRow ───────────────────────────────────────────────────────────────
@@ -75,6 +79,8 @@ export default function OrderSummary({
   vatNumber,
   vatValid,
   customerType,
+  promoCode = "",
+  onPromoError,
 }: Props) {
   const { items, subtotal, totalItems } = useCart();
   const { t } = useLanguage();
@@ -120,6 +126,7 @@ export default function OrderSummary({
       vat_number: vatValid ? vatNumberRef.current : undefined,
       vat_valid: vatValid,
       customer_type: customerType,
+      ...(promoCode ? { promo_code: promoCode } : {}),
     };
 
     const timer = setTimeout(async () => {
@@ -131,7 +138,16 @@ export default function OrderSummary({
           signal: controller.signal,
         });
 
-        if (!res.ok) throw new Error(`preview_failed_${res.status}`);
+        if (!res.ok) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          let errBody: any = {};
+          try { errBody = await res.json(); } catch { /* non-JSON */ }
+          if (promoCode) {
+            const msg: string = errBody?.error ?? errBody?.message ?? "Invalid or ineligible promo code.";
+            onPromoError?.(msg);
+          }
+          throw new Error(`preview_failed_${res.status}`);
+        }
 
         const json = await res.json();
         const raw = json?.data;
@@ -146,6 +162,8 @@ export default function OrderSummary({
           tax_amount:        Number(raw.tax_amount),
           is_reverse_charge: Boolean(raw.is_reverse_charge),
           tax_treatment:     String(raw.tax_treatment ?? "standard"),
+          discount_amount:   Number(raw.discount_amount ?? 0),
+          discount_label:    raw.discount_label ? String(raw.discount_label) : null,
           total:             Number(raw.total),
           note:              raw.note ?? null,
         };
@@ -154,6 +172,7 @@ export default function OrderSummary({
 
         setTaxPreview(data);
         setTaxError(false);
+        if (promoCode) onPromoError?.(null);
       } catch (err) {
         if ((err as Error).name === "AbortError") return;
         if (process.env.NODE_ENV === "development") {
@@ -171,8 +190,9 @@ export default function OrderSummary({
       controller.abort();
     };
   // vatNumber intentionally excluded — vatNumberRef.current is synced on every render.
+  // promoCode triggers a fresh preview when applied or removed.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [items, deliveryCost, fetAddon, country, vatValid, customerType]);
+  }, [items, deliveryCost, fetAddon, country, vatValid, customerType, promoCode]);
 
   // ── Derived display values ─────────────────────────────────────────────────
 
@@ -274,6 +294,18 @@ export default function OrderSummary({
       <div className="flex flex-col gap-3 border-t border-black/[0.07] px-6 py-5">
         {/* Subtotal */}
         <SummaryRow label={c.subtotal} value={`€${displaySubtotal.toFixed(2)}`} />
+
+        {/* Discount — only when backend returns discount_amount > 0 */}
+        {taxPreview && taxPreview.discount_amount > 0 && (
+          <div className="flex items-center justify-between">
+            <span className="text-[0.88rem] text-green-600">
+              {taxPreview.discount_label ?? "Discount"}
+            </span>
+            <span className="text-[0.88rem] font-semibold text-green-600">
+              −€{taxPreview.discount_amount.toFixed(2)}
+            </span>
+          </div>
+        )}
 
         {/* Delivery */}
         <SummaryRow

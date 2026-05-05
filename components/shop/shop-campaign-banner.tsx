@@ -1,8 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Copy, Check } from "lucide-react";
 
 export type CampaignPromotion = {
   id: number;
@@ -13,12 +14,22 @@ export type CampaignPromotion = {
   image_url?: string | null;
   brand_name?: string | null;
   discount_pct?: number | null;
+  promo_code?: string | null;
   customer_type_target?: "b2c" | "b2b" | "all" | null;
 };
 
 export default function ShopCampaignBanner({ promo }: { promo: CampaignPromotion }) {
   const discountLabel = promo.discount_pct != null ? `${promo.discount_pct}% OFF` : null;
   const hasCta = !!(promo.button_text && promo.button_link);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    if (!promo.promo_code) return;
+    navigator.clipboard.writeText(promo.promo_code).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(() => {});
+  };
 
   return (
     <div className="mb-6 overflow-hidden rounded-2xl border border-[#f4511e]/20 bg-white shadow-[0_2px_12px_rgba(244,81,30,0.06)]">
@@ -62,6 +73,26 @@ export default function ShopCampaignBanner({ promo }: { promo: CampaignPromotion
             <p className="mt-1 text-[0.83rem] leading-relaxed text-[#5c5e62]">
               {promo.subheadline}
             </p>
+          )}
+
+          {/* Promo code copy row */}
+          {promo.promo_code && (
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1.5 rounded-full border border-[#f4511e]/20 bg-[#fff8f6] px-3 py-1.5">
+                <span className="text-[0.7rem] text-[#5c5e62]">Code:</span>
+                <span className="font-mono text-[0.82rem] font-extrabold tracking-widest text-[#171a20]">
+                  {promo.promo_code}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleCopy}
+                className="inline-flex items-center gap-1.5 rounded-full border border-[#f4511e]/20 bg-[#fff8f6] px-3 py-1.5 text-[0.73rem] font-semibold text-[#f4511e] transition hover:bg-[#fee2d8] active:scale-[0.97]"
+              >
+                {copied ? <Check size={11} strokeWidth={2.5} /> : <Copy size={11} strokeWidth={2.2} />}
+                {copied ? "Copied!" : "Copy code"}
+              </button>
+            </div>
           )}
 
           {hasCta && (

@@ -204,25 +204,43 @@ export default function CheckoutFlow() {
   const [fetQty, setFetQty]             = useState(1);
   const [fetDismissed, setFetDismissed] = useState(false);
 
-  type CartCampaign = { brand_name: string; discount_pct: number | null };
+  type CartCampaign = { brand_name: string; discount_pct: number | null; promo_code?: string | null };
   const [cartCampaign, setCartCampaign] = useState<CartCampaign | null>(null);
 
   useEffect(() => {
     fetch("/api/promotions/active", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((json) => {
-        type P = { brand_name?: string | null; discount_pct?: number | null; customer_type_target?: string | null };
+        type P = { brand_name?: string | null; discount_pct?: number | null; customer_type_target?: string | null; promo_code?: string | null };
         const all: P[] = Array.isArray(json?.data) ? json.data : [];
         const campaign = all.find(
           (p) => p.brand_name &&
             (!p.customer_type_target || p.customer_type_target === "b2c" || p.customer_type_target === "all")
         );
         if (campaign?.brand_name) {
-          setCartCampaign({ brand_name: campaign.brand_name, discount_pct: campaign.discount_pct ?? null });
+          setCartCampaign({
+            brand_name:  campaign.brand_name,
+            discount_pct: campaign.discount_pct ?? null,
+            promo_code:  campaign.promo_code ?? null,
+          });
         }
       })
       .catch(() => {});
   }, []);
+
+  const [promoInput, setPromoInput]             = useState("");
+  const [appliedPromoCode, setAppliedPromoCode] = useState("");
+  const [promoError, setPromoError]             = useState<string | null>(null);
+
+  // Pre-fill promo input once when campaign loads and cart has matching brand
+  useEffect(() => {
+    if (!cartCampaign?.promo_code || promoInput || appliedPromoCode) return;
+    const hasBrand = items.some(
+      (item) => item.product.brand.toLowerCase().trim() === cartCampaign.brand_name.toLowerCase().trim()
+    );
+    if (hasBrand) setPromoInput(cartCampaign.promo_code!);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cartCampaign]);
 
   // Stable object reference — recreated only when fetAdded/fetQty actually change.
   // Without useMemo, every CheckoutFlow render creates a new object, causing
@@ -277,6 +295,7 @@ export default function CheckoutFlow() {
         quantity:     fetQty,
       },
     }),
+    ...(appliedPromoCode ? { promo_code: appliedPromoCode } : {}),
   });
 
   // Submit -> Stripe Checkout redirect via Laravel /api/v1/payments/create-session.
@@ -342,6 +361,19 @@ export default function CheckoutFlow() {
     };
 
   const ic = (key: keyof DeliveryData) => deliveryErrors[key] ? inputErrCls : inputCls;
+
+  const handleApplyPromo = () => {
+    const code = promoInput.trim().toUpperCase();
+    if (!code) return;
+    setPromoError(null);
+    setAppliedPromoCode(code);
+  };
+
+  const handleRemovePromo = () => {
+    setAppliedPromoCode("");
+    setPromoInput("");
+    setPromoError(null);
+  };
 
   // ── Render ──────────────────────────────────────────────────────────────────
 
@@ -450,10 +482,23 @@ export default function CheckoutFlow() {
           ) && (
             <div className="flex items-start gap-3 rounded-[14px] border border-[#f4511e]/20 bg-[#fff8f6] px-4 py-3.5">
               <Tag size={14} strokeWidth={1.8} className="mt-0.5 shrink-0 text-[#f4511e]" />
-              <p className="text-[0.85rem] leading-relaxed text-[#171a20]">
-                <span className="font-semibold">{cartCampaign.brand_name} campaign</span>
-                {cartCampaign.discount_pct != null && ` — ${cartCampaign.discount_pct}% discount`} applies at checkout.
-              </p>
+              {appliedPromoCode && cartCampaign.promo_code && appliedPromoCode === cartCampaign.promo_code ? (
+                <p className="text-[0.85rem] font-semibold text-green-700">
+                  {appliedPromoCode} applied
+                  {cartCampaign.discount_pct != null && ` — ${cartCampaign.discount_pct}% off`} on {cartCampaign.brand_name} tyres.
+                </p>
+              ) : cartCampaign.promo_code ? (
+                <p className="text-[0.85rem] leading-relaxed text-[#171a20]">
+                  Use code{" "}
+                  <span className="font-mono font-extrabold tracking-wider">{cartCampaign.promo_code}</span>
+                  {cartCampaign.discount_pct != null && ` for ${cartCampaign.discount_pct}% off`} {cartCampaign.brand_name} tyres.
+                </p>
+              ) : (
+                <p className="text-[0.85rem] leading-relaxed text-[#171a20]">
+                  <span className="font-semibold">{cartCampaign.brand_name} campaign</span>
+                  {cartCampaign.discount_pct != null && ` — ${cartCampaign.discount_pct}% discount`} applies at checkout.
+                </p>
+              )}
             </div>
           )}
 
@@ -518,7 +563,7 @@ export default function CheckoutFlow() {
         </div>
 
         {/* ── Right column ── */}
-        <div className="lg:sticky lg:top-[96px]">
+        <div className="flex flex-col gap-4 lg:sticky lg:top-[96px]">
           <OrderSummary
             deliveryCost={DELIVERY_COST}
             fetAddon={fetAddonProp}
@@ -526,7 +571,54 @@ export default function CheckoutFlow() {
             vatNumber={vatNumber}
             vatValid={vatValid}
             customerType={customer?.customer_type}
+            promoCode={appliedPromoCode}
+            onPromoError={setPromoError}
           />
+
+          {/* Promo code input */}
+          <div className="overflow-hidden rounded-[22px] bg-[#efefef] px-5 py-4">
+            <p className="mb-3 text-[0.85rem] font-semibold text-[var(--foreground)]">Promo code</p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={promoInput}
+                onChange={(e) => {
+                  setPromoInput(e.target.value.toUpperCase());
+                  if (promoError) setPromoError(null);
+                }}
+                onKeyDown={(e) => { if (e.key === "Enter" && !appliedPromoCode) handleApplyPromo(); }}
+                placeholder="e.g. RAPID5"
+                disabled={!!appliedPromoCode}
+                className="h-10 flex-1 rounded-full border border-black/[0.08] bg-white px-4 font-mono text-[0.88rem] font-bold uppercase tracking-widest text-[var(--foreground)] outline-none placeholder:font-sans placeholder:normal-case placeholder:tracking-normal placeholder:text-[var(--muted)] transition focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]/10 disabled:cursor-not-allowed disabled:opacity-60"
+              />
+              {appliedPromoCode ? (
+                <button
+                  type="button"
+                  onClick={handleRemovePromo}
+                  className="flex h-10 shrink-0 items-center rounded-full border border-black/[0.08] bg-white px-4 text-[0.82rem] font-semibold text-[var(--foreground)] transition hover:bg-[#f0f0f0]"
+                >
+                  Remove
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleApplyPromo}
+                  disabled={!promoInput.trim()}
+                  className="flex h-10 shrink-0 items-center rounded-full bg-[var(--primary)] px-5 text-[0.82rem] font-semibold text-white transition hover:bg-[var(--primary-hover)] disabled:opacity-40"
+                >
+                  Apply
+                </button>
+              )}
+            </div>
+            {appliedPromoCode && !promoError && (
+              <p className="mt-2 flex items-center gap-1.5 text-[0.78rem] font-semibold text-green-600">
+                <CheckCircle2 size={12} strokeWidth={2.2} /> {appliedPromoCode} applied
+              </p>
+            )}
+            {promoError && (
+              <p role="alert" className="mt-2 text-[0.78rem] text-red-500">{promoError}</p>
+            )}
+          </div>
         </div>
 
       </div>

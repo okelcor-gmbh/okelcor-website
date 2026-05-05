@@ -62,6 +62,7 @@ type RawPromotion = ShopPromotion & {
   brand_name?: string | null;
   customer_type_target?: string | null;
   discount_pct?: number | null;
+  promo_code?: string | null;
 };
 
 // ── Fallback filter values (used until /products/specs loads) ─────────────────
@@ -205,6 +206,7 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
             image_url:            hero.image_url ?? null,
             brand_name:           hero.brand_name,
             discount_pct:         hero.discount_pct ?? null,
+            promo_code:           hero.promo_code ?? null,
             customer_type_target: (hero.customer_type_target as CampaignPromotion["customer_type_target"]) ?? null,
           });
         }
