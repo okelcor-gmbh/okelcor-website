@@ -114,6 +114,10 @@ export default function OrderSummary({
     const payload = {
       items: [
         ...items.map((i) => ({
+          id:       i.product.id,
+          sku:      i.product.sku      || `ITEM-${i.product.id}`,
+          brand:    i.product.brand    || "",
+          name:     i.product.name     || "",
           price:    i.product.price,
           quantity: i.quantity,
         })),
