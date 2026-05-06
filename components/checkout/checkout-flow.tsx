@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, ChevronRight, Lock, ShieldCheck, Tag } from "lucide-react";
+import { CheckCircle2, ChevronRight, Info, Lock, ShieldCheck, Tag } from "lucide-react";
 import { useCart } from "@/context/cart-context";
 import { useLanguage } from "@/context/language-context";
 import { useCustomerAuth } from "@/context/CustomerAuthContext";
@@ -35,6 +35,28 @@ const COUNTRIES = [
   "Nigeria", "South Africa", "Kenya", "Uganda", "Singapore",
   "China", "India", "Japan", "Australia",
 ];
+
+const EU_COUNTRIES = new Set([
+  "Austria", "Belgium", "Bulgaria", "Croatia", "Cyprus", "Czech Republic",
+  "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Hungary",
+  "Ireland", "Italy", "Latvia", "Lithuania", "Luxembourg", "Malta",
+  "Netherlands", "Poland", "Portugal", "Romania", "Slovakia", "Slovenia",
+  "Spain", "Sweden",
+]);
+
+function getVatMessage(country: string, vatValid: boolean): {
+  text: string; variant: "green" | "amber" | "blue";
+} | null {
+  if (!country) return null;
+  if (!EU_COUNTRIES.has(country)) {
+    return { text: "VAT exempt export destination.", variant: "blue" };
+  }
+  if (!vatValid) return null;
+  if (country === "Germany") {
+    return { text: "Valid VAT number. German VAT still applies.", variant: "amber" };
+  }
+  return { text: "Valid EU VAT number — reverse charge applies.", variant: "green" };
+}
 
 const inputCls =
   "w-full rounded-[12px] border border-black/[0.08] bg-white px-4 py-3.5 text-[0.93rem] text-[var(--foreground)] outline-none placeholder:text-[var(--muted)] transition focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/10";
@@ -143,6 +165,32 @@ function SectionCard({ title, children }: { title: string; children: React.React
     <div className="rounded-[18px] bg-[#efefef] p-4 sm:rounded-[22px] sm:p-6">
       <p className="mb-3.5 text-[0.95rem] font-extrabold text-[var(--foreground)] sm:mb-4 sm:text-[1rem]">{title}</p>
       {children}
+    </div>
+  );
+}
+
+// ─── VAT status message ───────────────────────────────────────────────────────
+
+function VatStatusMessage({ country, vatValid }: { country: string; vatValid: boolean }) {
+  const msg = getVatMessage(country, vatValid);
+  if (!msg) return null;
+  const isGreen = msg.variant === "green";
+  return (
+    <div
+      className={[
+        "mt-3 flex items-start gap-2.5 rounded-[12px] border px-3.5 py-3 text-[0.83rem] font-medium",
+        isGreen
+          ? "border-green-200 bg-green-50 text-green-700"
+          : msg.variant === "amber"
+          ? "border-amber-200 bg-amber-50 text-amber-700"
+          : "border-blue-200 bg-blue-50 text-blue-700",
+      ].join(" ")}
+    >
+      {isGreen
+        ? <CheckCircle2 size={15} strokeWidth={2} className="mt-0.5 shrink-0" />
+        : <Info size={15} strokeWidth={2} className="mt-0.5 shrink-0" />
+      }
+      <span>{msg.text}</span>
     </div>
   );
 }
@@ -450,6 +498,7 @@ export default function CheckoutFlow() {
                 {vatError && (
                   <p role="alert" className="mt-2 text-[0.75rem] text-red-500">{vatError}</p>
                 )}
+                <VatStatusMessage country={delivery.country} vatValid={vatValid} />
               </SectionCard>
             </div>
           )}

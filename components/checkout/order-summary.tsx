@@ -327,20 +327,20 @@ export default function OrderSummary({
           taxPreview.is_reverse_charge ? (
             <>
               <SummaryRow label="VAT reverse charge (0%)" value="€0.00" />
-              {taxPreview.note && (
-                <p className="text-[0.75rem] italic text-[var(--muted)]">{taxPreview.note}</p>
-              )}
+              <p className="text-[0.75rem] italic text-[var(--muted)]">
+                {taxPreview.note ?? "Valid EU VAT number — VAT liability transfers to the recipient."}
+              </p>
             </>
           ) : taxPreview.tax_treatment === "exempt" ? (
             <>
               <SummaryRow label="VAT exempt (0%)" value="€0.00" />
-              {taxPreview.note && (
-                <p className="text-[0.75rem] italic text-[var(--muted)]">{taxPreview.note}</p>
-              )}
+              <p className="text-[0.75rem] italic text-[var(--muted)]">
+                {taxPreview.note ?? "Export outside the EU — VAT exempt."}
+              </p>
             </>
           ) : (
             <SummaryRow
-              label={`${c.tax} (${taxPreview.tax_rate}%)`}
+              label={`VAT (${taxPreview.tax_rate}%)`}
               value={`€${taxPreview.tax_amount.toFixed(2)}`}
             />
           )
