@@ -3,7 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
-  AlertCircle, CheckCircle2, ChevronDown, Loader2,
+  AlertCircle, CheckCircle2, ChevronDown, Landmark, Loader2,
   RefreshCw, MapPin, Ship, Clock, Package,
 } from "lucide-react";
 import { updateOrderStatus, cancelOrder, deleteOrder } from "@/app/admin/orders/actions";
@@ -337,6 +337,16 @@ export default function OrderDetail({
   const [deleteError,     setDeleteError]     = useState<string | null>(null);
   const [isDeletePending, startDeleteTransition] = useTransition();
 
+  // Mark-paid state
+  const [paymentStatus,     setPaymentStatus]     = useState(order.payment_status ?? "");
+  const [markPaidOpen,      setMarkPaidOpen]      = useState(false);
+  const [markPaidConfirmed, setMarkPaidConfirmed] = useState(false);
+  const [paymentRef,        setPaymentRef]        = useState("");
+  const [adminNote,         setAdminNote]         = useState("");
+  const [markPaidError,     setMarkPaidError]     = useState<string | null>(null);
+  const [markPaidSuccess,   setMarkPaidSuccess]   = useState(false);
+  const [isMarkPaidPending, setIsMarkPaidPending] = useState(false);
+
   // Role-based access
   const canCancel = ["admin", "order_manager", "super_admin"].includes(adminRole);
   const canDelete = adminRole === "super_admin";
@@ -396,6 +406,45 @@ export default function OrderDetail({
     setDeleteModalOpen(false);
     setDeleteRef("");
     setDeleteError(null);
+  };
+
+  const closeMarkPaidModal = () => {
+    setMarkPaidOpen(false);
+    setMarkPaidConfirmed(false);
+    setPaymentRef("");
+    setAdminNote("");
+    setMarkPaidError(null);
+  };
+
+  const handleMarkPaid = async () => {
+    setMarkPaidError(null);
+    setIsMarkPaidPending(true);
+    try {
+      const res = await fetch(`/api/admin/orders/${order.id}/mark-paid`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          confirmation:      true,
+          payment_reference: paymentRef  || undefined,
+          admin_note:        adminNote   || undefined,
+        }),
+      });
+      const json = await res.json().catch(() => ({})) as Record<string, unknown>;
+      if (!res.ok) {
+        const msg = (json?.message ?? json?.error) as string | undefined;
+        setMarkPaidError(msg ?? "Something went wrong. Please try again.");
+        return;
+      }
+      setPaymentStatus("paid");
+      closeMarkPaidModal();
+      setMarkPaidSuccess(true);
+      setTimeout(() => setMarkPaidSuccess(false), 5000);
+      router.refresh();
+    } catch {
+      setMarkPaidError("Could not connect to the server. Please try again.");
+    } finally {
+      setIsMarkPaidPending(false);
+    }
   };
 
   // ── Active container to show the tracking widget
@@ -617,6 +666,17 @@ export default function OrderDetail({
             </button>
           )}
 
+          {order.payment_method === "bank_transfer" && paymentStatus === "pending" && (
+            <button
+              type="button"
+              onClick={() => setMarkPaidOpen(true)}
+              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-50 px-5 text-[0.83rem] font-semibold text-emerald-700 transition hover:bg-emerald-100"
+            >
+              <Landmark size={13} strokeWidth={2} />
+              Mark as Paid
+            </button>
+          )}
+
           <button
             type="button"
             onClick={() => setDeleteModalOpen(true)}
@@ -640,10 +700,96 @@ export default function OrderDetail({
             Order cancelled successfully.
           </div>
         )}
+        {markPaidSuccess && (
+          <div className="mt-3 flex items-center gap-2 text-[0.83rem] text-emerald-600">
+            <CheckCircle2 size={14} className="shrink-0" />
+            Payment marked as received.
+          </div>
+        )}
       </div>
 
       {/* ── Activity log ── */}
       <ActivityLog logs={order.logs} />
+
+      {/* ── Mark bank transfer as paid modal ── */}
+      {markPaidOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+            <p className="mb-1 text-[0.75rem] font-bold uppercase tracking-[0.15em] text-emerald-700">
+              Mark Bank Transfer as Paid
+            </p>
+
+            <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[0.83rem] text-amber-800">
+              <AlertCircle size={14} className="mt-0.5 shrink-0 text-amber-600" />
+              Confirm only after payment appears in the Okelcor bank / Wise account.
+            </div>
+
+            <label className="mb-4 flex cursor-pointer items-start gap-3">
+              <input
+                type="checkbox"
+                checked={markPaidConfirmed}
+                onChange={(e) => setMarkPaidConfirmed(e.target.checked)}
+                className="mt-0.5 h-4 w-4 accent-emerald-600"
+              />
+              <span className="text-[0.875rem] text-[#1a1a1a]">
+                I confirm payment has been received.
+              </span>
+            </label>
+
+            <div className="mb-3">
+              <p className="mb-1.5 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">
+                Payment Reference (optional)
+              </p>
+              <input
+                type="text"
+                value={paymentRef}
+                onChange={(e) => setPaymentRef(e.target.value)}
+                placeholder="e.g. Wise transaction ID"
+                className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+              />
+            </div>
+
+            <div className="mb-4">
+              <p className="mb-1.5 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">
+                Admin Note (optional)
+              </p>
+              <textarea
+                value={adminNote}
+                onChange={(e) => setAdminNote(e.target.value)}
+                placeholder="Internal note about this payment…"
+                rows={3}
+                className="w-full resize-none rounded-xl border border-black/[0.09] bg-white px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+              />
+            </div>
+
+            {markPaidError && (
+              <div className="mb-4 flex items-start gap-2 rounded-xl border border-red-100 bg-red-50 px-3 py-2.5 text-[0.83rem] text-red-700">
+                <AlertCircle size={14} className="mt-0.5 shrink-0" />
+                {markPaidError}
+              </div>
+            )}
+
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={closeMarkPaidModal}
+                disabled={isMarkPaidPending}
+                className="h-9 rounded-full border border-black/[0.09] bg-white px-5 text-[0.83rem] font-semibold text-[#5c5e62] transition hover:border-black/20 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleMarkPaid}
+                disabled={isMarkPaidPending || !markPaidConfirmed}
+                className="h-9 rounded-full bg-emerald-600 px-5 text-[0.83rem] font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-50"
+              >
+                {isMarkPaidPending ? "Saving…" : "Confirm Payment"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Delete confirmation modal ── */}
       {deleteModalOpen && (
