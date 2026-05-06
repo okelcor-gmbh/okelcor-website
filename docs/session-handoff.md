@@ -60,24 +60,96 @@ Development environment: Windows 11, VS Code, Node.js / npm
 
 ---
 
-## Completed in Latest Session — Shipment Event Crash Fix (2026-05-06)
+## Completed in Latest Session — Shipment Events, Carrier Type & Order Status (2026-05-06)
 
-### Order Detail Pages — Crash with 2+ Shipment Events
+### Backend: Revert Shipment Event Field to `event_date` (2026-05-06)
 
-**Files:** `lib/admin-api.ts`, `app/admin/orders/actions.ts`, `components/admin/order-detail.tsx`, `components/account/shipment-tracker.tsx`
+**File:** `app/Http/Controllers/Admin/AdminOrderShipmentEventController.php`, `app/Http/Controllers/Admin/AdminOrderController.php`, `app/Http/Controllers/OrderController.php`
 
-**Root cause:** Backend returns `event_date` on every `ShipmentEvent` object, but the frontend type had `date: string`. With 0 or 1 event, `.sort()` never calls the comparator — the bug is invisible. With 2+ events, `a.date.localeCompare(b.date)` fires on `undefined` → `TypeError: Cannot read properties of undefined (reading 'localeCompare')`, crashing all three order pages (admin detail, customer detail, customer tracking).
+**Problem:** Backend commit `3e7e682` renamed the response field from `event_date` to `date` to fix the crash. The frontend team independently fixed the crash (commit `ed6ab25`) by updating their types to use `event_date` instead. The two fixes went in opposite directions — backend returned `date`, frontend read `event_date` → all event dates displayed as "—".
 
-**Fix:**
+**Fix:** Backend reverted all three formatters back to returning `event_date` to match the frontend contract. Commit `50ffd1c`.
+
+**Authoritative contract:** All three API endpoints return `event_date` (not `date`) on every `ShipmentEvent` object:
+- `POST /api/v1/admin/orders/{id}/shipment-events` → `{ data: { id, event_date, ... } }`
+- `GET /api/v1/admin/orders/{id}` → `data.shipment_events[].event_date`
+- `GET /api/v1/orders/{ref}` → `data.shipment_events[].event_date`
+
+---
+
+### Crash with 2+ Shipment Events — Fixed
+
+**Root cause:** Frontend type had `date: string` but backend always returned `event_date`. With 0–1 events `.sort()` never calls the comparator — bug invisible. With 2+ events, `a.date.localeCompare(b.date)` fires on `undefined` → `TypeError: Cannot read properties of undefined (reading 'localeCompare')`, crashing admin detail, customer detail, and customer tracking pages.
+
+**Frontend fix (commit `ed6ab25`):**
 
 | File | Change |
 |---|---|
 | `lib/admin-api.ts` | `ShipmentEvent.date: string` → `event_date?: string \| null` |
 | `app/admin/orders/actions.ts` | `ShipmentEventRow.date` → `event_date?: string \| null` |
-| `components/admin/order-detail.tsx` | Fixed sort comparator; fixed optimistic add/update constructors; fixed `startEdit` prefill (`ev.date` → `ev.event_date ?? ""`); fixed date display (`shortDateOnly(ev.event_date ?? undefined)`) |
-| `components/account/shipment-tracker.tsx` | Updated local `ShipmentEvent` type; fixed sort comparator; fixed date display (`formatDate(ev.event_date ?? undefined)`) |
+| `components/admin/order-detail.tsx` | Sort comparator, optimistic constructors, `startEdit` prefill, date display — all `ev.date` → `ev.event_date ?? ""` |
+| `components/account/shipment-tracker.tsx` | Local type + sort comparator + date display updated to `ev.event_date ?? undefined` |
 
-All `ev.date` references replaced with `ev.event_date ?? ""` / `ev.event_date ?? undefined`. TypeScript check passes with zero errors. Commit `ed6ab25`.
+TypeScript check passes with zero errors.
+
+---
+
+### Backend: `carrier_type` Not Persisting on Order Save — Fixed
+
+**Files:** `app/Http/Controllers/Admin/AdminOrderController.php`
+
+**Root cause:** `carrier_type` was validated in both `update()` and `updateStatus()` but omitted from `$request->only([...])` in both methods, so it was silently dropped. Also missing from `formatOrderDetail()` and the PATCH response body, causing the admin panel to revert the select to its old value after every save.
+
+**Fix (commit `0e8cdfa`):**
+- Added `'carrier_type'` to `$request->only()` in both `update()` and `updateStatus()`
+- Added `'carrier_type' => $o->carrier_type` to `formatOrderDetail()`
+- Added `'carrier_type' => $order->carrier_type` to the `updateStatus()` PATCH response body
+- Added `'carrier_type' => $o->carrier_type` to `OrderController::formatOrder()` (customer endpoint)
+
+---
+
+### Customer Order Status Timeline — `confirmed` Status Missing — Fixed
+
+**Root cause:** Backend correctly returns `status: "confirmed"` for admin-confirmed orders. Frontend `OrderStatus` type and `STEP_ORDER` map did not include `"confirmed"`, so the timeline step lookup returned `undefined` and "Order Placed" stayed highlighted regardless of actual status.
+
+**Frontend fix (commit `fcad9c3`):**
+
+| File | Change |
+|---|---|
+| `app/account/orders/page.tsx` | Added `"confirmed"` to `OrderStatus` union type; added `confirmed: 1` to `STEP_ORDER` map |
+| `app/account/orders/[ref]/page.tsx` | Updated `TIMELINE_STEPS` to include a "Confirmed" step; `processing` maps to same step index as `confirmed` |
+
+**Final status → step mapping:**
+| `order.status` | Step |
+|---|---|
+| `pending` | Order Placed |
+| `confirmed` | Confirmed |
+| `processing` | Confirmed (same step) |
+| `shipped` | Shipped |
+| `delivered` | Delivered |
+| `cancelled` | Cancelled state |
+
+No backend changes needed — backend was already returning the correct value.
+
+---
+
+### Backend: Manual Bus/Road Freight Shipment Event Tracking — Added
+
+**Commits:** `b89dd2e` (backend)
+
+New table `order_shipment_events` and admin CRUD endpoints to manually track bus/road freight shipments that have no external tracking API.
+
+**New backend:**
+- Migration: `order_shipment_events` table (id, order_id, order_ref, event_date, location, status_label, description, admin_user_id, timestamps)
+- Migration: adds `bus` to `orders.carrier_type` enum (was: sea/air/dhl/road)
+- Model: `OrderShipmentEvent` with date cast and `belongsTo(Order)`
+- `Order` model: `shipmentEvents()` hasMany, ordered by event_date + created_at asc
+- Controller: `AdminOrderShipmentEventController` — store / update / destroy; `syncTrackingStatus()` keeps `orders.tracking_status` in sync with latest event label
+- Routes: `POST/PUT/DELETE /api/v1/admin/orders/{id}/shipment-events/{event?}`
+
+**Customer endpoints updated:** Both `GET /api/v1/orders/{ref}` and `GET /api/v1/orders?email=` now eager-load and return `shipment_events` array.
+
+⚠️ **Namecheap deploy required:** Run `php artisan migrate --force` — two new migrations.
 
 ---
 
@@ -1094,11 +1166,13 @@ Email template: dark Okelcor header, migration announcement, "Set Your Password 
 
 ## Known Issues / Remaining Tasks
 
+### High Priority
+
+1. **Stripe `order_ref` not displayed on return page — backend fix required** — Root cause confirmed: Laravel's `POST /payments/create-session` does not return `order_ref` because the order is created by the Stripe webhook, not at session creation time. Frontend is already wired and waiting. Backend must: (a) create the `Order` record at session creation time with `status: pending`, `payment_status: pending`, (b) return `order_ref` in `data.order_ref`, (c) embed it in the Stripe `success_url` as `?order_ref=OKL-XXXXX`, (d) have the webhook update the existing order (paid + confirmed) instead of creating a new one. No frontend changes needed.
+
 ### Medium Priority
 
-1. **Crisp live chat `X-Crisp-Tier` unresolved** — Main currently uses `"website"` tier (working). User confirmed credentials require `"plugin"` tier, but switching to `plugin` on main caused 404. Must test in isolation on the production Crisp account before merging dev version. Dev branch has `plugin` + simplified env vars (`CRISP_IDENTIFIER`/`CRISP_KEY` only). Do not merge until confirmed. See session notes above for full history.
-
-2. **Stripe `order_ref` not displayed on return page — backend fix required** — Root cause confirmed via audit: Laravel's `POST /payments/create-session` does not return `order_ref` because the order is created by the Stripe webhook, not at session creation time. Frontend code is correct. Backend must: (a) create the order record at session creation time, (b) return `order_ref` in `data.order_ref`, and (c) embed it in the Stripe `success_url` as `?order_ref=OKL-XXXXX`. No frontend changes needed once backend supplies the field.
+2. **Crisp live chat `X-Crisp-Tier` unresolved** — Main currently uses `"website"` tier (working). User confirmed credentials require `"plugin"` tier, but switching to `plugin` on main caused 404. Must test in isolation on the production Crisp account before merging dev version. Dev branch has `plugin` + simplified env vars (`CRISP_IDENTIFIER`/`CRISP_KEY` only). Do not merge until confirmed.
 
 3. **Stripe diagnostic logging** — Temporary `console.log` lines in `app/api/checkout/stripe-session/route.ts` (target URL, request body, HTTP status, has checkout_url, has order_ref). Remove once the backend confirms the response shape.
 
@@ -1110,11 +1184,13 @@ Email template: dark Okelcor header, migration announcement, "Set Your Password 
 
 7. **DNS redirect** — Configure okelcor.de → okelcor.com redirect at DNS/hosting level.
 
+8. **Namecheap deploy pending** — Backend commits `b89dd2e` (bus freight tracking), `996fc0b` (email deliverability), `fbe2d3f` (bank details), `0e8cdfa` (carrier_type fix), `3e7e682`/`50ffd1c` (event_date fix) need deploying. Run `php artisan migrate --force` — two new migrations in `b89dd2e`.
+
 ### Low Priority
 
-8. **Newsletter backend** — `components/newsletter-strip.tsx` shows success UI but does not POST to any endpoint.
+9. **Newsletter backend** — `components/newsletter-strip.tsx` shows success UI but does not POST to any endpoint.
 
-9. **Unused public assets** — Old placeholder SVGs in `public/brands/` safe to delete.
+10. **Unused public assets** — Old placeholder SVGs in `public/brands/` safe to delete.
 
 ---
 
