@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type OrderStatus = "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+export type OrderStatus = "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled";
 
 export type OrderItem = {
   product_name: string;
@@ -50,6 +50,7 @@ export type Order = {
 
 export const STATUS_CONFIG: Record<OrderStatus, { label: string; cls: string }> = {
   pending:    { label: "Pending",    cls: "bg-gray-100 text-gray-600" },
+  confirmed:  { label: "Confirmed",  cls: "bg-blue-100 text-blue-700" },
   processing: { label: "Processing", cls: "bg-blue-100 text-blue-700" },
   shipped:    { label: "Shipped",    cls: "bg-orange-100 text-[#f4511e]" },
   delivered:  { label: "Delivered",  cls: "bg-green-100 text-green-700" },

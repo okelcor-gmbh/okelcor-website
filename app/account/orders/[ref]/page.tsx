@@ -12,14 +12,19 @@ import { StatusBadge, formatDate, type Order, type OrderStatus } from "../page";
 // ─── Timeline config ──────────────────────────────────────────────────────────
 
 const TIMELINE_STEPS: { key: OrderStatus; label: string }[] = [
-  { key: "pending",    label: "Order Placed" },
-  { key: "processing", label: "Processing"   },
-  { key: "shipped",    label: "Shipped"       },
-  { key: "delivered",  label: "Delivered"     },
+  { key: "pending",   label: "Order Placed" },
+  { key: "confirmed", label: "Confirmed"    },
+  { key: "shipped",   label: "Shipped"      },
+  { key: "delivered", label: "Delivered"    },
 ];
 
 const STEP_ORDER: Record<OrderStatus, number> = {
-  pending: 0, processing: 1, shipped: 2, delivered: 3, cancelled: -1,
+  pending:    0,
+  confirmed:  1,
+  processing: 1,  // maps to same step as confirmed
+  shipped:    2,
+  delivered:  3,
+  cancelled: -1,
 };
 
 // ─── Data fetching ────────────────────────────────────────────────────────────
