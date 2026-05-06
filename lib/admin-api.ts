@@ -175,7 +175,7 @@ export type AdminOrderLog = {
 
 export type ShipmentEvent = {
   id: number;
-  date: string;
+  event_date?: string | null;
   status_label: string;
   location?: string | null;
   description?: string | null;

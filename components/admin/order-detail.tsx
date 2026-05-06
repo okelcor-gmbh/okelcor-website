@@ -155,7 +155,7 @@ function ShipmentEventManager({
   const [error,      setError]      = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
-  const sorted = [...events].sort((a, b) => a.date.localeCompare(b.date));
+  const sorted = [...events].sort((a, b) => (a.event_date ?? "").localeCompare(b.event_date ?? ""));
   const setField = (field: keyof EventFormData, value: string) => setForm((f) => ({ ...f, [field]: value }));
 
   const handleAdd = async () => {
@@ -166,7 +166,7 @@ function ShipmentEventManager({
     });
     setSaving(false);
     if (result.error) { setError(result.error); return; }
-    const newEvent: ShipmentEvent = result.event ?? { id: Date.now(), date: form.date, status_label: form.status_label, location: form.location || null, description: form.description || null };
+    const newEvent: ShipmentEvent = result.event ?? { id: Date.now(), event_date: form.date, status_label: form.status_label, location: form.location || null, description: form.description || null };
     setEvents((evs) => [...evs, newEvent]);
     setAdding(false); setForm(EMPTY_FORM);
     router.refresh();
@@ -174,7 +174,7 @@ function ShipmentEventManager({
 
   const startEdit = (ev: ShipmentEvent) => {
     setEditingId(ev.id);
-    setForm({ date: ev.date.slice(0, 10), status_label: ev.status_label, location: ev.location ?? "", description: ev.description ?? "" });
+    setForm({ date: (ev.event_date ?? "").slice(0, 10), status_label: ev.status_label, location: ev.location ?? "", description: ev.description ?? "" });
     setError(null);
   };
 
@@ -188,7 +188,7 @@ function ShipmentEventManager({
     setSaving(false);
     if (result.error) { setError(result.error); return; }
     setEvents((evs) => evs.map((e) => e.id === editingId
-      ? { ...e, date: form.date, status_label: form.status_label, location: form.location || null, description: form.description || null }
+      ? { ...e, event_date: form.date, status_label: form.status_label, location: form.location || null, description: form.description || null }
       : e
     ));
     setEditingId(null); setForm(EMPTY_FORM);
@@ -258,7 +258,7 @@ function ShipmentEventManager({
                         <span className={`text-[0.875rem] font-semibold ${isLatest ? "text-[#E85C1A]" : "text-[#1a1a1a]"}`}>
                           {ev.status_label}
                         </span>
-                        <span className="text-[0.75rem] text-[#5c5e62]">{shortDateOnly(ev.date)}</span>
+                        <span className="text-[0.75rem] text-[#5c5e62]">{shortDateOnly(ev.event_date ?? undefined)}</span>
                       </div>
                       {ev.location && (
                         <p className="mt-0.5 flex items-center gap-1 text-[0.78rem] text-[#5c5e62]">

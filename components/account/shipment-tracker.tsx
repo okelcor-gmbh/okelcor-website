@@ -5,7 +5,7 @@ import { Truck, Calendar, MapPin, Copy, Check, Package } from "lucide-react";
 
 type ShipmentEvent = {
   id: number;
-  date: string;
+  event_date?: string | null;
   status_label: string;
   location?: string | null;
   description?: string | null;
@@ -83,7 +83,7 @@ export default function ShipmentTracker({
     );
   }
 
-  const sorted = [...events].sort((a, b) => a.date.localeCompare(b.date));
+  const sorted = [...events].sort((a, b) => (a.event_date ?? "").localeCompare(b.event_date ?? ""));
   const latestEvent = sorted[sorted.length - 1];
   const currentStatus = trackingStatus ?? latestEvent?.status_label;
 
@@ -161,7 +161,7 @@ export default function ShipmentTracker({
                       <span className={`text-[0.83rem] font-bold ${isLatest ? "text-[var(--primary)]" : "text-[var(--foreground)]"}`}>
                         {ev.status_label}
                       </span>
-                      <span className="text-[0.74rem] text-[var(--muted)]">{formatDate(ev.date)}</span>
+                      <span className="text-[0.74rem] text-[var(--muted)]">{formatDate(ev.event_date ?? undefined)}</span>
                     </div>
                     {ev.location && (
                       <div className="mt-0.5 flex items-center gap-1">

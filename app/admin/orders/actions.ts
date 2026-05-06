@@ -33,7 +33,7 @@ type ShipmentEventInput = {
 
 type ShipmentEventRow = {
   id: number;
-  date: string;
+  event_date?: string | null;
   status_label: string;
   location?: string | null;
   description?: string | null;
