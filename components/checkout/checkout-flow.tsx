@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, ChevronRight, Info, Lock, ShieldCheck, Tag } from "lucide-react";
+import { CheckCircle2, ChevronRight, CreditCard, Info, Landmark, Lock, ShieldCheck, Tag } from "lucide-react";
+import BankTransferDetails from "@/components/account/bank-transfer-details";
 import { useCart } from "@/context/cart-context";
 import { useLanguage } from "@/context/language-context";
 import { useCustomerAuth } from "@/context/CustomerAuthContext";
@@ -169,6 +170,53 @@ function SectionCard({ title, children }: { title: string; children: React.React
   );
 }
 
+// ─── Bank transfer success screen ────────────────────────────────────────────
+
+function BankTransferSuccess({ orderRef }: { orderRef: string }) {
+  return (
+    <div className="tesla-shell py-10 md:py-16">
+      <div className="mx-auto max-w-[640px]">
+        <div className="mb-6 flex items-start gap-3 sm:gap-4">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-green-100 sm:h-12 sm:w-12">
+            <CheckCircle2 size={22} strokeWidth={2} className="text-green-600 sm:hidden" />
+            <CheckCircle2 size={24} strokeWidth={2} className="hidden text-green-600 sm:block" />
+          </div>
+          <div>
+            <h1 className="text-[1.2rem] font-extrabold text-[var(--foreground)] sm:text-[1.35rem]">
+              Order Placed Successfully
+            </h1>
+            <p className="mt-0.5 text-[0.85rem] text-[var(--muted)]">
+              Transfer to the account below to confirm your order.
+            </p>
+          </div>
+        </div>
+
+        <BankTransferDetails orderRef={orderRef} />
+
+        <p className="mt-4 text-[0.82rem] leading-6 text-[var(--muted)]">
+          Please quote your order reference in the payment description. Your order will be
+          processed once the transfer is received.
+        </p>
+
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+          <Link
+            href="/account/orders"
+            className="flex h-[44px] items-center justify-center rounded-full bg-[var(--primary)] px-6 text-[0.88rem] font-semibold text-white transition hover:bg-[var(--primary-hover)]"
+          >
+            View My Orders
+          </Link>
+          <Link
+            href="/shop"
+            className="flex h-[44px] items-center justify-center rounded-full border border-black/[0.08] bg-white px-6 text-[0.88rem] font-semibold text-[var(--foreground)] transition hover:bg-[#f0f0f0]"
+          >
+            Continue Shopping
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── VAT status message ───────────────────────────────────────────────────────
 
 function VatStatusMessage({ country, vatValid }: { country: string; vatValid: boolean }) {
@@ -281,6 +329,9 @@ export default function CheckoutFlow() {
   const [appliedPromoCode, setAppliedPromoCode] = useState("");
   const [promoError, setPromoError]             = useState<string | null>(null);
 
+  const [paymentMethod, setPaymentMethod] = useState<"stripe" | "bank_transfer">("stripe");
+  const [orderCreated, setOrderCreated]   = useState<{ ref: string } | null>(null);
+
   // Pre-fill promo input once when campaign loads and cart has matching brand
   useEffect(() => {
     if (!cartCampaign?.promo_code || promoInput || appliedPromoCode) return;
@@ -300,6 +351,8 @@ export default function CheckoutFlow() {
       : null,
     [fetAdded, fetQty],
   );
+
+  if (orderCreated) return <BankTransferSuccess orderRef={orderCreated.ref} />;
 
   if (items.length === 0) return <EmptyCartState />;
 
@@ -323,7 +376,7 @@ export default function CheckoutFlow() {
 
   const orderPayload = () => ({
     delivery,
-    payment_method: "stripe",
+    payment_method: paymentMethod,
     vat_number: vatNumber.trim() || undefined,
     items: items.map((item) => ({
       product: {
@@ -347,8 +400,6 @@ export default function CheckoutFlow() {
     ...(appliedPromoCode ? { promo_code: appliedPromoCode, code: appliedPromoCode } : {}),
   });
 
-  // Submit -> Stripe Checkout redirect via Laravel /api/v1/payments/create-session.
-
   const handleSubmit = async () => {
     if (!validateDelivery()) {
       deliveryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -369,6 +420,34 @@ export default function CheckoutFlow() {
       itemCount: items.reduce((s, i) => s + i.quantity, 0),
     });
 
+    // ── Bank Transfer ────────────────────────────────────────────────────────
+    if (paymentMethod === "bank_transfer") {
+      try {
+        const res = await fetch("/api/checkout/bank-transfer", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(orderPayload()),
+        });
+        const data = await res.json();
+        const orderData = (data?.data ?? {}) as Record<string, unknown>;
+        const orderRef  = String(orderData.order_ref ?? orderData.ref ?? "");
+
+        if (!res.ok || data.error) {
+          setSubmitError(data.error ?? data.message ?? "Failed to place order. Please try again.");
+          setSubmitting(false);
+          return;
+        }
+
+        clearCart();
+        setOrderCreated({ ref: orderRef || "—" });
+      } catch {
+        setSubmitError("Network error. Please check your connection and try again.");
+        setSubmitting(false);
+      }
+      return;
+    }
+
+    // ── Stripe Checkout ──────────────────────────────────────────────────────
     try {
       const res = await fetch("/api/checkout/stripe-session", {
         method: "POST",
@@ -552,26 +631,70 @@ export default function CheckoutFlow() {
             </div>
           )}
 
-          {/* Secure payment */}
-          <SectionCard title="Secure payment">
-            <p className="mb-3 text-[0.88rem] leading-6 text-[var(--muted)]">
-              You will be redirected to Stripe Checkout to complete your payment securely.
-            </p>
-            <p className="text-[0.82rem] leading-6 text-[var(--muted)]">
-              Stripe Checkout supports cards and other available payment methods based on your location.
-            </p>
+          {/* Payment Method */}
+          <SectionCard title="Payment Method">
+            <div className="grid gap-3 sm:grid-cols-2">
+              {/* Stripe option */}
+              <button
+                type="button"
+                onClick={() => setPaymentMethod("stripe")}
+                className={[
+                  "flex items-start gap-3 rounded-[14px] border-2 p-4 text-left transition",
+                  paymentMethod === "stripe"
+                    ? "border-[var(--primary)] bg-white"
+                    : "border-black/[0.08] bg-white hover:border-black/[0.14]",
+                ].join(" ")}
+              >
+                <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${paymentMethod === "stripe" ? "bg-[#f4511e]/10" : "bg-black/[0.05]"}`}>
+                  <CreditCard size={15} strokeWidth={1.9} className={paymentMethod === "stripe" ? "text-[var(--primary)]" : "text-[var(--muted)]"} />
+                </div>
+                <div>
+                  <p className="text-[0.88rem] font-semibold text-[var(--foreground)]">Pay by Card</p>
+                  <p className="mt-0.5 text-[0.76rem] text-[var(--muted)]">Stripe — Visa, Mastercard &amp; more</p>
+                </div>
+              </button>
 
-            {/* Trust badges */}
-            <div className="mt-4 flex flex-wrap items-center gap-4 text-[0.75rem] text-[#5c5e62]">
-              <span className="flex items-center gap-1.5">
-                <ShieldCheck size={14} className="text-green-500" />
-                256-bit SSL encryption
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Lock size={14} className="text-green-500" />
-                PCI DSS compliant via Stripe
-              </span>
+              {/* Bank Transfer option */}
+              <button
+                type="button"
+                onClick={() => setPaymentMethod("bank_transfer")}
+                className={[
+                  "flex items-start gap-3 rounded-[14px] border-2 p-4 text-left transition",
+                  paymentMethod === "bank_transfer"
+                    ? "border-[var(--primary)] bg-white"
+                    : "border-black/[0.08] bg-white hover:border-black/[0.14]",
+                ].join(" ")}
+              >
+                <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${paymentMethod === "bank_transfer" ? "bg-[#f4511e]/10" : "bg-black/[0.05]"}`}>
+                  <Landmark size={15} strokeWidth={1.9} className={paymentMethod === "bank_transfer" ? "text-[var(--primary)]" : "text-[var(--muted)]"} />
+                </div>
+                <div>
+                  <p className="text-[0.88rem] font-semibold text-[var(--foreground)]">Direct Bank Transfer</p>
+                  <p className="mt-0.5 text-[0.76rem] text-[var(--muted)]">CIF · 50% on confirmation, balance on B/L</p>
+                </div>
+              </button>
             </div>
+
+            {/* Stripe trust badges */}
+            {paymentMethod === "stripe" && (
+              <div className="mt-4 flex flex-wrap items-center gap-4 text-[0.75rem] text-[#5c5e62]">
+                <span className="flex items-center gap-1.5">
+                  <ShieldCheck size={14} className="text-green-500" />
+                  256-bit SSL encryption
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Lock size={14} className="text-green-500" />
+                  PCI DSS compliant via Stripe
+                </span>
+              </div>
+            )}
+
+            {/* Bank details preview */}
+            {paymentMethod === "bank_transfer" && (
+              <div className="mt-4">
+                <BankTransferDetails />
+              </div>
+            )}
           </SectionCard>
 
           {/* Error */}
@@ -594,7 +717,12 @@ export default function CheckoutFlow() {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                 </svg>
-                Redirecting to payment…
+                {paymentMethod === "bank_transfer" ? "Placing order…" : "Redirecting to payment…"}
+              </>
+            ) : paymentMethod === "bank_transfer" ? (
+              <>
+                <Landmark size={17} strokeWidth={2.2} />
+                Place Order · Bank Transfer
               </>
             ) : (
               <>

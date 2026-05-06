@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { CreditCard, CheckCircle, Banknote, Clock } from "lucide-react";
+import { CreditCard, CheckCircle, Landmark, Clock } from "lucide-react";
+import BankTransferDetails from "./bank-transfer-details";
 
 type Props = {
   orderRef: string;
@@ -124,16 +125,19 @@ export default function OrderPaymentCard({ orderRef, paymentMethod, paymentStatu
   // ── Bank transfer pending ─────────────────────────────────────────────────────
   if (paymentStatus === "pending" && paymentMethod === "bank_transfer") {
     return (
-      <div className="rounded-[22px] bg-[#efefef] p-6 sm:p-8">
-        <div className="mb-4 flex items-center gap-2">
-          <Banknote size={17} strokeWidth={1.9} className="text-[var(--foreground)]" />
-          <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[var(--foreground)]">
-            Payment by Bank Transfer
+      <div className="rounded-[18px] bg-[#efefef] p-4 sm:rounded-[22px] sm:p-6 lg:p-8">
+        <div className="mb-3 flex items-center gap-2 sm:mb-4">
+          <Landmark size={16} strokeWidth={1.9} className="text-[var(--foreground)] sm:hidden" />
+          <Landmark size={17} strokeWidth={1.9} className="hidden text-[var(--foreground)] sm:block" />
+          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--foreground)] sm:text-[11px]">
+            Bank Transfer Instructions
           </p>
         </div>
-        <p className="text-[0.88rem] leading-relaxed text-[var(--muted)]">
-          Our team will share payment instructions with you shortly.
+        <p className="mb-4 text-[0.85rem] leading-relaxed text-[var(--muted)] sm:text-[0.88rem]">
+          Please transfer the order amount to the account below. Quote your order reference in the
+          payment description. Your order will be processed once the transfer is received.
         </p>
+        <BankTransferDetails orderRef={orderRef} />
       </div>
     );
   }

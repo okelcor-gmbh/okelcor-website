@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronRight, Package, CreditCard } from "lucide-react";
+import { ChevronRight, Package, CreditCard, Landmark } from "lucide-react";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { getCustomerFromCookie } from "@/lib/get-customer";
@@ -214,6 +214,12 @@ export default async function OrdersPage() {
                                 Payment due
                               </span>
                             )}
+                            {order.payment_method === "bank_transfer" && order.payment_status === "pending" && (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-blue-700">
+                                <Landmark size={10} strokeWidth={2.5} />
+                                Bank transfer
+                              </span>
+                            )}
                           </div>
                         </td>
                         <td className="px-5 py-4 text-right xl:px-6">
@@ -268,6 +274,12 @@ export default async function OrdersPage() {
                           <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-amber-700">
                             <CreditCard size={10} strokeWidth={2.5} />
                             Payment due
+                          </span>
+                        )}
+                        {order.payment_method === "bank_transfer" && order.payment_status === "pending" && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-blue-700">
+                            <Landmark size={10} strokeWidth={2.5} />
+                            Bank transfer
                           </span>
                         )}
                       </div>
