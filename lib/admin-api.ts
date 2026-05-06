@@ -173,17 +173,31 @@ export type AdminOrderLog = {
   created_at: string;
 };
 
+export type ShipmentEvent = {
+  id: number;
+  date: string;
+  status_label: string;
+  location?: string | null;
+  description?: string | null;
+  created_at?: string;
+};
+
 export type AdminOrderFull = AdminOrder & {
   phone?: string;
   company_name?: string;
   country?: string;
   address?: string;
   notes?: string;
-  container_number?: string;
+  container_number?: string;    // legacy — kept for backward compat
   tracking_status?: string;
+  carrier?: string | null;
+  carrier_type?: string | null;
+  tracking_number?: string | null;
+  estimated_delivery?: string | null;
   eta?: string;
   items: AdminOrderItem[];
   logs?: AdminOrderLog[];
+  shipment_events?: ShipmentEvent[];
   updated_at?: string;
 };
 

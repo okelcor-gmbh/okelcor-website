@@ -1,36 +1,18 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   AlertCircle, CheckCircle2, ChevronDown, Landmark, Loader2,
-  RefreshCw, MapPin, Ship, Clock, Package,
+  MapPin, Truck, Plus, Pencil, Trash2,
 } from "lucide-react";
-import { updateOrderStatus, cancelOrder, deleteOrder } from "@/app/admin/orders/actions";
-import type { AdminOrderFull, AdminOrderLog } from "@/lib/admin-api";
+import { updateOrderStatus, cancelOrder, deleteOrder, addShipmentEvent, updateShipmentEvent, deleteShipmentEvent } from "@/app/admin/orders/actions";
+import type { AdminOrderFull, AdminOrderLog, ShipmentEvent } from "@/lib/admin-api";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 const ORDER_STATUSES = ["pending", "confirmed", "shipped", "delivered", "cancelled"] as const;
 type OrderStatus = (typeof ORDER_STATUSES)[number];
-
-interface TrackingEvent {
-  date?:        string;
-  timestamp?:   string;
-  location?:    string;
-  description?: string;
-  status?:      string;
-  event?:       string;
-}
-
-interface TrackingData {
-  container_number?: string;
-  status?:           string;
-  vessel?:           string;
-  location?:         string;
-  eta?:              string;
-  events?:           TrackingEvent[];
-}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -85,144 +67,233 @@ function toDateInputValue(iso?: string): string {
   try { return new Date(iso).toISOString().slice(0, 10); } catch { return ""; }
 }
 
-// ── Tracking widget ───────────────────────────────────────────────────────────
+// ── Shipment event manager ────────────────────────────────────────────────────
 
-function TrackingWidget({ containerNumber }: { containerNumber: string }) {
-  const [data,    setData]    = useState<TrackingData | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error,   setError]   = useState<string | null>(null);
+type EventFormData = {
+  date: string;
+  status_label: string;
+  location: string;
+  description: string;
+};
 
-  const load = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res  = await fetch(`/api/tracking/${encodeURIComponent(containerNumber)}`);
-      const json = await res.json() as { data?: TrackingData; error?: string } & TrackingData;
-      console.log("Tracking response:", json);
-      if (!res.ok) {
-        setError(json.error ?? "No tracking data found for this container.");
-      } else {
-        setData(json.data ?? (json as TrackingData));
-      }
-    } catch {
-      setError("Could not reach the tracking service.");
-    } finally {
-      setLoading(false);
-    }
-  };
+const EMPTY_FORM: EventFormData = { date: "", status_label: "", location: "", description: "" };
 
-  useEffect(() => { load(); }, [containerNumber]); // eslint-disable-line react-hooks/exhaustive-deps
-
+function EventForm({
+  data,
+  onChange,
+  onSave,
+  onCancel,
+  saving,
+  error,
+  saveLabel,
+}: {
+  data: EventFormData;
+  onChange: (field: keyof EventFormData, value: string) => void;
+  onSave: () => void;
+  onCancel: () => void;
+  saving: boolean;
+  error: string | null;
+  saveLabel: string;
+}) {
+  const inp = "h-9 rounded-lg border border-black/[0.09] bg-white px-3 text-[0.83rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10";
   return (
-    <div className="rounded-2xl bg-white shadow-sm">
-      <div className="flex items-center justify-between border-b border-black/[0.06] px-6 py-4">
-        <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
-          Container Tracking
-        </p>
-        <div className="flex items-center gap-3">
-          <span className="font-mono text-[0.8rem] text-[#5c5e62]">{containerNumber}</span>
-          <button
-            type="button"
-            onClick={load}
-            disabled={loading}
-            className="flex items-center gap-1.5 rounded-lg border border-black/[0.09] bg-white px-3 py-1.5 text-[0.75rem] font-semibold text-[#5c5e62] transition hover:border-[#E85C1A]/40 hover:text-[#E85C1A] disabled:opacity-50"
-          >
-            <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
-            Refresh
-          </button>
+    <div className="flex flex-col gap-3 rounded-xl border border-black/[0.09] bg-[#fafafa] p-4">
+      <div className="grid grid-cols-2 gap-3">
+        <div className="flex flex-col gap-1">
+          <span className="text-[0.68rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Date *</span>
+          <input type="date" value={data.date} onChange={(e) => onChange("date", e.target.value)} className={inp} />
+        </div>
+        <div className="flex flex-col gap-1">
+          <span className="text-[0.68rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Status Label *</span>
+          <input type="text" value={data.status_label} onChange={(e) => onChange("status_label", e.target.value)}
+            placeholder="e.g. Dispatched, In Transit" className={inp} />
+        </div>
+        <div className="flex flex-col gap-1">
+          <span className="text-[0.68rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Location</span>
+          <input type="text" value={data.location} onChange={(e) => onChange("location", e.target.value)}
+            placeholder="e.g. Brussels, Belgium" className={inp} />
+        </div>
+        <div className="flex flex-col gap-1">
+          <span className="text-[0.68rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Description</span>
+          <input type="text" value={data.description} onChange={(e) => onChange("description", e.target.value)}
+            placeholder="Optional note" className={inp} />
         </div>
       </div>
+      {error && (
+        <div className="flex items-center gap-1.5 text-[0.8rem] text-red-600">
+          <AlertCircle size={13} className="shrink-0" />
+          {error}
+        </div>
+      )}
+      <div className="flex items-center gap-2">
+        <button type="button" onClick={onSave} disabled={saving || !data.date || !data.status_label}
+          className="h-8 rounded-full bg-[#E85C1A] px-5 text-[0.78rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-50">
+          {saving ? "Saving…" : saveLabel}
+        </button>
+        <button type="button" onClick={onCancel} disabled={saving}
+          className="h-8 rounded-full border border-black/[0.09] bg-white px-4 text-[0.78rem] font-semibold text-[#5c5e62] transition hover:bg-[#f0f0f0] disabled:opacity-50">
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
 
-      <div className="p-6">
-        {loading && (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 size={22} className="animate-spin text-[#9ca3af]" />
-          </div>
-        )}
+function ShipmentEventManager({
+  orderId,
+  initialEvents,
+}: {
+  orderId: number;
+  initialEvents: ShipmentEvent[];
+}) {
+  const router = useRouter();
+  const [events,     setEvents]     = useState<ShipmentEvent[]>(initialEvents);
+  const [adding,     setAdding]     = useState(false);
+  const [editingId,  setEditingId]  = useState<number | null>(null);
+  const [form,       setForm]       = useState<EventFormData>(EMPTY_FORM);
+  const [saving,     setSaving]     = useState(false);
+  const [error,      setError]      = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
-        {!loading && error && (
-          <div className="flex items-start gap-2.5 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-[0.83rem] text-red-700">
-            <AlertCircle size={15} className="mt-0.5 shrink-0" />
-            {error}
-          </div>
-        )}
+  const sorted = [...events].sort((a, b) => a.date.localeCompare(b.date));
+  const setField = (field: keyof EventFormData, value: string) => setForm((f) => ({ ...f, [field]: value }));
 
-        {!loading && data && !(data.status || data.vessel || data.location || data.eta || data.events?.length) && (
-          <div className="flex items-start gap-2.5 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-[0.83rem] text-blue-800">
-            <Clock size={15} className="mt-0.5 shrink-0 text-blue-500" />
-            Awaiting first tracking update from carrier — check back in a few hours.
-          </div>
-        )}
+  const handleAdd = async () => {
+    setSaving(true); setError(null);
+    const result = await addShipmentEvent(orderId, {
+      date: form.date, status_label: form.status_label,
+      location: form.location || undefined, description: form.description || undefined,
+    });
+    setSaving(false);
+    if (result.error) { setError(result.error); return; }
+    const newEvent: ShipmentEvent = result.event ?? { id: Date.now(), date: form.date, status_label: form.status_label, location: form.location || null, description: form.description || null };
+    setEvents((evs) => [...evs, newEvent]);
+    setAdding(false); setForm(EMPTY_FORM);
+    router.refresh();
+  };
 
-        {!loading && data && !!(data.status || data.vessel || data.location || data.eta || data.events?.length) && (
-          <div className="space-y-5">
-            {/* Summary chips */}
-            <div className="flex flex-wrap gap-3">
-              {data.status && (
-                <div className="flex items-center gap-2 rounded-xl border border-black/[0.07] bg-[#fafafa] px-4 py-2.5">
-                  <Package size={14} className="text-[#E85C1A]" />
-                  <div>
-                    <p className="text-[0.65rem] font-bold uppercase tracking-wider text-[#5c5e62]">Status</p>
-                    <p className="text-[0.83rem] font-semibold text-[#1a1a1a]">{data.status}</p>
-                  </div>
-                </div>
-              )}
-              {data.vessel && (
-                <div className="flex items-center gap-2 rounded-xl border border-black/[0.07] bg-[#fafafa] px-4 py-2.5">
-                  <Ship size={14} className="text-[#E85C1A]" />
-                  <div>
-                    <p className="text-[0.65rem] font-bold uppercase tracking-wider text-[#5c5e62]">Vessel</p>
-                    <p className="text-[0.83rem] font-semibold text-[#1a1a1a]">{data.vessel}</p>
-                  </div>
-                </div>
-              )}
-              {data.location && (
-                <div className="flex items-center gap-2 rounded-xl border border-black/[0.07] bg-[#fafafa] px-4 py-2.5">
-                  <MapPin size={14} className="text-[#E85C1A]" />
-                  <div>
-                    <p className="text-[0.65rem] font-bold uppercase tracking-wider text-[#5c5e62]">Location</p>
-                    <p className="text-[0.83rem] font-semibold text-[#1a1a1a]">{data.location}</p>
-                  </div>
-                </div>
-              )}
-              {data.eta && (
-                <div className="flex items-center gap-2 rounded-xl border border-black/[0.07] bg-[#fafafa] px-4 py-2.5">
-                  <Clock size={14} className="text-[#E85C1A]" />
-                  <div>
-                    <p className="text-[0.65rem] font-bold uppercase tracking-wider text-[#5c5e62]">ETA</p>
-                    <p className="text-[0.83rem] font-semibold text-[#1a1a1a]">{shortDateOnly(data.eta)}</p>
-                  </div>
-                </div>
-              )}
-            </div>
+  const startEdit = (ev: ShipmentEvent) => {
+    setEditingId(ev.id);
+    setForm({ date: ev.date.slice(0, 10), status_label: ev.status_label, location: ev.location ?? "", description: ev.description ?? "" });
+    setError(null);
+  };
 
-            {/* Events timeline */}
-            {!!data.events?.length && (
-              <div>
-                <p className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.12em] text-[#5c5e62]">
-                  Events Timeline
-                </p>
-                <ol className="relative border-l border-black/[0.08] pl-5 space-y-4">
-                  {data.events.map((ev, i) => (
-                    <li key={i} className="relative">
-                      <span className="absolute -left-[1.35rem] top-1 flex h-3 w-3 items-center justify-center rounded-full border-2 border-[#E85C1A] bg-white" />
-                      <p className="text-[0.75rem] text-[#9ca3af]">
-                        {shortDate(ev.date ?? ev.timestamp)}
-                        {(ev.location) && (
-                          <span className="ml-2 font-medium text-[#5c5e62]">· {ev.location}</span>
-                        )}
-                      </p>
-                      <p className="mt-0.5 text-[0.83rem] font-medium text-[#1a1a1a]">
-                        {ev.description ?? ev.event ?? ev.status ?? "—"}
-                      </p>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            )}
-          </div>
+  const handleEdit = async () => {
+    if (!editingId) return;
+    setSaving(true); setError(null);
+    const result = await updateShipmentEvent(orderId, editingId, {
+      date: form.date, status_label: form.status_label,
+      location: form.location || undefined, description: form.description || undefined,
+    });
+    setSaving(false);
+    if (result.error) { setError(result.error); return; }
+    setEvents((evs) => evs.map((e) => e.id === editingId
+      ? { ...e, date: form.date, status_label: form.status_label, location: form.location || null, description: form.description || null }
+      : e
+    ));
+    setEditingId(null); setForm(EMPTY_FORM);
+    router.refresh();
+  };
+
+  const handleDelete = async (id: number) => {
+    setDeletingId(id); setError(null);
+    const result = await deleteShipmentEvent(orderId, id);
+    setDeletingId(null);
+    if (result.error) { setError(result.error); return; }
+    setEvents((evs) => evs.filter((e) => e.id !== id));
+    router.refresh();
+  };
+
+  const cancelForm = () => { setAdding(false); setEditingId(null); setForm(EMPTY_FORM); setError(null); };
+
+  return (
+    <div className="rounded-2xl bg-white p-6 shadow-sm">
+      <div className="mb-4 flex items-center justify-between">
+        <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+          Shipment Events
+        </p>
+        {!adding && editingId === null && (
+          <button type="button"
+            onClick={() => { setAdding(true); setForm(EMPTY_FORM); setError(null); }}
+            className="inline-flex items-center gap-1.5 rounded-full border border-[#E85C1A]/30 bg-[#fff5f2] px-3 py-1.5 text-[0.75rem] font-semibold text-[#E85C1A] transition hover:bg-[#fff0ea]">
+            <Plus size={13} strokeWidth={2.2} />
+            Add Event
+          </button>
         )}
       </div>
+
+      {error && !adding && editingId === null && (
+        <div className="mb-3 flex items-center gap-1.5 text-[0.8rem] text-red-600">
+          <AlertCircle size={13} className="shrink-0" />
+          {error}
+        </div>
+      )}
+
+      {adding && (
+        <div className="mb-4">
+          <EventForm data={form} onChange={setField} onSave={handleAdd} onCancel={cancelForm}
+            saving={saving} error={error} saveLabel="Add Event" />
+        </div>
+      )}
+
+      {sorted.length === 0 && !adding ? (
+        <p className="text-[0.875rem] text-[#5c5e62]">
+          No shipment events yet. Add the first milestone to start tracking.
+        </p>
+      ) : (
+        <ol className="divide-y divide-black/[0.05]">
+          {sorted.map((ev, i) => {
+            const isLatest  = i === sorted.length - 1;
+            const isEditing = editingId === ev.id;
+            return (
+              <li key={ev.id} className="py-3">
+                {isEditing ? (
+                  <EventForm data={form} onChange={setField} onSave={handleEdit} onCancel={cancelForm}
+                    saving={saving} error={error} saveLabel="Save Changes" />
+                ) : (
+                  <div className="flex items-start gap-3">
+                    <span className={`mt-[7px] h-2.5 w-2.5 shrink-0 rounded-full ${isLatest ? "bg-[#E85C1A]" : "bg-black/20"}`} />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-baseline gap-x-2">
+                        <span className={`text-[0.875rem] font-semibold ${isLatest ? "text-[#E85C1A]" : "text-[#1a1a1a]"}`}>
+                          {ev.status_label}
+                        </span>
+                        <span className="text-[0.75rem] text-[#5c5e62]">{shortDateOnly(ev.date)}</span>
+                      </div>
+                      {ev.location && (
+                        <p className="mt-0.5 flex items-center gap-1 text-[0.78rem] text-[#5c5e62]">
+                          <MapPin size={11} strokeWidth={1.8} className="shrink-0" />
+                          {ev.location}
+                        </p>
+                      )}
+                      {ev.description && (
+                        <p className="mt-0.5 text-[0.78rem] italic text-[#5c5e62]">{ev.description}</p>
+                      )}
+                    </div>
+                    <div className="flex shrink-0 items-center gap-1">
+                      <button type="button" onClick={() => startEdit(ev)}
+                        disabled={!!editingId || adding || deletingId !== null}
+                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-black/[0.08] bg-white text-[#5c5e62] transition hover:border-[#E85C1A]/30 hover:text-[#E85C1A] disabled:opacity-40"
+                        title="Edit event">
+                        <Pencil size={12} strokeWidth={2} />
+                      </button>
+                      <button type="button" onClick={() => handleDelete(ev.id)}
+                        disabled={deletingId !== null || !!editingId || adding}
+                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-black/[0.08] bg-white text-[#5c5e62] transition hover:border-red-200 hover:text-red-500 disabled:opacity-40"
+                        title="Delete event">
+                        {deletingId === ev.id
+                          ? <Loader2 size={12} className="animate-spin" />
+                          : <Trash2 size={12} strokeWidth={2} />
+                        }
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </li>
+            );
+          })}
+        </ol>
+      )}
     </div>
   );
 }
@@ -319,8 +390,10 @@ export default function OrderDetail({
       ? (order.status as OrderStatus)
       : "pending",
   );
-  const [containerNumber, setContainerNumber] = useState(order.container_number ?? "");
-  const [eta,             setEta]             = useState(toDateInputValue(order.eta));
+  const [carrier,           setCarrier]           = useState(order.carrier ?? "");
+  const [carrierType,       setCarrierType]       = useState(order.carrier_type ?? "");
+  const [trackingNumber,    setTrackingNumber]    = useState(order.tracking_number ?? "");
+  const [estimatedDelivery, setEstimatedDelivery] = useState(toDateInputValue(order.estimated_delivery ?? order.eta));
 
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saved,     setSaved]     = useState(false);
@@ -353,17 +426,21 @@ export default function OrderDetail({
   const cancelDisabled = ["cancelled", "delivered"].includes(status);
 
   const isDirty =
-    status          !== order.status                     ||
-    containerNumber !== (order.container_number ?? "")   ||
-    eta             !== toDateInputValue(order.eta);
+    status            !== order.status                                            ||
+    carrier           !== (order.carrier ?? "")                                   ||
+    carrierType       !== (order.carrier_type ?? "")                              ||
+    trackingNumber    !== (order.tracking_number ?? "")                           ||
+    estimatedDelivery !== toDateInputValue(order.estimated_delivery ?? order.eta);
 
   const handleSave = () => {
     setSaveError(null);
     setSaved(false);
     startTransition(async () => {
       const result = await updateOrderStatus(order.id, status, {
-        container_number: containerNumber || undefined,
-        eta:              eta             || undefined,
+        carrier:            carrier           || undefined,
+        carrier_type:       carrierType       || undefined,
+        tracking_number:    trackingNumber    || undefined,
+        estimated_delivery: estimatedDelivery || undefined,
       });
       if (result.error) {
         setSaveError(result.error);
@@ -447,10 +524,6 @@ export default function OrderDetail({
     }
   };
 
-  // ── Active container to show the tracking widget
-  // Use the saved value (order prop) not the input state, so the widget
-  // only renders for a container that's already persisted on the order.
-  const savedContainer = order.container_number;
 
   return (
     <div className="flex flex-col gap-6">
@@ -500,25 +573,57 @@ export default function OrderDetail({
             </div>
           </div>
 
-          {/* Container number */}
+          {/* Carrier */}
           <div className="flex flex-col gap-1">
-            <span className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Container number</span>
+            <span className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Carrier</span>
             <input
               type="text"
-              value={containerNumber}
-              onChange={(e) => setContainerNumber(e.target.value)}
-              placeholder="e.g. MSCU1234567"
+              value={carrier}
+              onChange={(e) => setCarrier(e.target.value)}
+              placeholder="e.g. DHL Freight"
+              className="h-10 w-40 rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+            />
+          </div>
+
+          {/* Carrier type */}
+          <div className="flex flex-col gap-1">
+            <span className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Carrier type</span>
+            <div className="relative">
+              <select
+                value={carrierType}
+                onChange={(e) => setCarrierType(e.target.value)}
+                className="h-10 appearance-none rounded-xl border border-black/[0.09] bg-white pl-3.5 pr-9 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+              >
+                <option value="">— select —</option>
+                <option value="bus">Bus Freight</option>
+                <option value="road">Road Freight</option>
+                <option value="dhl">DHL</option>
+                <option value="sea">Sea Freight</option>
+                <option value="air">Air Freight</option>
+              </select>
+              <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#5c5e62]" />
+            </div>
+          </div>
+
+          {/* Tracking / waybill */}
+          <div className="flex flex-col gap-1">
+            <span className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Tracking / Waybill</span>
+            <input
+              type="text"
+              value={trackingNumber}
+              onChange={(e) => setTrackingNumber(e.target.value)}
+              placeholder="Ref or waybill number"
               className="h-10 w-44 rounded-xl border border-black/[0.09] bg-white px-3.5 font-mono text-[0.875rem] text-[#1a1a1a] outline-none placeholder:font-sans placeholder:text-[#aaa] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
             />
           </div>
 
-          {/* ETA */}
+          {/* Estimated delivery */}
           <div className="flex flex-col gap-1">
-            <span className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">ETA</span>
+            <span className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Est. Delivery</span>
             <input
               type="date"
-              value={eta}
-              onChange={(e) => setEta(e.target.value)}
+              value={estimatedDelivery}
+              onChange={(e) => setEstimatedDelivery(e.target.value)}
               className="h-10 rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
             />
           </div>
@@ -568,9 +673,10 @@ export default function OrderDetail({
             <InfoRow label="Payment Method"   value={order.payment_method} />
             <InfoRow label="Placed On"        value={shortDate(order.created_at)} />
             <InfoRow label="Last Updated"     value={shortDate(order.updated_at)} />
-            <InfoRow label="Container No."    value={order.container_number} />
-            <InfoRow label="Tracking Status"  value={order.tracking_status} />
-            <InfoRow label="ETA"              value={shortDateOnly(order.eta)} />
+            <InfoRow label="Carrier"          value={order.carrier} />
+            <InfoRow label="Carrier Type"     value={order.carrier_type} />
+            <InfoRow label="Tracking No."     value={order.tracking_number} />
+            <InfoRow label="Est. Delivery"    value={shortDateOnly(order.estimated_delivery ?? order.eta)} />
           </div>
           <div className="mt-5 flex items-center justify-between rounded-xl bg-[#f5f5f5] px-4 py-3">
             <span className="text-[0.83rem] font-semibold text-[#5c5e62]">Order Total</span>
@@ -644,8 +750,8 @@ export default function OrderDetail({
         )}
       </div>
 
-      {/* ── Container tracking widget (only when container_number is saved on order) ── */}
-      {savedContainer && <TrackingWidget containerNumber={savedContainer} />}
+      {/* ── Shipment event manager ── */}
+      <ShipmentEventManager orderId={order.id} initialEvents={order.shipment_events ?? []} />
 
       {/* ── Order Actions ── */}
       <div className="rounded-2xl bg-white p-6 shadow-sm">

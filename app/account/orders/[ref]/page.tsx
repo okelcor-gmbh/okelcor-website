@@ -1,7 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronLeft, Truck, Package } from "lucide-react";
+import { ChevronLeft, Truck } from "lucide-react";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import ShipmentTracker from "@/components/account/shipment-tracker";
@@ -275,20 +275,14 @@ export default async function OrderDetailPage({ params }: Props) {
               </p>
             </div>
 
-            {order.container_number ? (
-              <ShipmentTracker
-                containerNumber={order.container_number}
-                orderEta={order.eta}
-              />
-            ) : (
-              <div className="flex items-start gap-3 rounded-[10px] border border-black/[0.06] bg-white/70 px-4 py-3 sm:rounded-[12px] sm:px-5 sm:py-4">
-                <Package size={16} strokeWidth={1.7} className="mt-0.5 shrink-0 text-[var(--muted)] sm:hidden" />
-                <Package size={18} strokeWidth={1.7} className="mt-0.5 hidden shrink-0 text-[var(--muted)] sm:block" />
-                <p className="text-[0.85rem] leading-6 text-[var(--muted)] sm:text-[0.88rem]">
-                  Tracking details will appear here once your order is shipped.
-                </p>
-              </div>
-            )}
+            <ShipmentTracker
+              carrier={order.carrier}
+              carrierType={order.carrier_type}
+              trackingNumber={order.tracking_number}
+              estimatedDelivery={order.estimated_delivery ?? order.eta}
+              trackingStatus={order.tracking_status}
+              events={order.shipment_events}
+            />
           </div>
 
           {/* ── Order items ── */}

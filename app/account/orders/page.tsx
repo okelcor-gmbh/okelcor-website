@@ -5,6 +5,7 @@ import { ChevronRight, Package, CreditCard, Landmark } from "lucide-react";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { getCustomerFromCookie } from "@/lib/get-customer";
+import type { ShipmentEvent } from "@/lib/admin-api";
 
 export const metadata: Metadata = {
   title: "My Orders",
@@ -36,11 +37,13 @@ export type Order = {
   payment_url?: string | null;
   checkout_url?: string | null;
   carrier?: string;
+  carrier_type?: string;
   tracking_number?: string;
   estimated_delivery?: string;
   container_number?: string;
   tracking_status?: string;
   eta?: string;
+  shipment_events?: ShipmentEvent[];
 };
 
 // ─── Status badge config ──────────────────────────────────────────────────────
