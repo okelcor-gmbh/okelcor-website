@@ -39,6 +39,33 @@ type ShipmentEventRow = {
   description?: string | null;
 };
 
+type LaravelErrorResponse = { message?: string; errors?: Record<string, string[]> };
+
+function toISODate(raw: string): string {
+  if (!raw) return raw;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;           // already YYYY-MM-DD
+  const dd = raw.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (dd) return `${dd[3]}-${dd[2]}-${dd[1]}`;               // DD/MM/YYYY → YYYY-MM-DD
+  try { return new Date(raw).toISOString().slice(0, 10); } catch { return raw; }
+}
+
+function extractApiError(json: LaravelErrorResponse, fallback: string): string {
+  if (json.errors) {
+    const first = Object.values(json.errors)[0];
+    if (first?.[0]) return first[0];
+  }
+  return json.message || fallback;
+}
+
+function buildEventBody(data: ShipmentEventInput): string {
+  return JSON.stringify({
+    event_date:   toISODate(data.date),
+    status_label: data.status_label,
+    location:     data.location    || undefined,
+    description:  data.description || undefined,
+  });
+}
+
 export async function updateOrderStatus(
   id: number,
   status: OrderStatus,
@@ -160,11 +187,11 @@ export async function addShipmentEvent(
         Accept: "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(data),
+      body: buildEventBody(data),
       cache: "no-store",
     });
-    const json = await res.json().catch(() => ({})) as { data?: ShipmentEventRow; message?: string };
-    if (!res.ok) return { error: json.message || `Failed to add event (HTTP ${res.status}).` };
+    const json = await res.json().catch(() => ({})) as LaravelErrorResponse & { data?: ShipmentEventRow };
+    if (!res.ok) return { error: extractApiError(json, `Failed to add event (HTTP ${res.status}).`) };
     revalidatePath(`/admin/orders/${orderId}`);
     return { event: json.data };
   } catch {
@@ -186,11 +213,11 @@ export async function updateShipmentEvent(
         Accept: "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(data),
+      body: buildEventBody(data),
       cache: "no-store",
     });
-    const json = await res.json().catch(() => ({})) as { message?: string };
-    if (!res.ok) return { error: json.message || `Failed to update event (HTTP ${res.status}).` };
+    const json = await res.json().catch(() => ({})) as LaravelErrorResponse;
+    if (!res.ok) return { error: extractApiError(json, `Failed to update event (HTTP ${res.status}).`) };
     revalidatePath(`/admin/orders/${orderId}`);
     return {};
   } catch {
