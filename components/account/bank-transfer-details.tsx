@@ -6,7 +6,7 @@ type BankRow = { label: string; value: string; mono?: boolean; copy?: boolean; w
 
 const ROWS: BankRow[] = [
   { label: "Account Name",    value: "OKELCOR GMBH",                                            mono: true },
-  { label: "Account Number",  value: "905760906807",                                             mono: true, copy: true },
+  { label: "Account Number",  value: "7609068",                                                  mono: true, copy: true },
   { label: "IBAN",            value: "BE74 9057 6090 6807",                                      mono: true, copy: true },
   { label: "BIC / SWIFT",     value: "TRWIBEB1XXX",                                              mono: true, copy: true },
   { label: "Bank",            value: "Wise" },
@@ -16,8 +16,8 @@ const ROWS: BankRow[] = [
 ];
 
 const TIMING = [
-  { label: "SEPA transfers",        value: "1–2 business days" },
-  { label: "International (SWIFT)", value: "2–5 business days" },
+  { label: "SEPA transfers",        value: "1–2 working days" },
+  { label: "International (SWIFT)", value: "4–5 working days" },
 ];
 
 export default function BankTransferDetails({ orderRef }: { orderRef?: string }) {
