@@ -60,7 +60,28 @@ Development environment: Windows 11, VS Code, Node.js / npm
 
 ---
 
-## Completed in Latest Session — Order Payment UX & Checkout VAT Preview (2026-05-04)
+## Completed in Latest Session — Shipment Event Crash Fix (2026-05-06)
+
+### Order Detail Pages — Crash with 2+ Shipment Events
+
+**Files:** `lib/admin-api.ts`, `app/admin/orders/actions.ts`, `components/admin/order-detail.tsx`, `components/account/shipment-tracker.tsx`
+
+**Root cause:** Backend returns `event_date` on every `ShipmentEvent` object, but the frontend type had `date: string`. With 0 or 1 event, `.sort()` never calls the comparator — the bug is invisible. With 2+ events, `a.date.localeCompare(b.date)` fires on `undefined` → `TypeError: Cannot read properties of undefined (reading 'localeCompare')`, crashing all three order pages (admin detail, customer detail, customer tracking).
+
+**Fix:**
+
+| File | Change |
+|---|---|
+| `lib/admin-api.ts` | `ShipmentEvent.date: string` → `event_date?: string \| null` |
+| `app/admin/orders/actions.ts` | `ShipmentEventRow.date` → `event_date?: string \| null` |
+| `components/admin/order-detail.tsx` | Fixed sort comparator; fixed optimistic add/update constructors; fixed `startEdit` prefill (`ev.date` → `ev.event_date ?? ""`); fixed date display (`shortDateOnly(ev.event_date ?? undefined)`) |
+| `components/account/shipment-tracker.tsx` | Updated local `ShipmentEvent` type; fixed sort comparator; fixed date display (`formatDate(ev.event_date ?? undefined)`) |
+
+All `ev.date` references replaced with `ev.event_date ?? ""` / `ev.event_date ?? undefined`. TypeScript check passes with zero errors. Commit `ed6ab25`.
+
+---
+
+## Completed in Previous Session — Order Payment UX & Checkout VAT Preview (2026-05-04)
 
 ### Customer Order Detail — Dynamic Payment Section
 
@@ -821,7 +842,7 @@ See prior entries for:
 | Account profile | Complete — personal info + change password |
 | Account addresses | Complete — add/edit/delete modal |
 | **Account orders** | **Updated** — Pay Now CTA for pending Stripe orders; payment_url → button; no URL → amber email notice |
-| **Account order detail** | **Updated** — `OrderPaymentCard` client component; dynamic payment section via proxy `/api/account/orders/{ref}/checkout`; paid / stripe / bank_transfer / unknown states |
+| **Account order detail** | **Updated** — `OrderPaymentCard` client component; dynamic payment section via proxy `/api/account/orders/{ref}/checkout`; paid / stripe / bank_transfer / unknown states; shipment event crash fixed |
 | **Account quotes** | **Updated** — progress tracker, normalized status, quoted CTA, note filter, admin_notes block |
 | **Account invoices** | **Updated** — PDF download via auth proxy; "PDF pending" pill; B2C receipt labels |
 | **Account company** | **Complete** — `/account/company`; editable company name + industry |
@@ -842,7 +863,7 @@ See prior entries for:
 | **Admin RBAC** | **Complete** — `lib/admin-permissions.ts`; canAccess(); route guard; nav filtering by role |
 | Admin profile | Complete — first/last/display name fields; role label from API |
 | Admin users | Complete — create without password; temp password notice; role_label display |
-| **Admin order actions** | **New** — Cancel Order (admin/order_manager/super_admin); Delete Order (super_admin only, confirm-ref modal); 422/409 error handling |
+| **Admin order actions** | **New** — Cancel Order (admin/order_manager/super_admin); Delete Order (super_admin only, confirm-ref modal); 422/409 error handling; shipment event crash fixed |
 | **Admin order activity log** | **New** — `ActivityLog` card in order detail; timeline with old→new diff, actor email, IP, notes |
 | **Account invoices (B2C)** | **Updated** — Receipts & Invoices card added to B2C dashboard; previously B2B only |
 | **Account invoices page** | **Updated** — customer-type-aware title/badge/empty state; PDF download via auth proxy |
