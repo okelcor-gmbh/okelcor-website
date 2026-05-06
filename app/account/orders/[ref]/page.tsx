@@ -24,7 +24,7 @@ const STEP_ORDER: Record<OrderStatus, number> = {
 
 // ─── Data fetching ────────────────────────────────────────────────────────────
 
-async function fetchOrder(ref: string): Promise<Order | null> {
+async function fetchOrder(ref: string, token?: string): Promise<Order | null> {
   const API_URL =
     process.env.API_URL ??
     process.env.NEXT_PUBLIC_API_URL ??
@@ -36,7 +36,10 @@ async function fetchOrder(ref: string): Promise<Order | null> {
   try {
     const res = await fetch(url, {
       cache: "no-store",
-      headers: { Accept: "application/json" },
+      headers: {
+        Accept: "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
     });
 
     const json = await res.json();
@@ -180,7 +183,11 @@ export default async function OrderDetailPage({ params }: Props) {
   const customer = await getCustomerFromCookie();
   if (!customer) redirect(`/login?redirect=/account/orders/${ref}`);
 
-  const order = await fetchOrder(ref);
+  const { cookies } = await import("next/headers");
+  const cookieStore = await cookies();
+  const token = cookieStore.get("customer_token")?.value;
+
+  const order = await fetchOrder(ref, token);
   if (!order) notFound();
 
   return (
