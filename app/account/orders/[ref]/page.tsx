@@ -223,7 +223,17 @@ export default async function OrderDetailPage({ params }: Props) {
                 </p>
               </div>
               <div className="flex shrink-0 flex-col items-end gap-2">
-                <StatusBadge status={order.status} />
+                {order.payment_status === "paid" ? (
+                  <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-green-700">
+                    Paid
+                  </span>
+                ) : order.payment_status === "pending" ? (
+                  <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-gray-600">
+                    Pending
+                  </span>
+                ) : (
+                  <StatusBadge status={order.status} />
+                )}
                 <p className="text-[1.1rem] font-extrabold text-[var(--foreground)] sm:text-[1.25rem]">
                   €{Number(order.total).toFixed(2)}
                 </p>
