@@ -60,7 +60,114 @@ Development environment: Windows 11, VS Code, Node.js / npm
 
 ---
 
-## Completed in Latest Session — Shipment Events, Carrier Type & Order Status (2026-05-06)
+## Completed in Latest Session — Phase 2A: EU VAT Enforcement & RFQ Form Upgrade (2026-05-07)
+
+### Phase 2A-1 — Mandatory EU VAT Workflow for B2B Customers
+
+**Goal:** EU business customers outside Germany must validate their VAT number before checkout or quote submission. Germany always shows an amber note that German VAT still applies.
+
+**Rules implemented:**
+| Customer type + country | VAT field | Behaviour |
+|---|---|---|
+| B2B + EU outside Germany | Shown, required | Submit blocked until valid |
+| B2B + Germany | Shown, optional | Amber note always shown; submit never blocked |
+| B2B + non-EU | Shown, optional | No VAT constraint |
+| B2C (any country) | Hidden | No VAT field |
+
+#### New: `lib/eu-vat.ts`
+Single source of truth for the EU country set and the helper function. Both checkout and quote form import from here.
+```typescript
+export const EU_COUNTRIES = new Set([...27 member states...]);
+export function isEuCountryExceptGermany(country: string): boolean { ... }
+```
+
+#### Updated: `components/vat-field.tsx`
+Added `required?: boolean` prop. When `true`, label shows an orange `*`; when `false`, shows `(optional)` muted text.
+
+#### Updated: `components/checkout/checkout-flow.tsx`
+- Removed local `EU_COUNTRIES` duplicate; imports from `@/lib/eu-vat`
+- Added `vatRequired` derived value: `showVatField && isEuCountryExceptGermany(delivery.country)`
+- `getVatMessage`: Germany amber note shows unconditionally (not gated on `vatValid`)
+- Submit guard: if `vatRequired && !vatValid` → scroll to VAT field, block submit
+- `vatError` only displayed when `vatRequired` is still true (clears on country change)
+- VAT field passes `required={vatRequired}` + helper text "Required for EU intra-community business purchases."
+
+#### Updated: `components/quote/quote-form.tsx`
+Same EU VAT logic applied. `vatRequired = showVatField && isEuCountryExceptGermany(form.country)`.
+
+---
+
+### Phase 2A-2 — RFQ Form Upgrade
+
+**Goal:** Upgrade the quote request form so Okelcor receives enough information to quote without follow-up calls.
+
+#### Updated: `components/quote/quote-form.tsx` (full rewrite)
+
+New fields and features added:
+
+**Tyre condition toggle:**
+- "New tyres" / "Used tyres" pill toggle
+- When Used: shows Grade dropdown (Grade A / Grade B / Mixed) + Used Tyre Notes textarea
+- `tyreCondition`, `usedTyreGrade`, `usedTyreNotes` submitted to backend
+
+**Dynamic tyre size rows:**
+- Replaced single size + quantity fields with a multi-row list
+- Add row / remove row (Trash2 icon) per entry
+- Submits `tyre_items: Array<{ size, quantity }>` array
+- Legacy compat: also sends `tyre_size` (first row size) and `quantity` (first row qty)
+- Validation: at least one row must have a size before submit
+
+**Company/contact fields (new):**
+- Contact Person (who makes the purchasing decision)
+- Company Address (street), City, Postal Code
+
+**Logistics Terms (EU-aware):**
+- If country is in EU: label "Delivery Terms", options: DAP / DDP / EXW, `incoterm_type: "delivery_terms"`
+- If country is outside EU: label "Shipping Terms", options: FOB / CIF / EXW, `incoterm_type: "shipping_terms"`
+- Incoterm resets when customer switches between EU ↔ non-EU countries
+- Submitted as `incoterm` + `incoterm_type`
+
+**Submit paths:** Both JSON and FormData (multipart) paths include all new fields.
+
+**Types added to `FormData`:**
+`contactPerson`, `companyAddress`, `companyCity`, `companyPostalCode`, `tyreCondition`, `usedTyreGrade`, `usedTyreNotes`, `incoterm`
+
+**Removed:** `tyreSize`, `quantity` (replaced by `tyreItems` array; legacy fallback fields still sent)
+
+#### Updated: `lib/admin-api.ts`
+14 new optional fields added to `AdminQuoteFull`:
+```typescript
+vat_number?, business_type?, contact_person?,
+company_address?, company_city?, company_postal_code?,
+tyre_condition?, used_tyre_grade?, used_tyre_notes?,
+tyre_items?: Array<{ size: string; quantity: string }> | null,
+delivery_timeline?, budget_range?, incoterm?, incoterm_type?
+```
+
+#### Updated: `components/admin/quote-detail.tsx`
+All new Phase 2A-2 fields are now displayed:
+
+**Requester Details card** — added:
+- Contact Person, Business Type, VAT Number
+- Company Address (combined street + city + postal)
+
+**Request Details card** — added:
+- Tyre Condition, Budget Range, Delivery Timeline
+- Incoterm with contextual label ("Delivery Terms" / "Shipping Terms" / "Incoterm")
+
+**New "Tyre Sizes & Quantities" card:**
+- Table showing each row: #, Tyre Size, Quantity
+- Only rendered when `tyre_items` has entries
+
+**New "Used Tyre Details" card (conditional):**
+- Only rendered when `tyre_condition === "Used tyres"` and grade or notes are present
+- Shows Grade + multi-line Notes
+
+TypeScript check: **0 errors** after all changes.
+
+---
+
+## Completed in Previous Session — Shipment Events, Carrier Type & Order Status (2026-05-06)
 
 ### Backend: Revert Shipment Event Field to `event_date` (2026-05-06)
 
@@ -919,9 +1026,9 @@ See prior entries for:
 | **Account invoices** | **Updated** — PDF download via auth proxy; "PDF pending" pill; B2C receipt labels |
 | **Account company** | **Complete** — `/account/company`; editable company name + industry |
 | **Account VAT** | **Complete** — `/account/vat`; VAT status + VIES link |
-| Quote page | Complete |
+| **Quote page / RFQ form** | **Updated** — Phase 2A-2: tyre condition toggle (new/used), used tyre grade + notes, dynamic tyre size rows, contact person, company address/city/postal, EU-aware incoterm selector (DAP/DDP/EXW vs FOB/CIF/EXW), VAT required for EU B2B (Phase 2A-1) |
 | Cart drawer | Complete |
-| **Checkout page** | **Updated** — Stripe Checkout; proxy `app/api/checkout/stripe-session/route.ts` → Laravel `/api/v1/payments/create-session`; live VAT preview via `app/api/checkout/tax-preview/route.ts`; `OrderSummary` shows exact VAT treatment (standard/reverse charge/exempt) before redirect |
+| **Checkout page** | **Updated** — Stripe Checkout; live VAT preview; Phase 2A-1: EU B2B VAT required (`lib/eu-vat.ts`); Germany amber note always shown; submit blocked until VAT valid for EU B2B outside Germany |
 | **Checkout return** | **Updated** — `/checkout/return`; "Order received" copy; `order_ref` from URL param + sessionStorage fallback (awaiting backend fix to supply `order_ref`) |
 | Fuel Echo Tech page | Complete — `/fet`; green theme; ROI calculator |
 | About / Contact / News | Complete |
@@ -940,7 +1047,7 @@ See prior entries for:
 | **Account invoices (B2C)** | **Updated** — Receipts & Invoices card added to B2C dashboard; previously B2B only |
 | **Account invoices page** | **Updated** — customer-type-aware title/badge/empty state; PDF download via auth proxy |
 | **Quote form** | **Updated** — file attachment upload (PDF/CSV/XLS/XLSX, max 10 MB); multipart forwarding to Laravel |
-| **Admin quote detail** | **Updated** — attachment card, brand_preference/tyre_size rows, Convert to Order card + modal |
+| **Admin quote detail** | **Updated** — Phase 2A-2: contact person, VAT number, business type, company address, tyre condition, incoterm, budget/timeline rows; new Tyre Items table card; new Used Tyre Details card (conditional); attachment card; Convert to Order modal |
 | **Admin quote → order** | **New** — `QuoteConvertModal`; delivery + items + summary form; 422/409 handling; View Order link |
 | **Admin dashboard KPIs** | **Updated** — connected to real `/admin/dashboard` endpoint; AOV card shows period label + paid order count |
 | Admin products / articles / orders / quotes / brands / hero-slides / settings / supplier | Complete |

@@ -10,6 +10,7 @@ import { useCustomerAuth } from "@/context/CustomerAuthContext";
 import OrderSummary from "./order-summary";
 import VatField from "@/components/vat-field";
 import { trackCheckoutStarted } from "@/lib/analytics";
+import { EU_COUNTRIES, isEuCountryExceptGermany } from "@/lib/eu-vat";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -37,14 +38,6 @@ const COUNTRIES = [
   "China", "India", "Japan", "Australia",
 ];
 
-const EU_COUNTRIES = new Set([
-  "Austria", "Belgium", "Bulgaria", "Croatia", "Cyprus", "Czech Republic",
-  "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Hungary",
-  "Ireland", "Italy", "Latvia", "Lithuania", "Luxembourg", "Malta",
-  "Netherlands", "Poland", "Portugal", "Romania", "Slovakia", "Slovenia",
-  "Spain", "Sweden",
-]);
-
 function getVatMessage(country: string, vatValid: boolean): {
   text: string; variant: "green" | "amber" | "blue";
 } | null {
@@ -52,10 +45,10 @@ function getVatMessage(country: string, vatValid: boolean): {
   if (!EU_COUNTRIES.has(country)) {
     return { text: "VAT exempt export destination.", variant: "blue" };
   }
-  if (!vatValid) return null;
   if (country === "Germany") {
-    return { text: "Valid VAT number. German VAT still applies.", variant: "amber" };
+    return { text: "German VAT still applies.", variant: "amber" };
   }
+  if (!vatValid) return null;
   return { text: "Valid EU VAT number — reverse charge applies.", variant: "green" };
 }
 
@@ -281,6 +274,11 @@ export default function CheckoutFlow() {
   const [vatValid, setVatValid]             = useState(false);
   const [vatError, setVatError]             = useState<string | null>(null);
 
+  // EU non-Germany B2B: VAT validation is mandatory.
+  // Germany B2B: VAT optional (reverse charge does not apply — German VAT remains).
+  // Non-EU B2B: VAT optional.
+  const vatRequired = showVatField && isEuCountryExceptGermany(delivery.country);
+
   // Prefill delivery form from customer profile once loaded.
   // Only fills empty fields so user edits are never overwritten.
   useEffect(() => {
@@ -406,7 +404,7 @@ export default function CheckoutFlow() {
       return;
     }
 
-    if (showVatField && !vatValid) {
+    if (vatRequired && !vatValid) {
       setVatError("Please validate your VAT number before proceeding to payment.");
       vatSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
@@ -569,12 +567,19 @@ export default function CheckoutFlow() {
                 <VatField
                   value={vatNumber}
                   onChange={setVatNumber}
+                  required={vatRequired}
                   onValidationChange={(valid) => {
                     setVatValid(valid);
                     if (valid) setVatError(null);
                   }}
                 />
-                {vatError && (
+                {vatRequired && (
+                  <p className="mt-2 flex items-start gap-1.5 text-[0.78rem] text-[var(--muted)]">
+                    <Info size={13} strokeWidth={2} className="mt-0.5 shrink-0" />
+                    Required for EU intra-community business purchases.
+                  </p>
+                )}
+                {vatRequired && vatError && (
                   <p role="alert" className="mt-2 text-[0.75rem] text-red-500">{vatError}</p>
                 )}
                 <VatStatusMessage country={delivery.country} vatValid={vatValid} />

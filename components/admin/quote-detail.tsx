@@ -228,11 +228,23 @@ export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
               Requester Details
             </p>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <InfoRow label="Full Name"    value={quote.full_name} />
-              <InfoRow label="Email"        value={quote.email} />
-              <InfoRow label="Phone"        value={quote.phone} />
-              <InfoRow label="Company"      value={quote.company_name} />
-              <InfoRow label="Country"      value={quote.country} />
+              <InfoRow label="Full Name"       value={quote.full_name} />
+              <InfoRow label="Email"           value={quote.email} />
+              <InfoRow label="Phone"           value={quote.phone} />
+              <InfoRow label="Company"         value={quote.company_name} />
+              <InfoRow label="Contact Person"  value={quote.contact_person} />
+              <InfoRow label="Business Type"   value={quote.business_type} />
+              <InfoRow label="Country"         value={quote.country} />
+              <InfoRow label="VAT Number"      value={quote.vat_number} />
+              {(quote.company_address || quote.company_city || quote.company_postal_code) && (
+                <div className="col-span-full flex flex-col gap-0.5">
+                  <p className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Company Address</p>
+                  <p className="text-[0.875rem] text-[#1a1a1a]">
+                    {[quote.company_address, quote.company_city, quote.company_postal_code]
+                      .filter(Boolean).join(", ")}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -244,9 +256,14 @@ export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <InfoRow label="Ref Number"        value={quote.ref_number} />
               <InfoRow label="Tyre Category"     value={quote.tyre_category} />
+              <InfoRow label="Tyre Condition"    value={quote.tyre_condition} />
               <InfoRow label="Brand Preference"  value={quote.brand_preference} />
-              <InfoRow label="Tyre Size"         value={quote.tyre_size} />
-              <InfoRow label="Quantity"          value={quote.quantity} />
+              <InfoRow label="Budget Range"      value={quote.budget_range} />
+              <InfoRow label="Delivery Timeline" value={quote.delivery_timeline} />
+              <InfoRow
+                label={quote.incoterm_type === "delivery_terms" ? "Delivery Terms" : quote.incoterm_type === "shipping_terms" ? "Shipping Terms" : "Incoterm"}
+                value={quote.incoterm}
+              />
               <InfoRow label="Delivery Address"  value={quote.delivery_address} />
               <InfoRow label="City"              value={quote.delivery_city} />
               <InfoRow label="Postal Code"       value={quote.delivery_postal_code} />
@@ -256,6 +273,55 @@ export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
             </div>
           </div>
         </div>
+
+        {/* ── Tyre Items ── */}
+        {quote.tyre_items && quote.tyre_items.length > 0 && (
+          <div className="rounded-2xl bg-white p-6 shadow-sm">
+            <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+              Tyre Sizes &amp; Quantities
+            </p>
+            <div className="overflow-x-auto">
+              <table className="w-full text-[0.875rem]">
+                <thead>
+                  <tr className="border-b border-black/[0.06]">
+                    <th className="pb-2 text-left text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">#</th>
+                    <th className="pb-2 text-left text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Tyre Size</th>
+                    <th className="pb-2 text-left text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Quantity</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {quote.tyre_items.map((item, i) => (
+                    <tr key={i} className="border-b border-black/[0.04] last:border-0">
+                      <td className="py-2.5 pr-4 text-[#5c5e62]">{i + 1}</td>
+                      <td className="py-2.5 pr-4 font-medium text-[#1a1a1a]">{item.size || "—"}</td>
+                      <td className="py-2.5 text-[#1a1a1a]">{item.quantity || "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* ── Used Tyre Details — conditional ── */}
+        {quote.tyre_condition === "Used tyres" && (quote.used_tyre_grade || quote.used_tyre_notes) && (
+          <div className="rounded-2xl bg-white p-6 shadow-sm">
+            <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+              Used Tyre Details
+            </p>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <InfoRow label="Grade" value={quote.used_tyre_grade} />
+              {quote.used_tyre_notes && (
+                <div className="col-span-full flex flex-col gap-0.5">
+                  <p className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Notes</p>
+                  <p className="whitespace-pre-wrap text-[0.875rem] leading-relaxed text-[#1a1a1a]">
+                    {quote.used_tyre_notes}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* ── Attachment — placed above Notes ── */}
         {(() => {

@@ -12,10 +12,12 @@ export default function VatField({
   value,
   onChange,
   onValidationChange,
+  required = false,
 }: {
   value: string;
   onChange: (v: string) => void;
   onValidationChange?: (valid: boolean) => void;
+  required?: boolean;
 }) {
   const [status, setStatus] = useState<VatStatus>("idle");
 
@@ -56,7 +58,11 @@ export default function VatField({
     <div>
       <label className="mb-1.5 block text-[0.82rem] font-semibold text-[var(--foreground)]">
         VAT Number
-        <span className="ml-1.5 text-[0.75rem] font-normal text-[var(--muted)]">(optional)</span>
+        {required ? (
+          <span className="ml-0.5 text-[var(--primary)]">*</span>
+        ) : (
+          <span className="ml-1.5 text-[0.75rem] font-normal text-[var(--muted)]">(optional)</span>
+        )}
       </label>
 
       <div className="flex gap-2">

@@ -234,6 +234,21 @@ export type AdminQuoteFull = AdminQuote & {
   attachment_original_name?: string; // original filename from upload
   attachment_mime?: string;          // MIME type e.g. "application/pdf"
   attachment_size?: number;          // bytes
+  // Phase 2A-2 extended fields
+  vat_number?: string;
+  business_type?: string;
+  contact_person?: string;
+  company_address?: string;
+  company_city?: string;
+  company_postal_code?: string;
+  tyre_condition?: string;
+  used_tyre_grade?: string;
+  used_tyre_notes?: string;
+  tyre_items?: Array<{ size: string; quantity: string }> | null;
+  delivery_timeline?: string;
+  budget_range?: string;
+  incoterm?: string;
+  incoterm_type?: string;
 };
 
 export type AdminHeroSlideTranslation = {
