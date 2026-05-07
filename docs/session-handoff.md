@@ -60,6 +60,91 @@ Development environment: Windows 11, VS Code, Node.js / npm
 
 ---
 
+## Completed in Latest Session — Phase 2B-3: Customer EU Entry Certificate Form (2026-05-07)
+
+**Goal:** Replace the read-only declaration notice in the customer order detail with a fully functional Gelangensbestätigung signing form so customers can complete the declaration directly from their account, without contacting Okelcor.
+
+### New: `components/account/entry-certificate-card.tsx`
+
+`"use client"` component with three display states driven by local React state — no page refresh after submit.
+
+**Pending state** — full form:
+- **Goods Receipt**: month + year dropdowns (MM/YYYY), EU member state select (all 27 states; pre-fills from `orderCountry` prop by matching code or full name), place of entry / customs office text input, own transport checkbox → conditional "month transport ended" month + year dropdowns
+- **Authorised Representative**: full name (required), title / position (optional)
+- **Signature**: printed name field (auto-uppercases every keystroke), canvas signature pad, §17a UStDV legal declaration checkbox
+
+**Canvas signature pad:**
+- Drawing buffer sized to `Math.round(rect.width × DPR)` × `Math.round(rect.height × DPR)` so CSS pixel coordinates from pointer events map correctly — fixes the root cause of invisible strokes (default 300×150 buffer vs. ~600px wide display)
+- `ctx.scale(DPR, DPR)` keeps coordinate space in CSS pixels
+- Quadratic Bézier curves via midpoint (`quadraticCurveTo(prevX, prevY, midX, midY)`) for smooth lines
+- `pointerleave` handler stops drawing when pointer exits the canvas
+- `clearSignature` clears using `ctx.clearRect(0, 0, rect.width, rect.height)` (CSS pixel coords, consistent with scaled context)
+- Stroke: `#111827`, `lineWidth: 2.5`, `lineCap: "round"`, `lineJoin: "round"`
+- Canvas CSS: `h-[200px] w-full cursor-crosshair bg-white`, `touch-action: none`
+
+**Client-side validation**: all required fields, `signedName === signedName.toUpperCase()`, signature canvas must be drawn, terms must be accepted. Shows per-field inline errors.
+
+**Submit**: `POST /api/account/orders/{ref}/declaration`. On success: optimistically sets `localStatus = "signed"` without page reload.
+
+**API error display**: parses Laravel's `errors` object and renders every validation message as its own `<p>` — no `"(and N more errors)"` truncation.
+
+**Download**: `fetch()` → `blob()` → `URL.createObjectURL()` → programmatic `<a>` click. Preserves `Content-Disposition` filename from backend.
+
+**Signed state** — green card: submitted date, signed name, Download Certificate button.
+
+**Acknowledged state** — green card: Okelcor confirmation message, Download Certificate button.
+
+#### Payload sent to backend:
+```json
+{
+  "month_year_received": "01/2026",
+  "member_state_of_entry": "France",
+  "place_of_entry": "Port of Rotterdam",
+  "self_transported": false,
+  "month_year_transport_ended": null,
+  "representative_name": "John Oluwaseyi",
+  "representative_title": "Order Manager",
+  "signed_name": "JOHN OLUWASEYI",
+  "signature_data": "data:image/png;base64,...",
+  "accepted_terms": true
+}
+```
+
+`member_state_of_entry` sends the full country **name** (e.g. `"France"`), not the ISO code (`"FR"`). The form stores the code for the select; the payload builder resolves the name via `EU_STATES.find(s => s.code === form.memberState)?.name`.
+
+### New: `app/api/account/orders/[ref]/declaration/route.ts`
+POST proxy. Reads `customer_token` cookie, forwards JSON body to `POST /api/v1/auth/orders/{ref}/declaration` with Bearer auth. Returns Laravel response body and status unchanged.
+
+### New: `app/api/account/orders/[ref]/declaration/download/route.ts`
+GET proxy. Reads `customer_token` cookie, forwards to `GET /api/v1/auth/orders/{ref}/declaration/download`. Streams binary response via `arrayBuffer()`; preserves `Content-Type` and `Content-Disposition` headers for PDF download.
+
+### Updated: `app/account/orders/page.tsx`
+Added two fields to the exported `Order` type:
+```typescript
+country?: string | null;
+declaration_signed_name?: string | null;
+```
+
+### Updated: `app/account/orders/[ref]/page.tsx`
+- Removed `FileCheck` from lucide-react imports
+- Added `import EntryCertificateCard from "@/components/account/entry-certificate-card"`
+- Replaced entire inline EU Entry Certificate amber/green div block with:
+```tsx
+<EntryCertificateCard
+  orderRef={order.ref}
+  orderCountry={order.country}
+  status={order.declaration_status}
+  signedAt={order.declaration_signed_at}
+  signedName={order.declaration_signed_name}
+/>
+```
+
+**Commits:** `c126a74` (Phase 2B-3 foundation) · `c12d7ec` (payload key fix) · `d28231f` (signature pad visibility + smoothness fix)
+
+TypeScript check: **0 errors** across all three commits.
+
+---
+
 ## Completed in Latest Session — Phase 2B-2: EU Entry Certificate Visibility (2026-05-07)
 
 ### Phase 2B-2 — EU Entry Certificate Visibility Foundation
@@ -1114,7 +1199,7 @@ See prior entries for:
 | Account profile | Complete — personal info + change password |
 | Account addresses | Complete — add/edit/delete modal |
 | **Account orders** | **Updated** — Pay Now CTA for pending Stripe orders; payment_url → button; no URL → amber email notice |
-| **Account order detail** | **Updated** — `OrderPaymentCard` client component; dynamic payment section via proxy `/api/account/orders/{ref}/checkout`; paid / stripe / bank_transfer / unknown states; shipment event crash fixed; Phase 2B-2: EU Entry Certificate card (amber/green, gated on `declaration_required`) |
+| **Account order detail** | **Updated** — `OrderPaymentCard` dynamic payment section; shipment event crash fixed; Phase 2B-2: EU Entry Certificate status card; **Phase 2B-3: full `EntryCertificateCard` signing form** (canvas signature pad with DPR scaling + Bézier smoothing, Gelangensbestätigung fields, optimistic local state update, PDF download proxy) |
 | **Account quotes** | **Updated** — progress tracker, normalized status, quoted CTA, note filter, admin_notes block |
 | **Account invoices** | **Updated** — PDF download via auth proxy; "PDF pending" pill; B2C receipt labels |
 | **Account company** | **Complete** — `/account/company`; editable company name + industry |
@@ -1370,7 +1455,9 @@ Email template: dark Okelcor header, migration announcement, "Set Your Password 
 
 ### High Priority
 
-1. **Stripe `order_ref` not displayed on return page — backend fix required** — Root cause confirmed: Laravel's `POST /payments/create-session` does not return `order_ref` because the order is created by the Stripe webhook, not at session creation time. Frontend is already wired and waiting. Backend must: (a) create the `Order` record at session creation time with `status: pending`, `payment_status: pending`, (b) return `order_ref` in `data.order_ref`, (c) embed it in the Stripe `success_url` as `?order_ref=OKL-XXXXX`, (d) have the webhook update the existing order (paid + confirmed) instead of creating a new one. No frontend changes needed.
+1. **"No entry certificate exists for this order" — backend fix required** — Customer submits the EU Entry Certificate form successfully (client-side validation passes, proxy reaches backend), but `POST /api/v1/auth/orders/{ref}/declaration` returns this error. Root cause: the endpoint expects an existing `eu_declarations` row but older reverse-charge orders created before Phase 2B were never given one. Backend fix: if no row exists and `order.is_reverse_charge === true` (or `order.tax_treatment === "reverse_charge"`), create a pending `eu_declarations` row on demand via `EuDeclarationService::createForOrder($order)` before processing the signature. The Laravel backend is hosted separately at `api.okelcor.de` — not in this repository.
+
+2. **Stripe `order_ref` not displayed on return page — backend fix required** — Root cause confirmed: Laravel's `POST /payments/create-session` does not return `order_ref` because the order is created by the Stripe webhook, not at session creation time. Frontend is already wired and waiting. Backend must: (a) create the `Order` record at session creation time with `status: pending`, `payment_status: pending`, (b) return `order_ref` in `data.order_ref`, (c) embed it in the Stripe `success_url` as `?order_ref=OKL-XXXXX`, (d) have the webhook update the existing order (paid + confirmed) instead of creating a new one. No frontend changes needed.
 
 ### Medium Priority
 
