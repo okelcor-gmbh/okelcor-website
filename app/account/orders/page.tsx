@@ -47,6 +47,8 @@ export type Order = {
   declaration_required?: boolean | null;
   declaration_status?: "pending" | "signed" | "acknowledged" | null;
   declaration_signed_at?: string | null;
+  declaration_signed_name?: string | null;
+  country?: string | null;
 };
 
 // ─── Status badge config ──────────────────────────────────────────────────────
