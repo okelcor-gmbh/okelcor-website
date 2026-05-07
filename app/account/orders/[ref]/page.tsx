@@ -1,7 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronLeft, Truck } from "lucide-react";
+import { ChevronLeft, FileCheck, Truck } from "lucide-react";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import ShipmentTracker from "@/components/account/shipment-tracker";
@@ -260,6 +260,58 @@ export default async function OrderDetailPage({ params }: Props) {
               paymentMethod={order.payment_method}
               paymentStatus={order.payment_status}
             />
+          )}
+
+          {/* ── EU Entry Certificate ── */}
+          {order.declaration_required === true && (
+            <div className={`rounded-[18px] border p-4 sm:rounded-[22px] sm:p-6 lg:p-8 ${
+              order.declaration_status === "acknowledged" || order.declaration_status === "signed"
+                ? "border-green-200 bg-green-50"
+                : "border-amber-200 bg-amber-50"
+            }`}>
+              <div className="mb-3 flex items-center gap-2">
+                <FileCheck
+                  size={16}
+                  strokeWidth={1.9}
+                  className={order.declaration_status === "acknowledged" || order.declaration_status === "signed"
+                    ? "text-green-600"
+                    : "text-amber-600"}
+                />
+                <p className={`text-[10px] font-bold uppercase tracking-[0.22em] sm:text-[11px] ${
+                  order.declaration_status === "acknowledged" || order.declaration_status === "signed"
+                    ? "text-green-700"
+                    : "text-amber-700"
+                }`}>
+                  EU Entry Certificate
+                </p>
+              </div>
+
+              {order.declaration_status === "acknowledged" ? (
+                <p className="text-[0.88rem] font-semibold text-green-700">
+                  Confirmed — Okelcor has acknowledged receipt of your signed declaration.
+                </p>
+              ) : order.declaration_status === "signed" ? (
+                <>
+                  <p className="text-[0.88rem] font-semibold text-green-700">
+                    Signed — awaiting acknowledgement from Okelcor.
+                  </p>
+                  {order.declaration_signed_at && (
+                    <p className="mt-1 text-[0.78rem] text-green-600">
+                      Signed on {formatDate(order.declaration_signed_at)}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <>
+                  <p className="text-[0.88rem] font-semibold text-amber-800">
+                    Action required: EU Entry Certificate (Gelangensbestätigung)
+                  </p>
+                  <p className="mt-1.5 text-[0.8rem] leading-relaxed text-amber-700">
+                    As a reverse-charge B2B delivery within the EU, this order requires a signed entry declaration under §17a UStDV confirming goods have arrived in your country. Please contact us to complete this.
+                  </p>
+                </>
+              )}
+            </div>
           )}
 
           {/* ── Status timeline ── */}

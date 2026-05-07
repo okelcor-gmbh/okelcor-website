@@ -44,6 +44,9 @@ export type Order = {
   tracking_status?: string;
   eta?: string;
   shipment_events?: ShipmentEvent[];
+  declaration_required?: boolean | null;
+  declaration_status?: "pending" | "signed" | "acknowledged" | null;
+  declaration_signed_at?: string | null;
 };
 
 // ─── Status badge config ──────────────────────────────────────────────────────

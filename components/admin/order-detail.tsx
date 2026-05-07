@@ -687,6 +687,51 @@ export default function OrderDetail({
         </div>
       </div>
 
+      {/* ── EU Entry Certificate (Gelangensbestätigung) ── */}
+      {order.declaration_required != null && (
+        <div className="rounded-2xl bg-white p-6 shadow-sm">
+          <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+            EU Entry Certificate
+          </p>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="flex flex-col gap-0.5">
+              <p className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Required</p>
+              <p className="text-[0.875rem] text-[#1a1a1a]">
+                {order.declaration_required ? "Yes" : "No"}
+              </p>
+            </div>
+            {order.declaration_required && (
+              <>
+                <div className="flex flex-col gap-0.5">
+                  <p className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Status</p>
+                  <span className={`inline-flex w-fit items-center rounded-full px-2.5 py-0.5 text-[0.72rem] font-bold capitalize ${
+                    order.declaration_status === "acknowledged"
+                      ? "bg-emerald-100 text-emerald-700"
+                      : order.declaration_status === "signed"
+                      ? "bg-blue-100 text-blue-700"
+                      : "bg-amber-100 text-amber-700"
+                  }`}>
+                    {order.declaration_status ?? "pending"}
+                  </span>
+                </div>
+                {order.declaration_id != null && (
+                  <div className="flex flex-col gap-0.5">
+                    <p className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Declaration ID</p>
+                    <p className="font-mono text-[0.875rem] text-[#1a1a1a]">#{order.declaration_id}</p>
+                  </div>
+                )}
+                {order.declaration_signed_at && (
+                  <div className="flex flex-col gap-0.5">
+                    <p className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Signed At</p>
+                    <p className="text-[0.875rem] text-[#1a1a1a]">{shortDate(order.declaration_signed_at)}</p>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* ── Order items ── */}
       <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
         <div className="border-b border-black/[0.06] px-6 py-4">

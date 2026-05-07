@@ -199,6 +199,11 @@ export type AdminOrderFull = AdminOrder & {
   logs?: AdminOrderLog[];
   shipment_events?: ShipmentEvent[];
   updated_at?: string;
+  // EU Entry Certificate (Gelangensbestätigung)
+  declaration_required?: boolean | null;
+  declaration_status?: "pending" | "signed" | "acknowledged" | null;
+  declaration_id?: number | null;
+  declaration_signed_at?: string | null;
 };
 
 export type AdminQuote = {
