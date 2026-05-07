@@ -179,7 +179,7 @@ export default function EntryCertificateCard({
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
-  const [apiError, setApiError] = useState("");
+  const [apiErrors, setApiErrors] = useState<string[]>([]);
   const [signatureDrawn, setSignatureDrawn] = useState(false);
 
   // ── Canvas signature pad ────────────────────────────────────────────────────
@@ -279,15 +279,16 @@ export default function EntryCertificateCard({
     }
     setErrors({});
     setSubmitting(true);
-    setApiError("");
+    setApiErrors([]);
 
+    const stateName = EU_STATES.find(s => s.code === form.memberState)?.name ?? form.memberState;
     const signatureData = canvasRef.current?.toDataURL("image/png") ?? "";
     const payload = {
-      month_received: `${form.receivedMonth}/${form.receivedYear}`,
-      member_state: form.memberState,
+      month_year_received: `${form.receivedMonth}/${form.receivedYear}`,
+      member_state_of_entry: stateName,
       place_of_entry: form.placeOfEntry.trim(),
-      own_transport: form.ownTransport,
-      month_transport_ended: form.ownTransport
+      self_transported: form.ownTransport,
+      month_year_transport_ended: form.ownTransport
         ? `${form.transportMonth}/${form.transportYear}`
         : null,
       representative_name: form.repName.trim(),
@@ -305,12 +306,16 @@ export default function EntryCertificateCard({
       });
 
       if (!res.ok) {
-        let msg = "Failed to submit. Please try again.";
         try {
-          const data = await res.json() as { message?: string };
-          if (data.message) msg = data.message;
-        } catch { /* ignore parse error */ }
-        setApiError(msg);
+          const data = await res.json() as { message?: string; errors?: Record<string, string[]> };
+          if (data.errors && Object.keys(data.errors).length > 0) {
+            setApiErrors(Object.values(data.errors).flat());
+          } else {
+            setApiErrors([data.message ?? "Failed to submit. Please try again."]);
+          }
+        } catch {
+          setApiErrors(["Failed to submit. Please try again."]);
+        }
         setSubmitting(false);
         return;
       }
@@ -319,7 +324,7 @@ export default function EntryCertificateCard({
       setLocalSignedName(form.signedName.trim());
       setLocalStatus("signed");
     } catch {
-      setApiError("Network error. Please try again.");
+      setApiErrors(["Network error. Please try again."]);
       setSubmitting(false);
     }
   }
@@ -610,10 +615,12 @@ export default function EntryCertificateCard({
             <FieldError msg={errors.acceptedTerms} />
           </div>
 
-          {/* API error */}
-          {apiError && (
-            <div className="rounded-[10px] border border-red-200 bg-red-50 px-4 py-3 text-[0.83rem] text-red-700">
-              {apiError}
+          {/* API errors */}
+          {apiErrors.length > 0 && (
+            <div className="rounded-[10px] border border-red-200 bg-red-50 px-4 py-3">
+              {apiErrors.map((err, i) => (
+                <p key={i} className="text-[0.83rem] text-red-700">{err}</p>
+              ))}
             </div>
           )}
 
