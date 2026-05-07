@@ -10,7 +10,7 @@ import { useCustomerAuth } from "@/context/CustomerAuthContext";
 import OrderSummary from "./order-summary";
 import VatField from "@/components/vat-field";
 import { trackCheckoutStarted } from "@/lib/analytics";
-import { EU_COUNTRIES, isEuCountryExceptGermany } from "@/lib/eu-vat";
+import { shouldShowVatField, isVatRequired, isNonEuB2B } from "@/lib/eu-vat";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -39,12 +39,9 @@ const COUNTRIES = [
 ];
 
 function getVatMessage(country: string, vatValid: boolean): {
-  text: string; variant: "green" | "amber" | "blue";
+  text: string; variant: "green" | "amber";
 } | null {
   if (!country) return null;
-  if (!EU_COUNTRIES.has(country)) {
-    return { text: "VAT exempt export destination.", variant: "blue" };
-  }
   if (country === "Germany") {
     return { text: "German VAT still applies.", variant: "amber" };
   }
@@ -222,9 +219,7 @@ function VatStatusMessage({ country, vatValid }: { country: string; vatValid: bo
         "mt-3 flex items-start gap-2.5 rounded-[12px] border px-3.5 py-3 text-[0.83rem] font-medium",
         isGreen
           ? "border-green-200 bg-green-50 text-green-700"
-          : msg.variant === "amber"
-          ? "border-amber-200 bg-amber-50 text-amber-700"
-          : "border-blue-200 bg-blue-50 text-blue-700",
+          : "border-amber-200 bg-amber-50 text-amber-700",
       ].join(" ")}
     >
       {isGreen
@@ -261,7 +256,6 @@ export default function CheckoutFlow() {
   const { items, clearCart } = useCart();
   const { t }                = useLanguage();
   const { customer }         = useCustomerAuth();
-  const showVatField         = customer?.customer_type === "b2b";
   const c                    = t.checkout;
   const deliveryRef          = useRef<HTMLDivElement>(null);
   const vatSectionRef        = useRef<HTMLDivElement>(null);
@@ -274,10 +268,10 @@ export default function CheckoutFlow() {
   const [vatValid, setVatValid]             = useState(false);
   const [vatError, setVatError]             = useState<string | null>(null);
 
-  // EU non-Germany B2B: VAT validation is mandatory.
-  // Germany B2B: VAT optional (reverse charge does not apply — German VAT remains).
-  // Non-EU B2B: VAT optional.
-  const vatRequired = showVatField && isEuCountryExceptGermany(delivery.country);
+  const customerType   = customer?.customer_type ?? "";
+  const showVatField   = shouldShowVatField(delivery.country, customerType);
+  const vatRequired    = isVatRequired(delivery.country, customerType);
+  const showExportNote = isNonEuB2B(delivery.country, customerType);
 
   // Prefill delivery form from customer profile once loaded.
   // Only fills empty fields so user edits are never overwritten.
@@ -560,7 +554,17 @@ export default function CheckoutFlow() {
             </SectionCard>
           </div>
 
-          {/* VAT — b2b only */}
+          {/* Export note — B2B non-EU only */}
+          {showExportNote && (
+            <div className="flex items-start gap-3 rounded-[14px] border border-blue-200 bg-blue-50 px-4 py-3.5">
+              <Info size={14} strokeWidth={1.8} className="mt-0.5 shrink-0 text-blue-600" />
+              <p className="text-[0.85rem] leading-relaxed text-blue-800">
+                Export order — VAT exempt. No VAT number required for this destination.
+              </p>
+            </div>
+          )}
+
+          {/* VAT — B2B EU only */}
           {showVatField && (
             <div ref={vatSectionRef}>
               <SectionCard title="Business Details">
@@ -611,7 +615,7 @@ export default function CheckoutFlow() {
           )}
 
           {/* Campaign reminder — B2C/guest only, when cart has matching brand */}
-          {!showVatField && cartCampaign && items.some((item) =>
+          {customerType !== "b2b" && cartCampaign && items.some((item) =>
             item.product.brand.toLowerCase().trim() === cartCampaign.brand_name.toLowerCase().trim()
           ) && (
             <div className="flex items-start gap-3 rounded-[14px] border border-[#f4511e]/20 bg-[#fff8f6] px-4 py-3.5">

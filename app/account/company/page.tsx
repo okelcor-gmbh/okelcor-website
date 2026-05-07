@@ -42,6 +42,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 export default function CompanyDetailsPage() {
   const { customer, isLoading, refreshCustomer } = useCustomerAuth();
+  const isB2B = customer?.customer_type === "b2b";
 
   const [companyName, setCompanyName] = useState(customer?.company_name ?? "");
   const [industry, setIndustry]       = useState(customer?.industry ?? "");
@@ -134,21 +135,23 @@ export default function CompanyDetailsPage() {
                 </select>
               </Field>
 
-              <Field label="VAT Number">
-                <input
-                  type="text"
-                  value={customer?.vat_number ?? "—"}
-                  readOnly
-                  className={inputReadonlyCls}
-                />
-                <p className="mt-1 text-[0.75rem] text-[var(--muted)]">
-                  VAT number cannot be changed here.{" "}
-                  <Link href="/contact" className="text-[var(--primary)] hover:underline">
-                    Contact support
-                  </Link>{" "}
-                  to update it.
-                </p>
-              </Field>
+              {isB2B && (
+                <Field label="VAT Number">
+                  <input
+                    type="text"
+                    value={customer?.vat_number ?? "—"}
+                    readOnly
+                    className={inputReadonlyCls}
+                  />
+                  <p className="mt-1 text-[0.75rem] text-[var(--muted)]">
+                    VAT number cannot be changed here.{" "}
+                    <Link href="/contact" className="text-[var(--primary)] hover:underline">
+                      Contact support
+                    </Link>{" "}
+                    to update it.
+                  </p>
+                </Field>
+              )}
 
               <Field label="Account Email">
                 <input
@@ -195,21 +198,23 @@ export default function CompanyDetailsPage() {
             </div>
           </div>
 
-          {/* VAT card link */}
-          <div className="rounded-[22px] border border-black/[0.06] bg-white p-5 shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-semibold text-[var(--foreground)]">VAT Registration Status</p>
-                <p className="mt-0.5 text-[0.83rem] text-[var(--muted)]">View your VAT validation and registration details</p>
+          {/* VAT card link — B2B only */}
+          {isB2B && (
+            <div className="rounded-[22px] border border-black/[0.06] bg-white p-5 shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-semibold text-[var(--foreground)]">VAT Registration Status</p>
+                  <p className="mt-0.5 text-[0.83rem] text-[var(--muted)]">View your VAT validation and registration details</p>
+                </div>
+                <Link
+                  href="/account/vat"
+                  className="flex items-center gap-1.5 text-[0.85rem] font-semibold text-[var(--primary)] hover:underline"
+                >
+                  View <ChevronRight size={14} />
+                </Link>
               </div>
-              <Link
-                href="/account/vat"
-                className="flex items-center gap-1.5 text-[0.85rem] font-semibold text-[var(--primary)] hover:underline"
-              >
-                View <ChevronRight size={14} />
-              </Link>
             </div>
-          </div>
+          )}
 
         </div>
       </div>

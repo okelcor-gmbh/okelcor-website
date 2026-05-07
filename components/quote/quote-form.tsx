@@ -6,7 +6,7 @@ import { useLanguage } from "@/context/language-context";
 import { trackQuoteSubmit } from "@/lib/analytics";
 import VatField from "@/components/vat-field";
 import { useCustomerAuth } from "@/context/CustomerAuthContext";
-import { isEuCountryExceptGermany, EU_COUNTRIES } from "@/lib/eu-vat";
+import { shouldShowVatField, isVatRequired, isNonEuB2B, EU_COUNTRIES } from "@/lib/eu-vat";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -126,7 +126,6 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 export default function QuoteForm() {
   const { t } = useLanguage();
   const { customer } = useCustomerAuth();
-  const showVatField = customer?.customer_type === "b2b";
 
   const [form, setForm] = useState<FormData>({
     fullName: "", companyName: "", email: "", phone: "",
@@ -155,8 +154,11 @@ export default function QuoteForm() {
 
   // ── Derived ──────────────────────────────────────────────────────────────
 
-  const vatRequired     = showVatField && isEuCountryExceptGermany(form.country);
-  const isEuCountry     = EU_COUNTRIES.has(form.country);
+  const customerType   = customer?.customer_type ?? "";
+  const showVatField   = shouldShowVatField(form.country, customerType);
+  const vatRequired    = isVatRequired(form.country, customerType);
+  const showExportNote = isNonEuB2B(form.country, customerType);
+  const isEuCountry    = EU_COUNTRIES.has(form.country);
   const incotermLabel   = isEuCountry ? "Delivery Terms" : "Shipping Terms";
   const incotermOptions = isEuCountry ? EU_INCOTERMS : INT_INCOTERMS;
   const incotermType    = isEuCountry ? "delivery_terms" : "shipping_terms";
@@ -485,6 +487,16 @@ export default function QuoteForm() {
               </select>
             </div>
           </Field>
+
+          {/* Export note — B2B non-EU only */}
+          {showExportNote && (
+            <div className="col-span-full flex items-start gap-3 rounded-[14px] border border-blue-200 bg-blue-50 px-4 py-3.5">
+              <Info size={14} strokeWidth={1.8} className="mt-0.5 shrink-0 text-blue-600" />
+              <p className="text-[0.85rem] leading-relaxed text-blue-800">
+                Export order — VAT exempt. No VAT number required for this destination.
+              </p>
+            </div>
+          )}
 
           <Field label={t.quote.form.labelBusiness} htmlFor="quote-businessType" error={errors.businessType}>
             <select id="quote-businessType" value={form.businessType} onChange={set("businessType")} className={ic("businessType")}>
