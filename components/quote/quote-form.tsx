@@ -55,7 +55,17 @@ const COUNTRIES = [
 
 const EU_INCOTERMS  = ["DAP", "DDP", "EXW"] as const;
 const INT_INCOTERMS = ["FOB", "CIF", "EXW"] as const;
-const USED_GRADES   = ["Grade A", "Grade B", "Mixed"] as const;
+
+const TYRE_CONDITIONS = [
+  { value: "new",  label: "New tyres" },
+  { value: "used", label: "Used tyres" },
+] as const;
+
+const USED_GRADES = [
+  { value: "grade_a", label: "Grade A" },
+  { value: "grade_b", label: "Grade B" },
+  { value: "mixed",   label: "Mixed" },
+] as const;
 
 // ─── File helpers ─────────────────────────────────────────────────────────────
 
@@ -150,7 +160,7 @@ export default function QuoteForm() {
   const incotermLabel   = isEuCountry ? "Delivery Terms" : "Shipping Terms";
   const incotermOptions = isEuCountry ? EU_INCOTERMS : INT_INCOTERMS;
   const incotermType    = isEuCountry ? "delivery_terms" : "shipping_terms";
-  const isUsed          = form.tyreCondition === "Used tyres";
+  const isUsed          = form.tyreCondition === "used";
 
   // ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -186,8 +196,8 @@ export default function QuoteForm() {
     setForm((prev) => ({
       ...prev,
       tyreCondition: val,
-      usedTyreGrade: val === "New tyres" ? "" : prev.usedTyreGrade,
-      usedTyreNotes: val === "New tyres" ? "" : prev.usedTyreNotes,
+      usedTyreGrade: val === "new" ? "" : prev.usedTyreGrade,
+      usedTyreNotes: val === "new" ? "" : prev.usedTyreNotes,
     }));
   };
 
@@ -532,16 +542,16 @@ export default function QuoteForm() {
           <div className="col-span-full sm:col-span-1">
             <p className="mb-1.5 text-[0.82rem] font-semibold text-[var(--foreground)]">Tyre Condition</p>
             <div className="flex gap-2">
-              {(["New tyres", "Used tyres"] as const).map((opt) => (
-                <button key={opt} type="button" onClick={() => setTyreCondition(opt)}
+              {TYRE_CONDITIONS.map(({ value, label }) => (
+                <button key={value} type="button" onClick={() => setTyreCondition(value)}
                   className={[
                     "flex-1 rounded-full border-2 py-2.5 text-[0.88rem] font-semibold transition",
-                    form.tyreCondition === opt
+                    form.tyreCondition === value
                       ? "border-[var(--primary)] bg-[var(--primary)] text-white"
                       : "border-black/[0.08] bg-white text-[var(--foreground)] hover:border-[var(--primary)]/40",
                   ].join(" ")}
                 >
-                  {opt}
+                  {label}
                 </button>
               ))}
             </div>
@@ -553,7 +563,7 @@ export default function QuoteForm() {
               <Field label="Used Tyre Grade" htmlFor="quote-usedTyreGrade">
                 <select id="quote-usedTyreGrade" value={form.usedTyreGrade} onChange={set("usedTyreGrade")} className={ic("usedTyreGrade")}>
                   <option value="">Select grade</option>
-                  {USED_GRADES.map((g) => <option key={g} value={g}>{g}</option>)}
+                  {USED_GRADES.map((g) => <option key={g.value} value={g.value}>{g.label}</option>)}
                 </select>
               </Field>
 
