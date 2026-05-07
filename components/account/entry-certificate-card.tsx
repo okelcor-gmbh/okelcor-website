@@ -194,27 +194,51 @@ export default function EntryCertificateCard({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    ctx.strokeStyle = "#1a1a1a";
-    ctx.lineWidth = 2;
+    // Scale drawing buffer to CSS display size × device pixel ratio so
+    // pointer coordinates (CSS pixels) map correctly and lines are crisp.
+    const ratio = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = Math.round(rect.width * ratio);
+    canvas.height = Math.round(rect.height * ratio);
+    ctx.scale(ratio, ratio);
+
+    ctx.strokeStyle = "#111827";
+    ctx.lineWidth = 2.5;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
 
     let drawing = false;
+    let prevX = 0;
+    let prevY = 0;
+
+    const getXY = (e: PointerEvent) => {
+      const r = canvas.getBoundingClientRect();
+      return { x: e.clientX - r.left, y: e.clientY - r.top };
+    };
 
     const onDown = (e: PointerEvent) => {
       drawing = true;
       canvas.setPointerCapture(e.pointerId);
-      const r = canvas.getBoundingClientRect();
+      const { x, y } = getXY(e);
+      prevX = x;
+      prevY = y;
       ctx.beginPath();
-      ctx.moveTo(e.clientX - r.left, e.clientY - r.top);
+      ctx.moveTo(x, y);
       e.preventDefault();
     };
 
     const onMove = (e: PointerEvent) => {
       if (!drawing) return;
-      const r = canvas.getBoundingClientRect();
-      ctx.lineTo(e.clientX - r.left, e.clientY - r.top);
+      const { x, y } = getXY(e);
+      // Quadratic curve through the midpoint for smooth lines
+      const midX = (prevX + x) / 2;
+      const midY = (prevY + y) / 2;
+      ctx.beginPath();
+      ctx.moveTo(prevX, prevY);
+      ctx.quadraticCurveTo(prevX, prevY, midX, midY);
       ctx.stroke();
+      prevX = x;
+      prevY = y;
       if (!hasSignatureRef.current) {
         hasSignatureRef.current = true;
         setSignatureDrawn(true);
@@ -228,12 +252,14 @@ export default function EntryCertificateCard({
     canvas.addEventListener("pointermove", onMove);
     canvas.addEventListener("pointerup", onUp);
     canvas.addEventListener("pointercancel", onUp);
+    canvas.addEventListener("pointerleave", onUp);
 
     return () => {
       canvas.removeEventListener("pointerdown", onDown);
       canvas.removeEventListener("pointermove", onMove);
       canvas.removeEventListener("pointerup", onUp);
       canvas.removeEventListener("pointercancel", onUp);
+      canvas.removeEventListener("pointerleave", onUp);
     };
   }, [localStatus]);
 
@@ -242,7 +268,9 @@ export default function EntryCertificateCard({
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Clear in CSS pixel coordinates (ctx is scaled by DPR)
+    const rect = canvas.getBoundingClientRect();
+    ctx.clearRect(0, 0, rect.width, rect.height);
     hasSignatureRef.current = false;
     setSignatureDrawn(false);
   }, []);
@@ -580,7 +608,7 @@ export default function EntryCertificateCard({
               <div className={`overflow-hidden rounded-[12px] border bg-white${errors.signature && !signatureDrawn ? " border-red-400" : " border-black/[0.12]"}`}>
                 <canvas
                   ref={canvasRef}
-                  className="block h-[140px] w-full cursor-crosshair"
+                  className="block h-[200px] w-full cursor-crosshair bg-white"
                   style={{ touchAction: "none" }}
                 />
                 <div className="border-t border-black/[0.06] bg-[#fafafa] px-3 py-1.5">
