@@ -260,6 +260,11 @@ export default function QuoteForm() {
       document.getElementById("field-tyreItems")?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
+    if (validItems.some((i) => !i.quantity.trim())) {
+      setTyreItemsError("Please enter a quantity for each tyre size.");
+      document.getElementById("field-tyreItems")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
 
     if (vatRequired && !vatValid) {
       setVatError("Please validate your VAT number before submitting.");
@@ -287,9 +292,9 @@ export default function QuoteForm() {
         fd.append("company_city",         form.companyCity);
         fd.append("company_postal_code",  form.companyPostalCode);
         fd.append("tyre_category",        form.tyreCategory);
-        fd.append("tyre_condition",       form.tyreCondition);
-        fd.append("used_tyre_grade",      isUsed ? form.usedTyreGrade : "");
-        fd.append("used_tyre_notes",      isUsed ? form.usedTyreNotes : "");
+        if (form.tyreCondition)           fd.append("tyre_condition", form.tyreCondition);
+        if (isUsed && form.usedTyreGrade) fd.append("used_tyre_grade", form.usedTyreGrade);
+        if (isUsed && form.usedTyreNotes) fd.append("used_tyre_notes", form.usedTyreNotes);
         fd.append("brand_preference",     form.brandPreference);
         fd.append("tyre_items",           JSON.stringify(validItems));
         fd.append("tyre_size",            validItems[0]?.size ?? "");
