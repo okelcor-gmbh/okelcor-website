@@ -281,34 +281,47 @@ export default function QuoteForm() {
       if (attachedFile) {
         // Multipart — proxy detects content-type and forwards to Laravel
         const fd = new FormData();
-        fd.append("full_name",            form.fullName);
-        fd.append("company_name",         form.companyName);
-        fd.append("email",                form.email);
-        fd.append("phone",                form.phone);
-        fd.append("country",              form.country);
-        fd.append("business_type",        form.businessType);
-        fd.append("contact_person",       form.contactPerson);
-        fd.append("company_address",      form.companyAddress);
-        fd.append("company_city",         form.companyCity);
-        fd.append("company_postal_code",  form.companyPostalCode);
-        fd.append("tyre_category",        form.tyreCategory);
-        if (form.tyreCondition)           fd.append("tyre_condition", form.tyreCondition);
-        if (isUsed && form.usedTyreGrade) fd.append("used_tyre_grade", form.usedTyreGrade);
-        if (isUsed && form.usedTyreNotes) fd.append("used_tyre_notes", form.usedTyreNotes);
-        fd.append("brand_preference",     form.brandPreference);
-        fd.append("tyre_items",           JSON.stringify(validItems));
-        fd.append("tyre_size",            validItems[0]?.size ?? "");
-        fd.append("quantity",             validItems[0]?.quantity ?? "");
-        fd.append("budget_range",         form.budgetRange);
-        fd.append("delivery_timeline",    form.deliveryTimeline);
-        fd.append("incoterm",             form.incoterm);
-        fd.append("incoterm_type",        form.incoterm ? incotermType : "");
-        fd.append("delivery_address",     form.deliveryAddress);
-        fd.append("delivery_city",        form.deliveryCity);
-        fd.append("delivery_postal_code", form.deliveryPostalCode);
-        fd.append("delivery_location",    form.deliveryLocation);
-        fd.append("notes",                form.notes);
-        if (vatNumber.trim()) fd.append("vat_number", vatNumber.trim());
+
+        // ── Required fields ──
+        fd.append("full_name",          form.fullName);
+        fd.append("email",              form.email);
+        fd.append("country",            form.country);
+        fd.append("tyre_category",      form.tyreCategory);
+        fd.append("delivery_location",  form.deliveryLocation);
+        fd.append("notes",              form.notes);
+        // Legacy single-row compat (backend still validates these as required)
+        fd.append("tyre_size",          validItems[0].size);
+        fd.append("quantity",           validItems[0].quantity);
+
+        // ── tyre_items as bracket notation so Laravel parses it as an array ──
+        // Sending JSON.stringify() produces a plain string → Laravel "must be array" error.
+        validItems.forEach((item, i) => {
+          fd.append(`tyre_items[${i}][size]`,     item.size);
+          fd.append(`tyre_items[${i}][quantity]`, item.quantity);
+        });
+
+        // ── Optional fields — only append when non-empty (mirrors JSON path) ──
+        if (form.companyName)        fd.append("company_name",         form.companyName);
+        if (form.phone)              fd.append("phone",                 form.phone);
+        if (form.businessType)       fd.append("business_type",         form.businessType);
+        if (form.contactPerson)      fd.append("contact_person",        form.contactPerson);
+        if (form.companyAddress)     fd.append("company_address",       form.companyAddress);
+        if (form.companyCity)        fd.append("company_city",          form.companyCity);
+        if (form.companyPostalCode)  fd.append("company_postal_code",   form.companyPostalCode);
+        if (form.tyreCondition)      fd.append("tyre_condition",        form.tyreCondition);
+        if (isUsed && form.usedTyreGrade) fd.append("used_tyre_grade",  form.usedTyreGrade);
+        if (isUsed && form.usedTyreNotes) fd.append("used_tyre_notes",  form.usedTyreNotes);
+        if (form.brandPreference)    fd.append("brand_preference",      form.brandPreference);
+        if (form.budgetRange)        fd.append("budget_range",          form.budgetRange);
+        if (form.deliveryTimeline)   fd.append("delivery_timeline",     form.deliveryTimeline);
+        if (form.incoterm) {
+          fd.append("incoterm",      form.incoterm);
+          fd.append("incoterm_type", incotermType);
+        }
+        if (form.deliveryAddress)    fd.append("delivery_address",      form.deliveryAddress);
+        if (form.deliveryCity)       fd.append("delivery_city",         form.deliveryCity);
+        if (form.deliveryPostalCode) fd.append("delivery_postal_code",  form.deliveryPostalCode);
+        if (vatNumber.trim())        fd.append("vat_number",            vatNumber.trim());
         fd.append("attachment", attachedFile);
         res = await fetch("/api/customer/quote-requests", { method: "POST", body: fd });
       } else {
