@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -12,8 +12,6 @@ import type { ConvertToOrderResult } from "@/app/admin/quotes/actions";
 import type { AdminQuoteFull } from "@/lib/admin-api";
 import QuoteConvertModal from "@/components/admin/quote-convert-modal";
 
-// Defined here (not imported from "use server" file) so this array is
-// available at runtime in the client bundle.
 const QUOTE_STATUSES = ["new", "reviewed", "quoted", "closed"] as const;
 type QuoteStatus = (typeof QUOTE_STATUSES)[number];
 
@@ -50,12 +48,38 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function InfoRow({ label, value }: { label: string; value?: string | null }) {
+const ENUM_LABELS: Record<string, string> = {
+  grade_a:        "Grade A",
+  grade_b:        "Grade B",
+  mixed:          "Mixed",
+  new:            "New",
+  used:           "Used",
+  delivery_terms: "Delivery Terms",
+  shipping_terms: "Shipping Terms",
+};
+
+function formatEnum(value?: string | null): string | null {
   if (!value) return null;
+  return ENUM_LABELS[value] ?? value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function InfoRow({ label, value, fallback }: { label: string; value?: string | null; fallback?: string }) {
+  if (!value && !fallback) return null;
   return (
     <div className="flex flex-col gap-0.5">
       <p className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">{label}</p>
-      <p className="text-[0.875rem] text-[#1a1a1a]">{value}</p>
+      <p className={`text-[0.875rem] ${!value ? "italic text-[#9ca3af]" : "text-[#1a1a1a]"}`}>
+        {value || fallback}
+      </p>
+    </div>
+  );
+}
+
+function SectionCard({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div className="rounded-2xl bg-white p-6 shadow-sm">
+      <p className="mb-5 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">{title}</p>
+      {children}
     </div>
   );
 }
@@ -73,14 +97,11 @@ export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
   const [saved, setSaved] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  // Conversion state
   const [showConvertModal, setShowConvertModal] = useState(false);
   const [convertedOrder, setConvertedOrder] = useState<ConvertToOrderResult | null>(null);
 
   const isDirty = status !== quote.status;
 
-  // Resolve the effective conversion info from either the initial quote load
-  // or a conversion performed in this session.
   const effectiveOrderRef = convertedOrder?.order_ref ?? quote.order_ref ?? null;
   const effectiveOrderId  = convertedOrder?.order_id  ?? quote.order_id  ?? null;
   const isConverted       = !!(effectiveOrderRef || convertedOrder);
@@ -105,11 +126,26 @@ export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
     setShowConvertModal(false);
   }
 
+  // Attachment
+  const attachmentUrl  = quote.attachment_url ?? quote.attachment_path ?? null;
+  const attachmentName = quote.attachment_original_name ?? quote.attachment_name ?? null;
+  const hasAttachment  = !!(attachmentUrl || attachmentName);
+
+  // Tyre items
+  const hasTyreItems = Array.isArray(quote.tyre_items) && quote.tyre_items.length > 0;
+  const isUsed       = quote.tyre_condition === "used";
+
+  // Incoterm label
+  const incotermLabel =
+    quote.incoterm_type === "delivery_terms" ? "Delivery Terms" :
+    quote.incoterm_type === "shipping_terms" ? "Shipping Terms" :
+    "Incoterm";
+
   return (
     <>
       <div className="flex flex-col gap-6">
 
-        {/* ── Status update card ── */}
+        {/* ── Quote Status card ── */}
         <div className="rounded-2xl bg-white p-6 shadow-sm">
           <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
             Quote Status
@@ -160,14 +196,13 @@ export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
           </div>
         </div>
 
-        {/* ── Convert to Order card ── */}
+        {/* ── Order Conversion card ── */}
         <div className="rounded-2xl bg-white p-6 shadow-sm">
           <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
             Order Conversion
           </p>
 
           {isConverted ? (
-            /* Already converted — show success state */
             <div className="flex flex-wrap items-center gap-4">
               <div className="flex items-center gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5">
                 <CheckCircle2 size={16} className="shrink-0 text-emerald-600" />
@@ -196,7 +231,6 @@ export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
               )}
             </div>
           ) : quote.status === "quoted" ? (
-            /* Quoted and not yet converted — show convert button */
             <div className="flex flex-wrap items-center gap-4">
               <p className="text-[0.83rem] text-[#5c5e62]">
                 This quote is ready to be converted into a confirmed order.
@@ -211,7 +245,6 @@ export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
               </button>
             </div>
           ) : (
-            /* Not yet quoted — explain the requirement */
             <p className="text-[0.83rem] text-[#5c5e62]">
               Order conversion is available once this quote&apos;s status is set to{" "}
               <span className="font-semibold text-emerald-700">Quoted</span>.
@@ -219,123 +252,139 @@ export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
           )}
         </div>
 
-        {/* ── Two-column: requester info + request details ── */}
-        <div className="grid gap-6 lg:grid-cols-2">
+        {/* ── 1. Customer & Company ── */}
+        <SectionCard title="Customer & Company">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <InfoRow label="Full Name"      value={quote.full_name} />
+            <InfoRow label="Contact Person" value={quote.contact_person} />
+            <InfoRow label="Email"          value={quote.email} />
+            <InfoRow label="Phone"          value={quote.phone} />
+            <InfoRow label="Company Name"   value={quote.company_name} />
+            <InfoRow label="Business Type"  value={quote.business_type} />
+            <InfoRow label="Country"        value={quote.country} />
+            <InfoRow label="Submitted"      value={shortDate(quote.created_at)} />
+            <InfoRow label="Last Updated"   value={shortDate(quote.updated_at)} />
+            {(quote.company_address || quote.company_city || quote.company_postal_code) && (
+              <div className="col-span-full flex flex-col gap-0.5">
+                <p className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Company Address</p>
+                <p className="text-[0.875rem] text-[#1a1a1a]">
+                  {[quote.company_address, quote.company_city, quote.company_postal_code]
+                    .filter(Boolean).join(", ")}
+                </p>
+              </div>
+            )}
+          </div>
+        </SectionCard>
 
-          {/* Requester info */}
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
-            <p className="mb-5 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
-              Requester Details
-            </p>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <InfoRow label="Full Name"       value={quote.full_name} />
-              <InfoRow label="Email"           value={quote.email} />
-              <InfoRow label="Phone"           value={quote.phone} />
-              <InfoRow label="Company"         value={quote.company_name} />
-              <InfoRow label="Contact Person"  value={quote.contact_person} />
-              <InfoRow label="Business Type"   value={quote.business_type} />
-              <InfoRow label="Country"         value={quote.country} />
-              <InfoRow label="VAT Number"      value={quote.vat_number} />
-              {(quote.company_address || quote.company_city || quote.company_postal_code) && (
-                <div className="col-span-full flex flex-col gap-0.5">
-                  <p className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Company Address</p>
-                  <p className="text-[0.875rem] text-[#1a1a1a]">
-                    {[quote.company_address, quote.company_city, quote.company_postal_code]
-                      .filter(Boolean).join(", ")}
-                  </p>
-                </div>
+        {/* ── 2. VAT & Compliance ── */}
+        <SectionCard title="VAT & Compliance">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <InfoRow label="VAT Number" value={quote.vat_number} fallback="Not provided" />
+            <div className="flex flex-col gap-0.5">
+              <p className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">VAT Validated</p>
+              {quote.vat_valid === true ? (
+                <span className="inline-flex items-center gap-1.5 text-[0.875rem] font-semibold text-emerald-700">
+                  <CheckCircle2 size={14} strokeWidth={2} /> Verified
+                </span>
+              ) : (
+                <span className="text-[0.875rem] italic text-[#9ca3af]">Not verified</span>
               )}
             </div>
           </div>
+        </SectionCard>
 
-          {/* Request details */}
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
-            <p className="mb-5 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
-              Request Details
-            </p>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <InfoRow label="Ref Number"        value={quote.ref_number} />
-              <InfoRow label="Tyre Category"     value={quote.tyre_category} />
-              <InfoRow label="Tyre Condition"    value={quote.tyre_condition} />
-              <InfoRow label="Brand Preference"  value={quote.brand_preference} />
-              <InfoRow label="Budget Range"      value={quote.budget_range} />
-              <InfoRow label="Delivery Timeline" value={quote.delivery_timeline} />
-              <InfoRow
-                label={quote.incoterm_type === "delivery_terms" ? "Delivery Terms" : quote.incoterm_type === "shipping_terms" ? "Shipping Terms" : "Incoterm"}
-                value={quote.incoterm}
-              />
-              <InfoRow label="Delivery Address"  value={quote.delivery_address} />
-              <InfoRow label="City"              value={quote.delivery_city} />
-              <InfoRow label="Postal Code"       value={quote.delivery_postal_code} />
-              <InfoRow label="Location / Port"   value={quote.delivery_location} />
-              <InfoRow label="Submitted On"      value={shortDate(quote.created_at)} />
-              <InfoRow label="Last Updated"      value={shortDate(quote.updated_at)} />
-            </div>
+        {/* ── 3. Tyre Requirements ── */}
+        <SectionCard title="Tyre Requirements">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <InfoRow label="Tyre Category"    value={quote.tyre_category} />
+            <InfoRow label="Tyre Condition"   value={formatEnum(quote.tyre_condition)} />
+            <InfoRow label="Brand Preference" value={quote.brand_preference} />
           </div>
-        </div>
 
-        {/* ── Tyre Items ── */}
-        {quote.tyre_items && quote.tyre_items.length > 0 && (
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
-            <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
-              Tyre Sizes &amp; Quantities
-            </p>
-            <div className="overflow-x-auto">
-              <table className="w-full text-[0.875rem]">
-                <thead>
-                  <tr className="border-b border-black/[0.06]">
-                    <th className="pb-2 text-left text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">#</th>
-                    <th className="pb-2 text-left text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Tyre Size</th>
-                    <th className="pb-2 text-left text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Quantity</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {quote.tyre_items.map((item, i) => (
-                    <tr key={i} className="border-b border-black/[0.04] last:border-0">
-                      <td className="py-2.5 pr-4 text-[#5c5e62]">{i + 1}</td>
-                      <td className="py-2.5 pr-4 font-medium text-[#1a1a1a]">{item.size || "—"}</td>
-                      <td className="py-2.5 text-[#1a1a1a]">{item.quantity || "—"}</td>
+          {/* Tyre items table — preferred path */}
+          {hasTyreItems ? (
+            <div className="mt-5">
+              <p className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">
+                Tyre Sizes &amp; Quantities
+              </p>
+              <div className="overflow-x-auto rounded-xl border border-black/[0.06]">
+                <table className="w-full text-[0.875rem]">
+                  <thead>
+                    <tr className="border-b border-black/[0.06] bg-[#f8f8f8]">
+                      <th className="px-4 py-2.5 text-left text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">#</th>
+                      <th className="px-4 py-2.5 text-left text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Tyre Size</th>
+                      <th className="px-4 py-2.5 text-left text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Quantity</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {quote.tyre_items?.map((item, i) => (
+                      <tr key={i} className="border-b border-black/[0.04] last:border-0">
+                        <td className="px-4 py-2.5 text-[#5c5e62]">{i + 1}</td>
+                        <td className="px-4 py-2.5 font-medium text-[#1a1a1a]">{item.size || "—"}</td>
+                        <td className="px-4 py-2.5 text-[#1a1a1a]">{item.quantity || "—"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-        )}
+          ) : (quote.tyre_size || quote.quantity) ? (
+            /* Legacy single-row fallback */
+            <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <InfoRow label="Tyre Size" value={quote.tyre_size} fallback="Not provided" />
+              <InfoRow label="Quantity"  value={quote.quantity}  fallback="Not provided" />
+            </div>
+          ) : null}
 
-        {/* ── Used Tyre Details — conditional ── */}
-        {quote.tyre_condition === "Used tyres" && (quote.used_tyre_grade || quote.used_tyre_notes) && (
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
-            <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
-              Used Tyre Details
-            </p>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <InfoRow label="Grade" value={quote.used_tyre_grade} />
+          {/* Used tyre sub-section — shown only when condition is "used" */}
+          {isUsed && (
+            <div className="mt-5 border-t border-black/[0.05] pt-5">
+              <p className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">
+                Used Tyre Specification
+              </p>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <InfoRow label="Grade" value={formatEnum(quote.used_tyre_grade)} fallback="Not specified" />
+              </div>
               {quote.used_tyre_notes && (
-                <div className="col-span-full flex flex-col gap-0.5">
-                  <p className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Notes</p>
+                <div className="mt-3 flex flex-col gap-0.5">
+                  <p className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Condition Notes</p>
                   <p className="whitespace-pre-wrap text-[0.875rem] leading-relaxed text-[#1a1a1a]">
                     {quote.used_tyre_notes}
                   </p>
                 </div>
               )}
             </div>
+          )}
+        </SectionCard>
+
+        {/* ── 4. Logistics & Terms ── */}
+        <SectionCard title="Logistics & Terms">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <InfoRow label={incotermLabel}            value={quote.incoterm}          fallback="Not specified" />
+            <InfoRow label="Delivery Timeline"        value={quote.delivery_timeline} />
+            <InfoRow label="Budget Range"             value={quote.budget_range} />
+            <InfoRow label="Delivery Location / Port" value={quote.delivery_location} fallback="Not provided" />
           </div>
-        )}
-
-        {/* ── Attachment — placed above Notes ── */}
-        {(() => {
-          const attachmentUrl  = quote.attachment_url ?? quote.attachment_path ?? null;
-          const attachmentName = quote.attachment_original_name ?? quote.attachment_name ?? null;
-          const hasAttachment  = !!(attachmentUrl || attachmentName);
-
-          if (!hasAttachment) return null;
-
-          return (
-            <div className="rounded-2xl bg-white p-6 shadow-sm">
-              <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
-                Attached Specification Sheet
+          {(quote.delivery_address || quote.delivery_city || quote.delivery_postal_code) && (
+            <div className="mt-4 flex flex-col gap-0.5">
+              <p className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Delivery Address</p>
+              <p className="text-[0.875rem] text-[#1a1a1a]">
+                {[quote.delivery_address, quote.delivery_city, quote.delivery_postal_code]
+                  .filter(Boolean).join(", ")}
               </p>
+            </div>
+          )}
+        </SectionCard>
+
+        {/* ── 5. Attachments & Notes ── */}
+        <SectionCard title="Attachments & Notes">
+
+          {/* Specification sheet */}
+          <div className="mb-5">
+            <p className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">
+              Specification Sheet
+            </p>
+            {hasAttachment ? (
               <div className="flex items-center justify-between rounded-xl border border-black/[0.07] bg-[#f8f8f8] px-4 py-3.5">
                 <div className="flex min-w-0 items-center gap-3">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm">
@@ -364,26 +413,38 @@ export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
                     Download
                   </a>
                 ) : (
-                  <span className="ml-4 shrink-0 text-[0.78rem] text-[#5c5e62]">
-                    Download unavailable
-                  </span>
+                  <span className="ml-4 shrink-0 text-[0.78rem] text-[#5c5e62]">Download unavailable</span>
                 )}
               </div>
-            </div>
-          );
-        })()}
-
-        {/* ── Notes ── */}
-        {quote.notes && (
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
-            <p className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
-              Additional Notes
-            </p>
-            <p className="whitespace-pre-wrap text-[0.875rem] leading-relaxed text-[#1a1a1a]">
-              {quote.notes}
-            </p>
+            ) : (
+              <p className="text-[0.83rem] italic text-[#9ca3af]">No specification sheet attached.</p>
+            )}
           </div>
-        )}
+
+          {/* Customer notes */}
+          <div className="mb-4">
+            <p className="mb-2 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Customer Notes</p>
+            {quote.notes ? (
+              <p className="whitespace-pre-wrap text-[0.875rem] leading-relaxed text-[#1a1a1a]">
+                {quote.notes}
+              </p>
+            ) : (
+              <p className="text-[0.83rem] italic text-[#9ca3af]">None provided.</p>
+            )}
+          </div>
+
+          {/* Internal admin notes */}
+          {quote.admin_notes && (
+            <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3.5">
+              <p className="mb-1.5 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-amber-700">
+                Internal Admin Notes
+              </p>
+              <p className="whitespace-pre-wrap text-[0.875rem] leading-relaxed text-amber-900">
+                {quote.admin_notes}
+              </p>
+            </div>
+          )}
+        </SectionCard>
 
       </div>
 

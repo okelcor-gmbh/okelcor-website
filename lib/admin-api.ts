@@ -236,6 +236,7 @@ export type AdminQuoteFull = AdminQuote & {
   attachment_size?: number;          // bytes
   // Phase 2A-2 extended fields
   vat_number?: string;
+  vat_valid?: boolean | null;
   business_type?: string;
   contact_person?: string;
   company_address?: string;
