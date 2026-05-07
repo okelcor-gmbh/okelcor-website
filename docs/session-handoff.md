@@ -60,6 +60,77 @@ Development environment: Windows 11, VS Code, Node.js / npm
 
 ---
 
+## Completed in Latest Session — Phase 2B-2: EU Entry Certificate Visibility (2026-05-07)
+
+### Phase 2B-2 — EU Entry Certificate Visibility Foundation
+
+**Goal:** Surface the Gelangensbestätigung (EU Entry Certificate, §17a UStDV) declaration status to both customers and admins, and provide a dedicated admin list + detail view.
+
+**Background:** For intra-community B2B zero-VAT supplies (reverse charge), German law requires the supplier to hold a signed entry confirmation from the buyer. Backend now exposes declaration fields on orders.
+
+#### Updated: `lib/admin-api.ts`
+Added four optional fields to `AdminOrderFull`:
+```typescript
+declaration_required?: boolean | null;
+declaration_status?: "pending" | "signed" | "acknowledged" | null;
+declaration_id?: number | null;
+declaration_signed_at?: string | null;
+```
+
+#### Updated: `app/account/orders/page.tsx`
+Added three declaration fields to the exported `Order` type:
+```typescript
+declaration_required?: boolean | null;
+declaration_status?: "pending" | "signed" | "acknowledged" | null;
+declaration_signed_at?: string | null;
+```
+
+#### Updated: `app/account/orders/[ref]/page.tsx`
+EU Entry Certificate card inserted between payment card and status timeline.
+
+- Only rendered when `order.declaration_required === true`
+- **Pending (amber):** "Action required: EU Entry Certificate (Gelangensbestätigung)" + explanation of §17a UStDV obligation
+- **Signed (green):** "Signed — awaiting acknowledgement from Okelcor" + signed date if present
+- **Acknowledged (green):** "Confirmed — Okelcor has acknowledged receipt of your signed declaration"
+- Imports `FileCheck` from lucide-react
+
+#### Updated: `components/admin/order-detail.tsx`
+EU Entry Certificate card added after the two-column customer/order summary section, before Order Items.
+
+- Visible when `order.declaration_required != null`
+- Shows: Required (Yes/No), Status badge (amber/blue/emerald), Declaration ID (always shown; clickable link to `/admin/eu-declarations/{id}` or `—` when null), Signed At (always shown; `—` when null)
+
+#### New: `app/admin/eu-declarations/page.tsx`
+List page at `/admin/eu-declarations`. Fetches `GET /admin/eu-declarations`.
+
+Columns: Order Ref (linked to order detail), Customer / Company, Email, Country, VAT Number, Status badge, Signed, Created, View button.
+
+- `EuDeclaration` type defined locally with all fields including `email`
+- Status badges: amber (pending), blue (signed), emerald (acknowledged)
+- View button links to `/admin/eu-declarations/{id}`
+- Handles `AdminUnauthorizedError` → redirect to `/admin/login`; `AdminForbiddenError` → redirect to `/admin/unauthorized`
+
+#### New: `app/admin/eu-declarations/[id]/page.tsx`
+Detail page at `/admin/eu-declarations/{id}`. Fetches `GET /admin/eu-declarations/{id}`.
+
+- **Status banner** at top: colour-coded (amber/blue/green) with human-readable description
+- **Order & Customer card**: Order Ref (linked), Customer, Company, Email, Country, VAT Number
+- **Declaration Details card**: Created, Signed At, Updated; optional "Download / View Document" link when `signed_document_url` is present
+- **Notes section** (conditional): Customer Notes + Internal Admin Notes (amber block)
+- Handles 404 (`notFound()`), 401, 403 gracefully
+- Back link to `/admin/eu-declarations`
+
+#### Updated: `components/admin/admin-shell.tsx`
+- Added `FileCheck` to lucide-react imports
+- Added `{ label: "EU Declarations", href: "/admin/eu-declarations", icon: FileCheck, section: "eu_declarations" }` to `NAV` immediately after "Quote Requests"
+
+#### Updated: `lib/admin-permissions.ts`
+- Added `eu_declarations` to `super_admin`, `admin`, and `order_manager` access lists
+- Added `"/admin/eu-declarations": "eu_declarations"` to `PATH_SECTION`
+- `editor` role does **not** have access
+
+---
+
 ## Completed in Latest Session — Phase 2A: EU VAT Enforcement & RFQ Form Upgrade (2026-05-07)
 
 ### Phase 2A-1 — Mandatory EU VAT Workflow for B2B Customers
@@ -164,6 +235,28 @@ All new Phase 2A-2 fields are now displayed:
 - Shows Grade + multi-line Notes
 
 TypeScript check: **0 errors** after all changes.
+
+---
+
+### Phase 2A-3 — Convert Quote Modal Prefill from `tyre_items`
+
+**Goal:** Use the structured `tyre_items` array submitted with the Phase 2A-2 RFQ form to pre-populate item rows in the Convert to Order modal, reducing manual data entry for the admin.
+
+#### Updated: `components/admin/quote-convert-modal.tsx`
+
+- **Replaced** `buildInitialItem(quote): ItemRow` (single row) with `buildInitialItems(quote): ItemRow[]` (multiple rows)
+- **Tyre items path** (when `quote.tyre_items` is a non-empty array):
+  - One `ItemRow` per `tyre_items` entry
+  - `name` = `"{brand || 'Quoted tyre'} {size}"` (trimmed)
+  - `brand` = `quote.brand_preference ?? ""`
+  - `size` = `item.size?.trim() ?? ""`
+  - `quantity` = parsed integer from `item.quantity`; empty string if NaN or ≤ 0
+  - `sku`, `unit_price` = `""` (admin fills in)
+- **Legacy fallback** (when no `tyre_items`): single row from `quote.tyre_size` + `quote.quantity` (previous behaviour)
+- `useState<ItemRow[]>` uses a lazy initializer `() => buildInitialItems(quote)` to avoid re-running on every render
+- **Size validation**: per-row guard `if (!item.size.trim()) return 'Item N: tyre size is required.'`
+- **Quantity check** updated: `!Number.isInteger(qty) || qty < 1`
+- **Helper text banner** (blue): *"Rows are prefilled from the customer's RFQ. Please confirm product names, quantities and prices before creating the order."*
 
 ---
 
@@ -1021,7 +1114,7 @@ See prior entries for:
 | Account profile | Complete — personal info + change password |
 | Account addresses | Complete — add/edit/delete modal |
 | **Account orders** | **Updated** — Pay Now CTA for pending Stripe orders; payment_url → button; no URL → amber email notice |
-| **Account order detail** | **Updated** — `OrderPaymentCard` client component; dynamic payment section via proxy `/api/account/orders/{ref}/checkout`; paid / stripe / bank_transfer / unknown states; shipment event crash fixed |
+| **Account order detail** | **Updated** — `OrderPaymentCard` client component; dynamic payment section via proxy `/api/account/orders/{ref}/checkout`; paid / stripe / bank_transfer / unknown states; shipment event crash fixed; Phase 2B-2: EU Entry Certificate card (amber/green, gated on `declaration_required`) |
 | **Account quotes** | **Updated** — progress tracker, normalized status, quoted CTA, note filter, admin_notes block |
 | **Account invoices** | **Updated** — PDF download via auth proxy; "PDF pending" pill; B2C receipt labels |
 | **Account company** | **Complete** — `/account/company`; editable company name + industry |
@@ -1038,17 +1131,19 @@ See prior entries for:
 | Analytics (GA4) | Complete |
 | **Admin login** | **Updated** — `must_change_password` redirects to change-password page |
 | **Admin change-password** | **New** — `/admin/change-password`; forced change with strength bar |
-| **Admin shell** | **Updated** — top-bar dropdown, must_change banner, role badge colors, RBAC nav |
-| **Admin RBAC** | **Complete** — `lib/admin-permissions.ts`; canAccess(); route guard; nav filtering by role |
+| **Admin shell** | **Updated** — top-bar dropdown, must_change banner, role badge colors, RBAC nav; EU Declarations nav item (FileCheck icon) |
+| **Admin RBAC** | **Updated** — `lib/admin-permissions.ts`; `eu_declarations` section added to super_admin/admin/order_manager; PATH_SECTION entry added |
+| **Admin EU Declarations list** | **New** — `/admin/eu-declarations`; fetches `GET /admin/eu-declarations`; columns: Order Ref, Customer/Company, Email, Country, VAT, Status badge, Signed, Created, View button |
+| **Admin EU Declarations detail** | **New** — `/admin/eu-declarations/[id]`; status banner, order/customer card, declaration details, optional document download, notes section |
 | Admin profile | Complete — first/last/display name fields; role label from API |
 | Admin users | Complete — create without password; temp password notice; role_label display |
-| **Admin order actions** | **New** — Cancel Order (admin/order_manager/super_admin); Delete Order (super_admin only, confirm-ref modal); 422/409 error handling; shipment event crash fixed |
+| **Admin order actions** | **New** — Cancel Order (admin/order_manager/super_admin); Delete Order (super_admin only, confirm-ref modal); 422/409 error handling; shipment event crash fixed; Phase 2B-2: EU compliance card with declaration_required/status/id (linked)/signed_at |
 | **Admin order activity log** | **New** — `ActivityLog` card in order detail; timeline with old→new diff, actor email, IP, notes |
 | **Account invoices (B2C)** | **Updated** — Receipts & Invoices card added to B2C dashboard; previously B2B only |
 | **Account invoices page** | **Updated** — customer-type-aware title/badge/empty state; PDF download via auth proxy |
 | **Quote form** | **Updated** — file attachment upload (PDF/CSV/XLS/XLSX, max 10 MB); multipart forwarding to Laravel |
 | **Admin quote detail** | **Updated** — Phase 2A-2: contact person, VAT number, business type, company address, tyre condition, incoterm, budget/timeline rows; new Tyre Items table card; new Used Tyre Details card (conditional); attachment card; Convert to Order modal |
-| **Admin quote → order** | **New** — `QuoteConvertModal`; delivery + items + summary form; 422/409 handling; View Order link |
+| **Admin quote → order** | **Updated** — `QuoteConvertModal`; Phase 2A-3: prefills item rows from `tyre_items` array; size validation per row; helper text banner; legacy single-row fallback |
 | **Admin dashboard KPIs** | **Updated** — connected to real `/admin/dashboard` endpoint; AOV card shows period label + paid order count |
 | Admin products / articles / orders / quotes / brands / hero-slides / settings / supplier | Complete |
 
@@ -1072,10 +1167,10 @@ Response shape: `{ data: { token: "...", user: { role, role_label, name, first_n
 ### RBAC Permission Map (`lib/admin-permissions.ts`)
 
 ```
-super_admin   → all sections
-admin         → all except users
-editor        → dashboard, articles, hero_slides
-order_manager → dashboard, orders, quotes
+super_admin   → all sections (including eu_declarations)
+admin         → all except users (including eu_declarations)
+editor        → dashboard, articles, hero_slides, promotions, fet
+order_manager → dashboard, orders, quotes, supplier, eu_declarations
 ```
 
 `canAccess(role, section)` is the single source of truth. Used by:
