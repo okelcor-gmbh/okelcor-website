@@ -29,6 +29,7 @@ import {
   Zap,
   MessageSquare,
   ShieldAlert,
+  FileCheck,
 } from "lucide-react";
 import { logoutAdmin } from "@/app/admin/actions";
 import { canAccess, PATH_SECTION } from "@/lib/admin-permissions";
@@ -43,7 +44,8 @@ const NAV = [
   { label: "Products",       href: "/admin/products",    icon: Package,         section: "products" },
   { label: "Articles",       href: "/admin/articles",    icon: FileText,        section: "articles" },
   { label: "Orders",         href: "/admin/orders",      icon: ShoppingCart,    section: "orders" },
-  { label: "Quote Requests", href: "/admin/quotes",      icon: ClipboardList,   section: "quotes" },
+  { label: "Quote Requests", href: "/admin/quotes",          icon: ClipboardList,   section: "quotes" },
+  { label: "EU Declarations", href: "/admin/eu-declarations", icon: FileCheck,      section: "eu_declarations" },
   { label: "Hero Slides",    href: "/admin/hero-slides",  icon: Layers,      section: "hero_slides" },
   { label: "Promotions",     href: "/admin/promotions",   icon: Megaphone,   section: "promotions" },
   { label: "FET Engines",    href: "/admin/fet",          icon: Zap,         section: "fet" },

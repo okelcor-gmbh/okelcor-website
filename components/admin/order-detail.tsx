@@ -714,18 +714,25 @@ export default function OrderDetail({
                     {order.declaration_status ?? "pending"}
                   </span>
                 </div>
-                {order.declaration_id != null && (
-                  <div className="flex flex-col gap-0.5">
-                    <p className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Declaration ID</p>
-                    <p className="font-mono text-[0.875rem] text-[#1a1a1a]">#{order.declaration_id}</p>
-                  </div>
-                )}
-                {order.declaration_signed_at && (
-                  <div className="flex flex-col gap-0.5">
-                    <p className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Signed At</p>
-                    <p className="text-[0.875rem] text-[#1a1a1a]">{shortDate(order.declaration_signed_at)}</p>
-                  </div>
-                )}
+                <div className="flex flex-col gap-0.5">
+                  <p className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Declaration ID</p>
+                  {order.declaration_id != null ? (
+                    <a
+                      href={`/admin/eu-declarations/${order.declaration_id}`}
+                      className="font-mono text-[0.875rem] font-semibold text-[#E85C1A] hover:underline"
+                    >
+                      #{order.declaration_id}
+                    </a>
+                  ) : (
+                    <p className="text-[0.875rem] text-[#5c5e62]">—</p>
+                  )}
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  <p className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Signed At</p>
+                  <p className="text-[0.875rem] text-[#1a1a1a]">
+                    {order.declaration_signed_at ? shortDate(order.declaration_signed_at) : "—"}
+                  </p>
+                </div>
               </>
             )}
           </div>

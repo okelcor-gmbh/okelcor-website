@@ -19,6 +19,7 @@ type EuDeclaration = {
   order_ref: string;
   customer_name: string;
   company_name?: string | null;
+  email?: string | null;
   country?: string | null;
   vat_number?: string | null;
   status: "pending" | "signed" | "acknowledged";
@@ -100,7 +101,7 @@ export default async function EuDeclarationsPage() {
             <table className="w-full min-w-[700px] text-left">
               <thead>
                 <tr className="border-b border-black/[0.06] bg-[#fafafa]">
-                  {["Order Ref", "Customer / Company", "Country", "VAT Number", "Status", "Signed", "Created"].map((h) => (
+                  {["Order Ref", "Customer / Company", "Email", "Country", "VAT Number", "Status", "Signed", "Created", ""].map((h) => (
                     <th key={h} className="px-4 py-3 text-[0.7rem] font-bold uppercase tracking-[0.12em] text-[#5c5e62]">
                       {h}
                     </th>
@@ -126,6 +127,9 @@ export default async function EuDeclarationsPage() {
                         <p className="text-[0.75rem] text-[#5c5e62]">{dec.company_name}</p>
                       )}
                     </td>
+                    <td className="px-4 py-3 text-[0.83rem] text-[#5c5e62]">
+                      {dec.email ?? "—"}
+                    </td>
                     <td className="px-4 py-3 text-[0.875rem] text-[#1a1a1a]">
                       {dec.country ?? "—"}
                     </td>
@@ -142,6 +146,14 @@ export default async function EuDeclarationsPage() {
                     </td>
                     <td className="px-4 py-3 text-[0.83rem] text-[#5c5e62]">
                       {shortDate(dec.created_at)}
+                    </td>
+                    <td className="px-4 py-3">
+                      <Link
+                        href={`/admin/eu-declarations/${dec.id}`}
+                        className="inline-flex h-7 items-center rounded-full border border-black/[0.09] bg-white px-3 text-[0.75rem] font-semibold text-[#1a1a1a] transition hover:border-[#E85C1A]/40 hover:text-[#E85C1A]"
+                      >
+                        View
+                      </Link>
                     </td>
                   </tr>
                 ))}

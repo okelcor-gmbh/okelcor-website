@@ -1,9 +1,9 @@
 // Canonical permissions map — mirrors the backend's ROLE_ACCESS table.
 export const ROLE_ACCESS: Record<string, string[]> = {
-  super_admin:   ["dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "analytics", "chats", "security"],
-  admin:         ["dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "analytics", "chats", "security"],
+  super_admin:   ["dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "analytics", "chats", "security", "eu_declarations"],
+  admin:         ["dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "analytics", "chats", "security", "eu_declarations"],
   editor:        ["dashboard", "articles", "hero_slides", "promotions", "fet"],
-  order_manager: ["dashboard", "orders", "quotes", "supplier"],
+  order_manager: ["dashboard", "orders", "quotes", "supplier", "eu_declarations"],
 };
 
 export function canAccess(role: string, section: string): boolean {
@@ -27,5 +27,6 @@ export const PATH_SECTION: Record<string, string> = {
   "/admin/security":    "security",
   "/admin/ebay":        "ebay",
   "/admin/analytics":   "analytics",
-  "/admin/chats":       "chats",
+  "/admin/chats":           "chats",
+  "/admin/eu-declarations": "eu_declarations",
 };
