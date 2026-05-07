@@ -45,16 +45,36 @@ function fmtEur(n: number): string {
   return new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(n);
 }
 
-function buildInitialItem(quote: AdminQuoteFull): ItemRow {
-  const nameParts = [quote.brand_preference, quote.tyre_size].filter(Boolean).join(" ").trim();
-  return {
+function buildInitialItems(quote: AdminQuoteFull): ItemRow[] {
+  const brand = quote.brand_preference ?? "";
+
+  // Preferred path: one row per tyre_items entry
+  if (Array.isArray(quote.tyre_items) && quote.tyre_items.length > 0) {
+    return quote.tyre_items.map((item) => {
+      const size       = item.size?.trim() ?? "";
+      const parsedQty  = parseInt(item.quantity ?? "", 10);
+      return {
+        name:       `${brand || "Quoted tyre"} ${size}`.trim(),
+        brand,
+        size,
+        sku:        "",
+        unit_price: "",
+        quantity:   !isNaN(parsedQty) && parsedQty > 0 ? String(parsedQty) : "",
+      };
+    });
+  }
+
+  // Legacy fallback: single row from tyre_size + quantity
+  const nameParts    = [brand, quote.tyre_size].filter(Boolean).join(" ").trim();
+  const parsedLegacy = parseInt(quote.quantity ?? "", 10);
+  return [{
     name:       nameParts || "Quoted product",
-    brand:      quote.brand_preference ?? "",
+    brand,
     size:       quote.tyre_size ?? "",
     sku:        "",
     unit_price: "",
-    quantity:   "",
-  };
+    quantity:   !isNaN(parsedLegacy) && parsedLegacy > 0 ? String(parsedLegacy) : "",
+  }];
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -105,7 +125,7 @@ export default function QuoteConvertModal({ quote, onClose, onSuccess }: Props) 
     phone:       quote.phone                ?? "",
   });
 
-  const [items, setItems] = useState<ItemRow[]>([buildInitialItem(quote)]);
+  const [items, setItems] = useState<ItemRow[]>(() => buildInitialItems(quote));
   const [deliveryCost, setDeliveryCost] = useState("0");
   const [paymentMethod, setPaymentMethod] = useState("bank_transfer");
   const [adminNotes, setAdminNotes] = useState("");
@@ -151,10 +171,11 @@ export default function QuoteConvertModal({ quote, onClose, onSuccess }: Props) 
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       if (!item.name.trim()) return `Item ${i + 1}: product name is required.`;
+      if (!item.size.trim()) return `Item ${i + 1}: tyre size is required.`;
       const price = parseFloat(item.unit_price);
       if (isNaN(price) || price <= 0) return `Item ${i + 1}: unit price must be greater than 0.`;
-      const qty = parseInt(item.quantity);
-      if (isNaN(qty) || qty < 1) return `Item ${i + 1}: quantity must be at least 1.`;
+      const qty = parseInt(item.quantity, 10);
+      if (!Number.isInteger(qty) || qty < 1) return `Item ${i + 1}: quantity must be a positive whole number.`;
     }
     return null;
   }
@@ -290,7 +311,7 @@ export default function QuoteConvertModal({ quote, onClose, onSuccess }: Props) 
 
           {/* ── Items ── */}
           <section>
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-3 flex items-center justify-between">
               <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
                 Items
               </p>
@@ -303,6 +324,11 @@ export default function QuoteConvertModal({ quote, onClose, onSuccess }: Props) 
                 Add Item
               </button>
             </div>
+
+            <p className="mb-4 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-[0.8rem] leading-relaxed text-blue-800">
+              Rows are prefilled from the customer&apos;s RFQ. Please confirm product names,
+              quantities and prices before creating the order.
+            </p>
 
             <div className="flex flex-col gap-4">
               {items.map((item, i) => {
