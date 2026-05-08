@@ -377,6 +377,13 @@ export default function EntryCertificateCard({
               </p>
             )}
             <DownloadButton orderRef={orderRef} />
+            <p className="mt-3 text-[0.78rem] text-green-700">
+              Your final invoice is now available in{" "}
+              <a href="/account/invoices" className="font-semibold underline underline-offset-2">
+                Invoices
+              </a>
+              .
+            </p>
           </div>
         </div>
       </div>
@@ -403,6 +410,13 @@ export default function EntryCertificateCard({
               </p>
             )}
             <DownloadButton orderRef={orderRef} />
+            <p className="mt-3 text-[0.78rem] text-green-700">
+              Your final invoice is now available in{" "}
+              <a href="/account/invoices" className="font-semibold underline underline-offset-2">
+                Invoices
+              </a>
+              .
+            </p>
           </div>
         </div>
       </div>
@@ -431,6 +445,9 @@ export default function EntryCertificateCard({
             <p className="mt-0.5 text-[0.82rem] leading-relaxed text-amber-800">
               As a reverse-charge B2B delivery to the EU, this order requires a signed
               Gelangensbestätigung (§17a UStDV) confirming that the goods have entered your country.
+            </p>
+            <p className="mt-2 text-[0.78rem] text-amber-700">
+              Your final invoice will become available after this certificate is signed.
             </p>
           </div>
         </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Download, FileText, Loader2 } from "lucide-react";
+import { Download, FileText, Loader2, Lock } from "lucide-react";
 import type { TradeDocument } from "@/lib/admin-api";
 
 const TYPE_LABEL: Record<string, string> = {
@@ -10,6 +10,9 @@ const TYPE_LABEL: Record<string, string> = {
   packing_list:       "Packing List",
   other:              "Document",
 };
+
+// Document types that require EU certificate sign-off before download
+const GATED_TYPES = new Set(["commercial_invoice", "final_invoice"]);
 
 function shortDate(iso?: string | null): string {
   if (!iso) return "—";
@@ -22,10 +25,23 @@ function shortDate(iso?: string | null): string {
 
 export default function TradeDocumentsCard({
   documents,
+  declarationRequired,
+  declarationStatus,
 }: {
   documents: TradeDocument[];
+  declarationRequired?: boolean | null;
+  declarationStatus?: "pending" | "signed" | "acknowledged" | null;
 }) {
   const [downloading, setDownloading] = useState<number | null>(null);
+
+  // Returns true when this document must be locked pending EU certificate signing.
+  // Proforma invoices and packing lists are never locked.
+  // Only locks when declaration is required AND certificate not yet signed.
+  function isLocked(doc: TradeDocument): boolean {
+    if (!declarationRequired) return false;
+    if (!GATED_TYPES.has(doc.type)) return false;
+    return declarationStatus !== "signed" && declarationStatus !== "acknowledged";
+  }
 
   async function handleDownload(doc: TradeDocument) {
     setDownloading(doc.id);
@@ -62,43 +78,54 @@ export default function TradeDocumentsCard({
         </p>
       ) : (
         <div className="flex flex-col gap-2">
-          {documents.map((doc) => (
-            <div
-              key={doc.id}
-              className="flex items-center gap-3 rounded-[12px] bg-white px-4 py-3"
-            >
-              <FileText
-                size={16}
-                strokeWidth={1.8}
-                className="shrink-0 text-[var(--primary)]"
-              />
-              <div className="min-w-0 flex-1">
-                <p className="text-[0.88rem] font-semibold text-[var(--foreground)]">
-                  {TYPE_LABEL[doc.type] ?? doc.type}
-                </p>
-                {doc.number && (
-                  <p className="font-mono text-[0.72rem] text-[var(--muted)]">
-                    #{doc.number}
-                  </p>
-                )}
-                <p className="text-[0.72rem] text-[var(--muted)]">
-                  Issued {shortDate(doc.issued_at)}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => handleDownload(doc)}
-                disabled={downloading === doc.id}
-                className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-black/[0.08] bg-[#f0f0f0] px-3 text-[0.75rem] font-semibold text-[var(--foreground)] transition hover:bg-[var(--primary)] hover:text-white disabled:opacity-50"
+          {documents.map((doc) => {
+            const locked = isLocked(doc);
+            return (
+              <div
+                key={doc.id}
+                className="flex items-center gap-3 rounded-[12px] bg-white px-4 py-3"
               >
-                {downloading === doc.id
-                  ? <Loader2 size={12} className="animate-spin" />
-                  : <Download size={12} strokeWidth={2.2} />
-                }
-                {downloading === doc.id ? "…" : "Download"}
-              </button>
-            </div>
-          ))}
+                <FileText
+                  size={16}
+                  strokeWidth={1.8}
+                  className={`shrink-0 ${locked ? "text-[var(--muted)]" : "text-[var(--primary)]"}`}
+                />
+                <div className="min-w-0 flex-1">
+                  <p className={`text-[0.88rem] font-semibold ${locked ? "text-[var(--muted)]" : "text-[var(--foreground)]"}`}>
+                    {TYPE_LABEL[doc.type] ?? doc.type}
+                  </p>
+                  {doc.number && (
+                    <p className="font-mono text-[0.72rem] text-[var(--muted)]">
+                      #{doc.number}
+                    </p>
+                  )}
+                  <p className="text-[0.72rem] text-[var(--muted)]">
+                    Issued {shortDate(doc.issued_at)}
+                  </p>
+                </div>
+
+                {locked ? (
+                  <div className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-black/[0.08] bg-[#f5f5f5] px-3 text-[0.72rem] text-[var(--muted)]">
+                    <Lock size={11} strokeWidth={2} />
+                    Requires certificate
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => handleDownload(doc)}
+                    disabled={downloading === doc.id}
+                    className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-black/[0.08] bg-[#f0f0f0] px-3 text-[0.75rem] font-semibold text-[var(--foreground)] transition hover:bg-[var(--primary)] hover:text-white disabled:opacity-50"
+                  >
+                    {downloading === doc.id
+                      ? <Loader2 size={12} className="animate-spin" />
+                      : <Download size={12} strokeWidth={2.2} />
+                    }
+                    {downloading === doc.id ? "…" : "Download"}
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

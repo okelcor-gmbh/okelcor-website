@@ -277,7 +277,11 @@ export default async function OrderDetailPage({ params }: Props) {
 
           {/* ── Trade Documents ── */}
           {order.trade_documents !== undefined && (
-            <TradeDocumentsCard documents={order.trade_documents} />
+            <TradeDocumentsCard
+              documents={order.trade_documents}
+              declarationRequired={order.declaration_required}
+              declarationStatus={order.declaration_status}
+            />
           )}
 
           {/* ── Status timeline ── */}
