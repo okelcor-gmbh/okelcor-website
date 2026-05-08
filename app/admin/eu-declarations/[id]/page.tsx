@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Clock, AlertTriangle } from "lucide-react";
 import {
   AdminUnauthorizedError,
   AdminForbiddenError,
@@ -48,6 +48,8 @@ type EuDeclarationFull = {
   admin_acknowledged_at?: string | null;
   notes?: string | null;
   admin_notes?: string | null;
+  reminder_count?: number | null;
+  last_reminder_at?: string | null;
   created_at: string;
   updated_at?: string | null;
 };
@@ -98,6 +100,107 @@ function BoolBadge({ label, value }: { label: string; value?: boolean | null }) 
           {value ? "Yes" : "No"}
         </span>
       )}
+    </div>
+  );
+}
+
+// ── Compliance helpers ────────────────────────────────────────────────────────
+
+type ComplianceUrgency = "normal" | "overdue" | "critical" | "signed" | "done";
+
+function computeUrgency(dec: EuDeclarationFull): {
+  urgency: ComplianceUrgency;
+  daysPending: number | null;
+} {
+  let daysPending: number | null = null;
+  const now = Date.now();
+  if (dec.status === "pending") {
+    daysPending = Math.floor((now - new Date(dec.created_at).getTime()) / 86_400_000);
+  } else if (dec.status === "signed") {
+    const from = dec.signed_at ?? dec.created_at;
+    daysPending = Math.floor((now - new Date(from).getTime()) / 86_400_000);
+  }
+  let urgency: ComplianceUrgency = "normal";
+  if (dec.status === "acknowledged") urgency = "done";
+  else if (dec.status === "signed") urgency = "signed";
+  else if (daysPending !== null && daysPending > 30) urgency = "critical";
+  else if (daysPending !== null && daysPending > 14) urgency = "overdue";
+  return { urgency, daysPending };
+}
+
+const URGENCY_COLORS: Record<ComplianceUrgency, { strip: string; badge: string; text: string; sub: string }> = {
+  normal:   { strip: "border-sky-200   bg-sky-50",   badge: "bg-sky-100   text-sky-700",   text: "text-sky-700",   sub: "text-sky-600" },
+  overdue:  { strip: "border-amber-200 bg-amber-50", badge: "bg-amber-100 text-amber-700", text: "text-amber-700", sub: "text-amber-600" },
+  critical: { strip: "border-red-200   bg-red-50",   badge: "bg-red-100   text-red-700",   text: "text-red-700",   sub: "text-red-600" },
+  signed:   { strip: "border-blue-200  bg-blue-50",  badge: "bg-blue-100  text-blue-700",  text: "text-blue-700",  sub: "text-blue-600" },
+  done:     { strip: "border-emerald-200 bg-emerald-50", badge: "bg-emerald-100 text-emerald-700", text: "text-emerald-700", sub: "text-emerald-600" },
+};
+
+const URGENCY_LABEL: Record<ComplianceUrgency, { state: string; desc: string }> = {
+  normal:   { state: "On Track",          desc: "Pending — within the 14-day window" },
+  overdue:  { state: "Overdue",           desc: "Pending — customer has not responded within 14 days" },
+  critical: { state: "Critical — Overdue", desc: "Pending — 30+ days without a customer signature" },
+  signed:   { state: "Awaiting Acknowledgement", desc: "Customer has signed — admin review needed" },
+  done:     { state: "Complete",          desc: "Declaration acknowledged by admin" },
+};
+
+function ComplianceStrip({ declaration }: { declaration: EuDeclarationFull }) {
+  const { urgency, daysPending } = computeUrgency(declaration);
+  const c = URGENCY_COLORS[urgency];
+  const l = URGENCY_LABEL[urgency];
+
+  return (
+    <div className={`grid grid-cols-2 gap-px overflow-hidden rounded-2xl border lg:grid-cols-4 ${c.strip}`}>
+
+      {/* Days Pending */}
+      <div className="flex flex-col gap-1 bg-white/70 px-5 py-4">
+        <p className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Days Pending</p>
+        {daysPending === null ? (
+          <p className="text-[0.875rem] text-[#1a1a1a]">—</p>
+        ) : (
+          <div className="flex flex-wrap items-center gap-2">
+            <p className={`text-[1.5rem] font-extrabold leading-none ${c.text}`}>{daysPending}</p>
+            {urgency === "critical" && (
+              <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.68rem] font-bold ${c.badge}`}>
+                <AlertTriangle size={9} strokeWidth={2.5} />
+                Critical
+              </span>
+            )}
+            {urgency === "overdue" && (
+              <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.68rem] font-bold ${c.badge}`}>
+                <Clock size={9} strokeWidth={2.5} />
+                Overdue
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Reminders Sent */}
+      <div className="flex flex-col gap-1 bg-white/70 px-5 py-4">
+        <p className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Reminders Sent</p>
+        {declaration.reminder_count != null ? (
+          <p className="text-[1.5rem] font-extrabold leading-none text-[#1a1a1a]">{declaration.reminder_count}</p>
+        ) : (
+          <p className="text-[0.875rem] text-[#1a1a1a]">—</p>
+        )}
+      </div>
+
+      {/* Last Reminder */}
+      <div className="flex flex-col gap-1 bg-white/70 px-5 py-4">
+        <p className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Last Reminder</p>
+        <p className="text-[0.875rem] text-[#1a1a1a]">{shortDate(declaration.last_reminder_at)}</p>
+      </div>
+
+      {/* Compliance State */}
+      <div className="flex flex-col gap-1.5 bg-white/70 px-5 py-4">
+        <p className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Compliance State</p>
+        <span className={`inline-flex w-fit items-center rounded-full px-2.5 py-0.5 text-[0.72rem] font-bold ${c.badge}`}>
+          {l.state}
+        </span>
+        <p className={`text-[0.72rem] ${c.sub}`}>{l.desc}</p>
+      </div>
+
     </div>
   );
 }
@@ -163,6 +266,9 @@ export default async function EuDeclarationDetailPage({ params }: Props) {
         initialStatus={declaration.status}
         orderRef={declaration.order_ref}
       />
+
+      {/* Compliance metrics strip */}
+      <ComplianceStrip declaration={declaration} />
 
       {/* Row 1: Order & Customer | Certificate Submission */}
       <div className="grid gap-6 lg:grid-cols-2">

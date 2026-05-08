@@ -49,7 +49,19 @@
       "Bash(grep -i \"api_url\\\\|NEXT_PUBLIC_API\" .env)",
       "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\({k:v for k,v in d.get\\('dependencies',{}\\).items\\(\\)}, indent=2\\)\\)\")",
       "PowerShell(Set-Location \"C:\\\\Users\\\\user\\\\Desktop\\\\Projects\\\\okelcor-website\"; npx tsc --noEmit 2>&1; echo \"Exit: $LASTEXITCODE\")",
-      "Bash(git checkout *)"
+      "Bash(git checkout *)",
+      "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")",
+      "Bash(git *)",
+      "PowerShell(head *)",
+      "Bash(php artisan *)",
+      "Read(//c/Users/user/Desktop/**)",
+      "Read(//c/Users/user/Documents/**)",
+      "Bash(where laragon *)",
+      "Read(//c/laragon/www/**)",
+      "Read(//c/Users/user/laragon/**)",
+      "Bash(python -c ' *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\user\\\\Desktop\\\\Projects\\\\okelcor-website\" -Force)",
+      "Bash(Select-Object Name, FullName)"
     ]
   }
 }
