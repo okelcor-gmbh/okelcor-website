@@ -9,6 +9,7 @@ type Status = "pending" | "signed" | "acknowledged";
 interface Props {
   id: number;
   initialStatus: Status;
+  initialAcknowledgedAt?: string | null;
   orderRef: string;
 }
 
@@ -27,7 +28,7 @@ const BADGE: Record<Status, string> = {
 const LABEL: Record<Status, string> = {
   pending:      "Pending — awaiting customer signature",
   signed:       "Signed — awaiting admin acknowledgement",
-  acknowledged: "Acknowledged — declaration complete",
+  acknowledged: "Acknowledged — compliance review completed.",
 };
 
 const TEXT: Record<Status, string> = {
@@ -36,20 +37,24 @@ const TEXT: Record<Status, string> = {
   acknowledged: "text-emerald-800",
 };
 
-export default function EuDeclarationActions({ id, initialStatus, orderRef }: Props) {
+export default function EuDeclarationActions({ id, initialStatus, initialAcknowledgedAt, orderRef }: Props) {
   const router = useRouter();
   const [status, setStatus] = useState<Status>(initialStatus);
+  const [adminAcknowledgedAt, setAdminAcknowledgedAt] = useState<string | null>(
+    initialAcknowledgedAt ?? null
+  );
   const [downloading, setDownloading] = useState(false);
   const [acknowledging, setAcknowledging] = useState(false);
   const [ackError, setAckError] = useState<string | null>(null);
 
-  // Sync local status whenever the server re-fetches (e.g. after router.refresh()).
-  // This is what makes the optimistic update honest: if the backend didn't actually
-  // persist the acknowledge, initialStatus stays "signed" after the refresh and
-  // the banner reverts — making the failure visible instead of silently hidden.
+  // Sync both status and acknowledged timestamp from server after router.refresh().
+  // If the backend persisted the change, initialStatus becomes "acknowledged" and
+  // initialAcknowledgedAt is set — both sync here. If not, state reverts and the
+  // Acknowledge button reappears, making the failure visible.
   useEffect(() => {
     setStatus(initialStatus);
-  }, [initialStatus]);
+    setAdminAcknowledgedAt(initialAcknowledgedAt ?? null);
+  }, [initialStatus, initialAcknowledgedAt]);
 
   async function handleDownload() {
     setDownloading(true);
@@ -81,9 +86,9 @@ export default function EuDeclarationActions({ id, initialStatus, orderRef }: Pr
         method: "PATCH",
       });
       if (res.ok) {
-        setStatus("acknowledged"); // optimistic
-        router.refresh();          // re-fetch server data; useEffect above will
-                                   // revert to "signed" if backend didn't persist
+        setStatus("acknowledged");
+        setAdminAcknowledgedAt(new Date().toISOString());
+        router.refresh();
       } else {
         const data = await res.json().catch(() => ({})) as { message?: string };
         setAckError(data.message ?? "Failed to acknowledge. Please try again.");
@@ -95,18 +100,24 @@ export default function EuDeclarationActions({ id, initialStatus, orderRef }: Pr
     }
   }
 
-  const canDownload = status === "signed" || status === "acknowledged";
+  // Use admin_acknowledged_at as an additional source of truth — the backend may
+  // set this field even if the status field has a sync lag.
+  const isAcknowledged = status === "acknowledged" || adminAcknowledgedAt != null;
+  const effectiveStatus: Status = isAcknowledged ? "acknowledged" : status;
+
+  const canDownload = effectiveStatus === "signed" || effectiveStatus === "acknowledged";
+  const canAcknowledge = !isAcknowledged && status === "signed";
 
   return (
-    <div className={`flex flex-col gap-4 rounded-2xl border px-5 py-5 ${BANNER[status]}`}>
+    <div className={`flex flex-col gap-4 rounded-2xl border px-5 py-5 ${BANNER[effectiveStatus]}`}>
 
       {/* Status badge + label */}
       <div className="flex items-center gap-3">
-        <span className={`inline-flex items-center rounded-full px-3 py-1 text-[0.75rem] font-bold capitalize ${BADGE[status]}`}>
-          {status}
+        <span className={`inline-flex items-center rounded-full px-3 py-1 text-[0.75rem] font-bold capitalize ${BADGE[effectiveStatus]}`}>
+          {effectiveStatus}
         </span>
-        <p className={`text-[0.875rem] font-semibold ${TEXT[status]}`}>
-          {LABEL[status]}
+        <p className={`text-[0.875rem] font-semibold ${TEXT[effectiveStatus]}`}>
+          {LABEL[effectiveStatus]}
         </p>
       </div>
 
@@ -126,7 +137,7 @@ export default function EuDeclarationActions({ id, initialStatus, orderRef }: Pr
             </button>
           )}
 
-          {status === "signed" && (
+          {canAcknowledge && (
             <button
               type="button"
               onClick={handleAcknowledge}

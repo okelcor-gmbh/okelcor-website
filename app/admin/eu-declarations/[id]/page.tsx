@@ -112,16 +112,23 @@ function computeUrgency(dec: EuDeclarationFull): {
   urgency: ComplianceUrgency;
   daysPending: number | null;
 } {
+  // Use admin_acknowledged_at as the primary source of truth — status field may
+  // lag behind if the backend sets the timestamp without updating the status column.
+  const isAcknowledged = dec.status === "acknowledged" || !!dec.admin_acknowledged_at;
+
   let daysPending: number | null = null;
   const now = Date.now();
-  if (dec.status === "pending") {
-    daysPending = Math.floor((now - new Date(dec.created_at).getTime()) / 86_400_000);
-  } else if (dec.status === "signed") {
-    const from = dec.signed_at ?? dec.created_at;
-    daysPending = Math.floor((now - new Date(from).getTime()) / 86_400_000);
+  if (!isAcknowledged) {
+    if (dec.status === "pending") {
+      daysPending = Math.floor((now - new Date(dec.created_at).getTime()) / 86_400_000);
+    } else if (dec.status === "signed") {
+      const from = dec.signed_at ?? dec.created_at;
+      daysPending = Math.floor((now - new Date(from).getTime()) / 86_400_000);
+    }
   }
+
   let urgency: ComplianceUrgency = "normal";
-  if (dec.status === "acknowledged") urgency = "done";
+  if (isAcknowledged) urgency = "done";
   else if (dec.status === "signed") urgency = "signed";
   else if (daysPending !== null && daysPending > 30) urgency = "critical";
   else if (daysPending !== null && daysPending > 14) urgency = "overdue";
@@ -137,11 +144,11 @@ const URGENCY_COLORS: Record<ComplianceUrgency, { strip: string; badge: string; 
 };
 
 const URGENCY_LABEL: Record<ComplianceUrgency, { state: string; desc: string }> = {
-  normal:   { state: "On Track",          desc: "Pending — within the 14-day window" },
-  overdue:  { state: "Overdue",           desc: "Pending — customer has not responded within 14 days" },
-  critical: { state: "Critical — Overdue", desc: "Pending — 30+ days without a customer signature" },
+  normal:   { state: "On Track",               desc: "Pending — within the 14-day window" },
+  overdue:  { state: "Overdue",                desc: "Pending — customer has not responded within 14 days" },
+  critical: { state: "Critical — Overdue",     desc: "Pending — 30+ days without a customer signature" },
   signed:   { state: "Awaiting Acknowledgement", desc: "Customer has signed — admin review needed" },
-  done:     { state: "Complete",          desc: "Declaration acknowledged by admin" },
+  done:     { state: "Compliance Completed",   desc: "Declaration acknowledged by admin" },
 };
 
 function ComplianceStrip({ declaration }: { declaration: EuDeclarationFull }) {
@@ -264,6 +271,7 @@ export default async function EuDeclarationDetailPage({ params }: Props) {
       <EuDeclarationActions
         id={declaration.id}
         initialStatus={declaration.status}
+        initialAcknowledgedAt={declaration.admin_acknowledged_at}
         orderRef={declaration.order_ref}
       />
 
