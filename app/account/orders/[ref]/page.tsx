@@ -272,6 +272,8 @@ export default async function OrderDetailPage({ params }: Props) {
               status={order.declaration_status}
               signedAt={order.declaration_signed_at}
               signedName={order.declaration_signed_name}
+              paymentStatus={order.payment_status}
+              orderStatus={order.status}
             />
           )}
 

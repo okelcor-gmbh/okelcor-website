@@ -13,6 +13,8 @@ interface Props {
   status?: DeclarationStatus | null;
   signedAt?: string | null;
   signedName?: string | null;
+  paymentStatus?: string | null;
+  orderStatus?: string | null;
 }
 
 // ── Constants ──────────────────────────────────────────────────────────────────
@@ -156,6 +158,8 @@ export default function EntryCertificateCard({
   status,
   signedAt,
   signedName,
+  paymentStatus,
+  orderStatus,
 }: Props) {
   const [localStatus, setLocalStatus] = useState<DeclarationStatus | null>(status ?? null);
   const [localSignedAt, setLocalSignedAt] = useState<string | null>(signedAt ?? null);
@@ -419,6 +423,37 @@ export default function EntryCertificateCard({
             </p>
           </div>
         </div>
+      </div>
+    );
+  }
+
+  // ── Payment not yet confirmed ────────────────────────────────────────────────
+  // Only gate when the backend explicitly tells us payment_status.
+  // If paymentStatus is undefined (backend hasn't returned it yet), skip this guard.
+  if (paymentStatus !== undefined && paymentStatus !== null && paymentStatus !== "paid") {
+    return (
+      <div className="rounded-[18px] bg-[#efefef] p-4 sm:rounded-[22px] sm:p-5 lg:p-6">
+        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--muted)] sm:text-[11px]">
+          EU Entry Certificate
+        </p>
+        <p className="mt-2 text-[0.83rem] leading-relaxed text-[var(--muted)]">
+          Complete payment first. The EU Entry Certificate will be requested after delivery.
+        </p>
+      </div>
+    );
+  }
+
+  // ── Paid but not yet delivered ────────────────────────────────────────────────
+  // Only gate when the backend explicitly tells us order status.
+  if (orderStatus !== undefined && orderStatus !== null && orderStatus !== "delivered") {
+    return (
+      <div className="rounded-[18px] bg-[#efefef] p-4 sm:rounded-[22px] sm:p-5 lg:p-6">
+        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--muted)] sm:text-[11px]">
+          EU Entry Certificate
+        </p>
+        <p className="mt-2 text-[0.83rem] leading-relaxed text-[var(--muted)]">
+          After delivery, you will be asked to confirm receipt for VAT compliance.
+        </p>
       </div>
     );
   }
