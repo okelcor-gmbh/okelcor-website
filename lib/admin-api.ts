@@ -182,6 +182,16 @@ export type ShipmentEvent = {
   created_at?: string;
 };
 
+export type TradeDocument = {
+  id: number;
+  type: "proforma_invoice" | "commercial_invoice" | "packing_list" | "other" | string;
+  number?: string | null;
+  status: "draft" | "issued" | "sent" | string;
+  issued_at?: string | null;
+  sent_at?: string | null;
+  original_filename?: string | null;
+};
+
 export type AdminOrderFull = AdminOrder & {
   phone?: string;
   company_name?: string;
@@ -204,6 +214,8 @@ export type AdminOrderFull = AdminOrder & {
   declaration_status?: "pending" | "signed" | "acknowledged" | null;
   declaration_id?: number | null;
   declaration_signed_at?: string | null;
+  // Trade documents (proforma, commercial invoice, packing list, etc.)
+  trade_documents?: TradeDocument[];
 };
 
 export type AdminQuote = {

@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { updateOrderStatus, cancelOrder, deleteOrder, addShipmentEvent, updateShipmentEvent, deleteShipmentEvent } from "@/app/admin/orders/actions";
 import type { AdminOrderFull, AdminOrderLog, ShipmentEvent } from "@/lib/admin-api";
+import TradeDocumentsCard from "@/components/admin/trade-documents-card";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -686,6 +687,12 @@ export default function OrderDetail({
           </div>
         </div>
       </div>
+
+      {/* ── Trade Documents ── */}
+      <TradeDocumentsCard
+        orderId={order.id}
+        initialDocuments={order.trade_documents ?? []}
+      />
 
       {/* ── EU Entry Certificate (Gelangensbestätigung) ── */}
       {order.declaration_required != null && (

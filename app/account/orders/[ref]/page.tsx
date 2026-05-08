@@ -7,6 +7,7 @@ import Footer from "@/components/footer";
 import ShipmentTracker from "@/components/account/shipment-tracker";
 import OrderPaymentCard from "@/components/account/order-payment-card";
 import EntryCertificateCard from "@/components/account/entry-certificate-card";
+import TradeDocumentsCard from "@/components/account/trade-documents-card";
 import { getCustomerFromCookie } from "@/lib/get-customer";
 import { StatusBadge, formatDate, type Order, type OrderStatus } from "../page";
 
@@ -272,6 +273,11 @@ export default async function OrderDetailPage({ params }: Props) {
               signedAt={order.declaration_signed_at}
               signedName={order.declaration_signed_name}
             />
+          )}
+
+          {/* ── Trade Documents ── */}
+          {order.trade_documents !== undefined && (
+            <TradeDocumentsCard documents={order.trade_documents} />
           )}
 
           {/* ── Status timeline ── */}
