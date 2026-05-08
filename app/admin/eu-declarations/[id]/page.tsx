@@ -7,6 +7,7 @@ import {
   AdminForbiddenError,
   adminApiFetch,
 } from "@/lib/admin-api";
+import EuDeclarationActions from "@/components/admin/eu-declaration-actions";
 
 export const metadata: Metadata = {
   title: "EU Declaration — Admin",
@@ -18,14 +19,33 @@ type EuDeclarationFull = {
   id: number;
   order_id: number;
   order_ref: string;
+  // Customer & company
   customer_name: string;
   company_name?: string | null;
   email?: string | null;
+  // Delivery address snapshot from order
+  delivery_address?: string | null;
+  delivery_city?: string | null;
+  delivery_postal_code?: string | null;
   country?: string | null;
   vat_number?: string | null;
+  // Goods
+  goods_description?: string | null;
+  // Form fields submitted by the customer
+  month_year_received?: string | null;
+  member_state_of_entry?: string | null;
+  place_of_entry?: string | null;
+  self_transported?: boolean | null;
+  month_year_transport_ended?: string | null;
+  // Representative & signature
+  representative_name?: string | null;
+  representative_title?: string | null;
+  signed_name?: string | null;
+  // Status & timestamps
   status: "pending" | "signed" | "acknowledged";
   signed_at?: string | null;
   signed_document_url?: string | null;
+  admin_acknowledged_at?: string | null;
   notes?: string | null;
   admin_notes?: string | null;
   created_at: string;
@@ -33,18 +53,6 @@ type EuDeclarationFull = {
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-const STATUS_STYLES: Record<string, string> = {
-  pending:      "bg-amber-100 text-amber-700",
-  signed:       "bg-blue-100 text-blue-700",
-  acknowledged: "bg-emerald-100 text-emerald-700",
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  pending:      "Pending — awaiting customer signature",
-  signed:       "Signed — awaiting admin acknowledgement",
-  acknowledged: "Acknowledged — declaration complete",
-};
 
 function shortDate(iso?: string | null): string {
   if (!iso) return "—";
@@ -56,11 +64,40 @@ function shortDate(iso?: string | null): string {
   } catch { return iso; }
 }
 
-function InfoRow({ label, value }: { label: string; value?: string | null }) {
+function InfoRow({
+  label,
+  value,
+  mono,
+  span,
+}: {
+  label: string;
+  value?: string | null;
+  mono?: boolean;
+  span?: boolean;
+}) {
+  return (
+    <div className={`flex flex-col gap-0.5 ${span ? "sm:col-span-2" : ""}`}>
+      <p className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">{label}</p>
+      <p className={`text-[0.875rem] text-[#1a1a1a] ${mono ? "font-mono tracking-wide" : ""}`}>
+        {value ?? "—"}
+      </p>
+    </div>
+  );
+}
+
+function BoolBadge({ label, value }: { label: string; value?: boolean | null }) {
   return (
     <div className="flex flex-col gap-0.5">
       <p className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">{label}</p>
-      <p className="text-[0.875rem] text-[#1a1a1a]">{value ?? "—"}</p>
+      {value == null ? (
+        <p className="text-[0.875rem] text-[#1a1a1a]">—</p>
+      ) : (
+        <span className={`inline-flex w-fit items-center rounded-full px-2.5 py-0.5 text-[0.75rem] font-semibold ${
+          value ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-600"
+        }`}>
+          {value ? "Yes" : "No"}
+        </span>
+      )}
     </div>
   );
 }
@@ -120,28 +157,14 @@ export default async function EuDeclarationDetailPage({ params }: Props) {
         </p>
       </div>
 
-      {/* Status banner */}
-      <div className={`flex items-center gap-3 rounded-2xl border px-5 py-4 ${
-        declaration.status === "acknowledged"
-          ? "border-emerald-200 bg-emerald-50"
-          : declaration.status === "signed"
-          ? "border-blue-200 bg-blue-50"
-          : "border-amber-200 bg-amber-50"
-      }`}>
-        <span className={`inline-flex items-center rounded-full px-3 py-1 text-[0.75rem] font-bold capitalize ${STATUS_STYLES[declaration.status] ?? "bg-gray-100 text-gray-500"}`}>
-          {declaration.status}
-        </span>
-        <p className={`text-[0.875rem] font-semibold ${
-          declaration.status === "acknowledged"
-            ? "text-emerald-800"
-            : declaration.status === "signed"
-            ? "text-blue-800"
-            : "text-amber-800"
-        }`}>
-          {STATUS_LABELS[declaration.status] ?? declaration.status}
-        </p>
-      </div>
+      {/* Status banner + actions — client component owns both so status updates optimistically */}
+      <EuDeclarationActions
+        id={declaration.id}
+        initialStatus={declaration.status}
+        orderRef={declaration.order_ref}
+      />
 
+      {/* Row 1: Order & Customer | Certificate Submission */}
       <div className="grid gap-6 lg:grid-cols-2">
 
         {/* Order & Customer */}
@@ -150,7 +173,8 @@ export default async function EuDeclarationDetailPage({ params }: Props) {
             Order &amp; Customer
           </p>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-0.5">
+            {/* Order ref gets full width */}
+            <div className="flex flex-col gap-0.5 sm:col-span-2">
               <p className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Order Ref</p>
               <Link
                 href={`/admin/orders/${declaration.order_ref}`}
@@ -159,40 +183,67 @@ export default async function EuDeclarationDetailPage({ params }: Props) {
                 {declaration.order_ref}
               </Link>
             </div>
-            <InfoRow label="Customer"     value={declaration.customer_name} />
-            <InfoRow label="Company"      value={declaration.company_name} />
-            <InfoRow label="Email"        value={declaration.email} />
-            <InfoRow label="Country"      value={declaration.country} />
-            <InfoRow label="VAT Number"   value={declaration.vat_number} />
+            <InfoRow label="Customer"       value={declaration.customer_name} />
+            <InfoRow label="Company"        value={declaration.company_name} />
+            <InfoRow label="Email"          value={declaration.email} />
+            <InfoRow label="Country"        value={declaration.country} />
+            <InfoRow label="VAT Number"     value={declaration.vat_number} mono />
+            <InfoRow label="Street Address" value={declaration.delivery_address} />
+            <InfoRow label="City"           value={declaration.delivery_city} />
+            <InfoRow label="Postal Code"    value={declaration.delivery_postal_code} />
           </div>
         </div>
 
-        {/* Declaration Details */}
+        {/* Certificate details — form fields submitted by the customer */}
         <div className="rounded-2xl bg-white p-6 shadow-sm">
           <p className="mb-5 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
-            Declaration Details
+            Certificate Details
           </p>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <InfoRow label="Created"    value={shortDate(declaration.created_at)} />
-            <InfoRow label="Signed At"  value={shortDate(declaration.signed_at)} />
-            <InfoRow label="Updated"    value={shortDate(declaration.updated_at)} />
+            {declaration.goods_description && (
+              <InfoRow
+                label="Goods Description"
+                value={declaration.goods_description}
+                span
+              />
+            )}
+            <InfoRow label="Month / Year Received"    value={declaration.month_year_received} />
+            <InfoRow label="EU Member State"           value={declaration.member_state_of_entry} />
+            <InfoRow
+              label="Place of Entry / Customs Office"
+              value={declaration.place_of_entry}
+              span
+            />
+            <BoolBadge label="Own Transport"           value={declaration.self_transported} />
+            {declaration.self_transported ? (
+              <InfoRow label="Transport Ended"         value={declaration.month_year_transport_ended} />
+            ) : (
+              <div /> /* keep grid aligned */
+            )}
           </div>
+        </div>
+      </div>
 
-          {declaration.signed_document_url && (
-            <div className="mt-4">
-              <p className="mb-1.5 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">
-                Signed Document
-              </p>
-              <a
-                href={declaration.signed_document_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-full border border-[#E85C1A]/30 bg-[#fff5f2] px-4 py-1.5 text-[0.8rem] font-semibold text-[#E85C1A] transition hover:bg-[#fff0ea]"
-              >
-                Download / View Document
-              </a>
-            </div>
-          )}
+      {/* Row 2: Representative & Signature */}
+      <div className="rounded-2xl bg-white p-6 shadow-sm">
+        <p className="mb-5 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+          Representative &amp; Signature
+        </p>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <InfoRow label="Representative Name"   value={declaration.representative_name} />
+          <InfoRow label="Title / Position"      value={declaration.representative_title} />
+          <InfoRow label="Signed Name (print)"   value={declaration.signed_name} mono />
+          <InfoRow label="Signed At"             value={shortDate(declaration.signed_at)} />
+        </div>
+        {declaration.admin_acknowledged_at && (
+          <div className="mt-5 border-t border-black/[0.05] pt-4">
+            <InfoRow label="Acknowledged At" value={shortDate(declaration.admin_acknowledged_at)} />
+          </div>
+        )}
+        <div className="mt-5 grid grid-cols-1 gap-4 border-t border-black/[0.05] pt-4 sm:grid-cols-3">
+          <InfoRow label="Declaration ID" value={String(declaration.id)} mono />
+          <InfoRow label="Created"        value={shortDate(declaration.created_at)} />
+          <InfoRow label="Last Updated"   value={shortDate(declaration.updated_at)} />
         </div>
       </div>
 
@@ -205,13 +256,17 @@ export default async function EuDeclarationDetailPage({ params }: Props) {
           <div className="flex flex-col gap-4">
             {declaration.notes && (
               <div>
-                <p className="mb-1 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Customer Notes</p>
+                <p className="mb-1 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">
+                  Customer Notes
+                </p>
                 <p className="text-[0.875rem] text-[#1a1a1a]">{declaration.notes}</p>
               </div>
             )}
             {declaration.admin_notes && (
               <div className="rounded-xl bg-amber-50 px-4 py-3">
-                <p className="mb-1 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-amber-600">Internal Notes</p>
+                <p className="mb-1 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-amber-600">
+                  Internal Notes
+                </p>
                 <p className="text-[0.875rem] text-[#1a1a1a]">{declaration.admin_notes}</p>
               </div>
             )}

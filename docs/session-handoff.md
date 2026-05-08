@@ -60,6 +60,120 @@ Development environment: Windows 11, VS Code, Node.js / npm
 
 ---
 
+## Completed in Latest Session — Phase 2B-4: Admin EU Declaration Detail Overhaul (2026-05-08)
+
+### Goal
+Tighten the admin EU Entry Certificate detail page: surface all certificate fields, add Download Certificate and Acknowledge Declaration actions, and wire up admin-authenticated proxy routes for both.
+
+### New: `app/api/admin/eu-declarations/[id]/download/route.ts`
+GET proxy. Reads `admin_token` cookie, forwards to `GET /api/v1/admin/eu-declarations/{id}/download`. Preserves `Content-Type` + `Content-Disposition` headers for PDF stream.
+
+### New: `app/api/admin/eu-declarations/[id]/acknowledge/route.ts`
+PATCH proxy. Reads `admin_token` cookie, forwards to `PATCH /api/v1/admin/eu-declarations/{id}/acknowledge`. Returns Laravel response body + status unchanged.
+
+### New: `components/admin/eu-declaration-actions.tsx`
+`"use client"` component. Owns the status banner AND the action buttons so that the banner updates optimistically when the admin acknowledges (no page reload needed).
+
+**Props:** `{ id, initialStatus, orderRef }`
+
+**States managed:**
+- `status` — drives the banner colour + badge + label, and which buttons are visible
+- `downloading` / `acknowledging` — per-button spinners + disabled states
+- `ackError` — inline error message below the buttons
+
+**Download Certificate button:**
+- Visible when `status === "signed"` or `"acknowledged"`
+- Calls `/api/admin/eu-declarations/{id}/download`, streams `blob()` → `createObjectURL()` → programmatic `<a>` click
+- Filename: `EU-Certificate-{orderRef}.pdf`
+
+**Acknowledge Declaration button:**
+- Visible only when `status === "signed"`
+- Calls PATCH `/api/admin/eu-declarations/${id}/acknowledge`
+- On success: optimistically sets `status = "acknowledged"` — banner flips to emerald, button disappears
+- On error: shows backend `message` field below the buttons
+
+### Updated: `app/admin/eu-declarations/[id]/page.tsx`
+
+**`EuDeclarationFull` type expanded** with all certificate fields:
+```typescript
+delivery_address?, delivery_city?, delivery_postal_code?,  // order delivery snapshot
+goods_description?,
+month_year_received?, member_state_of_entry?, place_of_entry?,
+self_transported?: boolean | null,
+month_year_transport_ended?,
+representative_name?, representative_title?,
+signed_name?,
+admin_acknowledged_at?,
+```
+
+**Removed:** static server-rendered status banner (replaced by `EuDeclarationActions` client component).
+
+**Added:** Three-card layout:
+1. **Order & Customer** — Order Ref (linked), Customer, Company, Email, Country, VAT Number, Street Address, City, Postal Code
+2. **Certificate Details** — Goods Description (if present), Month/Year Received, EU Member State, Place of Entry, Own Transport (Yes/No badge), Transport Ended (if self-transported)
+3. **Representative & Signature** — Representative Name, Title/Position, Signed Name (mono), Signed At, Admin Acknowledged At (if set), Declaration ID, Created, Last Updated
+
+**`BoolBadge` helper** — renders boolean fields as emerald/grey pill badges.
+**`InfoRow`** — gains `mono` and `span` props for VAT/signature values and full-width rows.
+
+TypeScript check: **0 errors**.
+
+---
+
+### Backend changes required (Laravel — `api.okelcor.de`)
+
+#### 1. `PATCH /api/v1/admin/eu-declarations/{id}/acknowledge`
+Must be added. Suggested implementation:
+```php
+// AdminEuDeclarationController::acknowledge()
+public function acknowledge($id)
+{
+    $declaration = EuDeclaration::findOrFail($id);
+    $declaration->update([
+        'status'                 => 'acknowledged',
+        'admin_acknowledged_at'  => now(),
+        'admin_acknowledged_by'  => auth()->id(),
+    ]);
+    return response()->json(['data' => $declaration, 'message' => 'Declaration acknowledged.']);
+}
+// Route:
+Route::patch('eu-declarations/{id}/acknowledge', [AdminEuDeclarationController::class, 'acknowledge']);
+```
+
+#### 2. `GET /api/v1/admin/eu-declarations/{id}/download`
+Must return the signed PDF. Suggested implementation:
+```php
+public function download($id)
+{
+    $declaration = EuDeclaration::findOrFail($id);
+    return Storage::download(
+        $declaration->signed_document_path,
+        "EU-Certificate-{$declaration->order_ref}.pdf"
+    );
+}
+```
+
+#### 3. `GET /api/v1/admin/eu-declarations/{id}` — include all form fields
+Response must include all fields submitted by the customer:
+`month_year_received`, `member_state_of_entry`, `place_of_entry`, `self_transported`, `month_year_transport_ended`, `representative_name`, `representative_title`, `signed_name`, `admin_acknowledged_at`
+
+#### 4. Address snapshot fix
+When the customer POSTs `POST /api/v1/auth/orders/{ref}/declaration`, the backend must snapshot the delivery address from the order onto the `eu_declarations` record:
+```php
+$declaration->update([
+    ...
+    'delivery_address'      => $order->delivery_address,
+    'delivery_city'         => $order->delivery_city,
+    'delivery_postal_code'  => $order->delivery_postal_code,
+    'country'               => $order->delivery_country ?? $order->country,
+    'vat_number'            => $order->customer->vat_number,
+    'goods_description'     => $order->items->map(fn($i) => "{$i->quantity}× {$i->product_name}")->implode(', '),
+]);
+```
+This ensures the PDF and the admin view always reflect the actual delivery address, not the account billing address.
+
+---
+
 ## Completed in Latest Session — Phase 2B-3: Customer EU Entry Certificate Form (2026-05-07)
 
 **Goal:** Replace the read-only declaration notice in the customer order detail with a fully functional Gelangensbestätigung signing form so customers can complete the declaration directly from their account, without contacting Okelcor.
@@ -1456,6 +1570,13 @@ Email template: dark Okelcor header, migration announcement, "Set Your Password 
 ### High Priority
 
 1. **"No entry certificate exists for this order" — backend fix required** — Customer submits the EU Entry Certificate form successfully (client-side validation passes, proxy reaches backend), but `POST /api/v1/auth/orders/{ref}/declaration` returns this error. Root cause: the endpoint expects an existing `eu_declarations` row but older reverse-charge orders created before Phase 2B were never given one. Backend fix: if no row exists and `order.is_reverse_charge === true` (or `order.tax_treatment === "reverse_charge"`), create a pending `eu_declarations` row on demand via `EuDeclarationService::createForOrder($order)` before processing the signature. The Laravel backend is hosted separately at `api.okelcor.de` — not in this repository.
+
+2. **Admin EU Declaration — backend endpoints not yet added (Phase 2B-4 frontend ready)** — Four backend changes needed (see Phase 2B-4 section above):
+   - `PATCH /api/v1/admin/eu-declarations/{id}/acknowledge` — must be added
+   - `GET /api/v1/admin/eu-declarations/{id}/download` — must be added
+   - `GET /api/v1/admin/eu-declarations/{id}` — must return all form fields
+   - Address snapshot fix — delivery address/VAT must be snapshotted onto `eu_declarations` at signing time
+   Frontend proxy routes and UI are fully wired and waiting.
 
 2. **Stripe `order_ref` not displayed on return page — backend fix required** — Root cause confirmed: Laravel's `POST /payments/create-session` does not return `order_ref` because the order is created by the Stripe webhook, not at session creation time. Frontend is already wired and waiting. Backend must: (a) create the `Order` record at session creation time with `status: pending`, `payment_status: pending`, (b) return `order_ref` in `data.order_ref`, (c) embed it in the Stripe `success_url` as `?order_ref=OKL-XXXXX`, (d) have the webhook update the existing order (paid + confirmed) instead of creating a new one. No frontend changes needed.
 
