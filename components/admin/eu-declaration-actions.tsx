@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Download, CheckCheck } from "lucide-react";
 
 type Status = "pending" | "signed" | "acknowledged";
@@ -36,10 +37,19 @@ const TEXT: Record<Status, string> = {
 };
 
 export default function EuDeclarationActions({ id, initialStatus, orderRef }: Props) {
+  const router = useRouter();
   const [status, setStatus] = useState<Status>(initialStatus);
   const [downloading, setDownloading] = useState(false);
   const [acknowledging, setAcknowledging] = useState(false);
   const [ackError, setAckError] = useState<string | null>(null);
+
+  // Sync local status whenever the server re-fetches (e.g. after router.refresh()).
+  // This is what makes the optimistic update honest: if the backend didn't actually
+  // persist the acknowledge, initialStatus stays "signed" after the refresh and
+  // the banner reverts — making the failure visible instead of silently hidden.
+  useEffect(() => {
+    setStatus(initialStatus);
+  }, [initialStatus]);
 
   async function handleDownload() {
     setDownloading(true);
@@ -71,7 +81,9 @@ export default function EuDeclarationActions({ id, initialStatus, orderRef }: Pr
         method: "PATCH",
       });
       if (res.ok) {
-        setStatus("acknowledged");
+        setStatus("acknowledged"); // optimistic
+        router.refresh();          // re-fetch server data; useEffect above will
+                                   // revert to "signed" if backend didn't persist
       } else {
         const data = await res.json().catch(() => ({})) as { message?: string };
         setAckError(data.message ?? "Failed to acknowledge. Please try again.");
