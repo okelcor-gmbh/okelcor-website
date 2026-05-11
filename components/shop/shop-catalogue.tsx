@@ -193,28 +193,33 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pendingAutoSearch]);
 
-  // Load promotions on mount — split into inline banner + campaign hero
+  // Load promotions on mount — split into inline strip + campaign hero
   useEffect(() => {
     fetch("/api/promotions/active", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((json) => {
+        console.log("[specials] promotions response", json);
         const all: RawPromotion[] = Array.isArray(json?.data) ? json.data : [];
 
-        // Backend uses "shop_inline" for brand campaigns, not "shop_hero".
-        // Prefer shop_hero if it ever exists; fall back to the first shop_inline
-        // promotion that has brand_name set (that's the campaign, not a plain strip).
-        const hero =
-          all.find((p) => p.placement === "shop_hero") ??
-          all.find((p) => (p.placement === "shop_inline" || p.placement === "both") && p.brand_name);
+        // Campaign hero: first promotion whose placement is one of the known
+        // campaign slots AND that has brand_name set.
+        // Backend currently uses "shop_inline" — "shop_hero" is supported for future.
+        const CAMPAIGN_PLACEMENTS = ["shop_hero", "shop_inline", "both"];
+        const hero = all.find(
+          (p) => CAMPAIGN_PLACEMENTS.includes(p.placement ?? "") && p.brand_name,
+        );
 
-        // Inline strip promos: unplaced, shop_inline, or both — but exclude the
-        // campaign hero so it doesn't render twice (once as banner, once as strip).
+        console.log("[specials] selected campaignPromo", hero ?? "none — no matching placement+brand_name");
+        console.log("[specials] campaignBrand", hero?.brand_name ?? null);
+
+        // Inline strip: unplaced / shop_inline / both, excluding the campaign hero
+        // so it doesn't render both as a strip and a full banner.
         setInlinePromos(
           all.filter(
             (p) =>
               (!p.placement || p.placement === "shop_inline" || p.placement === "both") &&
               p.id !== hero?.id,
-          )
+          ),
         );
 
         if (hero) {
@@ -235,25 +240,23 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
       .catch(() => {});
   }, []);
 
-  // Fetch specials products as soon as the campaign brand is known.
-  // Applies the same customer-type targeting as the computed campaignPromo
-  // value below, but inline here to avoid a forward-reference TDZ error.
+  // Fetch specials products whenever campaign brand becomes known.
+  // Runs for all customer types — targeting only affects product card badges,
+  // not whether the specials section itself is shown.
   useEffect(() => {
-    const promo = campaignPromoRaw;
-    if (!promo?.brand_name) { setSpecialsLoading(false); return; }
+    const brand = campaignPromoRaw?.brand_name;
+    if (!brand) { setSpecialsLoading(false); return; }
 
-    const ct = promo.customer_type_target;
-    if (ct === "b2c" && customerType === "b2b") { setSpecialsLoading(false); return; }
-    if (ct === "b2b" && customerType !== "b2b") { setSpecialsLoading(false); return; }
-
-    const brand = promo.brand_name;
     setSpecialsLoading(true);
     const params = new URLSearchParams({ brand, locale, limit: "8" });
     if (customerType === "b2b" || customerType === "b2c") {
       params.set("segment", customerType);
     }
 
-    fetch(`${PRODUCTS_API}?${params.toString()}`, { cache: "no-store" })
+    const fetchUrl = `${PRODUCTS_API}?${params.toString()}`;
+    console.log("[specials] fetch url", fetchUrl);
+
+    fetch(fetchUrl, { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((json) => {
         if (!json) return;
@@ -262,12 +265,13 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
           .map(toProduct)
           .filter((p: Product) => p.price > 0)
           .slice(0, 8);
+        console.log("[specials] products count", list.length);
         setSpecialsProducts(list);
       })
       .catch(() => {})
       .finally(() => setSpecialsLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [campaignPromoRaw?.brand_name, campaignPromoRaw?.customer_type_target, customerType, locale]);
+  }, [campaignPromoRaw?.brand_name, customerType, locale]);
 
   // Load brands + specs on mount
   useEffect(() => {
@@ -405,23 +409,20 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
     searchText.trim() || priceMin || priceMax || selBrand || selType ||
     selWidth || selHeight || selRim || selSeason || selSpeed || selLoad;
 
-  // ── Campaign targeting (re-derived on every render when customerType changes) ──
-  // B2C campaigns: visible to guests + b2c, hidden from b2b.
-  // B2B campaigns: visible only to b2b.
-  // "all" or no target: visible to everyone.
+  // ── Campaign derived values ───────────────────────────────────────────────────
 
-  const campaignPromo: CampaignPromotion | null = (() => {
-    if (!campaignPromoRaw) return null;
+  // Brand name that drives banner + specials visibility.
+  // Not filtered by customer type — the section is visible to all users.
+  const campaignBrand = campaignPromoRaw?.brand_name ?? null;
+
+  // Product-card discount badge: only shown to the campaign's target segment.
+  const activeCampaign: ActiveCampaign | null = (() => {
+    if (!campaignPromoRaw?.brand_name || campaignPromoRaw?.discount_pct == null) return null;
     const ct = campaignPromoRaw.customer_type_target;
     if (ct === "b2c" && customerType === "b2b") return null;
     if (ct === "b2b" && customerType !== "b2b") return null;
-    return campaignPromoRaw;
+    return { brand_name: campaignPromoRaw.brand_name, discount_pct: campaignPromoRaw.discount_pct };
   })();
-
-  const activeCampaign: ActiveCampaign | null =
-    campaignPromo?.brand_name && campaignPromo?.discount_pct != null
-      ? { brand_name: campaignPromo.brand_name, discount_pct: campaignPromo.discount_pct }
-      : null;
 
   // ── CTA handler: apply URL params as filters without full navigation ──────────
 
@@ -455,27 +456,24 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
     <section className="w-full bg-[#f5f5f5] py-6 md:py-10">
       <div className="tesla-shell">
 
-        {/* ── Campaign hero banner — below intro, above filters ── */}
-        {campaignPromo && (
-          <ShopCampaignBanner promo={campaignPromo} onCtaClick={handleCampaignCta} />
-        )}
-
-        {/* ── Specials section — loaded in parallel with promotions, no click required ── */}
-        {campaignPromo?.brand_name && (
-          <SpecialsProductList
-            products={specialsProducts}
-            loading={specialsLoading}
-            brandName={campaignPromo.brand_name}
-            discountPct={campaignPromo.discount_pct}
-            customerType={customerType}
-            onViewAll={() => {
-              const brand = campaignPromo.brand_name;
-              handleCampaignCta(
-                campaignPromo.button_link ??
-                  `/shop?brand=${encodeURIComponent(brand ?? "")}`,
-              );
-            }}
-          />
+        {/* ── Campaign banner + specials — rendered for all users when brand_name set ── */}
+        {campaignBrand && campaignPromoRaw && (
+          <>
+            <ShopCampaignBanner promo={campaignPromoRaw} onCtaClick={handleCampaignCta} />
+            <SpecialsProductList
+              products={specialsProducts}
+              loading={specialsLoading}
+              brandName={campaignBrand}
+              discountPct={campaignPromoRaw.discount_pct}
+              customerType={customerType}
+              onViewAll={() =>
+                handleCampaignCta(
+                  campaignPromoRaw.button_link ??
+                    `/shop?brand=${encodeURIComponent(campaignBrand)}`,
+                )
+              }
+            />
+          </>
         )}
 
         {/* ── Filter bar ── */}
