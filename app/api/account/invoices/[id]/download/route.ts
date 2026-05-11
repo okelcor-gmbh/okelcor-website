@@ -19,14 +19,27 @@ export async function GET(
 
   const { id } = await params;
 
-  // Correct authenticated customer endpoint — must include /auth/ prefix.
-  // The previous route used /invoices/{id}/download (no auth prefix) which
-  // Laravel could not match to an authenticated route, causing a 404/403
-  // and triggering the generic frontend fallback message.
-  const targetUrl = `${API_URL}/auth/invoices/${id}/download`;
+  // The caller may pass ?src=<pdf_url> when the backend does not yet expose a
+  // dedicated /auth/invoices/{id}/download route.  The pdf_url comes from the
+  // trusted invoice list API response — we just proxy it here so auth headers
+  // are forwarded correctly.
+  //
+  // SSRF guard: only absolute HTTPS URLs are accepted.
+  const src = request.nextUrl.searchParams.get("src");
 
-  console.log("[invoice-download] target URL    :", targetUrl);
-  console.log("[invoice-download] token present :", !!token);
+  let targetUrl: string;
+  if (src) {
+    if (!src.startsWith("https://")) {
+      return NextResponse.json({ message: "Invalid source URL" }, { status: 400 });
+    }
+    targetUrl = src;
+  } else {
+    // Fallback to the canonical auth endpoint for when the backend implements it.
+    targetUrl = `${API_URL}/auth/invoices/${id}/download`;
+  }
+
+  console.log("[invoice-download] target URL        :", targetUrl);
+  console.log("[invoice-download] token present     :", !!token);
 
   try {
     const upstream = await fetch(targetUrl, {
@@ -47,8 +60,7 @@ export async function GET(
     );
 
     if (!upstream.ok) {
-      // Surface the real upstream error so it is visible in the browser and
-      // in server logs — never swallow it with a generic fallback.
+      // Surface the real upstream error — never replace it with a generic fallback.
       const errorBody = await upstream.text().catch(() => "");
       console.error(
         "[invoice-download] upstream error body:",
@@ -72,8 +84,6 @@ export async function GET(
     // Stream the PDF regardless of whether Content-Length is present.
     const body = await upstream.arrayBuffer();
 
-    // Extract filename from upstream Content-Disposition if provided;
-    // fall back to a sensible default.
     const backendCd = upstream.headers.get("Content-Disposition") ?? "";
     const fnMatch = backendCd.match(/filename[^;=\n]*=["']?([^"';\n]+)/i);
     const filename = fnMatch?.[1]?.trim() ?? `invoice-${id}.pdf`;
@@ -81,10 +91,7 @@ export async function GET(
     return new NextResponse(body, {
       status: 200,
       headers: {
-        // Always set to application/pdf — do not forward a wrong or missing
-        // content-type from the upstream response.
         "Content-Type": "application/pdf",
-        // inline → browser opens PDF in a new tab instead of downloading.
         "Content-Disposition": `inline; filename="${filename}"`,
         "Cache-Control": "no-store",
       },

@@ -156,6 +156,11 @@ export default async function InvoicesPage() {
               // An invoice is locked when the PDF exists but hasn't been released
               // yet (EU reverse-charge orders awaiting certificate acknowledgement).
               const isLocked = !!inv.pdf_url && inv.released_at == null;
+              // Pass pdf_url as ?src= so the proxy can fetch it directly.
+              // The backend dedicated /download route may not exist yet.
+              const downloadHref = inv.pdf_url
+                ? `/api/account/invoices/${inv.id}/download?src=${encodeURIComponent(inv.pdf_url)}`
+                : `/api/account/invoices/${inv.id}/download`;
               return (
                 <div
                   key={inv.id}
@@ -191,7 +196,7 @@ export default async function InvoicesPage() {
                       </span>
                     ) : inv.pdf_url ? (
                       <a
-                        href={`/api/account/invoices/${inv.id}/download`}
+                        href={downloadHref}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex h-8 w-8 items-center justify-center rounded-full border border-black/[0.08] text-[var(--muted)] transition hover:border-[var(--primary)]/40 hover:text-[var(--primary)]"
