@@ -5,7 +5,7 @@ import { Search, Loader2, RotateCcw } from "lucide-react";
 import ProductGrid from "./product-grid";
 import ShopPromoBanner, { type ShopPromotion } from "./shop-promo-banner";
 import ShopCampaignBanner, { type CampaignPromotion } from "./shop-campaign-banner";
-import SpecialsSection from "./specials-section";
+import SpecialsProductList from "./specials-product-list";
 import { type Product } from "./data";
 import { type ActiveCampaign } from "./product-card";
 import { useLanguage } from "@/context/language-context";
@@ -130,6 +130,10 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
   const [inlinePromos, setInlinePromos] = useState<ShopPromotion[]>([]);
   const [campaignPromoRaw, setCampaignPromoRaw] = useState<CampaignPromotion | null>(null);
 
+  // ── Specials products (pre-loaded from campaign brand on page load) ────────────
+  const [specialsProducts, setSpecialsProducts] = useState<Product[]>([]);
+  const [specialsLoading, setSpecialsLoading] = useState(false);
+
   // ── Dynamic filter options ───────────────────────────────────────────────────
   const [brands,      setBrands]      = useState<string[]>([]);
   const [widths,      setWidths]      = useState<string[]>(FALLBACK_WIDTHS);
@@ -215,6 +219,35 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
       })
       .catch(() => {});
   }, []);
+
+  // Fetch specials products as soon as the campaign brand is known.
+  // Runs automatically — no user interaction required.
+  // Fires whenever campaignPromoRaw.brand_name or customerType changes.
+  useEffect(() => {
+    const brand = campaignPromoRaw?.brand_name;
+    if (!brand) return;
+
+    setSpecialsLoading(true);
+    const params = new URLSearchParams({ brand, locale });
+    if (customerType === "b2b" || customerType === "b2c") {
+      params.set("segment", customerType);
+    }
+
+    fetch(`${PRODUCTS_API}?${params.toString()}`, { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json) => {
+        if (!json) return;
+        const raw = Array.isArray(json.data) ? json.data : [];
+        const list = raw
+          .map(toProduct)
+          .filter((p: Product) => p.price > 0)
+          .slice(0, 8);
+        setSpecialsProducts(list);
+      })
+      .catch(() => {})
+      .finally(() => setSpecialsLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [campaignPromoRaw?.brand_name, customerType]);
 
   // Load brands + specs on mount
   useEffect(() => {
@@ -387,9 +420,12 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
     // router.push() causes a server re-render which races with the state updates
     // above and prevents runSearch() from seeing the new selBrand value.
     try { window.history.pushState(null, "", url); } catch { /* SSR / unsupported */ }
-    // Scroll catalogue into view after the search result renders
+    // Scroll to specials section (already visible on load); fall back to catalogue
     setTimeout(() => {
-      document.getElementById("shop-catalogue")?.scrollIntoView({ behavior: "smooth" });
+      const target =
+        document.getElementById("specials-section") ??
+        document.getElementById("shop-catalogue");
+      target?.scrollIntoView({ behavior: "smooth" });
     }, 80);
   }, []);
 
@@ -404,18 +440,21 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
           <ShopCampaignBanner promo={campaignPromo} onCtaClick={handleCampaignCta} />
         )}
 
-        {/* ── Specials section — pre-loaded brand products from active campaign ── */}
+        {/* ── Specials section — loaded in parallel with promotions, no click required ── */}
         {campaignPromo?.brand_name && (
-          <SpecialsSection
+          <SpecialsProductList
+            products={specialsProducts}
+            loading={specialsLoading}
             brandName={campaignPromo.brand_name}
             discountPct={campaignPromo.discount_pct}
             customerType={customerType}
-            onViewAll={() =>
+            onViewAll={() => {
+              const brand = campaignPromo.brand_name;
               handleCampaignCta(
                 campaignPromo.button_link ??
-                  `/shop?brand=${encodeURIComponent(campaignPromo.brand_name!)}`,
-              )
-            }
+                  `/shop?brand=${encodeURIComponent(brand ?? "")}`,
+              );
+            }}
           />
         )}
 

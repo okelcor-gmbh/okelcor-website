@@ -1,13 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+// Pure-presentational. All data fetching is done in shop-catalogue.tsx so
+// specials products start loading in parallel with the promotions API call —
+// no user interaction required.
+
+import { useState } from "react";
 import Link from "next/link";
 import {
   Check,
   ChevronRight,
   Cloud,
   Disc3,
-  Loader2,
   Minus,
   Plus,
   ShoppingCart,
@@ -15,47 +18,19 @@ import {
   Sun,
 } from "lucide-react";
 import { useCart } from "@/context/cart-context";
-import { getProductImageUrl } from "@/lib/utils";
 import type { Product } from "./data";
-
-const PRODUCTS_API = "/api/shop/products";
-const MAX_DISPLAY = 8;
 
 type CustomerType = "b2b" | "b2c" | "guest";
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function normalise(p: any): Product {
-  const rawPrimary: string =
-    p.primary_image || p.image_url || p.image || "";
-  return {
-    id:            p.id,
-    brand:         p.brand       ?? "",
-    name:          p.name        ?? "",
-    size:          p.size        ?? "",
-    spec:          p.spec        ?? "",
-    season:        p.season      ?? "",
-    type:          p.type        ?? "",
-    price:         Number(p.price ?? 0),
-    price_b2b:     p.price_b2b != null && Number(p.price_b2b) > 0 ? Number(p.price_b2b) : undefined,
-    price_b2c:     p.price_b2c != null && Number(p.price_b2c) > 0 ? Number(p.price_b2c) : undefined,
-    sku:           p.sku         ?? "",
-    description:   p.description ?? "",
-    primary_image: rawPrimary,
-    image:         getProductImageUrl(rawPrimary),
-    images:        [],
-    in_stock:      p.in_stock != null ? Boolean(p.in_stock) : undefined,
-  };
-}
-
-function displayPrice(product: Product, ct: CustomerType): number {
+function resolvePrice(product: Product, ct: CustomerType): number {
   if (ct === "b2b") return product.price_b2b ?? product.price;
   if (ct === "b2c") return product.price_b2c ?? product.price;
   return product.price_b2c ?? product.price;
 }
 
-// ── Sub-components ─────────────────────────────────────────────────────────────
+// ── Season badge ───────────────────────────────────────────────────────────────
 
 function SeasonBadge({ season }: { season: string }) {
   if (!season) return null;
@@ -72,20 +47,56 @@ function SeasonBadge({ season }: { season: string }) {
           : "bg-slate-50 text-slate-500"
       }`}
     >
-      {isWinter ? (
-        <Snowflake size={10} />
-      ) : isSummer ? (
-        <Sun size={10} />
-      ) : (
-        <Cloud size={10} />
-      )}
+      {isWinter ? <Snowflake size={10} /> : isSummer ? <Sun size={10} /> : <Cloud size={10} />}
       {season}
     </span>
   );
 }
 
-// One product row — collapses to card layout on mobile
-function SpecialItem({
+// ── Skeleton row ───────────────────────────────────────────────────────────────
+
+function SkeletonRow() {
+  return (
+    <>
+      {/* Desktop skeleton (sm+) */}
+      <div className="hidden items-center gap-4 border-b border-[#e4f0e4] px-6 py-3.5 last:border-0 sm:flex">
+        <div className="h-9 w-9 animate-pulse rounded-full bg-[#dbeeda]" />
+        <div className="flex-1 space-y-1.5">
+          <div className="h-2.5 w-14 animate-pulse rounded bg-[#dbeeda]" />
+          <div className="h-3 w-40 animate-pulse rounded bg-[#dbeeda]" />
+        </div>
+        <div className="w-[120px] space-y-1.5">
+          <div className="h-2.5 w-20 animate-pulse rounded bg-[#dbeeda]" />
+          <div className="h-2 w-10 animate-pulse rounded bg-[#dbeeda]" />
+        </div>
+        <div className="h-5 w-[90px] animate-pulse rounded-full bg-[#dbeeda]" />
+        <div className="hidden w-[70px] lg:block">
+          <div className="h-2.5 w-14 animate-pulse rounded bg-[#dbeeda]" />
+        </div>
+        <div className="w-[88px] space-y-1 text-right">
+          <div className="ml-auto h-3.5 w-16 animate-pulse rounded bg-[#dbeeda]" />
+        </div>
+        <div className="h-7 w-[76px] animate-pulse rounded-full bg-[#dbeeda]" />
+        <div className="h-8 w-[68px] animate-pulse rounded-full bg-[#dbeeda]" />
+        <div className="hidden h-3 w-10 animate-pulse rounded bg-[#dbeeda] lg:block" />
+      </div>
+      {/* Mobile skeleton */}
+      <div className="flex gap-3 border-b border-[#e4f0e4] px-4 py-4 last:border-0 sm:hidden">
+        <div className="h-10 w-10 animate-pulse rounded-full bg-[#dbeeda]" />
+        <div className="flex-1 space-y-1.5">
+          <div className="h-2.5 w-12 animate-pulse rounded bg-[#dbeeda]" />
+          <div className="h-3 w-32 animate-pulse rounded bg-[#dbeeda]" />
+          <div className="h-2.5 w-24 animate-pulse rounded bg-[#dbeeda]" />
+        </div>
+        <div className="h-5 w-14 animate-pulse rounded bg-[#dbeeda]" />
+      </div>
+    </>
+  );
+}
+
+// ── Product row ────────────────────────────────────────────────────────────────
+
+function SpecialRow({
   product,
   customerType,
   discountPct,
@@ -95,10 +106,10 @@ function SpecialItem({
   discountPct?: number | null;
 }) {
   const { addItem, openCart } = useCart();
-  const [qty, setQty] = useState(1);
-  const [added, setAdded] = useState(false);
+  const [qty, setQty]       = useState(1);
+  const [added, setAdded]   = useState(false);
 
-  const price   = displayPrice(product, customerType);
+  const price      = resolvePrice(product, customerType);
   const outOfStock = product.in_stock === false;
 
   function handleAdd() {
@@ -111,6 +122,7 @@ function SpecialItem({
 
   return (
     <div className="border-b border-[#e4f0e4] last:border-0">
+
       {/* ── Desktop row (sm+) ── */}
       <div className="hidden items-center gap-3 px-5 py-3.5 transition-colors hover:bg-[#f5faf5] sm:flex sm:gap-4 sm:px-6">
 
@@ -163,7 +175,7 @@ function SpecialItem({
           </p>
         </div>
 
-        {/* Quantity selector */}
+        {/* Quantity stepper */}
         <div className="flex shrink-0 items-center gap-1">
           <button
             type="button"
@@ -192,16 +204,10 @@ function SpecialItem({
           onClick={handleAdd}
           disabled={outOfStock}
           className={`flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[0.75rem] font-bold text-white transition disabled:opacity-40 ${
-            added
-              ? "bg-emerald-500"
-              : "bg-[#f4511e] hover:bg-[#df4618] active:scale-[0.97]"
+            added ? "bg-emerald-500" : "bg-[#f4511e] hover:bg-[#df4618] active:scale-[0.97]"
           }`}
         >
-          {added ? (
-            <Check size={13} strokeWidth={2.5} />
-          ) : (
-            <ShoppingCart size={13} strokeWidth={2} />
-          )}
+          {added ? <Check size={13} strokeWidth={2.5} /> : <ShoppingCart size={13} strokeWidth={2} />}
           {added ? "Added" : "Add"}
         </button>
 
@@ -226,8 +232,7 @@ function SpecialItem({
             </p>
             <p className="text-[0.9rem] font-bold text-[#171a20]">{product.name}</p>
             <p className="mt-0.5 text-[0.78rem] text-[#5c5e62]">
-              {product.size}
-              {product.spec ? ` · ${product.spec}` : ""}
+              {product.size}{product.spec ? ` · ${product.spec}` : ""}
             </p>
             <div className="mt-1.5 flex flex-wrap items-center gap-2">
               <SeasonBadge season={product.season} />
@@ -244,14 +249,11 @@ function SpecialItem({
                 €{(price / (1 - discountPct / 100)).toFixed(2)}
               </p>
             )}
-            <p className="text-[1rem] font-extrabold text-[#171a20]">
-              €{price.toFixed(2)}
-            </p>
+            <p className="text-[1rem] font-extrabold text-[#171a20]">€{price.toFixed(2)}</p>
           </div>
         </div>
 
         <div className="mt-3 flex items-center gap-2">
-          {/* Qty */}
           <div className="flex shrink-0 items-center gap-1">
             <button
               type="button"
@@ -261,9 +263,7 @@ function SpecialItem({
             >
               <Minus size={11} strokeWidth={2.5} />
             </button>
-            <span className="w-6 text-center text-[0.85rem] font-semibold text-[#171a20]">
-              {qty}
-            </span>
+            <span className="w-6 text-center text-[0.85rem] font-semibold text-[#171a20]">{qty}</span>
             <button
               type="button"
               disabled={outOfStock}
@@ -274,26 +274,18 @@ function SpecialItem({
             </button>
           </div>
 
-          {/* Add to cart */}
           <button
             type="button"
             onClick={handleAdd}
             disabled={outOfStock}
             className={`flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full text-[0.82rem] font-bold text-white transition disabled:opacity-40 ${
-              added
-                ? "bg-emerald-500"
-                : "bg-[#f4511e] hover:bg-[#df4618]"
+              added ? "bg-emerald-500" : "bg-[#f4511e] hover:bg-[#df4618]"
             }`}
           >
-            {added ? (
-              <Check size={14} strokeWidth={2.5} />
-            ) : (
-              <ShoppingCart size={14} strokeWidth={2} />
-            )}
+            {added ? <Check size={14} strokeWidth={2.5} /> : <ShoppingCart size={14} strokeWidth={2} />}
             {added ? "Added to cart" : "Add to cart"}
           </button>
 
-          {/* View */}
           <Link
             href={`/shop/${product.id}`}
             className="flex h-9 shrink-0 items-center rounded-full border border-[#e5e7eb] px-3 text-[0.78rem] font-semibold text-[#5c5e62] transition hover:border-[#f4511e]/40 hover:text-[#f4511e]"
@@ -308,73 +300,36 @@ function SpecialItem({
 
 // ── Main export ────────────────────────────────────────────────────────────────
 
-type Props = {
+export type SpecialsProductListProps = {
+  products: Product[];
+  loading: boolean;
   brandName: string;
   discountPct?: number | null;
   customerType: CustomerType;
   onViewAll: () => void;
 };
 
-export default function SpecialsSection({
+export default function SpecialsProductList({
+  products,
+  loading,
   brandName,
   discountPct,
   customerType,
   onViewAll,
-}: Props) {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+}: SpecialsProductListProps) {
+  // Render nothing (not even a skeleton) if not loading and no products found.
+  if (!loading && products.length === 0) return null;
 
-  useEffect(() => {
-    if (!brandName) return;
-
-    const params = new URLSearchParams({ brand: brandName });
-    if (customerType === "b2b" || customerType === "b2c") {
-      params.set("segment", customerType);
-    }
-
-    setLoading(true);
-    fetch(`${PRODUCTS_API}?${params.toString()}`, { cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((json) => {
-        if (!json) return;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const raw: any[] = Array.isArray(json.data) ? json.data : [];
-        const list = raw
-          .map(normalise)
-          .filter((p) => p.price > 0)
-          .slice(0, MAX_DISPLAY);
-        setProducts(list);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [brandName, customerType]);
-
-  // Loading skeleton
-  if (loading) {
-    return (
-      <div
-        id="specials-section"
-        className="mb-6 overflow-hidden rounded-2xl border border-[#d1e8d1] bg-[#f0faf0] shadow-sm"
-      >
-        <div className="flex items-center justify-center py-12">
-          <Loader2 size={22} className="animate-spin text-[#5c5e62]" />
-        </div>
-      </div>
-    );
-  }
-
-  // Hide section entirely when no products found
-  if (products.length === 0) return null;
+  const SKELETON_COUNT = 5;
 
   return (
     <div
       id="specials-section"
       className="mb-6 overflow-hidden rounded-2xl border border-[#d1e8d1] bg-[#f0faf0] shadow-sm"
     >
-      {/* Section header */}
+      {/* ── Section header ── */}
       <div className="flex items-center justify-between border-b border-[#d1e8d1] px-5 py-4 sm:px-6">
         <div className="flex items-center gap-3">
-          {/* Green left accent */}
           <div className="h-8 w-1 rounded-full bg-emerald-500" />
           <div>
             <div className="flex items-center gap-2">
@@ -393,6 +348,7 @@ export default function SpecialsSection({
           </div>
         </div>
 
+        {/* Desktop CTA */}
         <button
           type="button"
           onClick={onViewAll}
@@ -403,32 +359,50 @@ export default function SpecialsSection({
         </button>
       </div>
 
-      {/* Desktop column headers */}
-      <div className="hidden grid-cols-[36px_1fr_120px_96px_70px_88px_88px_80px_auto] items-center gap-4 border-b border-[#d1e8d1] px-6 py-2 sm:grid lg:grid">
-        <div />
-        <p className="text-[0.68rem] font-bold uppercase tracking-[0.15em] text-[#5c5e62]">Product</p>
-        <p className="text-[0.68rem] font-bold uppercase tracking-[0.15em] text-[#5c5e62]">Size</p>
-        <p className="text-[0.68rem] font-bold uppercase tracking-[0.15em] text-[#5c5e62]">Season</p>
-        <p className="hidden text-[0.68rem] font-bold uppercase tracking-[0.15em] text-[#5c5e62] lg:block">Stock</p>
-        <p className="text-right text-[0.68rem] font-bold uppercase tracking-[0.15em] text-[#5c5e62]">Price</p>
-        <p className="text-center text-[0.68rem] font-bold uppercase tracking-[0.15em] text-[#5c5e62]">Qty</p>
-        <div />
-        <div />
-      </div>
+      {/* ── Desktop column headers (visible only when products loaded) ── */}
+      {!loading && (
+        <div className="hidden items-center gap-4 border-b border-[#d1e8d1] px-6 py-2 sm:flex">
+          <div className="w-9 shrink-0" />
+          <p className="flex-1 text-[0.68rem] font-bold uppercase tracking-[0.15em] text-[#5c5e62]">
+            Product
+          </p>
+          <p className="w-[120px] shrink-0 text-[0.68rem] font-bold uppercase tracking-[0.15em] text-[#5c5e62]">
+            Size / Spec
+          </p>
+          <p className="w-[96px] shrink-0 text-[0.68rem] font-bold uppercase tracking-[0.15em] text-[#5c5e62]">
+            Season
+          </p>
+          <p className="hidden w-[70px] shrink-0 text-[0.68rem] font-bold uppercase tracking-[0.15em] text-[#5c5e62] lg:block">
+            Stock
+          </p>
+          <p className="w-[88px] shrink-0 text-right text-[0.68rem] font-bold uppercase tracking-[0.15em] text-[#5c5e62]">
+            Price
+          </p>
+          <p className="w-[76px] shrink-0 text-center text-[0.68rem] font-bold uppercase tracking-[0.15em] text-[#5c5e62]">
+            Qty
+          </p>
+          <div className="w-[68px] shrink-0" />
+          <div className="hidden w-10 shrink-0 lg:block" />
+        </div>
+      )}
 
-      {/* Product rows */}
+      {/* ── Rows ── */}
       <div>
-        {products.map((p) => (
-          <SpecialItem
-            key={p.id}
-            product={p}
-            customerType={customerType}
-            discountPct={discountPct}
-          />
-        ))}
+        {loading
+          ? Array.from({ length: SKELETON_COUNT }).map((_, i) => (
+              <SkeletonRow key={i} />
+            ))
+          : products.map((p) => (
+              <SpecialRow
+                key={p.id}
+                product={p}
+                customerType={customerType}
+                discountPct={discountPct}
+              />
+            ))}
       </div>
 
-      {/* Mobile CTA */}
+      {/* ── Mobile CTA ── */}
       <div className="border-t border-[#d1e8d1] px-4 py-3 sm:hidden">
         <button
           type="button"

@@ -61,7 +61,10 @@
       "Read(//c/Users/user/laragon/**)",
       "Bash(python -c ' *)",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\user\\\\Desktop\\\\Projects\\\\okelcor-website\" -Force)",
-      "Bash(Select-Object Name, FullName)"
+      "Bash(Select-Object Name, FullName)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\user\\\\Desktop\\\\Projects\\\\okelcor-website\" -Directory)",
+      "Bash(Select-Object Name)",
+      "Bash(del \"components\\\\shop\\\\specials-section.tsx\")"
     ]
   }
 }
