@@ -10,6 +10,16 @@ const PLACEHOLDER = "/images/tyre-placeholder.png";
 
 type CustomerType = "b2b" | "b2c" | "guest";
 
+// Resolve the best image for a product:
+// 1. primary_image (processed full URL)
+// 2. brand_image (brand-level fallback, full URL from backend)
+// 3. neutral tyre placeholder
+function resolveImage(product: import("./data").Product): string {
+  if (product.primary_image) return product.image;
+  if (product.brand_image) return product.brand_image;
+  return PLACEHOLDER;
+}
+
 export type ActiveCampaign = {
   brand_name: string;
   discount_pct: number;
@@ -44,7 +54,7 @@ export default function ProductCard({
   const { t } = useLanguage();
   const cardRef = useDepthTilt<HTMLDivElement>({ maxRotate: 4, maxShift: 6, scale: 1.008 });
 
-  const imageUrl = product.image || PLACEHOLDER;
+  const imageUrl = resolveImage(product);
   const { displayPrice, badge, showGuestNudge } = resolvePrice(product, customerType);
 
   return (

@@ -28,7 +28,8 @@ function extractImagePath(entry: unknown): string {
 
 /** Map the API product shape → local Product shape used by all components. */
 function toProduct(p: ApiProduct): Product {
-  const rawPrimary = p.primary_image || p.image_url || p.image || extractImagePath(p.images?.[0]) || "";
+  // Do NOT fall back to p.image — that field may contain an admin category image.
+  const rawPrimary = p.primary_image || p.image_url || extractImagePath(p.images?.[0]) || "";
   const galleryPaths = (p.images ?? []).map(extractImagePath).filter(Boolean);
   const allPaths = [rawPrimary, ...galleryPaths.filter((g) => g !== rawPrimary)].filter(Boolean);
   return {
@@ -36,6 +37,7 @@ function toProduct(p: ApiProduct): Product {
     primary_image: rawPrimary,
     image:         getProductImageUrl(rawPrimary),
     images:        allPaths.map(getProductImageUrl),
+    brand_image:   p.brand_image ? getProductImageUrl(p.brand_image) : undefined,
     in_stock:      p.in_stock != null ? Boolean(p.in_stock) : undefined,
     price_b2b:     p.price_b2b != null && Number(p.price_b2b) > 0 ? Number(p.price_b2b) : undefined,
     price_b2c:     p.price_b2c != null && Number(p.price_b2c) > 0 ? Number(p.price_b2c) : undefined,

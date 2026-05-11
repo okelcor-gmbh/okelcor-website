@@ -30,11 +30,12 @@ function extractImagePath(entry: any): string {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function toProduct(p: any): Product {
-  const rawPrimary: string = p.primary_image || p.image_url || p.image || extractImagePath(p.images?.[0]) || "";
+  // Use primary_image first; do NOT fall back to p.image as that field may
+  // contain an admin-set category/brand image rather than a product photo.
+  const rawPrimary: string = p.primary_image || p.image_url || extractImagePath(p.images?.[0]) || "";
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const galleryPaths: string[] = (p.images ?? []).map((x: any) => extractImagePath(x)).filter(Boolean);
-  // Primary first, then any gallery images that differ from primary
-  const allPaths = [rawPrimary, ...galleryPaths.filter((p) => p !== rawPrimary)].filter(Boolean);
+  const allPaths = [rawPrimary, ...galleryPaths.filter((g) => g !== rawPrimary)].filter(Boolean);
   return {
     id:            p.id,
     brand:         p.brand        ?? "",
@@ -51,8 +52,7 @@ function toProduct(p: any): Product {
     primary_image: rawPrimary,
     image:         getProductImageUrl(rawPrimary),
     images:        allPaths.map(getProductImageUrl),
-    // Normalise to strict boolean. Backend may return 0/1 integers or null.
-    // ?? true would hide out-of-stock: 0 ?? true = 0, but 0 === false is false.
+    brand_image:   p.brand_image  ? getProductImageUrl(p.brand_image) : undefined,
     in_stock:      p.in_stock != null ? Boolean(p.in_stock) : undefined,
   };
 }
@@ -198,7 +198,6 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
     fetch("/api/promotions/active", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((json) => {
-        console.log("[specials] promotions response", json);
         const all: RawPromotion[] = Array.isArray(json?.data) ? json.data : [];
 
         // Campaign hero: first promotion whose placement is one of the known
@@ -208,9 +207,6 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
         const hero = all.find(
           (p) => CAMPAIGN_PLACEMENTS.includes(p.placement ?? "") && p.brand_name,
         );
-
-        console.log("[specials] selected campaignPromo", hero ?? "none — no matching placement+brand_name");
-        console.log("[specials] campaignBrand", hero?.brand_name ?? null);
 
         // Inline strip: unplaced / shop_inline / both, excluding the campaign hero
         // so it doesn't render both as a strip and a full banner.
@@ -254,7 +250,6 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
     }
 
     const fetchUrl = `${PRODUCTS_API}?${params.toString()}`;
-    console.log("[specials] fetch url", fetchUrl);
 
     fetch(fetchUrl, { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
@@ -265,7 +260,6 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
           .map(toProduct)
           .filter((p: Product) => p.price > 0)
           .slice(0, 8);
-        console.log("[specials] products count", list.length);
         setSpecialsProducts(list);
       })
       .catch(() => {})
@@ -424,8 +418,14 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
     return { brand_name: campaignPromoRaw.brand_name, discount_pct: campaignPromoRaw.discount_pct };
   })();
 
-  // ── CTA handler: apply URL params as filters without full navigation ──────────
+  // ── CTA handlers ─────────────────────────────────────────────────────────────
 
+  // Banner CTA ("Shop Rapid Tyres"): scroll-only, no filter change.
+  const handleScrollToSpecials = useCallback(() => {
+    document.getElementById("specials-section")?.scrollIntoView({ behavior: "smooth" });
+  }, []);
+
+  // Specials "View all" CTA: apply brand filter, trigger search, scroll to results.
   const handleCampaignCta = useCallback((url: string) => {
     try {
       const parsed = new URL(url, window.location.origin);
@@ -438,16 +438,14 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
     } catch { /* malformed url — still proceed */ }
     setPendingAutoSearch(true);
     // Update URL bar without triggering a Next.js navigation.
-    // router.push() causes a server re-render which races with the state updates
-    // above and prevents runSearch() from seeing the new selBrand value.
     try { window.history.pushState(null, "", url); } catch { /* SSR / unsupported */ }
-    // Scroll to specials section (already visible on load); fall back to catalogue
+    // Scroll to results grid once hasSearched becomes true and the div mounts.
     setTimeout(() => {
       const target =
-        document.getElementById("specials-section") ??
+        document.getElementById("catalogue-results") ??
         document.getElementById("shop-catalogue");
       target?.scrollIntoView({ behavior: "smooth" });
-    }, 80);
+    }, 200);
   }, []);
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -455,26 +453,6 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
   return (
     <section className="w-full bg-[#f5f5f5] py-6 md:py-10">
       <div className="tesla-shell">
-
-        {/* ── Campaign banner + specials — rendered for all users when brand_name set ── */}
-        {campaignBrand && campaignPromoRaw && (
-          <>
-            <ShopCampaignBanner promo={campaignPromoRaw} onCtaClick={handleCampaignCta} />
-            <SpecialsProductList
-              products={specialsProducts}
-              loading={specialsLoading}
-              brandName={campaignBrand}
-              discountPct={campaignPromoRaw.discount_pct}
-              customerType={customerType}
-              onViewAll={() =>
-                handleCampaignCta(
-                  campaignPromoRaw.button_link ??
-                    `/shop?brand=${encodeURIComponent(campaignBrand)}`,
-                )
-              }
-            />
-          </>
-        )}
 
         {/* ── Filter bar ── */}
         <div className="mb-6 overflow-hidden rounded-2xl border border-[#e5e7eb] bg-white shadow-sm">
@@ -596,12 +574,32 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
           </div>
         </div>
 
+        {/* ── Campaign banner + specials — below filter, above results ── */}
+        {campaignBrand && campaignPromoRaw && (
+          <>
+            <ShopCampaignBanner promo={campaignPromoRaw} onCtaClick={handleScrollToSpecials} />
+            <SpecialsProductList
+              products={specialsProducts}
+              loading={specialsLoading}
+              brandName={campaignBrand}
+              discountPct={campaignPromoRaw.discount_pct}
+              customerType={customerType}
+              onViewAll={() =>
+                handleCampaignCta(
+                  campaignPromoRaw.button_link ??
+                    `/shop?brand=${encodeURIComponent(campaignBrand)}`,
+                )
+              }
+            />
+          </>
+        )}
+
         {/* ── Inline promo banner ── */}
         <ShopPromoBanner promotions={inlinePromos} />
 
         {/* ── Results ── */}
         {hasSearched && (
-          <div>
+          <div id="catalogue-results">
             {isLoading ? (
               <div className="flex items-center justify-center py-24">
                 <Loader2 size={28} className="animate-spin text-[#9ca3af]" />

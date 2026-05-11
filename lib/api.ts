@@ -83,6 +83,9 @@ export type ApiProduct = {
   image?: string | null;
   /** Gallery — may be string paths or objects with a `path` field */
   images: (string | { path?: string; url?: string; image_url?: string })[];
+  /** Brand-level fallback image path — backend sets this when primary_image is absent.
+   *  Returned as a storage path (e.g. storage/brands/rapid.jpg) or absolute URL. */
+  brand_image?: string | null;
   sku: string;
   description: string;
   in_stock?: boolean;

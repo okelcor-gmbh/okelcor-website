@@ -18,6 +18,9 @@ export type Product = {
   image: string;
   /** All gallery images as full URLs — primary_image first, then additional */
   images: string[];
+  /** Brand-level fallback image (full URL) — used when product has no primary_image.
+   *  Backend must return brand_image on the product response for this to populate. */
+  brand_image?: string;
   sku: string;
   description: string;
   in_stock?: boolean;
