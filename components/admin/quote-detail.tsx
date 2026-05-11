@@ -10,6 +10,7 @@ import {
 import { updateQuoteStatus } from "@/app/admin/quotes/actions";
 import type { ConvertToOrderResult } from "@/app/admin/quotes/actions";
 import type { AdminQuoteFull } from "@/lib/admin-api";
+import { formatIncoterm } from "@/lib/utils";
 import QuoteConvertModal from "@/components/admin/quote-convert-modal";
 
 const QUOTE_STATUSES = ["new", "reviewed", "quoted", "closed"] as const;
@@ -360,7 +361,7 @@ export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
         {/* ── 4. Logistics & Terms ── */}
         <SectionCard title="Logistics & Terms">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <InfoRow label={incotermLabel}            value={quote.incoterm}          fallback="Not specified" />
+            <InfoRow label={incotermLabel}            value={quote.incoterm ? formatIncoterm(quote.incoterm) : undefined} fallback="Not specified" />
             <InfoRow label="Delivery Timeline"        value={quote.delivery_timeline} />
             <InfoRow label="Budget Range"             value={quote.budget_range} />
             <InfoRow label="Delivery Location / Port" value={quote.delivery_location} fallback="Not provided" />

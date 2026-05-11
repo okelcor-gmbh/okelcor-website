@@ -53,8 +53,17 @@ const COUNTRIES = [
   "Uganda", "Tanzania", "Singapore", "China", "India", "Japan", "Australia",
 ];
 
-const EU_INCOTERMS  = ["DAP", "DDP", "EXW"] as const;
-const INT_INCOTERMS = ["FOB", "CIF", "Custom shipping arrangement"] as const;
+const EU_INCOTERMS = [
+  { value: "DAP",    label: "DAP" },
+  { value: "DDP",    label: "DDP" },
+  { value: "EXW",    label: "EXW" },
+] as const;
+
+const INT_INCOTERMS = [
+  { value: "FOB",    label: "FOB" },
+  { value: "CIF",    label: "CIF" },
+  { value: "Custom", label: "Custom shipping arrangement" },
+] as const;
 
 const TYRE_CONDITIONS = [
   { value: "new",  label: "New tyres" },
@@ -671,13 +680,18 @@ export default function QuoteForm() {
                   <select id="quote-incoterm" value={form.incoterm} onChange={set("incoterm")} className={ic("incoterm")}>
                     <option value="">Select terms…</option>
                     {incotermOptions.map((opt) => (
-                      <option key={opt} value={opt}>{opt}</option>
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
                     ))}
                   </select>
                 </Field>
                 {form.incoterm === "CIF" && (
                   <p className="mt-1.5 text-[0.75rem] leading-relaxed text-[var(--muted)]">
                     CIF can be arranged upon request and will be confirmed in the quotation. Default shipping term is FOB Germany.
+                  </p>
+                )}
+                {form.incoterm === "Custom" && (
+                  <p className="mt-1.5 text-[0.75rem] leading-relaxed text-[var(--muted)]">
+                    Custom shipping arrangement — to be confirmed in quotation.
                   </p>
                 )}
                 {!isEuCountry && !form.incoterm && (

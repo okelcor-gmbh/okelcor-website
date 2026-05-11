@@ -1,6 +1,7 @@
 "use client";
 
 import CopyButton from "./copy-button";
+import { formatIncoterm } from "@/lib/utils";
 
 type BankRow = { label: string; value: string; mono?: boolean; copy?: boolean; wide?: boolean };
 
@@ -14,7 +15,6 @@ const BASE_ROWS: BankRow[] = [
   { label: "Payment Terms",   value: "50% against order confirmation and balance against bill of lading.", wide: true },
 ];
 
-const FOB_FALLBACK = "Incoterms 2020: FOB Germany unless otherwise agreed in writing.";
 
 const TIMING = [
   { label: "SEPA transfers",        value: "1–2 working days" },
@@ -24,7 +24,7 @@ const TIMING = [
 export default function BankTransferDetails({ orderRef, incoterm }: { orderRef?: string; incoterm?: string | null }) {
   const deliveryRow: BankRow = {
     label: "Delivery / Shipping Terms",
-    value: incoterm ? `Incoterms 2020: ${incoterm}` : FOB_FALLBACK,
+    value: formatIncoterm(incoterm),
     wide: true,
   };
   const ROWS = [...BASE_ROWS.slice(0, 6), deliveryRow, BASE_ROWS[BASE_ROWS.length - 1]];
