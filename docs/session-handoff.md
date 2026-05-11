@@ -60,6 +60,316 @@ Development environment: Windows 11, VS Code, Node.js / npm
 
 ---
 
+## Completed in Latest Session — Phase 2C + Bugfixes (2026-05-08)
+
+---
+
+### Phase 2B-5 (continued) — Compliance Metrics Strip on Admin EU Declaration Detail
+
+**Commits:** `445030f`, `fd341c1`
+
+#### Updated: `app/admin/eu-declarations/[id]/page.tsx`
+
+**New fields added to `EuDeclarationFull` type:**
+```typescript
+reminder_count?: number | null;
+last_reminder_at?: string | null;
+```
+
+**New `computeUrgency()` helper:**
+Derives one of five urgency levels from backend fields:
+| Urgency | Condition |
+|---|---|
+| `done` | `status === "acknowledged"` OR `admin_acknowledged_at` is set |
+| `signed` | `status === "signed"` |
+| `critical` | `status === "pending"` and 30+ days since creation |
+| `overdue` | `status === "pending"` and 14–30 days since creation |
+| `normal` | `status === "pending"` and under 14 days |
+
+`admin_acknowledged_at` is used as the primary source of truth — if the backend sets the timestamp without updating the status column, the strip still shows "done" correctly.
+
+**New `ComplianceStrip` server sub-component:**
+Four metric tiles rendered between `EuDeclarationActions` and the 2-column data grid:
+- **Days Pending** — large coloured number; `Clock`/`AlertTriangle` badge for overdue/critical
+- **Reminders Sent** — count or "—"
+- **Last Reminder** — date or "—"
+- **Compliance State** — coloured badge + description sentence
+
+Urgency colour map:
+| Urgency | Border/bg | Badge | Description |
+|---|---|---|---|
+| normal | sky | sky | "Pending — within the 14-day window" |
+| overdue | amber | amber | "Pending — customer has not responded within 14 days" |
+| critical | red | red | "Pending — 30+ days without a customer signature" |
+| signed | blue | blue | "Awaiting Acknowledgement — admin review needed" |
+| done | emerald | emerald | "Compliance Completed — acknowledged by admin" |
+
+---
+
+### Bugfix — Acknowledged State Not Reflecting After PATCH
+
+**Commit:** `fd341c1`
+
+**Root cause:** `EuDeclarationActions` tracked only `status` in local state. The backend may set `admin_acknowledged_at` without atomically changing the `status` column. On page reload, `initialStatus` was still `"signed"`, so the Acknowledge button reappeared and the banner stayed blue even though the declaration was acknowledged.
+
+**Fix:**
+- Added `initialAcknowledgedAt` prop to `EuDeclarationActions`
+- Added `adminAcknowledgedAt` local state, synced from `initialAcknowledgedAt` via `useEffect`
+- After successful PATCH: sets both `status = "acknowledged"` AND `adminAcknowledgedAt = new Date().toISOString()`
+- `isAcknowledged = status === "acknowledged" || adminAcknowledgedAt != null` — either field is sufficient
+- `effectiveStatus` forced to `"acknowledged"` when `isAcknowledged` is true — drives banner + badge
+- `canAcknowledge = !isAcknowledged && status === "signed"` — button hidden when either condition met
+- `computeUrgency()` in `page.tsx` updated to treat `admin_acknowledged_at` as source of truth for "done" urgency
+
+**Updated LABEL for acknowledged banner:**
+`"Acknowledged — compliance review completed."`
+
+**Props change:**
+```typescript
+// Before
+{ id, initialStatus, orderRef }
+
+// After
+{ id, initialStatus, initialAcknowledgedAt?: string | null, orderRef }
+```
+
+---
+
+### Phase 2C-1 — Trade Document Audit (No Code Changes)
+
+Audit of the existing invoice/document experience identified:
+
+**What existed:**
+- `/account/invoices` — invoice list with PDF download; no gating on order/declaration status
+- Customer order detail — no invoice download; only EU Certificate card + new `TradeDocumentsCard`
+- Admin order detail — no document generation or upload UI
+- `app/api/account/invoices/[id]/download/route.ts` — customer invoice proxy (existed)
+- `Invoice` type has no `declaration_required` or `declaration_status` fields
+
+**Key gaps identified:**
+- No proforma invoice generation
+- No commercial invoice generation
+- No document gating based on delivery or certificate status
+- `TradeDocumentsCard` was not yet connected to order state
+
+---
+
+### Phase 2C-2 — Trade Documents UI + Proforma Invoice
+
+**Commit:** `ca44d92`
+
+#### Updated: `lib/admin-api.ts`
+
+New `TradeDocument` type:
+```typescript
+export type TradeDocument = {
+  id: number;
+  type: "proforma_invoice" | "commercial_invoice" | "packing_list" | "other" | string;
+  number?: string | null;
+  status: "draft" | "issued" | "sent" | string;
+  issued_at?: string | null;
+  sent_at?: string | null;
+  original_filename?: string | null;
+};
+```
+
+`AdminOrderFull` updated:
+```typescript
+trade_documents?: TradeDocument[];
+```
+
+#### Updated: `app/account/orders/page.tsx`
+
+`Order` type updated:
+```typescript
+trade_documents?: TradeDocument[];
+```
+Imports `TradeDocument` from `@/lib/admin-api`.
+
+#### New: `app/api/admin/orders/[id]/trade-documents/proforma/route.ts`
+POST proxy → `POST /api/v1/admin/orders/{id}/trade-documents/proforma`. Requires `admin_token` cookie.
+
+#### New: `app/api/admin/trade-documents/[id]/download/route.ts`
+GET proxy → `GET /api/v1/admin/trade-documents/{id}/download`. Requires `admin_token` cookie. Streams binary PDF with preserved `Content-Type` + `Content-Disposition`.
+
+#### New: `app/api/account/trade-documents/[id]/download/route.ts`
+GET proxy → `GET /api/v1/auth/trade-documents/{id}/download`. Requires `customer_token` cookie.
+
+#### New: `components/admin/trade-documents-card.tsx`
+`"use client"` component rendered on admin order detail between Order Summary and EU Entry Certificate.
+
+- When no proforma exists: orange "Generate Proforma Invoice" button — POSTs to proxy, appends returned document to local state immediately (no page reload)
+- Once proforma exists: generate button hidden
+- Each document row: `FileText` icon, type label, `#number` (mono), status badge, issued date, Download button
+- Status badges: `draft` = grey, `issued` = blue, `sent` = emerald
+- Download: `fetch → blob → createObjectURL → <a>.click()`
+
+#### New: `components/account/trade-documents-card.tsx`
+`"use client"` component rendered on customer order detail.
+
+- Accepts `documents`, `declarationRequired`, `declarationStatus` props
+- Customer cannot generate documents — download only
+- Each document row: type label, number, issued date, Download button
+- Section hidden entirely when backend does not return `trade_documents` field (`undefined`)
+- Shows "No documents have been issued yet." when array is empty
+
+#### Updated: `components/admin/order-detail.tsx`
+Imports and renders `TradeDocumentsCard` with `orderId={order.id}` and `initialDocuments={order.trade_documents ?? []}`.
+
+#### Updated: `app/account/orders/[ref]/page.tsx`
+Passes `declarationRequired` and `declarationStatus` to customer `TradeDocumentsCard`.
+
+---
+
+### EU Reverse-Charge Invoice Visibility Gating
+
+**Commit:** `b1a7b8d`
+
+**Business rule:** For EU B2B reverse-charge orders, final invoice only available after EU Entry Certificate is signed.
+
+#### Updated: `components/account/entry-certificate-card.tsx`
+
+**Pending state (form header)** — added below the §17a UStDV explanation:
+> "Your final invoice will become available after this certificate is signed."
+
+**Signed state** — added after the Download Certificate button:
+> "Your final invoice is now available in [Invoices](/account/invoices)."
+
+**Acknowledged state** — same invoice link added.
+
+#### Updated: `components/account/trade-documents-card.tsx`
+
+New gating logic for `commercial_invoice` and `final_invoice` document types:
+```typescript
+const GATED_TYPES = new Set(["commercial_invoice", "final_invoice"]);
+
+function isLocked(doc: TradeDocument): boolean {
+  if (!declarationRequired) return false;
+  if (!GATED_TYPES.has(doc.type)) return false;
+  return declarationStatus !== "signed" && declarationStatus !== "acknowledged";
+}
+```
+
+When `isLocked(doc)` is true: Download button replaced with a grey lock chip:
+```
+🔒 Requires certificate
+```
+
+**Proforma invoices and packing lists are never locked.**
+
+---
+
+### Bugfix — EU Entry Certificate Showing Too Early
+
+**Commit:** `6f3fd2a`
+
+**Problem:** After placing a bank transfer order (payment pending, status pending), the EU Entry Certificate form appeared immediately — before payment and before delivery.
+
+**Fix:**
+
+#### Updated: `components/account/entry-certificate-card.tsx`
+
+Two new props added to `Props`:
+```typescript
+paymentStatus?: string | null;
+orderStatus?: string | null;
+```
+
+Two new early-return info cards inserted between the signed/acknowledged states and the full form render:
+
+**Payment not confirmed** (`paymentStatus !== "paid"`):
+```
+EU Entry Certificate
+Complete payment first. The EU Entry Certificate will be requested after delivery.
+```
+Style: neutral grey `bg-[#efefef]` — does not compete with the payment card above.
+
+**Paid but not yet delivered** (`orderStatus !== "delivered"`):
+```
+EU Entry Certificate
+After delivery, you will be asked to confirm receipt for VAT compliance.
+```
+Style: same neutral grey.
+
+**Backward compatibility:** Guards only fire when the backend returns these fields. If `paymentStatus === undefined` or `orderStatus === undefined`, the guards are skipped and the form renders as before.
+
+**Final visibility state machine:**
+| Condition | What customer sees |
+|---|---|
+| `declaration_required !== true` | Nothing rendered |
+| `declaration_status === "acknowledged"` | Green confirmed card + certificate download + invoice link |
+| `declaration_status === "signed"` | Green submitted card + certificate download + invoice link |
+| `paymentStatus` defined and not `"paid"` | Grey info: "Complete payment first…" |
+| `paymentStatus === "paid"` and `orderStatus` defined and not `"delivered"` | Grey info: "After delivery, you will be asked…" |
+| `paymentStatus === "paid"` and `orderStatus === "delivered"` | Full amber certificate form |
+| Backend omits `paymentStatus`/`orderStatus` | Guards skipped — full form shown |
+
+#### Updated: `app/account/orders/[ref]/page.tsx`
+
+```tsx
+<EntryCertificateCard
+  orderRef={order.ref}
+  orderCountry={order.country}
+  status={order.declaration_status}
+  signedAt={order.declaration_signed_at}
+  signedName={order.declaration_signed_name}
+  paymentStatus={order.payment_status}   {/* NEW */}
+  orderStatus={order.status}             {/* NEW */}
+/>
+```
+
+---
+
+### Backend Changes Required (Laravel — Phase 2C)
+
+#### Trade Documents
+
+```
+POST   /api/v1/admin/orders/{id}/trade-documents/proforma
+GET    /api/v1/admin/orders/{id}/trade-documents
+GET    /api/v1/admin/trade-documents/{id}/download
+GET    /api/v1/auth/orders/{ref}/trade-documents
+GET    /api/v1/auth/trade-documents/{id}/download
+```
+
+Response shape for `trade-documents` list/single:
+```json
+{
+  "data": {
+    "id": 1,
+    "type": "proforma_invoice",
+    "number": "PRO-2025-0042",
+    "status": "issued",
+    "issued_at": "2026-05-08T10:00:00Z",
+    "sent_at": null,
+    "original_filename": "Proforma-PRO-2025-0042.pdf"
+  }
+}
+```
+
+Trade documents must also be embedded in the order detail response:
+```json
+{ "data": { ...order fields..., "trade_documents": [...] } }
+```
+
+#### Certificate Timing
+
+Customer order detail response (`GET /api/v1/orders/{ref}`) must include:
+- `payment_status` — required for certificate gating
+- `status` — already present; must be `"delivered"` before certificate form is shown
+- `declaration_required` — already present
+- `declaration_status` — already present
+
+Backend must NOT mark the declaration as actionable until order is delivered. The frontend enforces this visually; the backend must enforce it at the API level.
+
+#### Invoice Release
+
+Commercial invoice `released_at` must be set when `declaration_status` transitions to `"signed"`. The `/auth/invoices` endpoint must omit unreleased invoices. The `/auth/trade-documents/{id}/download` endpoint must reject downloads while `released_at` is null.
+
+TypeScript checks: **0 errors** across all commits.
+
+---
+
 ## Completed in Latest Session — Phase 2B-4: Admin EU Declaration Detail Overhaul (2026-05-08)
 
 ### Goal

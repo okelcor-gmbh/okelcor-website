@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronRight, Receipt, Download, CheckCircle2, Clock, AlertCircle } from "lucide-react";
+import { ChevronRight, Receipt, Download, CheckCircle2, Clock, AlertCircle, Lock } from "lucide-react";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { getCustomerFromCookie } from "@/lib/get-customer";
@@ -27,6 +27,8 @@ type Invoice = {
   status: InvoiceStatus;
   pdf_url?: string;
   order_ref?: string;
+  released_at?: string | null;
+  tax_treatment?: string | null;
 };
 
 const STATUS_CONFIG: Record<InvoiceStatus, { label: string; cls: string; icon: React.ComponentType<{ size?: number; className?: string }> }> = {
@@ -37,7 +39,9 @@ const STATUS_CONFIG: Record<InvoiceStatus, { label: string; cls: string; icon: R
 
 // ─── Fetch ────────────────────────────────────────────────────────────────────
 
-async function fetchInvoices(token: string): Promise<Invoice[]> {
+async function fetchInvoices(
+  token: string,
+): Promise<{ invoices: Invoice[]; fetchError: boolean }> {
   const API_URL =
     process.env.API_URL ??
     process.env.NEXT_PUBLIC_API_URL ??
@@ -47,11 +51,21 @@ async function fetchInvoices(token: string): Promise<Invoice[]> {
       cache: "no-store",
       headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
     });
-    if (!res.ok) return [];
+    if (!res.ok) {
+      console.error("[invoices] API error:", res.status, await res.text().catch(() => ""));
+      return { invoices: [], fetchError: true };
+    }
     const json = await res.json();
-    return Array.isArray(json.data) ? json.data : [];
-  } catch {
-    return [];
+    // Support both flat {data:[]} and paginated {data:{data:[]}} Laravel shapes.
+    const list: Invoice[] = Array.isArray(json.data)
+      ? json.data
+      : Array.isArray(json.data?.data)
+      ? json.data.data
+      : [];
+    return { invoices: list, fetchError: false };
+  } catch (err) {
+    console.error("[invoices] fetch failed:", err);
+    return { invoices: [], fetchError: true };
   }
 }
 
@@ -66,7 +80,7 @@ export default async function InvoicesPage() {
   if (!customer) redirect("/login?redirect=/account/invoices");
 
   const isB2B = customer.customer_type === "b2b";
-  const invoices = await fetchInvoices(token);
+  const { invoices, fetchError } = await fetchInvoices(token);
 
   const pageLabel    = isB2B ? "Invoices"           : "Receipts & Invoices";
   const accountLabel = isB2B ? "B2B"                : "Personal";
@@ -98,8 +112,19 @@ export default async function InvoicesPage() {
           </h1>
         </div>
 
-        {invoices.length === 0 ? (
-          /* Empty state */
+        {/* Fetch error banner */}
+        {fetchError && (
+          <div className="mb-4 rounded-[14px] border border-red-200 bg-red-50 px-5 py-4 text-[0.875rem] text-red-700">
+            Unable to load invoices. Please refresh the page or{" "}
+            <Link href="/contact" className="underline underline-offset-2">
+              contact support
+            </Link>{" "}
+            if the problem persists.
+          </div>
+        )}
+
+        {!fetchError && invoices.length === 0 ? (
+          /* True empty state — API returned 200 with zero records */
           <div className="flex flex-col items-center justify-center rounded-[22px] border border-black/[0.06] bg-white py-20 text-center shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#f5f5f5]">
               <Receipt size={24} strokeWidth={1.5} className="text-[var(--muted)]" />
@@ -115,7 +140,7 @@ export default async function InvoicesPage() {
               Contact support
             </Link>
           </div>
-        ) : (
+        ) : invoices.length > 0 ? (
           /* Invoice list */
           <div className="overflow-hidden rounded-[22px] border border-black/[0.06] bg-white shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
             {/* Table header — desktop only */}
@@ -128,6 +153,9 @@ export default async function InvoicesPage() {
             {invoices.map((inv, i) => {
               const s = STATUS_CONFIG[inv.status] ?? STATUS_CONFIG.unpaid;
               const Icon = s.icon;
+              // An invoice is locked when the PDF exists but hasn't been released
+              // yet (EU reverse-charge orders awaiting certificate acknowledgement).
+              const isLocked = !!inv.pdf_url && inv.released_at == null;
               return (
                 <div
                   key={inv.id}
@@ -153,13 +181,21 @@ export default async function InvoicesPage() {
                       <Icon size={11} />
                       {s.label}
                     </span>
-                    {inv.pdf_url ? (
+                    {isLocked ? (
+                      <span
+                        title="Available after EU Entry Certificate is acknowledged"
+                        className="inline-flex items-center gap-1 rounded-full border border-black/[0.06] px-2.5 py-0.5 text-[0.68rem] font-medium text-[var(--muted)]"
+                      >
+                        <Lock size={10} strokeWidth={2} />
+                        Locked
+                      </span>
+                    ) : inv.pdf_url ? (
                       <a
                         href={`/api/account/invoices/${inv.id}/download`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex h-8 w-8 items-center justify-center rounded-full border border-black/[0.08] text-[var(--muted)] transition hover:border-[var(--primary)]/40 hover:text-[var(--primary)]"
-                        aria-label="Download PDF"
+                        aria-label="View Invoice"
                       >
                         <Download size={13} strokeWidth={2} />
                       </a>
@@ -173,7 +209,7 @@ export default async function InvoicesPage() {
               );
             })}
           </div>
-        )}
+        ) : null}
       </div>
 
       <Footer />

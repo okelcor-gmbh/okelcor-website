@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Download, FileText, Loader2, Lock } from "lucide-react";
+import { Download, ExternalLink, FileText, Loader2, Lock } from "lucide-react";
 import type { TradeDocument } from "@/lib/admin-api";
 
 const TYPE_LABEL: Record<string, string> = {
@@ -13,6 +13,11 @@ const TYPE_LABEL: Record<string, string> = {
 
 // Document types that require EU certificate sign-off before download
 const GATED_TYPES = new Set(["commercial_invoice", "final_invoice"]);
+
+// Final invoice types open inline in a new browser tab rather than being
+// force-downloaded. The browser sends the httpOnly cookie automatically since
+// the proxy route is same-origin.
+const INLINE_TYPES = new Set(["commercial_invoice", "final_invoice"]);
 
 function shortDate(iso?: string | null): string {
   if (!iso) return "—";
@@ -109,7 +114,21 @@ export default function TradeDocumentsCard({
                     <Lock size={11} strokeWidth={2} />
                     Requires certificate
                   </div>
+                ) : INLINE_TYPES.has(doc.type) ? (
+                  // Final/commercial invoices open inline in a new tab.
+                  // The browser forwards the session cookie automatically.
+                  <a
+                    href={`/api/account/trade-documents/${doc.id}/download`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-black/[0.08] bg-[#f0f0f0] px-3 text-[0.75rem] font-semibold text-[var(--foreground)] transition hover:bg-[var(--primary)] hover:text-white"
+                  >
+                    <ExternalLink size={12} strokeWidth={2.2} />
+                    View PDF
+                  </a>
                 ) : (
+                  // Proforma invoices and packing lists are force-downloaded so
+                  // the customer gets a local file to attach to shipment paperwork.
                   <button
                     type="button"
                     onClick={() => handleDownload(doc)}

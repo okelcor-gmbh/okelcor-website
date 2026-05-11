@@ -38,20 +38,27 @@ export async function GET(
     if (!res.ok) {
       const errText = await res.text();
       console.log("[invoice-download] error body     :", errText.slice(0, 300));
-      return new NextResponse(errText, {
-        status: res.status,
-        headers: { "Content-Type": "application/json" },
-      });
+      // 423 = invoice exists but not yet released (reverse-charge, pending certificate)
+      const message =
+        res.status === 423
+          ? "This invoice is not yet available. It will be released after your EU Entry Certificate is acknowledged."
+          : "Unable to retrieve invoice PDF.";
+      return NextResponse.json({ message }, { status: res.status });
     }
 
     const body = await res.arrayBuffer();
     const responseHeaders = new Headers();
 
     const contentType = res.headers.get("Content-Type");
-    const contentDisposition = res.headers.get("Content-Disposition");
-
     if (contentType) responseHeaders.set("Content-Type", contentType);
-    if (contentDisposition) responseHeaders.set("Content-Disposition", contentDisposition);
+
+    // Parse filename from backend header, fall back to a sensible default.
+    const backendCd = res.headers.get("Content-Disposition") ?? "";
+    const fnMatch = backendCd.match(/filename[^;=\n]*=["']?([^"';\n]+)/i);
+    const filename = fnMatch?.[1]?.trim() ?? `invoice-${id}.pdf`;
+    // Always serve inline so the browser opens the PDF in a new tab instead
+    // of forcing a download.
+    responseHeaders.set("Content-Disposition", `inline; filename="${filename}"`);
 
     return new NextResponse(body, { status: 200, headers: responseHeaders });
   } catch {
