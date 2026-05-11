@@ -54,7 +54,7 @@ const COUNTRIES = [
 ];
 
 const EU_INCOTERMS  = ["DAP", "DDP", "EXW"] as const;
-const INT_INCOTERMS = ["FOB", "CIF", "EXW"] as const;
+const INT_INCOTERMS = ["FOB", "CIF", "Custom shipping arrangement"] as const;
 
 const TYRE_CONDITIONS = [
   { value: "new",  label: "New tyres" },
@@ -675,6 +675,16 @@ export default function QuoteForm() {
                     ))}
                   </select>
                 </Field>
+                {form.incoterm === "CIF" && (
+                  <p className="mt-1.5 text-[0.75rem] leading-relaxed text-[var(--muted)]">
+                    CIF can be arranged upon request and will be confirmed in the quotation. Default shipping term is FOB Germany.
+                  </p>
+                )}
+                {!isEuCountry && !form.incoterm && (
+                  <p className="mt-1.5 text-[0.75rem] leading-relaxed text-[var(--muted)]">
+                    Flexible international shipping available: FOB, CIF and custom logistics solutions upon request.
+                  </p>
+                )}
               </div>
             </>
           )}

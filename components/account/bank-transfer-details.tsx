@@ -4,23 +4,30 @@ import CopyButton from "./copy-button";
 
 type BankRow = { label: string; value: string; mono?: boolean; copy?: boolean; wide?: boolean };
 
-const ROWS: BankRow[] = [
+const BASE_ROWS: BankRow[] = [
   { label: "Account Name",    value: "OKELCOR GMBH",                                            mono: true },
   { label: "Account Number",  value: "7609068",                                                  mono: true, copy: true },
   { label: "IBAN",            value: "BE74 9057 6090 6807",                                      mono: true, copy: true },
   { label: "BIC / SWIFT",     value: "TRWIBEB1XXX",                                              mono: true, copy: true },
   { label: "Bank",            value: "Wise" },
   { label: "Bank Address",    value: "Rue du Trône 100, 3rd Floor, 1050 Brussels, Belgium" },
-  { label: "Delivery Term",   value: "CIF" },
   { label: "Payment Terms",   value: "50% against order confirmation and balance against bill of lading.", wide: true },
 ];
+
+const FOB_FALLBACK = "Incoterms 2020: FOB Germany unless otherwise agreed in writing.";
 
 const TIMING = [
   { label: "SEPA transfers",        value: "1–2 working days" },
   { label: "International (SWIFT)", value: "4–5 working days" },
 ];
 
-export default function BankTransferDetails({ orderRef }: { orderRef?: string }) {
+export default function BankTransferDetails({ orderRef, incoterm }: { orderRef?: string; incoterm?: string | null }) {
+  const deliveryRow: BankRow = {
+    label: "Delivery / Shipping Terms",
+    value: incoterm ? `Incoterms 2020: ${incoterm}` : FOB_FALLBACK,
+    wide: true,
+  };
+  const ROWS = [...BASE_ROWS.slice(0, 6), deliveryRow, BASE_ROWS[BASE_ROWS.length - 1]];
   return (
     <div className="overflow-hidden rounded-[14px] border border-black/[0.07] bg-white">
       {/* Order Reference — prominent with copy */}

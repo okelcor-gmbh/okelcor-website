@@ -679,7 +679,7 @@ export default function CheckoutFlow() {
                 </div>
                 <div>
                   <p className="text-[0.88rem] font-semibold text-[var(--foreground)]">Direct Bank Transfer</p>
-                  <p className="mt-0.5 text-[0.76rem] text-[var(--muted)]">CIF · 50% on confirmation, balance on B/L</p>
+                  <p className="mt-0.5 text-[0.76rem] text-[var(--muted)]">FOB · 50% on confirmation, balance on B/L</p>
                 </div>
               </button>
             </div>
