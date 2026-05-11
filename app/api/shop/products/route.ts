@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 const API_URL =
   process.env.API_URL ??
   process.env.NEXT_PUBLIC_API_URL ??
@@ -15,8 +17,6 @@ export async function GET(request: NextRequest) {
   const guestToken    = process.env.SHOP_GUEST_TOKEN ?? "";
   const authToken     = customerToken || guestToken;
 
-  console.log("[api/shop/products] →", upstream.replace(API_URL, "<API>"));
-
   try {
     const res = await fetch(upstream, {
       cache: "no-store",
@@ -28,17 +28,10 @@ export async function GET(request: NextRequest) {
 
     const raw = await res.text();
 
-    console.log(
-      `[api/shop/products] ← HTTP ${res.status} | body[0..300]:`,
-      raw.slice(0, 300)
-    );
-
     let data: unknown;
     try {
       data = JSON.parse(raw);
     } catch {
-      // Non-JSON response (e.g. HTML 404 page from Laravel)
-      console.error("[api/shop/products] non-JSON response:", raw.slice(0, 200));
       return NextResponse.json(
         {
           data: [],
@@ -49,8 +42,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Surface the upstream status so the client can distinguish 404 / 200-empty
+    // Prevent edge/CDN caching — prices must always be read fresh from the API.
     const response = NextResponse.json(data, { status: res.status });
+    response.headers.set("Cache-Control", "no-store");
     response.headers.set("X-Upstream-Status", String(res.status));
     return response;
   } catch (err) {
