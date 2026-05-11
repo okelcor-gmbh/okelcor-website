@@ -200,11 +200,22 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
       .then((json) => {
         const all: RawPromotion[] = Array.isArray(json?.data) ? json.data : [];
 
-        setInlinePromos(
-          all.filter((p) => !p.placement || p.placement === "shop_inline" || p.placement === "both")
-        );
+        // Backend uses "shop_inline" for brand campaigns, not "shop_hero".
+        // Prefer shop_hero if it ever exists; fall back to the first shop_inline
+        // promotion that has brand_name set (that's the campaign, not a plain strip).
+        const hero =
+          all.find((p) => p.placement === "shop_hero") ??
+          all.find((p) => (p.placement === "shop_inline" || p.placement === "both") && p.brand_name);
 
-        const hero = all.find((p) => p.placement === "shop_hero");
+        // Inline strip promos: unplaced, shop_inline, or both — but exclude the
+        // campaign hero so it doesn't render twice (once as banner, once as strip).
+        setInlinePromos(
+          all.filter(
+            (p) =>
+              (!p.placement || p.placement === "shop_inline" || p.placement === "both") &&
+              p.id !== hero?.id,
+          )
+        );
 
         if (hero) {
           setCampaignPromoRaw({
@@ -237,7 +248,7 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
 
     const brand = promo.brand_name;
     setSpecialsLoading(true);
-    const params = new URLSearchParams({ brand, locale });
+    const params = new URLSearchParams({ brand, locale, limit: "8" });
     if (customerType === "b2b" || customerType === "b2c") {
       params.set("segment", customerType);
     }
