@@ -317,8 +317,9 @@ export default function SpecialsProductList({
   customerType,
   onViewAll,
 }: SpecialsProductListProps) {
-  // Render nothing (not even a skeleton) if not loading and no products found.
-  if (!loading && products.length === 0) return null;
+  // Do NOT return null here — the id="specials-section" div must always be in
+  // the DOM once this component is mounted so the CTA scroll target exists.
+  // Empty-state is handled inline in the rows section below.
 
   const SKELETON_COUNT = 5;
 
@@ -388,18 +389,26 @@ export default function SpecialsProductList({
 
       {/* ── Rows ── */}
       <div>
-        {loading
-          ? Array.from({ length: SKELETON_COUNT }).map((_, i) => (
-              <SkeletonRow key={i} />
-            ))
-          : products.map((p) => (
-              <SpecialRow
-                key={p.id}
-                product={p}
-                customerType={customerType}
-                discountPct={discountPct}
-              />
-            ))}
+        {loading ? (
+          Array.from({ length: SKELETON_COUNT }).map((_, i) => (
+            <SkeletonRow key={i} />
+          ))
+        ) : products.length === 0 ? (
+          <div className="px-6 py-8 text-center">
+            <p className="text-[0.85rem] text-[#5c5e62]">
+              No {brandName} specials available right now.
+            </p>
+          </div>
+        ) : (
+          products.map((p) => (
+            <SpecialRow
+              key={p.id}
+              product={p}
+              customerType={customerType}
+              discountPct={discountPct}
+            />
+          ))
+        )}
       </div>
 
       {/* ── Mobile CTA ── */}

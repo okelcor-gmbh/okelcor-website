@@ -132,7 +132,11 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
 
   // ── Specials products (pre-loaded from campaign brand on page load) ────────────
   const [specialsProducts, setSpecialsProducts] = useState<Product[]>([]);
-  const [specialsLoading, setSpecialsLoading] = useState(false);
+  // Start as true so the skeleton renders immediately the moment the section
+  // condition becomes truthy (after promotions load). Without this, React would
+  // render the section with loading=false and products=[] for one frame before
+  // the useEffect fires and sets loading=true, causing a null-flash.
+  const [specialsLoading, setSpecialsLoading] = useState(true);
 
   // ── Dynamic filter options ───────────────────────────────────────────────────
   const [brands,      setBrands]      = useState<string[]>([]);
@@ -221,12 +225,17 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
   }, []);
 
   // Fetch specials products as soon as the campaign brand is known.
-  // Runs automatically — no user interaction required.
-  // Fires whenever campaignPromoRaw.brand_name or customerType changes.
+  // Applies the same customer-type targeting as the computed campaignPromo
+  // value below, but inline here to avoid a forward-reference TDZ error.
   useEffect(() => {
-    const brand = campaignPromoRaw?.brand_name;
-    if (!brand) return;
+    const promo = campaignPromoRaw;
+    if (!promo?.brand_name) { setSpecialsLoading(false); return; }
 
+    const ct = promo.customer_type_target;
+    if (ct === "b2c" && customerType === "b2b") { setSpecialsLoading(false); return; }
+    if (ct === "b2b" && customerType !== "b2b") { setSpecialsLoading(false); return; }
+
+    const brand = promo.brand_name;
     setSpecialsLoading(true);
     const params = new URLSearchParams({ brand, locale });
     if (customerType === "b2b" || customerType === "b2c") {
@@ -247,7 +256,7 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
       .catch(() => {})
       .finally(() => setSpecialsLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [campaignPromoRaw?.brand_name, customerType]);
+  }, [campaignPromoRaw?.brand_name, campaignPromoRaw?.customer_type_target, customerType, locale]);
 
   // Load brands + specs on mount
   useEffect(() => {
