@@ -6,7 +6,7 @@ export type { Product } from "./data";
 import { useLanguage } from "@/context/language-context";
 import { useDepthTilt } from "@/hooks/useDepthTilt";
 
-const PLACEHOLDER = "/images/tyre-placeholder.png";
+const PLACEHOLDER = "/images/tyre-placeholder.svg";
 
 type CustomerType = "b2b" | "b2c" | "guest";
 

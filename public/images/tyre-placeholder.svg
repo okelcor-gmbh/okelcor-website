@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" fill="#f8f8f8"/>
+
+  <!-- Subtle ground shadow -->
+  <ellipse cx="100" cy="192" rx="68" ry="5" fill="#00000014"/>
+
+  <!-- Outer tyre body -->
+  <circle cx="100" cy="100" r="90" fill="#1a1a1a"/>
+
+  <!-- Tread blocks: dashed stroke across the tread band (r≈81, w=18) -->
+  <circle cx="100" cy="100" r="81" fill="none"
+          stroke="#2e2e2e" stroke-width="18"
+          stroke-dasharray="14 7" stroke-linecap="butt"/>
+
+  <!-- Tread groove rings -->
+  <circle cx="100" cy="100" r="87" fill="none" stroke="#111111" stroke-width="1.5"/>
+  <circle cx="100" cy="100" r="75" fill="none" stroke="#111111" stroke-width="1.5"/>
+
+  <!-- Sidewall -->
+  <circle cx="100" cy="100" r="69" fill="#212121"/>
+
+  <!-- Rim outer ring -->
+  <circle cx="100" cy="100" r="55" fill="#c3c5c8"/>
+
+  <!-- Rim lip highlight -->
+  <circle cx="100" cy="100" r="53" fill="none" stroke="#d9dbde" stroke-width="1.5"/>
+
+  <!-- Rim dish -->
+  <circle cx="100" cy="100" r="46" fill="#a6a8ab"/>
+
+  <!-- 5 spokes (angles: -90°, -18°, 54°, 126°, 198°) -->
+  <!-- inner endpoint: r=22 from center; outer endpoint: r=48 from center -->
+  <!-- -90°  → inner (100, 78)   outer (100, 52)  -->
+  <!-- -18°  → inner (121, 93)   outer (146, 85)  -->
+  <!--  54°  → inner (113, 118)  outer (128, 139) -->
+  <!-- 126°  → inner (87, 118)   outer (72, 139)  -->
+  <!-- 198°  → inner (79, 93)    outer (54, 85)   -->
+  <g stroke="#cbcdcf" stroke-width="9" stroke-linecap="round">
+    <line x1="100" y1="78"  x2="100" y2="52"/>
+    <line x1="121" y1="93"  x2="146" y2="85"/>
+    <line x1="113" y1="118" x2="128" y2="139"/>
+    <line x1="87"  y1="118" x2="72"  y2="139"/>
+    <line x1="79"  y1="93"  x2="54"  y2="85"/>
+  </g>
+
+  <!-- Hub -->
+  <circle cx="100" cy="100" r="22" fill="#909294"/>
+  <circle cx="100" cy="100" r="14" fill="#727476"/>
+  <circle cx="100" cy="100" r="7"  fill="#555557"/>
+  <circle cx="100" cy="100" r="3"  fill="#333335"/>
+</svg>

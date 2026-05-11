@@ -5,7 +5,7 @@ import type { Product } from "./data";
 import Reveal from "@/components/motion/reveal";
 import { StaggerParent, StaggerChild } from "@/components/motion/stagger";
 import { useLanguage } from "@/context/language-context";
-const PLACEHOLDER = "/images/tyre-placeholder.png";
+const PLACEHOLDER = "/images/tyre-placeholder.svg";
 
 export default function RelatedProducts({ products }: { products: Product[] }) {
   const { t } = useLanguage();

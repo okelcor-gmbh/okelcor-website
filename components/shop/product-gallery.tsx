@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { Product } from "./data";
 
-const PLACEHOLDER = "/images/tyre-placeholder.png";
+const PLACEHOLDER = "/images/tyre-placeholder.svg";
 const MAX_THUMBS = 4;
 
 export default function ProductGallery({ product }: { product: Product }) {
