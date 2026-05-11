@@ -4,7 +4,7 @@
 // specials products start loading in parallel with the promotions API call —
 // no user interaction required.
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Check,
@@ -320,6 +320,11 @@ export default function SpecialsProductList({
   // Do NOT return null here — the id="specials-section" div must always be in
   // the DOM once this component is mounted so the CTA scroll target exists.
   // Empty-state is handled inline in the rows section below.
+
+  // DEBUG: log on mount and on every prop change
+  useEffect(() => {
+    console.log("[specials-list] mounted/updated", { brandName, loading, productsLength: products.length });
+  });
 
   const SKELETON_COUNT = 5;
 

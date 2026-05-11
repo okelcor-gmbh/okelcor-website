@@ -198,16 +198,19 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
     fetch("/api/promotions/active", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((json) => {
+        console.log("[specials] raw promotions response", json);
         const all: RawPromotion[] = Array.isArray(json?.data) ? json.data : [];
+        console.log("[specials] all promotions", all.map((p) => ({ id: p.id, placement: p.placement, brand_name: p.brand_name, title: p.title })));
 
         setInlinePromos(
           all.filter((p) => !p.placement || p.placement === "shop_inline" || p.placement === "both")
         );
 
         const hero = all.find((p) => p.placement === "shop_hero");
+        console.log("[specials] hero promo", hero ?? "NOT FOUND — no placement=shop_hero in response");
 
         if (hero) {
-          setCampaignPromoRaw({
+          const payload = {
             id:                   hero.id,
             title:                hero.title,
             subheadline:          hero.subheadline ?? null,
@@ -218,10 +221,12 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
             discount_pct:         hero.discount_pct ?? null,
             promo_code:           hero.promo_code ?? null,
             customer_type_target: (hero.customer_type_target as CampaignPromotion["customer_type_target"]) ?? null,
-          });
+          };
+          console.log("[specials] setCampaignPromoRaw →", payload);
+          setCampaignPromoRaw(payload);
         }
       })
-      .catch(() => {});
+      .catch((err) => { console.error("[specials] promotions fetch failed", err); });
   }, []);
 
   // Fetch specials products as soon as the campaign brand is known.
@@ -229,11 +234,12 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
   // value below, but inline here to avoid a forward-reference TDZ error.
   useEffect(() => {
     const promo = campaignPromoRaw;
-    if (!promo?.brand_name) { setSpecialsLoading(false); return; }
+    console.log("[specials] specials effect fired", { promo_brand: promo?.brand_name, promo_ct: promo?.customer_type_target, customerType });
+    if (!promo?.brand_name) { console.warn("[specials] EARLY EXIT — brand_name is null/empty on campaignPromoRaw"); setSpecialsLoading(false); return; }
 
     const ct = promo.customer_type_target;
-    if (ct === "b2c" && customerType === "b2b") { setSpecialsLoading(false); return; }
-    if (ct === "b2b" && customerType !== "b2b") { setSpecialsLoading(false); return; }
+    if (ct === "b2c" && customerType === "b2b") { console.warn("[specials] EARLY EXIT — b2c campaign hidden from b2b user"); setSpecialsLoading(false); return; }
+    if (ct === "b2b" && customerType !== "b2b") { console.warn("[specials] EARLY EXIT — b2b campaign hidden from non-b2b user"); setSpecialsLoading(false); return; }
 
     const brand = promo.brand_name;
     setSpecialsLoading(true);
@@ -242,18 +248,22 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
       params.set("segment", customerType);
     }
 
-    fetch(`${PRODUCTS_API}?${params.toString()}`, { cache: "no-store" })
+    const fetchUrl = `${PRODUCTS_API}?${params.toString()}`;
+    console.log("[specials] fetch url", fetchUrl);
+    fetch(fetchUrl, { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((json) => {
-        if (!json) return;
+        console.log("[specials] products fetch response", json);
+        if (!json) { console.warn("[specials] products fetch returned null/non-ok"); return; }
         const raw = Array.isArray(json.data) ? json.data : [];
         const list = raw
           .map(toProduct)
           .filter((p: Product) => p.price > 0)
           .slice(0, 8);
+        console.log("[specials] products result", { rawCount: raw.length, filteredCount: list.length, sample: list[0] });
         setSpecialsProducts(list);
       })
-      .catch(() => {})
+      .catch((err) => { console.error("[specials] products fetch error", err); })
       .finally(() => setSpecialsLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [campaignPromoRaw?.brand_name, campaignPromoRaw?.customer_type_target, customerType, locale]);
@@ -440,9 +450,35 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
 
   // ─────────────────────────────────────────────────────────────────────────────
 
+  // DEBUG: log render state every render
+  console.log("[specials] render state", {
+    campaignPromoRaw_brand: campaignPromoRaw?.brand_name,
+    campaignPromo_brand: campaignPromo?.brand_name,
+    customerType,
+    shouldRender: Boolean(campaignPromo?.brand_name),
+    specialsLoading,
+    specialsCount: specialsProducts.length,
+  });
+
   return (
     <section className="w-full bg-[#f5f5f5] py-6 md:py-10">
       <div className="tesla-shell">
+
+        {/* ── DEV DEBUG PANEL ── */}
+        {process.env.NODE_ENV === "development" && (
+          <div className="mb-4 rounded-xl border border-yellow-400 bg-yellow-50 px-4 py-3 text-[0.75rem] font-mono text-yellow-900">
+            <p className="font-bold">Specials Debug</p>
+            <p>campaign loaded: {campaignPromoRaw ? "yes" : "no"}</p>
+            <p>brand_name: {campaignPromoRaw?.brand_name ?? "NULL ← ROOT CAUSE if banner shows"}</p>
+            <p>campaignPromo (targeted): {campaignPromo?.brand_name ?? "null"}</p>
+            <p>customerType: {customerType}</p>
+            <p>customer_type_target: {campaignPromoRaw?.customer_type_target ?? "null"}</p>
+            <p>shouldRender: {String(Boolean(campaignPromo?.brand_name))}</p>
+            <p>specialsLoading: {String(specialsLoading)}</p>
+            <p>products count: {specialsProducts.length}</p>
+            <p>button_link: {campaignPromoRaw?.button_link ?? "null"}</p>
+          </div>
+        )}
 
         {/* ── Campaign hero banner — below intro, above filters ── */}
         {campaignPromo && (
