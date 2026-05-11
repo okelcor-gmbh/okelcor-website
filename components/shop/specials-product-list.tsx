@@ -99,11 +99,9 @@ function SkeletonRow() {
 function SpecialRow({
   product,
   customerType,
-  discountPct,
 }: {
   product: Product;
   customerType: CustomerType;
-  discountPct?: number | null;
 }) {
   const { addItem, openCart } = useCart();
   const [qty, setQty]       = useState(1);
@@ -163,13 +161,8 @@ function SpecialRow({
           )}
         </div>
 
-        {/* Price */}
+        {/* Price — show exactly as returned by API; no client-side discount calculation */}
         <div className="w-[88px] shrink-0 text-right">
-          {discountPct != null && discountPct > 0 && (
-            <p className="text-[0.63rem] font-semibold text-[#5c5e62] line-through">
-              €{(price / (1 - discountPct / 100)).toFixed(2)}
-            </p>
-          )}
           <p className="text-[0.95rem] font-extrabold text-[#171a20]">
             €{price.toFixed(2)}
           </p>
@@ -244,11 +237,6 @@ function SpecialRow({
             </div>
           </div>
           <div className="shrink-0 text-right">
-            {discountPct != null && discountPct > 0 && (
-              <p className="text-[0.63rem] text-[#5c5e62] line-through">
-                €{(price / (1 - discountPct / 100)).toFixed(2)}
-              </p>
-            )}
             <p className="text-[1rem] font-extrabold text-[#171a20]">€{price.toFixed(2)}</p>
           </div>
         </div>
@@ -405,7 +393,6 @@ export default function SpecialsProductList({
               key={p.id}
               product={p}
               customerType={customerType}
-              discountPct={discountPct}
             />
           ))
         )}
