@@ -5,6 +5,7 @@ import { Search, Loader2, RotateCcw } from "lucide-react";
 import ProductGrid from "./product-grid";
 import ShopPromoBanner, { type ShopPromotion } from "./shop-promo-banner";
 import ShopCampaignBanner, { type CampaignPromotion } from "./shop-campaign-banner";
+import SpecialsSection from "./specials-section";
 import { type Product } from "./data";
 import { type ActiveCampaign } from "./product-card";
 import { useLanguage } from "@/context/language-context";
@@ -401,6 +402,21 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
         {/* ── Campaign hero banner — below intro, above filters ── */}
         {campaignPromo && (
           <ShopCampaignBanner promo={campaignPromo} onCtaClick={handleCampaignCta} />
+        )}
+
+        {/* ── Specials section — pre-loaded brand products from active campaign ── */}
+        {campaignPromo?.brand_name && (
+          <SpecialsSection
+            brandName={campaignPromo.brand_name}
+            discountPct={campaignPromo.discount_pct}
+            customerType={customerType}
+            onViewAll={() =>
+              handleCampaignCta(
+                campaignPromo.button_link ??
+                  `/shop?brand=${encodeURIComponent(campaignPromo.brand_name!)}`,
+              )
+            }
+          />
         )}
 
         {/* ── Filter bar ── */}
