@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const token = request.cookies.get("customer_token")?.value;
 
@@ -18,50 +18,79 @@ export async function GET(
   }
 
   const { id } = await params;
-  const targetUrl = `${API_URL}/invoices/${id}/download`;
 
-  console.log("[invoice-download] token present :", !!token);
+  // Correct authenticated customer endpoint — must include /auth/ prefix.
+  // The previous route used /invoices/{id}/download (no auth prefix) which
+  // Laravel could not match to an authenticated route, causing a 404/403
+  // and triggering the generic frontend fallback message.
+  const targetUrl = `${API_URL}/auth/invoices/${id}/download`;
+
   console.log("[invoice-download] target URL    :", targetUrl);
+  console.log("[invoice-download] token present :", !!token);
 
   try {
-    const res = await fetch(targetUrl, {
+    const upstream = await fetch(targetUrl, {
+      cache: "no-store",
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "application/pdf,application/octet-stream,*/*",
       },
-      cache: "no-store",
     });
 
-    console.log("[invoice-download] Laravel status :", res.status);
-    console.log("[invoice-download] content-type   :", res.headers.get("Content-Type"));
+    const upstreamContentType = upstream.headers.get("Content-Type") ?? "";
 
-    if (!res.ok) {
-      const errText = await res.text();
-      console.log("[invoice-download] error body     :", errText.slice(0, 300));
-      // 423 = invoice exists but not yet released (reverse-charge, pending certificate)
-      const message =
-        res.status === 423
-          ? "This invoice is not yet available. It will be released after your EU Entry Certificate is acknowledged."
-          : "Unable to retrieve invoice PDF.";
-      return NextResponse.json({ message }, { status: res.status });
+    console.log("[invoice-download] upstream status      :", upstream.status);
+    console.log("[invoice-download] upstream content-type:", upstreamContentType);
+    console.log(
+      "[invoice-download] upstream content-length:",
+      upstream.headers.get("Content-Length") ?? "(not sent)",
+    );
+
+    if (!upstream.ok) {
+      // Surface the real upstream error so it is visible in the browser and
+      // in server logs — never swallow it with a generic fallback.
+      const errorBody = await upstream.text().catch(() => "");
+      console.error(
+        "[invoice-download] upstream error body:",
+        errorBody.slice(0, 500),
+      );
+
+      let message: string;
+      try {
+        const parsed = JSON.parse(errorBody);
+        message = parsed?.message ?? parsed?.error ?? (errorBody || "Invoice unavailable.");
+      } catch {
+        message = errorBody || "Invoice unavailable.";
+      }
+
+      return NextResponse.json(
+        { message, upstream_status: upstream.status },
+        { status: upstream.status },
+      );
     }
 
-    const body = await res.arrayBuffer();
-    const responseHeaders = new Headers();
+    // Stream the PDF regardless of whether Content-Length is present.
+    const body = await upstream.arrayBuffer();
 
-    const contentType = res.headers.get("Content-Type");
-    if (contentType) responseHeaders.set("Content-Type", contentType);
-
-    // Parse filename from backend header, fall back to a sensible default.
-    const backendCd = res.headers.get("Content-Disposition") ?? "";
+    // Extract filename from upstream Content-Disposition if provided;
+    // fall back to a sensible default.
+    const backendCd = upstream.headers.get("Content-Disposition") ?? "";
     const fnMatch = backendCd.match(/filename[^;=\n]*=["']?([^"';\n]+)/i);
     const filename = fnMatch?.[1]?.trim() ?? `invoice-${id}.pdf`;
-    // Always serve inline so the browser opens the PDF in a new tab instead
-    // of forcing a download.
-    responseHeaders.set("Content-Disposition", `inline; filename="${filename}"`);
 
-    return new NextResponse(body, { status: 200, headers: responseHeaders });
-  } catch {
+    return new NextResponse(body, {
+      status: 200,
+      headers: {
+        // Always set to application/pdf — do not forward a wrong or missing
+        // content-type from the upstream response.
+        "Content-Type": "application/pdf",
+        // inline → browser opens PDF in a new tab instead of downloading.
+        "Content-Disposition": `inline; filename="${filename}"`,
+        "Cache-Control": "no-store",
+      },
+    });
+  } catch (err) {
+    console.error("[invoice-download] fetch error:", err);
     return NextResponse.json({ message: "Internal server error" }, { status: 500 });
   }
 }
