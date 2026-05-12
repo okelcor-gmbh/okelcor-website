@@ -10,6 +10,8 @@ import {
   CheckCircle2, Ban, Activity, ShieldCheck, ShieldOff, Info, Mail,
 } from "lucide-react";
 import TwoFactorStatus from "@/components/admin/two-factor-status";
+import SecurityMetrics from "@/components/admin/security-metrics";
+import SecurityLoginHistory from "@/components/admin/security-login-history";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -48,6 +50,9 @@ type Summary = {
   suspicious_accounts: number;
   suspended_today: number;
   banned_today: number;
+  blocked_admin_actions?: number;
+  webhook_failures?: number;
+  active_admin_sessions?: number;
   _unavailable?: boolean;
 };
 
@@ -114,24 +119,6 @@ function timeAgo(iso: string) {
 }
 
 // ── Sub-components ─────────────────────────────────────────────────────────────
-
-function StatCard({
-  icon: Icon, label, value, color, bg,
-}: {
-  icon: React.ElementType; label: string; value: number; color: string; bg: string;
-}) {
-  return (
-    <div className="flex items-center gap-4 rounded-2xl bg-white px-5 py-4 shadow-sm">
-      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${bg}`}>
-        <Icon size={18} className={color} />
-      </div>
-      <div>
-        <p className="text-[0.7rem] text-[#5c5e62]">{label}</p>
-        <p className={`text-[1.4rem] font-extrabold ${color}`}>{value}</p>
-      </div>
-    </div>
-  );
-}
 
 function EventRow({
   event, onUnlock,
@@ -211,6 +198,9 @@ export default function SecurityPage() {
   const [refreshing, setRefresh]= useState(false);
   const [unavailable, setUnavail] = useState(false);
   const [toast, setToast]       = useState<{ msg: string; variant: "success" | "warning" | "error" } | null>(null);
+  const [severityFilter, setSeverityFilter] = useState<"all" | Severity>("all");
+  const [eventsDateFrom, setEventsDateFrom] = useState("");
+  const [eventsDateTo, setEventsDateTo]     = useState("");
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const { can } = useAdminPermissions();
@@ -235,6 +225,9 @@ export default function SecurityPage() {
     if (!quiet) setLoading(true); else setRefresh(true);
     const params = new URLSearchParams({ page: String(pg), per_page: String(PER_PAGE) });
     if (tab !== "all") params.set("type", tab);
+    if (severityFilter !== "all") params.set("severity", severityFilter);
+    if (eventsDateFrom) params.set("date_from", eventsDateFrom);
+    if (eventsDateTo) params.set("date_to", eventsDateTo);
 
     const res = await fetch(`/api/admin/security/events?${params}`, { cache: "no-store" })
       .then(r => r.ok ? r.json() : null).catch(() => null);
@@ -247,7 +240,7 @@ export default function SecurityPage() {
     setEvents(res.data ?? []);
     setMeta(res.meta ?? { total: 0, current_page: pg, last_page: 1, per_page: PER_PAGE });
     setLoading(false); setRefresh(false);
-  }, []);
+  }, [severityFilter, eventsDateFrom, eventsDateTo]);
 
   // Initial + filter/page changes
   useEffect(() => {
@@ -354,13 +347,6 @@ export default function SecurityPage() {
     }
   };
 
-  const summaryStats = [
-    { icon: Lock,          label: "Accounts Locked Today",     value: summary?.locked_today ?? 0,          color: "text-red-600",    bg: "bg-red-50" },
-    { icon: AlertTriangle, label: "Failed Attempts Today",      value: summary?.failed_attempts_today ?? 0, color: "text-amber-600",  bg: "bg-amber-50" },
-    { icon: UserPlus,      label: "New Registrations Today",    value: summary?.new_registrations_today ?? 0, color: "text-emerald-600", bg: "bg-emerald-50" },
-    { icon: ShieldAlert,   label: "Suspicious Accounts",        value: summary?.suspicious_accounts ?? 0,   color: summary?.suspicious_accounts ? "text-red-700" : "text-[#5c5e62]", bg: summary?.suspicious_accounts ? "bg-red-100" : "bg-[#f5f5f7]" },
-    { icon: Ban,           label: "Suspended Today",            value: summary?.suspended_today ?? 0,       color: "text-orange-600", bg: "bg-orange-50" },
-  ];
 
   return (
     <div className="min-h-screen bg-[#f5f5f7] p-4 md:p-6 lg:p-8">
@@ -560,15 +546,14 @@ export default function SecurityPage() {
         </div>
       )}
 
+      {/* Admin Login History (super_admin only) */}
+      {can("security.manage") && <SecurityLoginHistory />}
+
       {/* System-wide security sections — super_admin only */}
       {can("security.manage") && <>
 
-      {/* Summary Stats */}
-      <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        {summaryStats.map(s => (
-          <StatCard key={s.label} icon={s.icon} label={s.label} value={s.value} color={s.color} bg={s.bg} />
-        ))}
-      </div>
+      {/* Metric Cards */}
+      <SecurityMetrics summary={summary} twoFaUsers={twoFaUsers} />
 
       {/* Suspicious accounts alert */}
       {!summary?._unavailable && (summary?.suspicious_accounts ?? 0) > 0 && (
@@ -623,6 +608,54 @@ export default function SecurityPage() {
               {t.label}
             </button>
           ))}
+        </div>
+
+        {/* Severity + date filter bar */}
+        <div className="flex flex-wrap items-center gap-2 border-b border-black/[0.06] bg-[#fafafa] px-4 py-2.5">
+          <span className="text-[0.68rem] font-bold uppercase tracking-wide text-[#9ca3af]">Severity</span>
+          {(["all", "info", "warning", "critical"] as const).map(s => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => { setSeverityFilter(s); setPage(1); }}
+              className={`rounded-lg px-2.5 py-1 text-[0.72rem] font-semibold transition ${
+                severityFilter === s
+                  ? s === "all"      ? "bg-[#1a1a1a] text-white"
+                  : s === "info"     ? "bg-blue-600 text-white"
+                  : s === "warning"  ? "bg-amber-500 text-white"
+                  :                    "bg-red-600 text-white"
+                  : "text-[#5c5e62] hover:bg-[#ebebeb]"
+              }`}
+            >
+              {s === "all" ? "All" : s.charAt(0).toUpperCase() + s.slice(1)}
+            </button>
+          ))}
+          <div className="ml-auto flex flex-wrap items-center gap-2">
+            <input
+              type="date"
+              value={eventsDateFrom}
+              onChange={e => { setEventsDateFrom(e.target.value); setPage(1); }}
+              className="h-7 rounded-lg border border-black/[0.09] bg-white px-2 text-[0.72rem] text-[#1a1a1a] outline-none focus:border-[#E85C1A] focus:ring-1 focus:ring-[#E85C1A]/20"
+              title="From date"
+            />
+            <span className="text-[0.68rem] text-[#9ca3af]">to</span>
+            <input
+              type="date"
+              value={eventsDateTo}
+              onChange={e => { setEventsDateTo(e.target.value); setPage(1); }}
+              className="h-7 rounded-lg border border-black/[0.09] bg-white px-2 text-[0.72rem] text-[#1a1a1a] outline-none focus:border-[#E85C1A] focus:ring-1 focus:ring-[#E85C1A]/20"
+              title="To date"
+            />
+            {(eventsDateFrom || eventsDateTo) && (
+              <button
+                type="button"
+                onClick={() => { setEventsDateFrom(""); setEventsDateTo(""); setPage(1); }}
+                className="text-[0.7rem] text-[#9ca3af] underline hover:text-[#5c5e62]"
+              >
+                Clear
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Content */}
