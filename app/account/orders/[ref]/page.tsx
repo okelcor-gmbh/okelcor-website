@@ -7,6 +7,7 @@ import Footer from "@/components/footer";
 import ShipmentTracker from "@/components/account/shipment-tracker";
 import OrderPaymentCard from "@/components/account/order-payment-card";
 import EntryCertificateCard from "@/components/account/entry-certificate-card";
+import DeliveryConfirmationCard from "@/components/account/delivery-confirmation-card";
 import TradeDocumentsCard from "@/components/account/trade-documents-card";
 import { getCustomerFromCookie } from "@/lib/get-customer";
 import { StatusBadge, formatDate, type Order, type OrderStatus } from "../page";
@@ -261,6 +262,14 @@ export default async function OrderDetailPage({ params }: Props) {
               orderRef={order.ref}
               paymentMethod={order.payment_method}
               paymentStatus={order.payment_status}
+            />
+          )}
+
+          {/* ── Delivery Confirmation ── */}
+          {order.status === "delivered" && (
+            <DeliveryConfirmationCard
+              declarationRequired={order.declaration_required}
+              declarationStatus={order.declaration_status}
             />
           )}
 

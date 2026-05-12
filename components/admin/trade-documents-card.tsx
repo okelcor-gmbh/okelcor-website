@@ -9,6 +9,7 @@ const TYPE_LABEL: Record<string, string> = {
   proforma_invoice:   "Proforma Invoice",
   commercial_invoice: "Commercial Invoice",
   packing_list:       "Packing List",
+  delivery_note:      "Delivery Note",
   other:              "Document",
 };
 
@@ -18,8 +19,8 @@ const STATUS_BADGE: Record<string, string> = {
   sent:   "bg-emerald-100 text-emerald-700",
 };
 
-// Packing lists open inline in a new tab; other doc types are force-downloaded.
-const INLINE_TYPES = new Set(["packing_list"]);
+// These document types open inline in a new browser tab instead of force-downloading.
+const INLINE_TYPES = new Set(["packing_list", "delivery_note"]);
 
 function shortDate(iso?: string | null): string {
   if (!iso) return "—";
@@ -30,6 +31,9 @@ function shortDate(iso?: string | null): string {
   } catch { return iso; }
 }
 
+type GenerateState = { loading: boolean; error: string | null };
+const IDLE: GenerateState = { loading: false, error: null };
+
 export default function TradeDocumentsCard({
   orderId,
   initialDocuments,
@@ -39,56 +43,34 @@ export default function TradeDocumentsCard({
 }) {
   const { can } = useAdminPermissions();
 
-  const [documents,          setDocuments]         = useState<TradeDocument[]>(initialDocuments);
-  const [generating,         setGenerating]         = useState(false);
-  const [generateError,      setGenerateError]      = useState<string | null>(null);
-  const [generatingPacking,  setGeneratingPacking]  = useState(false);
-  const [packingError,       setPackingError]       = useState<string | null>(null);
-  const [downloading,        setDownloading]        = useState<number | null>(null);
+  const [documents,      setDocuments]     = useState<TradeDocument[]>(initialDocuments);
+  const [proforma,       setProforma]      = useState<GenerateState>(IDLE);
+  const [packing,        setPacking]       = useState<GenerateState>(IDLE);
+  const [delivery,       setDelivery]      = useState<GenerateState>(IDLE);
+  const [downloading,    setDownloading]   = useState<number | null>(null);
 
-  const hasProforma = documents.some((d) => d.type === "proforma_invoice");
-  const hasPacking  = documents.some((d) => d.type === "packing_list");
-  const canManage   = can("trade_documents.manage");
+  const hasProforma      = documents.some((d) => d.type === "proforma_invoice");
+  const hasPacking       = documents.some((d) => d.type === "packing_list");
+  const hasDeliveryNote  = documents.some((d) => d.type === "delivery_note");
+  const canManage        = can("trade_documents.manage");
 
-  async function handleGenerate() {
-    setGenerating(true);
-    setGenerateError(null);
+  async function generateDoc(
+    endpoint: string,
+    setState: (s: GenerateState) => void,
+    label: string,
+  ) {
+    setState({ loading: true, error: null });
     try {
-      const res = await fetch(
-        `/api/admin/orders/${orderId}/trade-documents/proforma`,
-        { method: "POST" },
-      );
+      const res  = await fetch(endpoint, { method: "POST" });
       const json = await res.json().catch(() => ({})) as { data?: TradeDocument; message?: string };
       if (res.ok && json.data) {
         setDocuments((prev) => [...prev, json.data!]);
+        setState(IDLE);
       } else {
-        setGenerateError(json.message ?? "Failed to generate proforma. Please try again.");
+        setState({ loading: false, error: json.message ?? `Failed to generate ${label}. Please try again.` });
       }
     } catch {
-      setGenerateError("Network error. Please try again.");
-    } finally {
-      setGenerating(false);
-    }
-  }
-
-  async function handleGeneratePacking() {
-    setGeneratingPacking(true);
-    setPackingError(null);
-    try {
-      const res = await fetch(
-        `/api/admin/orders/${orderId}/trade-documents/packing-list`,
-        { method: "POST" },
-      );
-      const json = await res.json().catch(() => ({})) as { data?: TradeDocument; message?: string };
-      if (res.ok && json.data) {
-        setDocuments((prev) => [...prev, json.data!]);
-      } else {
-        setPackingError(json.message ?? "Failed to generate packing list. Please try again.");
-      }
-    } catch {
-      setPackingError("Network error. Please try again.");
-    } finally {
-      setGeneratingPacking(false);
+      setState({ loading: false, error: "Network error. Please try again." });
     }
   }
 
@@ -127,41 +109,71 @@ export default function TradeDocumentsCard({
             {!hasProforma && (
               <button
                 type="button"
-                onClick={handleGenerate}
-                disabled={generating}
+                onClick={() => generateDoc(
+                  `/api/admin/orders/${orderId}/trade-documents/proforma`,
+                  setProforma,
+                  "proforma invoice",
+                )}
+                disabled={proforma.loading}
                 className="inline-flex items-center gap-1.5 rounded-full border border-[#E85C1A]/30 bg-[#fff5f2] px-3 py-1.5 text-[0.75rem] font-semibold text-[#E85C1A] transition hover:bg-[#fff0ea] disabled:opacity-60"
               >
-                {generating
+                {proforma.loading
                   ? <Loader2 size={13} strokeWidth={2} className="animate-spin" />
                   : <FilePlus2 size={13} strokeWidth={2} />
                 }
-                {generating ? "Generating…" : "Generate Proforma"}
+                {proforma.loading ? "Generating…" : "Generate Proforma"}
               </button>
             )}
 
             {!hasPacking && (
               <button
                 type="button"
-                onClick={handleGeneratePacking}
-                disabled={generatingPacking}
+                onClick={() => generateDoc(
+                  `/api/admin/orders/${orderId}/trade-documents/packing-list`,
+                  setPacking,
+                  "packing list",
+                )}
+                disabled={packing.loading}
                 className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[0.75rem] font-semibold text-blue-700 transition hover:bg-blue-100 disabled:opacity-60"
               >
-                {generatingPacking
+                {packing.loading
                   ? <Loader2 size={13} strokeWidth={2} className="animate-spin" />
                   : <FilePlus2 size={13} strokeWidth={2} />
                 }
-                {generatingPacking ? "Generating…" : "Generate Packing List"}
+                {packing.loading ? "Generating…" : "Generate Packing List"}
+              </button>
+            )}
+
+            {!hasDeliveryNote && (
+              <button
+                type="button"
+                onClick={() => generateDoc(
+                  `/api/admin/orders/${orderId}/trade-documents/delivery-note`,
+                  setDelivery,
+                  "delivery note",
+                )}
+                disabled={delivery.loading}
+                className="inline-flex items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-3 py-1.5 text-[0.75rem] font-semibold text-teal-700 transition hover:bg-teal-100 disabled:opacity-60"
+              >
+                {delivery.loading
+                  ? <Loader2 size={13} strokeWidth={2} className="animate-spin" />
+                  : <FilePlus2 size={13} strokeWidth={2} />
+                }
+                {delivery.loading ? "Generating…" : "Generate Delivery Note"}
               </button>
             )}
           </div>
         )}
       </div>
 
-      {generateError && (
-        <p className="mb-4 text-[0.8rem] text-red-600">{generateError}</p>
+      {proforma.error && (
+        <p className="mb-3 text-[0.8rem] text-red-600">{proforma.error}</p>
       )}
-      {packingError && (
-        <p className="mb-4 text-[0.8rem] text-red-600">{packingError}</p>
+      {packing.error && (
+        <p className="mb-3 text-[0.8rem] text-red-600">{packing.error}</p>
+      )}
+      {delivery.error && (
+        <p className="mb-3 text-[0.8rem] text-red-600">{delivery.error}</p>
       )}
 
       {documents.length === 0 ? (

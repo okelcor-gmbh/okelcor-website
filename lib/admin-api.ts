@@ -184,7 +184,7 @@ export type ShipmentEvent = {
 
 export type TradeDocument = {
   id: number;
-  type: "proforma_invoice" | "commercial_invoice" | "packing_list" | "other" | string;
+  type: "proforma_invoice" | "commercial_invoice" | "packing_list" | "delivery_note" | "other" | string;
   number?: string | null;
   status: "draft" | "issued" | "sent" | string;
   issued_at?: string | null;

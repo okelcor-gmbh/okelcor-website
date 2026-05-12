@@ -8,6 +8,7 @@ const TYPE_LABEL: Record<string, string> = {
   proforma_invoice:   "Proforma Invoice",
   commercial_invoice: "Commercial Invoice",
   packing_list:       "Packing List",
+  delivery_note:      "Delivery Note",
   other:              "Document",
 };
 
@@ -17,7 +18,7 @@ const GATED_TYPES = new Set(["commercial_invoice", "final_invoice"]);
 // These document types open inline in a new browser tab rather than being
 // force-downloaded. The browser sends the httpOnly cookie automatically since
 // the proxy route is same-origin.
-const INLINE_TYPES = new Set(["commercial_invoice", "final_invoice", "packing_list"]);
+const INLINE_TYPES = new Set(["commercial_invoice", "final_invoice", "packing_list", "delivery_note"]);
 
 function shortDate(iso?: string | null): string {
   if (!iso) return "—";
