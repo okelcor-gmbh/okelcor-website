@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -18,12 +19,14 @@ type BarPromotion = {
 };
 
 export default function AnnouncementBar() {
+  const pathname              = usePathname();
   const [promos, setPromos]   = useState<BarPromotion[]>([]);
   const [idx, setIdx]         = useState(0);
   const [visible, setVisible] = useState(false);
   const timerRef              = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
+    if (pathname?.startsWith("/admin")) return;
     if (localStorage.getItem(STORAGE_KEY) === "1") return;
     fetch("/api/promotions/active")
       .then((r) => (r.ok ? r.json() : null))
@@ -39,7 +42,7 @@ export default function AnnouncementBar() {
         }
       })
       .catch(() => {});
-  }, []);
+  }, [pathname]);
 
   useEffect(() => {
     if (!visible || promos.length <= 1) return;
@@ -68,6 +71,7 @@ export default function AnnouncementBar() {
     setIdx((i) => (i + 1) % promos.length);
   };
 
+  if (pathname?.startsWith("/admin")) return null;
   if (!visible || promos.length === 0) return null;
 
   const promo = promos[idx];
