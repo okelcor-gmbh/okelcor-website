@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useTransition, type ReactNode } from "react";
+import { useState, useTransition, useCallback, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   CheckCircle2, AlertCircle, ChevronDown, Paperclip,
-  Download, ShoppingCart, ExternalLink,
+  Download, ShoppingCart, ExternalLink, Loader2,
 } from "lucide-react";
 import { updateQuoteStatus } from "@/app/admin/quotes/actions";
 import type { ConvertToOrderResult } from "@/app/admin/quotes/actions";
@@ -100,6 +100,7 @@ export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
 
   const [showConvertModal, setShowConvertModal] = useState(false);
   const [convertedOrder, setConvertedOrder] = useState<ConvertToOrderResult | null>(null);
+  const [downloadingAttachment, setDownloadingAttachment] = useState(false);
 
   const isDirty = status !== quote.status;
 
@@ -131,6 +132,40 @@ export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
   const attachmentUrl  = quote.attachment_url ?? quote.attachment_path ?? null;
   const attachmentName = quote.attachment_original_name ?? quote.attachment_name ?? null;
   const hasAttachment  = !!(attachmentUrl || attachmentName);
+
+  // Extract the numeric attachment ID from the new protected URL format:
+  // https://api.okelcor.com/api/v1/admin/quote-attachments/{id}/download
+  const attachmentId = useCallback((): string | null => {
+    if (!attachmentUrl) return null;
+    try {
+      const parts = new URL(attachmentUrl).pathname.split("/").filter(Boolean);
+      const dlIdx = parts.indexOf("download");
+      return dlIdx > 0 ? parts[dlIdx - 1] : null;
+    } catch { return null; }
+  }, [attachmentUrl])();
+
+  const handleDownloadAttachment = useCallback(async () => {
+    if (!attachmentId) return;
+    setDownloadingAttachment(true);
+    try {
+      const res = await fetch(`/api/admin/quote-attachments/${attachmentId}/download`);
+      if (!res.ok) return;
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement("a");
+      a.href     = url;
+      a.download = attachmentName ?? `quote-attachment-${attachmentId}`;
+      a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch {
+      // silently fail — user can retry
+    } finally {
+      setDownloadingAttachment(false);
+    }
+  }, [attachmentId, attachmentName]);
 
   // Tyre items
   const hasTyreItems = Array.isArray(quote.tyre_items) && quote.tyre_items.length > 0;
@@ -403,16 +438,19 @@ export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
                     </p>
                   </div>
                 </div>
-                {attachmentUrl ? (
-                  <a
-                    href={attachmentUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="ml-4 flex shrink-0 items-center gap-1.5 rounded-full bg-[#E85C1A] px-4 py-2 text-[0.8rem] font-semibold text-white transition hover:bg-[#d14f14]"
+                {attachmentId ? (
+                  <button
+                    type="button"
+                    onClick={handleDownloadAttachment}
+                    disabled={downloadingAttachment}
+                    className="ml-4 flex shrink-0 items-center gap-1.5 rounded-full bg-[#E85C1A] px-4 py-2 text-[0.8rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-60"
                   >
-                    <Download size={13} strokeWidth={2} />
-                    Download
-                  </a>
+                    {downloadingAttachment
+                      ? <Loader2 size={13} className="animate-spin" />
+                      : <Download size={13} strokeWidth={2} />
+                    }
+                    {downloadingAttachment ? "Downloading…" : "Download"}
+                  </button>
                 ) : (
                   <span className="ml-4 shrink-0 text-[0.78rem] text-[#5c5e62]">Download unavailable</span>
                 )}
