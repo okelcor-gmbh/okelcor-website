@@ -218,6 +218,8 @@ export default function SecurityPage() {
   const [showNoticeModal, setShowNoticeModal] = useState(false);
   const [sendingNotices, setSendingNotices] = useState(false);
 
+  const isSuperAdmin = adminRole === "super_admin";
+
   const showToast = (msg: string, ok: boolean) => {
     setToast({ msg, ok });
     setTimeout(() => setToast(null), 3500);
@@ -272,9 +274,9 @@ export default function SecurityPage() {
       .catch(() => null);
   }, []);
 
-  // Fetch 2FA adoption table (super_admin / admin only)
+  // Fetch 2FA adoption table (super_admin only)
   useEffect(() => {
-    if (!adminRole || !["super_admin", "admin"].includes(adminRole)) return;
+    if (!adminRole || adminRole !== "super_admin") return;
     fetch("/api/admin/security/2fa-status", { cache: "no-store" })
       .then(r => r.json())
       .then((json: { _unavailable?: boolean; data?: TwoFaUser[] }) => {
@@ -392,21 +394,23 @@ export default function SecurityPage() {
               Security & Events Log
             </h1>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-[0.72rem] font-semibold text-emerald-700">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
-              Auto-refreshes every 30s
+          {isSuperAdmin && (
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-[0.72rem] font-semibold text-emerald-700">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+                Auto-refreshes every 30s
+              </div>
+              <button
+                type="button"
+                onClick={() => { fetchSummary(); fetchEvents(filter, page, true); }}
+                disabled={refreshing}
+                className="flex items-center gap-1.5 rounded-xl border border-black/[0.08] bg-white px-3 py-1.5 text-[0.78rem] font-semibold text-[#1a1a1a] shadow-sm transition hover:bg-[#f5f5f7] disabled:opacity-50"
+              >
+                <RefreshCw size={13} className={refreshing ? "animate-spin" : ""} />
+                Refresh
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => { fetchSummary(); fetchEvents(filter, page, true); }}
-              disabled={refreshing}
-              className="flex items-center gap-1.5 rounded-xl border border-black/[0.08] bg-white px-3 py-1.5 text-[0.78rem] font-semibold text-[#1a1a1a] shadow-sm transition hover:bg-[#f5f5f7] disabled:opacity-50"
-            >
-              <RefreshCw size={13} className={refreshing ? "animate-spin" : ""} />
-              Refresh
-            </button>
-          </div>
+          )}
         </div>
       </div>
 
@@ -426,8 +430,8 @@ export default function SecurityPage() {
       {/* 2FA Setup */}
       <TwoFactorStatus />
 
-      {/* 2FA Adoption Table (super_admin / admin only) */}
-      {adminRole && ["super_admin", "admin"].includes(adminRole) && (
+      {/* 2FA Adoption Table (super_admin only) */}
+      {isSuperAdmin && (
         <div className="mb-6 overflow-hidden rounded-2xl bg-white shadow-sm">
           <div className="flex items-center gap-2.5 border-b border-black/[0.06] px-5 py-4">
             <ShieldCheck size={15} className="text-[#5c5e62]" />
@@ -520,6 +524,9 @@ export default function SecurityPage() {
           )}
         </div>
       )}
+
+      {/* System-wide security sections — super_admin only */}
+      {isSuperAdmin && <>
 
       {/* Summary Stats */}
       <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
@@ -700,6 +707,8 @@ export default function SecurityPage() {
           </div>
         </div>
       </div>
+
+      </>} {/* end isSuperAdmin */}
 
     </div>
   );

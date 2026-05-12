@@ -32,7 +32,7 @@ export async function GET() {
       cache: "no-store",
     });
 
-    if (res.status === 404) {
+    if (res.status === 404 || res.status === 403) {
       return NextResponse.json({ ...EMPTY, _unavailable: true });
     }
 

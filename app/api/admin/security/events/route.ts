@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
     });
     const json = await res.json().catch(() => null);
 
-    if (res.status === 404 || !json) {
+    if (res.status === 404 || res.status === 403 || !json) {
       return NextResponse.json({ data: [], meta: { total: 0 }, _unavailable: true });
     }
     return NextResponse.json(json, { status: res.status });
