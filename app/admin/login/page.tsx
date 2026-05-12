@@ -30,7 +30,7 @@ function ErrorAlert({ message }: { message: string }) {
 function PasswordForm({
   onTwoFaRequired,
 }: {
-  onTwoFaRequired: (tempToken: string) => void;
+  onTwoFaRequired: (sessionToken: string) => void;
 }) {
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
@@ -48,7 +48,7 @@ function PasswordForm({
       const result = await loginAdmin(email, password);
       if (!result) return; // redirect happened
       if ("requires_2fa" in result) {
-        onTwoFaRequired(result.temp_token);
+        onTwoFaRequired(result.session_token);
         return;
       }
       if (result.error) setError(result.error);
@@ -108,10 +108,10 @@ function PasswordForm({
 // ── 2FA challenge ──────────────────────────────────────────────────────────────
 
 function TwoFactorChallenge({
-  tempToken,
+  sessionToken,
   onBack,
 }: {
-  tempToken: string;
+  sessionToken: string;
   onBack: () => void;
 }) {
   const [code, setCode]   = useState("");
@@ -133,7 +133,7 @@ function TwoFactorChallenge({
     }
     setError(null);
     startTransition(async () => {
-      const result = await submitAdminTwoFactor(tempToken, code);
+      const result = await submitAdminTwoFactor(sessionToken, code);
       if (!result) return; // redirect happened
       if (result.error) {
         setError(result.error);
@@ -208,7 +208,7 @@ function TwoFactorChallenge({
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function AdminLoginPage() {
-  const [twoFaTempToken, setTwoFaTempToken] = useState<string | null>(null);
+  const [twoFaSessionToken, setTwoFaTempToken] = useState<string | null>(null);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#111111] p-4">
@@ -221,14 +221,14 @@ export default function AdminLoginPage() {
           <div>
             <p className="text-[1.4rem] font-extrabold text-white">Okelcor Admin</p>
             <p className="mt-0.5 text-[0.83rem] text-white/40">
-              {twoFaTempToken ? "Verify your identity" : "Sign in to manage your content"}
+              {twoFaSessionToken ? "Verify your identity" : "Sign in to manage your content"}
             </p>
           </div>
         </div>
 
-        {twoFaTempToken ? (
+        {twoFaSessionToken ? (
           <TwoFactorChallenge
-            tempToken={twoFaTempToken}
+            sessionToken={twoFaSessionToken}
             onBack={() => setTwoFaTempToken(null)}
           />
         ) : (

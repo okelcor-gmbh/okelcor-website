@@ -11,13 +11,13 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1
  * Authenticates an admin user against POST /api/v1/admin/login.
  *
  * On success: sets httpOnly admin_token cookie and redirects to /admin.
- * On 2FA required: returns { requires_2fa: true, temp_token } — no redirect.
+ * On 2FA required: returns { requires_2fa: true, session_token } — no redirect.
  * On failure: returns { error: string }.
  */
 export async function loginAdmin(
   email: string,
   password: string
-): Promise<{ error: string } | { requires_2fa: true; temp_token: string } | void> {
+): Promise<{ error: string } | { requires_2fa: true; session_token: string } | void> {
   let res: Response;
   try {
     res = await fetch(`${API_URL}/admin/login`, {
@@ -41,10 +41,15 @@ export async function loginAdmin(
   }
 
   // Backend signals that 2FA verification is required before a full token is issued.
+  // Contract: { requires_2fa: true, data: { session_token: "uuid" } }
   if (json.requires_2fa === true) {
-    const tempToken: string = json.temp_token ?? "";
-    if (!tempToken) return { error: "Server error: missing 2FA session token." };
-    return { requires_2fa: true, temp_token: tempToken };
+    console.log("[loginAdmin] 2FA required — response shape:", JSON.stringify({
+      requires_2fa: json.requires_2fa,
+      data_keys: json.data ? Object.keys(json.data) : null,
+    }));
+    const sessionToken: string = json.data?.session_token ?? "";
+    if (!sessionToken) return { error: "2FA session could not be started. Please try logging in again." };
+    return { requires_2fa: true, session_token: sessionToken };
   }
 
   const token: string | undefined = json.data?.token;
@@ -117,12 +122,12 @@ export async function logoutAdmin(): Promise<void> {
 // ── 2FA login challenge ───────────────────────────────────────────────────────
 
 /**
- * Validates a TOTP code against the temp_token issued by the initial login step.
+ * Validates a TOTP code against the session_token issued by the initial login step.
  * On success: sets full admin session cookies and redirects to /admin.
  * On failure: returns { error: string }.
  */
 export async function submitAdminTwoFactor(
-  tempToken: string,
+  sessionToken: string,
   code: string
 ): Promise<{ error: string } | void> {
   let res: Response;
@@ -130,7 +135,7 @@ export async function submitAdminTwoFactor(
     res = await fetch(`${API_URL}/admin/login/2fa`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify({ temp_token: tempToken, code }),
+      body: JSON.stringify({ session_token: sessionToken, code }),
       cache: "no-store",
     });
   } catch {
