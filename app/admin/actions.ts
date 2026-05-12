@@ -3,7 +3,10 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
+const API_URL =
+  process.env.API_URL ??
+  process.env.NEXT_PUBLIC_API_URL ??
+  "http://localhost:8000/api/v1";
 
 // ── Login ─────────────────────────────────────────────────────────────────────
 
@@ -145,11 +148,28 @@ export async function submitAdminTwoFactor(
   const json = await res.json().catch(() => ({}));
 
   if (!res.ok) {
-    return {
-      error:
-        json.message ||
-        (res.status === 422 ? "Invalid or expired code. Please try again." : "Verification failed."),
-    };
+    const raw: string | undefined = json.message;
+
+    if (res.status >= 500) {
+      // Never expose raw Laravel "Server Error" — backend logs have the real cause
+      return { error: "A server error occurred during verification. Please try again, or contact support if this persists." };
+    }
+    if (res.status === 419) {
+      return { error: "Session expired. Please sign in again." };
+    }
+    if (res.status === 429) {
+      return { error: "Too many attempts. Please wait a moment and try again." };
+    }
+    if (res.status === 422) {
+      if (raw?.toLowerCase().includes("session")) {
+        return { error: "Your 2FA session has expired. Please sign in again." };
+      }
+      if (raw?.toLowerCase().includes("not configured") || raw?.toLowerCase().includes("no secret")) {
+        return { error: "2FA is not configured on this account. Contact your super admin." };
+      }
+      return { error: raw || "Invalid or expired code. Please try again." };
+    }
+    return { error: raw || "Verification failed. Please try again." };
   }
 
   const token: string | undefined = json.data?.token;
