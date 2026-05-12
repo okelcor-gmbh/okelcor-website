@@ -11,12 +11,13 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1
  * Authenticates an admin user against POST /api/v1/admin/login.
  *
  * On success: sets httpOnly admin_token cookie and redirects to /admin.
- * On failure: returns { error: string } so the login page can display it.
+ * On 2FA required: returns { requires_2fa: true, temp_token } — no redirect.
+ * On failure: returns { error: string }.
  */
 export async function loginAdmin(
   email: string,
   password: string
-): Promise<{ error: string } | void> {
+): Promise<{ error: string } | { requires_2fa: true; temp_token: string } | void> {
   let res: Response;
   try {
     res = await fetch(`${API_URL}/admin/login`, {
@@ -37,6 +38,13 @@ export async function loginAdmin(
         json.message ||
         (res.status === 422 ? "Invalid credentials. Please try again." : "Login failed."),
     };
+  }
+
+  // Backend signals that 2FA verification is required before a full token is issued.
+  if (json.requires_2fa === true) {
+    const tempToken: string = json.temp_token ?? "";
+    if (!tempToken) return { error: "Server error: missing 2FA session token." };
+    return { requires_2fa: true, temp_token: tempToken };
   }
 
   const token: string | undefined = json.data?.token;
@@ -104,4 +112,72 @@ export async function logoutAdmin(): Promise<void> {
   cookieStore.delete("admin_role_label");
   cookieStore.delete("admin_must_change");
   redirect("/admin/login");
+}
+
+// ── 2FA login challenge ───────────────────────────────────────────────────────
+
+/**
+ * Validates a TOTP code against the temp_token issued by the initial login step.
+ * On success: sets full admin session cookies and redirects to /admin.
+ * On failure: returns { error: string }.
+ */
+export async function submitAdminTwoFactor(
+  tempToken: string,
+  code: string
+): Promise<{ error: string } | void> {
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}/admin/login/2fa`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ temp_token: tempToken, code }),
+      cache: "no-store",
+    });
+  } catch {
+    return { error: "Could not reach the server. Please try again." };
+  }
+
+  const json = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    return {
+      error:
+        json.message ||
+        (res.status === 422 ? "Invalid or expired code. Please try again." : "Verification failed."),
+    };
+  }
+
+  const token: string | undefined = json.data?.token;
+  if (!token) return { error: "Verification failed. No token received." };
+
+  const cookieStore = await cookies();
+  const cookieOpts = {
+    httpOnly: false,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax" as const,
+    path: "/",
+    maxAge: 60 * 60 * 24,
+  };
+
+  cookieStore.set("admin_token", token, { ...cookieOpts, httpOnly: true });
+
+  const admin = json.data?.user ?? {};
+  const adminName: string | undefined = admin.name;
+  const displayName: string = admin.display_name || admin.first_name || admin.name || "";
+
+  if (adminName)   cookieStore.set("admin_name",         adminName,   cookieOpts);
+  if (displayName) cookieStore.set("admin_display_name", displayName, cookieOpts);
+
+  const adminRole: string | undefined = admin.role;
+  if (adminRole) cookieStore.set("admin_role", adminRole, cookieOpts);
+
+  const roleLabel: string | undefined = admin.role_label;
+  if (roleLabel) cookieStore.set("admin_role_label", roleLabel, cookieOpts);
+
+  cookieStore.set("admin_must_change", admin.must_change_password ? "1" : "0", cookieOpts);
+
+  if (admin.must_change_password) redirect("/admin/change-password");
+
+  const isFirstLogin = !admin.last_login_at;
+  redirect(isFirstLogin ? "/admin/profile?first_login=1" : "/admin");
 }

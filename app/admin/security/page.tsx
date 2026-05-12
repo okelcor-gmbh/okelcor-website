@@ -7,6 +7,7 @@ import {
   RefreshCw, Filter, Unlock, Loader2, ChevronLeft, ChevronRight,
   CheckCircle2, Ban, Activity,
 } from "lucide-react";
+import TwoFactorStatus from "@/components/admin/two-factor-status";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -310,6 +311,9 @@ export default function SecurityPage() {
           </div>
         </div>
       </div>
+
+      {/* 2FA */}
+      <TwoFactorStatus />
 
       {/* Summary Stats */}
       <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
