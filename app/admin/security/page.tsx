@@ -209,7 +209,7 @@ export default function SecurityPage() {
   const [loading, setLoading]   = useState(true);
   const [refreshing, setRefresh]= useState(false);
   const [unavailable, setUnavail] = useState(false);
-  const [toast, setToast]       = useState<{ msg: string; ok: boolean } | null>(null);
+  const [toast, setToast]       = useState<{ msg: string; variant: "success" | "warning" | "error" } | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const [adminRole, setAdminRole] = useState<string | null>(null);
@@ -220,9 +220,9 @@ export default function SecurityPage() {
 
   const isSuperAdmin = adminRole === "super_admin";
 
-  const showToast = (msg: string, ok: boolean) => {
-    setToast({ msg, ok });
-    setTimeout(() => setToast(null), 3500);
+  const showToast = (msg: string, variant: "success" | "warning" | "error") => {
+    setToast({ msg, variant });
+    setTimeout(() => setToast(null), 4000);
   };
 
   const fetchSummary = useCallback(async () => {
@@ -274,9 +274,7 @@ export default function SecurityPage() {
       .catch(() => null);
   }, []);
 
-  // Fetch 2FA adoption table (super_admin only)
-  useEffect(() => {
-    if (!adminRole || adminRole !== "super_admin") return;
+  const fetchTwoFaUsers = useCallback(async () => {
     fetch("/api/admin/security/2fa-status", { cache: "no-store" })
       .then(r => r.json())
       .then((json: { _unavailable?: boolean; data?: TwoFaUser[] }) => {
@@ -284,7 +282,13 @@ export default function SecurityPage() {
         setTwoFaUsers(json.data ?? []);
       })
       .catch(() => setTwoFaUsersUnavail(true));
-  }, [adminRole]);
+  }, []);
+
+  // Fetch 2FA adoption table (super_admin only)
+  useEffect(() => {
+    if (!adminRole || adminRole !== "super_admin") return;
+    fetchTwoFaUsers();
+  }, [adminRole, fetchTwoFaUsers]);
 
   const handleFilterChange = (tab: FilterTab) => {
     setFilter(tab); setPage(1);
@@ -298,11 +302,11 @@ export default function SecurityPage() {
     }).then(r => r.json()).catch(() => null);
 
     if (res?.success || res?.message) {
-      showToast("Account unlocked successfully.", true);
+      showToast("Account unlocked successfully.", "success");
       fetchSummary();
       fetchEvents(filter, page, true);
     } else {
-      showToast(res?.error ?? "Failed to unlock account.", false);
+      showToast(res?.error ?? "Failed to unlock account.", "error");
     }
   };
 
@@ -310,16 +314,51 @@ export default function SecurityPage() {
     setSendingNotices(true);
     try {
       const res = await fetch("/api/admin/security/send-2fa-notices", { method: "POST" });
-      const json = await res.json().catch(() => null) as { sent?: number; skipped?: number; failed?: number; message?: string } | null;
+      const json = await res.json().catch(() => null) as {
+        success?: boolean;
+        message?: string;
+        data?: { eligible?: number; sent?: number; skipped?: number; failed?: number };
+      } | null;
+
       setShowNoticeModal(false);
-      if (res.ok && json) {
-        showToast(`Sent: ${json.sent ?? 0} · Skipped: ${json.skipped ?? 0} · Failed: ${json.failed ?? 0}`, true);
+
+      if (!res.ok || !json) {
+        showToast(json?.message ?? "Failed to send notices.", "error");
+        return;
+      }
+
+      const d = json.data ?? {};
+      const eligible = d.eligible ?? 0;
+      const sent     = d.sent     ?? 0;
+      const skipped  = d.skipped  ?? 0;
+      const failed   = d.failed   ?? 0;
+
+      let msg: string;
+      let variant: "success" | "warning" | "error";
+
+      if (eligible === 0 || (sent === 0 && failed === 0)) {
+        msg = json.message ?? "No admins currently require a 2FA reminder.";
+        variant = "success";
+      } else if (sent > 0 && failed === 0) {
+        msg = `${sent} admin user${sent === 1 ? "" : "s"} received the 2FA notice.`;
+        variant = "success";
+      } else if (sent > 0 && failed > 0) {
+        msg = `${sent} sent, ${skipped} skipped, ${failed} failed.`;
+        variant = "warning";
       } else {
-        showToast(json?.message ?? "Failed to send notices.", false);
+        msg = json.message ?? `Failed to send. ${failed} notice${failed === 1 ? "" : "s"} failed.`;
+        variant = "error";
+      }
+
+      showToast(msg, variant);
+
+      if (sent > 0 || eligible === 0) {
+        fetchSummary();
+        fetchTwoFaUsers();
       }
     } catch {
       setShowNoticeModal(false);
-      showToast("Failed to send notices.", false);
+      showToast("Failed to send notices.", "error");
     } finally {
       setSendingNotices(false);
     }
@@ -338,8 +377,14 @@ export default function SecurityPage() {
 
       {/* Toast */}
       {toast && (
-        <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-2.5 rounded-2xl px-4 py-3 text-[0.82rem] font-semibold shadow-lg ${toast.ok ? "bg-emerald-600 text-white" : "bg-red-600 text-white"}`}>
-          {toast.ok ? <CheckCircle2 size={15} /> : <AlertTriangle size={15} />}
+        <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-2.5 rounded-2xl px-4 py-3 text-[0.82rem] font-semibold shadow-lg ${
+          toast.variant === "success" ? "bg-emerald-600 text-white"
+          : toast.variant === "warning" ? "bg-amber-500 text-white"
+          : "bg-red-600 text-white"
+        }`}>
+          {toast.variant === "success"
+            ? <CheckCircle2 size={15} />
+            : <AlertTriangle size={15} />}
           {toast.msg}
         </div>
       )}
