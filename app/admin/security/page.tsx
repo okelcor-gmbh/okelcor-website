@@ -2,10 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   ShieldAlert, Lock, AlertTriangle, UserPlus, KeyRound, Settings,
   RefreshCw, Filter, Unlock, Loader2, ChevronLeft, ChevronRight,
-  CheckCircle2, Ban, Activity,
+  CheckCircle2, Ban, Activity, ShieldCheck, ShieldOff, Info,
 } from "lucide-react";
 import TwoFactorStatus from "@/components/admin/two-factor-status";
 
@@ -50,6 +51,16 @@ type Summary = {
 };
 
 type FilterTab = "all" | EventType;
+
+type TwoFaUser = {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  two_factor_enabled: boolean;
+  two_factor_enabled_at?: string | null;
+  last_login_at?: string | null;
+};
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
@@ -187,6 +198,9 @@ function EventRow({
 // ── Main Page ──────────────────────────────────────────────────────────────────
 
 export default function SecurityPage() {
+  const searchParams = useSearchParams();
+  const requireTwoFa = searchParams.get("require_2fa") === "1";
+
   const [summary, setSummary]   = useState<Summary | null>(null);
   const [events, setEvents]     = useState<SecurityEvent[]>([]);
   const [meta, setMeta]         = useState<EventsMeta>({ total: 0, current_page: 1, last_page: 1, per_page: PER_PAGE });
@@ -197,6 +211,10 @@ export default function SecurityPage() {
   const [unavailable, setUnavail] = useState(false);
   const [toast, setToast]       = useState<{ msg: string; ok: boolean } | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const [adminRole, setAdminRole] = useState<string | null>(null);
+  const [twoFaUsers, setTwoFaUsers] = useState<TwoFaUser[] | null>(null);
+  const [twoFaUsersUnavailable, setTwoFaUsersUnavail] = useState(false);
 
   const showToast = (msg: string, ok: boolean) => {
     setToast({ msg, ok });
@@ -241,6 +259,28 @@ export default function SecurityPage() {
     }, 30_000);
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [fetchSummary, fetchEvents, filter, page]);
+
+  // Fetch current admin role
+  useEffect(() => {
+    fetch("/api/admin/me", { cache: "no-store" })
+      .then(r => r.ok ? r.json() : null)
+      .then((json: { data?: { role?: string } } | null) => {
+        if (json?.data?.role) setAdminRole(json.data.role);
+      })
+      .catch(() => null);
+  }, []);
+
+  // Fetch 2FA adoption table (super_admin / admin only)
+  useEffect(() => {
+    if (!adminRole || !["super_admin", "admin"].includes(adminRole)) return;
+    fetch("/api/admin/security/2fa-status", { cache: "no-store" })
+      .then(r => r.json())
+      .then((json: { _unavailable?: boolean; data?: TwoFaUser[] }) => {
+        if (json._unavailable) { setTwoFaUsersUnavail(true); return; }
+        setTwoFaUsers(json.data ?? []);
+      })
+      .catch(() => setTwoFaUsersUnavail(true));
+  }, [adminRole]);
 
   const handleFilterChange = (tab: FilterTab) => {
     setFilter(tab); setPage(1);
@@ -312,8 +352,105 @@ export default function SecurityPage() {
         </div>
       </div>
 
-      {/* 2FA */}
+      {/* require_2fa alert */}
+      {requireTwoFa && (
+        <div className="mb-5 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4">
+          <Info size={16} className="mt-0.5 shrink-0 text-amber-600" />
+          <div>
+            <p className="text-[0.85rem] font-bold text-amber-900">Two-factor authentication required</p>
+            <p className="mt-0.5 text-[0.8rem] text-amber-800">
+              Please enable 2FA below to continue accessing the admin panel.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* 2FA Setup */}
       <TwoFactorStatus />
+
+      {/* 2FA Adoption Table (super_admin / admin only) */}
+      {adminRole && ["super_admin", "admin"].includes(adminRole) && (
+        <div className="mb-6 overflow-hidden rounded-2xl bg-white shadow-sm">
+          <div className="flex items-center gap-2.5 border-b border-black/[0.06] px-5 py-4">
+            <ShieldCheck size={15} className="text-[#5c5e62]" />
+            <p className="text-[0.9rem] font-extrabold text-[#1a1a1a]">2FA Adoption</p>
+            {twoFaUsers && (
+              <span className="rounded-full bg-[#f5f5f7] px-2 py-0.5 text-[0.72rem] font-semibold text-[#5c5e62]">
+                {twoFaUsers.filter(u => u.two_factor_enabled).length}/{twoFaUsers.length} enabled
+              </span>
+            )}
+          </div>
+
+          {twoFaUsersUnavailable ? (
+            <div className="px-5 py-10 text-center">
+              <ShieldOff size={28} className="mx-auto mb-3 text-[#d1d5db]" />
+              <p className="text-[0.85rem] font-semibold text-[#5c5e62]">Adoption data not available</p>
+              <p className="mt-1 text-[0.75rem] text-[#9ca3af]">
+                Implement <code className="rounded bg-[#f5f5f7] px-1.5 py-0.5 font-mono">GET /admin/security/2fa-status</code> to enable this view.
+              </p>
+            </div>
+          ) : twoFaUsers === null ? (
+            <div className="flex items-center justify-center gap-2 py-10 text-[#9ca3af]">
+              <Loader2 size={18} className="animate-spin" />
+              <span className="text-[0.82rem]">Loading…</span>
+            </div>
+          ) : twoFaUsers.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-2 py-10 text-[#9ca3af]">
+              <Info size={24} />
+              <p className="text-[0.82rem]">No admin users found.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-black/[0.06] bg-[#fafafa]">
+                    <th className="px-5 py-3 text-left text-[0.72rem] font-bold uppercase tracking-wide text-[#5c5e62]">Name</th>
+                    <th className="px-5 py-3 text-left text-[0.72rem] font-bold uppercase tracking-wide text-[#5c5e62]">Email</th>
+                    <th className="px-5 py-3 text-left text-[0.72rem] font-bold uppercase tracking-wide text-[#5c5e62]">Role</th>
+                    <th className="px-5 py-3 text-left text-[0.72rem] font-bold uppercase tracking-wide text-[#5c5e62]">2FA Status</th>
+                    <th className="px-5 py-3 text-left text-[0.72rem] font-bold uppercase tracking-wide text-[#5c5e62]">Enabled At</th>
+                    <th className="px-5 py-3 text-left text-[0.72rem] font-bold uppercase tracking-wide text-[#5c5e62]">Last Login</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-black/[0.04]">
+                  {twoFaUsers.map(user => (
+                    <tr key={user.id} className="hover:bg-[#fafafa]">
+                      <td className="px-5 py-3.5 text-[0.82rem] font-semibold text-[#1a1a1a]">{user.name}</td>
+                      <td className="px-5 py-3.5 text-[0.82rem] text-[#5c5e62]">{user.email}</td>
+                      <td className="px-5 py-3.5">
+                        <span className="rounded-full bg-[#f5f5f7] px-2.5 py-1 text-[0.72rem] font-semibold capitalize text-[#5c5e62]">
+                          {user.role.replace(/_/g, " ")}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3.5">
+                        {user.two_factor_enabled ? (
+                          <span className="flex items-center gap-1.5 text-[0.78rem] font-semibold text-emerald-700">
+                            <ShieldCheck size={13} /> Enabled
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1.5 text-[0.78rem] font-semibold text-red-600">
+                            <ShieldOff size={13} /> Not enabled
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-5 py-3.5 text-[0.78rem] text-[#5c5e62]">
+                        {user.two_factor_enabled_at
+                          ? fmtDT(user.two_factor_enabled_at)
+                          : <span className="text-[#d1d5db]">—</span>}
+                      </td>
+                      <td className="px-5 py-3.5 text-[0.78rem] text-[#5c5e62]">
+                        {user.last_login_at
+                          ? <span title={fmtDT(user.last_login_at)}>{timeAgo(user.last_login_at)}</span>
+                          : <span className="text-[#d1d5db]">—</span>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Summary Stats */}
       <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">

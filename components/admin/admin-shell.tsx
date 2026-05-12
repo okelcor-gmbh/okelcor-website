@@ -255,6 +255,8 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const [mustChange, setMustChange]         = useState(false);
   const [dropdownOpen, setDropdownOpen]     = useState(false);
   const [pendingChats, setPendingChats]     = useState(0);
+  // null = still loading (banner hidden); false = 2FA not enabled; true = enabled
+  const [twoFaEnabled, setTwoFaEnabled]     = useState<boolean | null>(null);
   const dropdownRef                         = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -275,6 +277,28 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
       return next;
     });
   };
+
+  // Fetch current admin profile to check two_factor_enabled.
+  // Runs once on mount; 403 with two_factor_required → redirect to security page.
+  useEffect(() => {
+    if (pathname === "/admin/login") return;
+    fetch("/api/admin/me")
+      .then(async (r) => {
+        const json = await r.json().catch(() => ({})) as {
+          two_factor_required?: boolean;
+          data?: { two_factor_enabled?: boolean };
+        };
+        if (r.status === 403 && json.two_factor_required) {
+          router.replace("/admin/security?require_2fa=1");
+          return;
+        }
+        if (r.ok && typeof json.data?.two_factor_enabled === "boolean") {
+          setTwoFaEnabled(json.data.two_factor_enabled);
+        }
+      })
+      .catch(() => {}); // banner stays hidden on network error — non-critical
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Route guard — redirect to /admin/unauthorized if role can't access current section
   useEffect(() => {
@@ -356,6 +380,27 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
               className="shrink-0 text-[0.83rem] font-semibold text-amber-700 underline hover:text-amber-900"
             >
               Change password →
+            </Link>
+          </div>
+        )}
+
+        {/* 2FA required banner — shown when two_factor_enabled === false */}
+        {twoFaEnabled === false && pathname !== "/admin/security" && (
+          <div className="flex shrink-0 items-center justify-between gap-4 border-b border-red-200 bg-red-50 px-4 py-2.5">
+            <div className="flex items-center gap-2">
+              <ShieldAlert size={14} className="shrink-0 text-red-500" />
+              <div>
+                <span className="text-[0.83rem] font-bold text-red-800">Security action required&ensp;·&ensp;</span>
+                <span className="text-[0.83rem] text-red-700">
+                  Two-factor authentication is required to protect admin access.
+                </span>
+              </div>
+            </div>
+            <Link
+              href="/admin/security"
+              className="shrink-0 rounded-full bg-red-600 px-4 py-1.5 text-[0.78rem] font-semibold text-white transition hover:bg-red-700"
+            >
+              Enable 2FA
             </Link>
           </div>
         )}
