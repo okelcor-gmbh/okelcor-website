@@ -60,6 +60,392 @@ Development environment: Windows 11, VS Code, Node.js / npm
 
 ---
 
+## Completed in Latest Session — Security Dashboard, Bugfixes & Trade Document Suite Phases 2C-1 → 2C-3 (2026-05-12)
+
+---
+
+### Security Dashboard UI — Phase 2B (continued)
+
+**Goal:** Complete the admin security dashboard with metric cards, login history table, and events log filters.
+
+#### New: `components/admin/security-metrics.tsx`
+Five KPI metric cards rendered at the top of `/admin/security`:
+- **2FA Adoption %** — computed from `twoFaUsers` array (`enabled / total × 100`); colour-coded green ≥80%, amber ≥50%, red <50%
+- **Failed Logins Today** — from `summary.failed_logins_today`
+- **Blocked Admin Actions** — from `summary.blocked_admin_actions`; "Not tracked" when field absent
+- **Webhook Failures** — from `summary.webhook_failures`; "Not tracked" when field absent
+- **Active Admin Sessions** — from `summary.active_admin_sessions`; "Not tracked" when field absent
+
+#### New: `components/admin/security-login-history.tsx`
+Self-fetching table: `GET /api/admin/security/login-history`
+
+Columns: Admin (name/email), IP + location, Device/Browser (parsed from UA string), Time, Status badge, 2FA indicator.
+
+- `parseDevice(ua)` and `parseBrowser(ua)` helpers
+- Status badges: `success` → emerald, `failed` → red, `2fa_required` → amber
+- Date-range filter (from/to inputs) with Clear button
+- Pagination with chevron + page number buttons
+- Graceful unavailable/empty/loading states
+
+#### New: `app/api/admin/security/login-history/route.ts`
+GET proxy → `GET /admin/security/login-history` with optional query params. Treats 404/403 as `{ _unavailable: true }` instead of error.
+
+#### Updated: `app/admin/security/page.tsx`
+- Replaced static `StatCard` grid with `<SecurityMetrics summary={summary} twoFaUsers={twoFaUsers} />`
+- Added `<SecurityLoginHistory />` between adoption table and system-wide sections
+- Added severity chip filter bar + date range inputs inside events log card
+- `fetchEvents` useCallback updated to read severity/date from closure deps and forward as query params
+- `Summary` type extended: `blocked_admin_actions?`, `webhook_failures?`, `active_admin_sessions?`
+
+---
+
+### Bugfix — Admin 2FA Login Challenge Shows "Server Error"
+
+**Problem:** `submitAdminTwoFactor` in `app/admin/actions.ts` returned the raw Laravel `json.message` string for all status codes — including 500 errors which sent generic internal messages to the UI.
+
+**Fix:** Status-code-specific error mapping in `app/admin/actions.ts`:
+| Status | Message shown |
+|---|---|
+| 5xx | "A server error occurred during verification. Please try again, or contact support if this persists." |
+| 429 | "Too many attempts. Please wait a moment and try again." |
+| 419 | "Session expired. Please sign in again." |
+| 422 + "session" in message | "Your 2FA session has expired. Please sign in again." |
+| 422 + "not configured" | "2FA is not configured on this account. Contact your super admin." |
+| 422 other | Raw `message` or "Invalid or expired code. Please try again." |
+| other | Raw `message` or "Verification failed. Please try again." |
+
+Also fixed `API_URL` in `actions.ts`: `process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ??`.
+
+---
+
+### Bugfix — Admin Dashboard Analytics Flickering / Disappearing
+
+**Problem:** Dashboard data wiped to zero on every failed background refresh; blank areas shown instead of keeping stale data.
+
+#### Updated: `components/admin/dashboard/hero-metrics.tsx`
+- Added `hasData = useRef(false)` — tracks whether at least one successful fetch has completed
+- `refresh(background = false)` — background refreshes set `stale=true` and preserve previous `m` on failure; only first-load failure sets `fetchErr=true` and shows error banner
+- JSX guards: `loading && m === null` → skeleton; `m === null && fetchErr` → error banner with Retry button; else → cards with `opacity-60` when stale
+
+#### Updated: `components/admin/dashboard/recent-orders.tsx`
+Added explicit `orders === null` branch: "Could not load orders. [Retry]" button.
+
+#### Updated: `components/admin/dashboard/revenue-chart.tsx`
+Added `data === null` branch: "Chart data unavailable." in 180px container. Legend only shown when `data !== null`.
+
+#### Bulk fix — 30 admin proxy routes
+All `app/api/admin/**/*.ts` routes that used `NEXT_PUBLIC_API_URL` without the private `API_URL` fallback were updated:
+```ts
+// Before
+process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1"
+
+// After
+process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1"
+```
+**Rule:** All server-side proxy routes must use `API_URL` first (private env var, not exposed to browser). `NEXT_PUBLIC_API_URL` is fallback only.
+
+---
+
+### Phase 2C-1 — Packing List System
+
+**Commits:** `d7caa08`
+
+#### Updated: `lib/admin-permissions.ts`
+```typescript
+"trade_documents.manage": ["super_admin", "admin", "order_manager"],
+```
+
+#### New: `app/api/admin/orders/[id]/trade-documents/packing-list/route.ts`
+POST proxy → `POST /api/v1/admin/orders/{id}/generate-packing-list`. Returns `{ data: TradeDocument }`.
+
+#### Updated: `components/admin/trade-documents-card.tsx`
+- Imports `useAdminPermissions` hook; gates all generate buttons on `can("trade_documents.manage")`
+- Added `hasPacking` check and "Generate Packing List" button (blue pill; hidden once doc exists)
+- `packing_list` type opens via **View PDF** link (`<a target="_blank">`) — not force-downloaded
+- `INLINE_TYPES = new Set(["packing_list", "delivery_note"])` established
+
+#### Updated: `components/account/trade-documents-card.tsx`
+`packing_list` added to `INLINE_TYPES` — customer sees "View PDF" instead of "Download".
+
+**Backend confirmed:** Endpoint lives at exactly `POST /api/v1/admin/orders/{id}/generate-packing-list`. Returns `status: "issued"` immediately. Calling twice returns the existing document (idempotent).
+
+---
+
+### Phase 2C-2 — Delivery Note + Delivery Confirmation
+
+**Commits:** `4255f03`
+
+#### New: `app/api/admin/orders/[id]/trade-documents/delivery-note/route.ts`
+POST proxy → `POST /api/v1/admin/orders/{id}/generate-delivery-note`.
+
+#### Updated: `lib/admin-api.ts`
+`delivery_note` added to `TradeDocument.type` union.
+
+#### Updated: `components/admin/trade-documents-card.tsx`
+- `delivery_note` added to `TYPE_LABEL` and `INLINE_TYPES`
+- `hasDeliveryNote` check; "Generate Delivery Note" button (teal pill; hidden once doc exists)
+
+#### Updated: `components/account/trade-documents-card.tsx`
+- `delivery_note` added to `TYPE_LABEL` and `INLINE_TYPES`
+
+#### New: `components/account/delivery-confirmation-card.tsx`
+Shown on customer order detail when `order.status === "delivered"`.
+
+Two variants:
+| Condition | Card shown |
+|---|---|
+| EU reverse-charge + declaration pending | Amber: "Delivery Confirmation Required — complete the EU Entry Certificate below" |
+| Non-EU, or cert already signed/acknowledged | Green: "Order Delivered — delivery note available in your documents below" |
+
+#### Updated: `app/account/orders/[ref]/page.tsx`
+`<DeliveryConfirmationCard>` inserted above the EU Entry Certificate card, conditional on `order.status === "delivered"`.
+
+**Backend note:** The backend's customer order endpoint (`GET /api/v1/orders/{ref}`) must include `delivery_note` type documents in the `trade_documents` array. Currently backend filters them out for customers.
+
+---
+
+### Phase 2C-3 — Shipment Document Uploads
+
+**Commits:** `0c681cf`
+
+#### New: `app/api/admin/orders/[id]/trade-documents/upload/route.ts`
+POST proxy — reads `FormData` from client request, forwards multipart directly to `POST /api/v1/admin/orders/{id}/trade-documents/upload`. Does NOT set `Content-Type` manually — lets fetch auto-set boundary.
+
+#### New: `app/api/admin/trade-documents/[id]/route.ts`
+DELETE proxy → `DELETE /api/v1/admin/trade-documents/{id}`. Returns 204 cleanly.
+
+#### Updated: `lib/admin-api.ts`
+```typescript
+export type TradeDocument = {
+  // ...existing fields...
+  type: "proforma_invoice" | "commercial_invoice" | "packing_list"
+      | "delivery_note" | "shipment_document" | "other" | string;
+  document_label?: string | null;   // admin-chosen label at upload
+  notes?: string | null;
+  file_size?: number | null;
+  mime_type?: string | null;
+};
+```
+
+#### Updated: `components/admin/trade-documents-card.tsx`
+Full rewrite with upload and delete support.
+
+**Upload panel** (toggled by "Upload Document" button — RBAC-gated):
+- Document type dropdown: Bill of Lading, CMR, Air Waybill, Customs Document, Certificate of Origin, Proof of Delivery, Other
+- Optional notes input
+- File picker with client-side validation: allowed extensions `pdf, jpg, jpeg, png, xls, xlsx, csv`; max 10 MB
+- `fmtSize()` helper for human-readable file sizes
+- On success: appends returned `TradeDocument` to local state; resets form and closes panel
+
+**Shipment document list** (separate section below generated docs):
+- Shows: `document_label`, filename, file size, upload date, optional notes
+- `canViewInline(doc)` helper — returns true for PDF/JPG/PNG by file extension; false for XLS/CSV → force-download
+- Delete: icon button → inline "Delete / Cancel" row (no browser confirm); removes from state on `204`/`200`
+- RBAC-gated; generated PDFs (proforma/packing/delivery/commercial) cannot be deleted from UI
+
+**`canViewInline()` logic:**
+```typescript
+function canViewInline(doc: TradeDocument): boolean {
+  if (INLINE_GENERATED.has(doc.type)) return true;
+  if (doc.type === "shipment_document") {
+    const ext = fileExt(doc.original_filename);
+    return ext === "pdf" || ext === "jpg" || ext === "jpeg" || ext === "png";
+  }
+  return false;
+}
+```
+
+#### Updated: `components/account/trade-documents-card.tsx`
+Split into two visual sections:
+- **Documents** — all non-`shipment_document` types (generated PDFs)
+- **Shipment Documents** — `shipment_document` entries; shows `document_label`, filename, size, date; View (inline) for PDF/images, Download for spreadsheets
+
+`shipment_document` added to `TYPE_LABEL`.
+
+**Backend requirements (Phase 2C-3):**
+- `POST /api/v1/admin/orders/{id}/trade-documents/upload` — accepts multipart, saves to `storage/app/private/trade-documents/uploads/{order_ref}/`, returns `{ data: TradeDocument }` with all fields including `document_label`, `file_size`, `mime_type`
+- `DELETE /api/v1/admin/trade-documents/{id}` — only allows deletion of `shipment_document` type; returns `204 No Content`
+- Customer order endpoint must include `shipment_document` records in `trade_documents` array
+
+TypeScript checks: **0 errors** across all commits.
+
+---
+
+## Completed in Latest Session — Shop Fixes, Incoterms Overhaul & FOB Default (2026-05-11)
+
+---
+
+### Rapid Specials Layout Fix + CTA Split
+
+**Commits:** `bfa332f`
+
+**Problem:** Campaign banner CTA was both triggering a brand-filtered search AND scrolling to results — making it behave like the "View All" button on the specials header, which confused UX intent.
+
+**Fix — `components/shop/shop-catalogue.tsx`:**
+- Added `handleScrollToSpecials` — scroll-only, no search trigger:
+  ```tsx
+  const handleScrollToSpecials = useCallback(() => {
+    document.getElementById("specials-section")?.scrollIntoView({ behavior: "smooth" });
+  }, []);
+  ```
+- Campaign banner `onCtaClick` now receives `handleScrollToSpecials` (scroll to specials) instead of `handleCampaignCta` (brand filter + search)
+- Specials header "View All" still uses `handleCampaignCta` — applies brand filter, triggers search, scrolls to `#catalogue-results`
+- Added `id="catalogue-results"` to the results `<div>` so the scroll target exists
+- Reordered JSX: filter bar → campaign banner + specials → inline promo strip → results
+- Removed 5 debug `console.log` calls across promotions and specials fetch effects
+
+---
+
+### Remove Client-Side Discount Calculation from Specials List
+
+**Commit:** `b2a20a7`
+
+**Problem:** `components/shop/specials-product-list.tsx` was calculating a crossed-out "original" price using `price / (1 - discountPct / 100)`. The backend `price` field already reflects the discounted price — this formula was fabricating a fake original price.
+
+**Fix:**
+- Removed `discountPct` prop from `SpecialRow` interface
+- Removed crossed-out price block from desktop row render
+- Removed crossed-out price block from mobile card render
+- Removed `discountPct={discountPct}` from `products.map()` call
+- Result: prices display exactly as returned by API; `discount_pct` is used only for the `"X% OFF"` badge
+
+**Rule going forward:** `discount_pct` is badge-only. All prices are final as returned by the API. Never compute `price × (1 - discount_pct / 100)` on the frontend.
+
+---
+
+### Tyre Placeholder — Replaced PNG with SVG Silhouette
+
+**Commit:** `aad419c`
+
+**Problem:** `public/images/tyre-placeholder.png` contained a photo of a van with shipping containers — entirely wrong for a product card placeholder in a tyre catalogue.
+
+**Fix:**
+- Created `public/images/tyre-placeholder.svg` — front-view tyre silhouette
+  - Structure: white background, outer tyre (`r=90`, `#1a1a1a`), tread block pattern (dashed stroke `r=81` `dasharray="14 7"`), groove rings, sidewall (`r=69`, `#212121`), grey rim (`r=55`, `#c3c5c8`), 5 spokes at `-90°/−18°/54°/126°/198°`, hub circles
+- Updated placeholder constant reference from `.png` → `.svg` in:
+  - `components/shop/product-card.tsx`
+  - `components/shop/product-gallery.tsx`
+  - `components/shop/related-products.tsx`
+  - `lib/utils.ts` (`getProductImageUrl` fallback)
+
+---
+
+### Products Proxy — Cache-Control: no-store Fix
+
+**Commit:** `735b88b`
+
+**Problem:** `app/api/shop/products/route.ts` used `cache: "no-store"` on the upstream `fetch()` (Next.js Data Cache), but the `NextResponse` had no `Cache-Control` header. Vercel's edge/CDN could still cache the response and serve stale prices.
+
+**Fix:**
+```ts
+export const dynamic = "force-dynamic";
+// ...
+response.headers.set("Cache-Control", "no-store");
+```
+- `export const dynamic = "force-dynamic"` — forces route to opt out of static rendering
+- `response.headers.set("Cache-Control", "no-store")` — instructs edge/CDN not to cache the response
+- Also removed 3 debug `console.log` calls from the route handler
+
+---
+
+### FOB-First Incoterms Overhaul
+
+**Commit:** `1491934`
+
+**Business rule:** FOB Germany is Okelcor's default shipping term for international orders. CIF was incorrectly used as the default across payment documents, checkout UI, and the quote form.
+
+**Changes:**
+
+#### `lib/utils.ts` — `formatIncoterm()` utility (new)
+Single source of truth for all incoterm display formatting:
+```ts
+export function formatIncoterm(value: string | null | undefined): string {
+  if (!value) return "Incoterms 2020: FOB Germany unless otherwise agreed in writing.";
+  if (value === "CIF") return "Incoterms 2020: CIF destination port — freight and insurance included to destination port.";
+  if (value === "Custom") return "Custom shipping arrangement — to be confirmed in quotation.";
+  return `Incoterms 2020: ${value}`;
+}
+```
+
+#### `components/account/bank-transfer-details.tsx`
+- Removed hardcoded `{ label: "Delivery Term", value: "CIF" }` row
+- Added optional `incoterm?: string | null` prop
+- Dynamic `deliveryRow` built from `formatIncoterm(incoterm)` — label: "Delivery / Shipping Terms"
+- Inserted between Bank Address row and Payment Terms row
+
+#### `components/checkout/checkout-flow.tsx`
+- Bank transfer payment option subtitle: `"CIF · 50% on confirmation…"` → `"FOB · 50% on confirmation, balance on B/L"`
+
+#### `components/quote/quote-form.tsx`
+- Converted `EU_INCOTERMS` and `INT_INCOTERMS` from plain string arrays to `{ value, label }` object arrays:
+  ```ts
+  const EU_INCOTERMS = [
+    { value: "DAP", label: "DAP" },
+    { value: "DDP", label: "DDP" },
+    { value: "EXW", label: "EXW" },
+  ] as const;
+  const INT_INCOTERMS = [
+    { value: "FOB",    label: "FOB" },
+    { value: "CIF",    label: "CIF" },
+    { value: "Custom", label: "Custom shipping arrangement" },
+  ] as const;
+  ```
+- Select `<option value={opt.value}>{opt.label}</option>` — submitted value is raw (`"Custom"`), displayed label is human-readable (`"Custom shipping arrangement"`)
+- Added helper text under the select for CIF, Custom, and empty non-EU state
+
+#### `components/admin/quote-detail.tsx`
+- Imports `formatIncoterm` from `@/lib/utils`
+- Incoterm `InfoRow` now displays `formatIncoterm(quote.incoterm)` instead of raw value
+
+---
+
+### Incoterm Value Alignment Fix
+
+**Commit:** `63517ef`
+
+**Problem:** Frontend was submitting `"Custom shipping arrangement"` as the `incoterm` value. Backend accepts only the raw string `"Custom"`. The `{ value, label }` refactor above (commit `1491934`) fixed this — `option value="Custom"` is submitted while `"Custom shipping arrangement"` is only the display label.
+
+**Verification:** Confirmed with `git grep` exhaustive search — no `price × (1 - discount_pct / 100)` formula exists anywhere in the codebase. All price calculations are `product.price × quantity` only.
+
+---
+
+### Price Audit Confirmation (No Code Changes)
+
+Three exhaustive `git grep` searches confirmed:
+- No `price * (1 - discount` formula exists in any file
+- No `price × (1 - discount` formula exists in any file
+- `resolvePrice()` performs field selection only (`price_b2b ?? price`, etc.) — no arithmetic
+- Cart context subtotal: pure `price × quantity`
+- Checkout order summary: pure `price × quantity`
+
+The `discount_pct` field is used exclusively for badge display (`"35% OFF"`). Backend returns final discounted prices in the `price` field.
+
+---
+
+### "Delivery Term: CIF" Root Cause (No Frontend Code Change Needed)
+
+**Investigation:** After the incoterms overhaul commits, the checkout page still appeared to show "Delivery Term: CIF" on the live server.
+
+**Root cause:** The server had not run `git pull` after commit `63517ef`. The stale build was serving the old code. No frontend code change was needed.
+
+**Confirmed by exhaustive grep:**
+- No hardcoded `"Delivery Term"` label in any rendered component
+- No raw `"CIF"` value in any rendered output
+- All incoterm display now routes through `formatIncoterm()` or the `bank-transfer-details.tsx` dynamic row
+
+**Resolution:** Run `git pull && npm run build && pm2 restart` (or equivalent) on the Namecheap server.
+
+---
+
+### Backend Changes Required (from this session)
+
+None — all changes are frontend only. Backend must:
+1. Return `price` as the final discounted price (already confirmed doing this)
+2. Accept `"Custom"` (not `"Custom shipping arrangement"`) as the incoterm value (already the case)
+3. Pass `incoterm` field on orders to the frontend so `BankTransferDetails` can display the correct delivery term per-order
+
+---
+
 ## Completed in Latest Session — Phase 2C + Bugfixes (2026-05-08)
 
 ---
