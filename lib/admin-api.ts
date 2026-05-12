@@ -184,12 +184,16 @@ export type ShipmentEvent = {
 
 export type TradeDocument = {
   id: number;
-  type: "proforma_invoice" | "commercial_invoice" | "packing_list" | "delivery_note" | "other" | string;
+  type: "proforma_invoice" | "commercial_invoice" | "packing_list" | "delivery_note" | "shipment_document" | "other" | string;
   number?: string | null;
   status: "draft" | "issued" | "sent" | string;
   issued_at?: string | null;
   sent_at?: string | null;
   original_filename?: string | null;
+  document_label?: string | null;
+  notes?: string | null;
+  file_size?: number | null;
+  mime_type?: string | null;
 };
 
 export type AdminOrderFull = AdminOrder & {
