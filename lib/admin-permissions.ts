@@ -105,6 +105,9 @@ const PERMISSION_ROLES: Record<string, string[]> = {
   // Analytics
   "analytics.view":        ["super_admin", "admin", "sales_manager"],
 
+  // Trade documents
+  "trade_documents.manage": ["super_admin", "admin", "order_manager"],
+
   // Users / audit
   "users.manage":          ["super_admin", "admin"],
   "audit.view":            ["super_admin"],

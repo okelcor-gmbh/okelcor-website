@@ -14,10 +14,10 @@ const TYPE_LABEL: Record<string, string> = {
 // Document types that require EU certificate sign-off before download
 const GATED_TYPES = new Set(["commercial_invoice", "final_invoice"]);
 
-// Final invoice types open inline in a new browser tab rather than being
+// These document types open inline in a new browser tab rather than being
 // force-downloaded. The browser sends the httpOnly cookie automatically since
 // the proxy route is same-origin.
-const INLINE_TYPES = new Set(["commercial_invoice", "final_invoice"]);
+const INLINE_TYPES = new Set(["commercial_invoice", "final_invoice", "packing_list"]);
 
 function shortDate(iso?: string | null): string {
   if (!iso) return "—";

@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { FileText, Download, FilePlus2, Loader2 } from "lucide-react";
+import { FileText, Download, ExternalLink, FilePlus2, Loader2 } from "lucide-react";
 import type { TradeDocument } from "@/lib/admin-api";
+import { useAdminPermissions } from "@/hooks/use-admin-permissions";
 
 const TYPE_LABEL: Record<string, string> = {
   proforma_invoice:   "Proforma Invoice",
@@ -16,6 +17,9 @@ const STATUS_BADGE: Record<string, string> = {
   issued: "bg-blue-100 text-blue-700",
   sent:   "bg-emerald-100 text-emerald-700",
 };
+
+// Packing lists open inline in a new tab; other doc types are force-downloaded.
+const INLINE_TYPES = new Set(["packing_list"]);
 
 function shortDate(iso?: string | null): string {
   if (!iso) return "—";
@@ -33,12 +37,18 @@ export default function TradeDocumentsCard({
   orderId: number;
   initialDocuments: TradeDocument[];
 }) {
-  const [documents,      setDocuments]     = useState<TradeDocument[]>(initialDocuments);
-  const [generating,     setGenerating]    = useState(false);
-  const [generateError,  setGenerateError] = useState<string | null>(null);
-  const [downloading,    setDownloading]   = useState<number | null>(null);
+  const { can } = useAdminPermissions();
+
+  const [documents,          setDocuments]         = useState<TradeDocument[]>(initialDocuments);
+  const [generating,         setGenerating]         = useState(false);
+  const [generateError,      setGenerateError]      = useState<string | null>(null);
+  const [generatingPacking,  setGeneratingPacking]  = useState(false);
+  const [packingError,       setPackingError]       = useState<string | null>(null);
+  const [downloading,        setDownloading]        = useState<number | null>(null);
 
   const hasProforma = documents.some((d) => d.type === "proforma_invoice");
+  const hasPacking  = documents.some((d) => d.type === "packing_list");
+  const canManage   = can("trade_documents.manage");
 
   async function handleGenerate() {
     setGenerating(true);
@@ -58,6 +68,27 @@ export default function TradeDocumentsCard({
       setGenerateError("Network error. Please try again.");
     } finally {
       setGenerating(false);
+    }
+  }
+
+  async function handleGeneratePacking() {
+    setGeneratingPacking(true);
+    setPackingError(null);
+    try {
+      const res = await fetch(
+        `/api/admin/orders/${orderId}/trade-documents/packing-list`,
+        { method: "POST" },
+      );
+      const json = await res.json().catch(() => ({})) as { data?: TradeDocument; message?: string };
+      if (res.ok && json.data) {
+        setDocuments((prev) => [...prev, json.data!]);
+      } else {
+        setPackingError(json.message ?? "Failed to generate packing list. Please try again.");
+      }
+    } catch {
+      setPackingError("Network error. Please try again.");
+    } finally {
+      setGeneratingPacking(false);
     }
   }
 
@@ -86,28 +117,51 @@ export default function TradeDocumentsCard({
 
   return (
     <div className="rounded-2xl bg-white p-6 shadow-sm">
-      <div className="mb-5 flex items-center justify-between">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
         <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
           Trade Documents
         </p>
-        {!hasProforma && (
-          <button
-            type="button"
-            onClick={handleGenerate}
-            disabled={generating}
-            className="inline-flex items-center gap-1.5 rounded-full border border-[#E85C1A]/30 bg-[#fff5f2] px-3 py-1.5 text-[0.75rem] font-semibold text-[#E85C1A] transition hover:bg-[#fff0ea] disabled:opacity-60"
-          >
-            {generating
-              ? <Loader2 size={13} strokeWidth={2} className="animate-spin" />
-              : <FilePlus2 size={13} strokeWidth={2} />
-            }
-            {generating ? "Generating…" : "Generate Proforma Invoice"}
-          </button>
+
+        {canManage && (
+          <div className="flex flex-wrap items-center gap-2">
+            {!hasProforma && (
+              <button
+                type="button"
+                onClick={handleGenerate}
+                disabled={generating}
+                className="inline-flex items-center gap-1.5 rounded-full border border-[#E85C1A]/30 bg-[#fff5f2] px-3 py-1.5 text-[0.75rem] font-semibold text-[#E85C1A] transition hover:bg-[#fff0ea] disabled:opacity-60"
+              >
+                {generating
+                  ? <Loader2 size={13} strokeWidth={2} className="animate-spin" />
+                  : <FilePlus2 size={13} strokeWidth={2} />
+                }
+                {generating ? "Generating…" : "Generate Proforma"}
+              </button>
+            )}
+
+            {!hasPacking && (
+              <button
+                type="button"
+                onClick={handleGeneratePacking}
+                disabled={generatingPacking}
+                className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[0.75rem] font-semibold text-blue-700 transition hover:bg-blue-100 disabled:opacity-60"
+              >
+                {generatingPacking
+                  ? <Loader2 size={13} strokeWidth={2} className="animate-spin" />
+                  : <FilePlus2 size={13} strokeWidth={2} />
+                }
+                {generatingPacking ? "Generating…" : "Generate Packing List"}
+              </button>
+            )}
+          </div>
         )}
       </div>
 
       {generateError && (
         <p className="mb-4 text-[0.8rem] text-red-600">{generateError}</p>
+      )}
+      {packingError && (
+        <p className="mb-4 text-[0.8rem] text-red-600">{packingError}</p>
       )}
 
       {documents.length === 0 ? (
@@ -142,18 +196,33 @@ export default function TradeDocumentsCard({
                   {doc.sent_at && ` · Sent ${shortDate(doc.sent_at)}`}
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={() => handleDownload(doc)}
-                disabled={downloading === doc.id}
-                className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-black/[0.09] bg-white px-3 text-[0.75rem] font-semibold text-[#1a1a1a] transition hover:border-[#E85C1A]/40 hover:text-[#E85C1A] disabled:opacity-50"
-              >
-                {downloading === doc.id
-                  ? <Loader2 size={13} className="animate-spin" />
-                  : <Download size={13} strokeWidth={2} />
-                }
-                {downloading === doc.id ? "…" : "Download"}
-              </button>
+
+              <div className="flex shrink-0 items-center gap-2">
+                {INLINE_TYPES.has(doc.type) ? (
+                  <a
+                    href={`/api/admin/trade-documents/${doc.id}/download`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex h-8 items-center gap-1.5 rounded-full border border-black/[0.09] bg-white px-3 text-[0.75rem] font-semibold text-[#1a1a1a] transition hover:border-[#E85C1A]/40 hover:text-[#E85C1A]"
+                  >
+                    <ExternalLink size={13} strokeWidth={2} />
+                    View PDF
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => handleDownload(doc)}
+                    disabled={downloading === doc.id}
+                    className="inline-flex h-8 items-center gap-1.5 rounded-full border border-black/[0.09] bg-white px-3 text-[0.75rem] font-semibold text-[#1a1a1a] transition hover:border-[#E85C1A]/40 hover:text-[#E85C1A] disabled:opacity-50"
+                  >
+                    {downloading === doc.id
+                      ? <Loader2 size={13} className="animate-spin" />
+                      : <Download size={13} strokeWidth={2} />
+                    }
+                    {downloading === doc.id ? "…" : "Download"}
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>
