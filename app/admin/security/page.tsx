@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import {
   ShieldAlert, Lock, AlertTriangle, UserPlus, KeyRound, Settings,
   RefreshCw, Filter, Unlock, Loader2, ChevronLeft, ChevronRight,
-  CheckCircle2, Ban, Activity, ShieldCheck, ShieldOff, Info,
+  CheckCircle2, Ban, Activity, ShieldCheck, ShieldOff, Info, Mail,
 } from "lucide-react";
 import TwoFactorStatus from "@/components/admin/two-factor-status";
 
@@ -215,6 +215,8 @@ export default function SecurityPage() {
   const [adminRole, setAdminRole] = useState<string | null>(null);
   const [twoFaUsers, setTwoFaUsers] = useState<TwoFaUser[] | null>(null);
   const [twoFaUsersUnavailable, setTwoFaUsersUnavail] = useState(false);
+  const [showNoticeModal, setShowNoticeModal] = useState(false);
+  const [sendingNotices, setSendingNotices] = useState(false);
 
   const showToast = (msg: string, ok: boolean) => {
     setToast({ msg, ok });
@@ -302,6 +304,25 @@ export default function SecurityPage() {
     }
   };
 
+  const handleSendNotices = async () => {
+    setSendingNotices(true);
+    try {
+      const res = await fetch("/api/admin/security/send-2fa-notices", { method: "POST" });
+      const json = await res.json().catch(() => null) as { sent?: number; skipped?: number; failed?: number; message?: string } | null;
+      setShowNoticeModal(false);
+      if (res.ok && json) {
+        showToast(`Sent: ${json.sent ?? 0} · Skipped: ${json.skipped ?? 0} · Failed: ${json.failed ?? 0}`, true);
+      } else {
+        showToast(json?.message ?? "Failed to send notices.", false);
+      }
+    } catch {
+      setShowNoticeModal(false);
+      showToast("Failed to send notices.", false);
+    } finally {
+      setSendingNotices(false);
+    }
+  };
+
   const summaryStats = [
     { icon: Lock,          label: "Accounts Locked Today",     value: summary?.locked_today ?? 0,          color: "text-red-600",    bg: "bg-red-50" },
     { icon: AlertTriangle, label: "Failed Attempts Today",      value: summary?.failed_attempts_today ?? 0, color: "text-amber-600",  bg: "bg-amber-50" },
@@ -318,6 +339,43 @@ export default function SecurityPage() {
         <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-2.5 rounded-2xl px-4 py-3 text-[0.82rem] font-semibold shadow-lg ${toast.ok ? "bg-emerald-600 text-white" : "bg-red-600 text-white"}`}>
           {toast.ok ? <CheckCircle2 size={15} /> : <AlertTriangle size={15} />}
           {toast.msg}
+        </div>
+      )}
+
+      {/* 2FA Notice Confirmation Modal */}
+      {showNoticeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-amber-100">
+              <Mail size={20} className="text-amber-600" />
+            </div>
+            <h3 className="mb-2 text-[1rem] font-extrabold text-[#1a1a1a]">Send 2FA Notices</h3>
+            <p className="mb-5 text-[0.83rem] text-[#5c5e62]">
+              This will email all admin users who have not enabled 2FA. Super admins are excluded.
+            </p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowNoticeModal(false)}
+                disabled={sendingNotices}
+                className="flex-1 rounded-xl border border-black/[0.10] px-4 py-2.5 text-[0.83rem] font-semibold text-[#5c5e62] transition hover:bg-[#f5f5f7] disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSendNotices}
+                disabled={sendingNotices}
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#E85C1A] px-4 py-2.5 text-[0.83rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-60"
+              >
+                {sendingNotices ? (
+                  <><Loader2 size={14} className="animate-spin" /> Sending…</>
+                ) : (
+                  <><Mail size={14} /> Send notices</>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -378,6 +436,17 @@ export default function SecurityPage() {
               <span className="rounded-full bg-[#f5f5f7] px-2 py-0.5 text-[0.72rem] font-semibold text-[#5c5e62]">
                 {twoFaUsers.filter(u => u.two_factor_enabled).length}/{twoFaUsers.length} enabled
               </span>
+            )}
+            {adminRole === "super_admin" && (
+              <button
+                type="button"
+                onClick={() => setShowNoticeModal(true)}
+                disabled={sendingNotices}
+                className="ml-auto flex items-center gap-1.5 rounded-xl bg-[#E85C1A] px-3 py-1.5 text-[0.75rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-60"
+              >
+                <Mail size={12} />
+                Send 2FA notice to admins
+              </button>
             )}
           </div>
 
