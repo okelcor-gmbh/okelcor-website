@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { updateOrderStatus, cancelOrder, deleteOrder, addShipmentEvent, updateShipmentEvent, deleteShipmentEvent } from "@/app/admin/orders/actions";
 import type { AdminOrderFull, AdminOrderLog, ShipmentEvent } from "@/lib/admin-api";
+import { canDo } from "@/lib/admin-permissions";
 import TradeDocumentsCard from "@/components/admin/trade-documents-card";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -421,9 +422,9 @@ export default function OrderDetail({
   const [markPaidSuccess,   setMarkPaidSuccess]   = useState(false);
   const [isMarkPaidPending, setIsMarkPaidPending] = useState(false);
 
-  // Role-based access
-  const canCancel = ["admin", "order_manager", "super_admin"].includes(adminRole);
-  const canDelete = adminRole === "super_admin";
+  // Permission-based access
+  const canCancel = canDo(adminRole, "orders.update");
+  const canDelete  = canDo(adminRole, "orders.delete");
   const cancelDisabled = ["cancelled", "delivered"].includes(status);
 
   const isDirty =

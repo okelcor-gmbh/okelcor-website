@@ -32,7 +32,7 @@ import {
   FileCheck,
 } from "lucide-react";
 import { logoutAdmin } from "@/app/admin/actions";
-import { canAccess, PATH_SECTION } from "@/lib/admin-permissions";
+import { canAccess, PATH_SECTION, ROLE_LABELS, ROLE_BADGE_COLORS } from "@/lib/admin-permissions";
 import CrispNotifier from "@/components/admin/crisp-notifier";
 
 // ── Navigation ────────────────────────────────────────────────────────────────
@@ -62,20 +62,7 @@ const SALES_CHANNELS_NAV = [
   { label: "eBay", href: "/admin/ebay", icon: ShoppingBag, section: "ebay" },
 ] as const;
 
-const ROLE_BADGE_COLORS: Record<string, string> = {
-  super_admin:   "bg-gray-900 text-white",
-  admin:         "bg-blue-100 text-blue-700",
-  editor:        "bg-emerald-100 text-emerald-700",
-  order_manager: "bg-amber-100 text-amber-700",
-};
-
-// Fallback labels when API doesn't return role_label
-const ROLE_LABELS: Record<string, string> = {
-  super_admin:   "Super Admin",
-  admin:         "Admin",
-  editor:        "Editor",
-  order_manager: "Orders",
-};
+// ROLE_LABELS and ROLE_BADGE_COLORS imported from lib/admin-permissions
 
 function getCookie(name: string): string {
   if (typeof document === "undefined") return "";

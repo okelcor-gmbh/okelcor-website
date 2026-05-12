@@ -1,24 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SHOP_REQUIRES_LOGIN } from "@/lib/flags";
-
-// ── Admin role table ──────────────────────────────────────────────────────────
-// Keep in sync with lib/admin-permissions.ts ROLE_ACCESS map.
-// super_admin: empty array means "allow all".
-
-const ROLE_ROUTES: Record<string, string[]> = {
-  super_admin:   [],
-  admin:         [
-    "/admin/products", "/admin/articles", "/admin/orders", "/admin/quotes",
-    "/admin/hero-slides", "/admin/brands", "/admin/settings",
-    "/admin/users", "/admin/supplier", "/admin/customers", "/admin/ebay", "/admin/analytics",
-  ],
-  editor:        [
-    "/admin/articles", "/admin/hero-slides",
-  ],
-  order_manager: [
-    "/admin/orders", "/admin/quotes", "/admin/supplier",
-  ],
-};
+import { canAccess, PATH_SECTION } from "@/lib/admin-permissions";
 
 // Paths accessible to every authenticated admin regardless of role.
 const ADMIN_ALWAYS_ALLOWED = [
@@ -26,16 +8,23 @@ const ADMIN_ALWAYS_ALLOWED = [
   "/admin/unauthorized",
   "/admin/profile",
   "/admin/change-password",
+  "/admin/security",    // all roles can visit to manage own 2FA
 ];
 
 function roleCanAccess(role: string, pathname: string): boolean {
   if (ADMIN_ALWAYS_ALLOWED.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
     return true;
   }
-  const allowed = ROLE_ROUTES[role];
-  if (!allowed) return false;          // unknown role — deny
-  if (allowed.length === 0) return true; // super_admin — allow all
-  return allowed.some((prefix) => pathname.startsWith(prefix));
+  if (role === "super_admin") return true;
+
+  // Derive from the canonical ROLE_ACCESS map — single source of truth.
+  const section = Object.entries(PATH_SECTION).find(([path]) =>
+    pathname.startsWith(path)
+  )?.[1];
+
+  if (!section) return true;    // path not mapped — pass through
+  if (!role) return false;      // unknown/missing role — deny
+  return canAccess(role, section);
 }
 
 // ── Middleware ────────────────────────────────────────────────────────────────

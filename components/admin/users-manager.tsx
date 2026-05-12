@@ -4,24 +4,12 @@ import { useState, useTransition } from "react";
 import { Plus, Pencil, Trash2, X, AlertCircle, CheckCircle2, Mail, RefreshCcw, AlertTriangle } from "lucide-react";
 import { createUser, updateUser, deleteUser, resendCredentials } from "@/app/admin/users/actions";
 import type { AdminUser } from "@/lib/admin-api";
+import { ROLE_LABELS, ROLE_COLORS } from "@/lib/admin-permissions";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
+// Roles available for assignment via this UI (subset of ALL_ROLES).
 const ROLES = ["super_admin", "admin", "editor", "order_manager"] as const;
-
-const ROLE_LABELS: Record<string, string> = {
-  super_admin: "Super Admin",
-  admin: "Admin",
-  editor: "Editor",
-  order_manager: "Orders",
-};
-
-const ROLE_COLORS: Record<string, string> = {
-  super_admin: "bg-purple-100 text-purple-700",
-  admin: "bg-blue-100 text-blue-700",
-  editor: "bg-emerald-100 text-emerald-700",
-  order_manager: "bg-amber-100 text-amber-700",
-};
 
 function formatDate(dt: string | null): string {
   if (!dt) return "Never";

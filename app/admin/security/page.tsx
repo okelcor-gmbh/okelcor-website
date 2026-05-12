@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useAdminPermissions } from "@/hooks/use-admin-permissions";
 import {
   ShieldAlert, Lock, AlertTriangle, UserPlus, KeyRound, Settings,
   RefreshCw, Filter, Unlock, Loader2, ChevronLeft, ChevronRight,
@@ -212,13 +213,12 @@ export default function SecurityPage() {
   const [toast, setToast]       = useState<{ msg: string; variant: "success" | "warning" | "error" } | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const [adminRole, setAdminRole] = useState<string | null>(null);
+  const { can } = useAdminPermissions();
+
   const [twoFaUsers, setTwoFaUsers] = useState<TwoFaUser[] | null>(null);
   const [twoFaUsersUnavailable, setTwoFaUsersUnavail] = useState(false);
   const [showNoticeModal, setShowNoticeModal] = useState(false);
   const [sendingNotices, setSendingNotices] = useState(false);
-
-  const isSuperAdmin = adminRole === "super_admin";
 
   const showToast = (msg: string, variant: "success" | "warning" | "error") => {
     setToast({ msg, variant });
@@ -264,16 +264,6 @@ export default function SecurityPage() {
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [fetchSummary, fetchEvents, filter, page]);
 
-  // Fetch current admin role
-  useEffect(() => {
-    fetch("/api/admin/me", { cache: "no-store" })
-      .then(r => r.ok ? r.json() : null)
-      .then((json: { data?: { role?: string } } | null) => {
-        if (json?.data?.role) setAdminRole(json.data.role);
-      })
-      .catch(() => null);
-  }, []);
-
   const fetchTwoFaUsers = useCallback(async () => {
     fetch("/api/admin/security/2fa-status", { cache: "no-store" })
       .then(r => r.json())
@@ -284,11 +274,11 @@ export default function SecurityPage() {
       .catch(() => setTwoFaUsersUnavail(true));
   }, []);
 
-  // Fetch 2FA adoption table (super_admin only)
+  // Fetch 2FA adoption table — security.manage permission only
   useEffect(() => {
-    if (!adminRole || adminRole !== "super_admin") return;
+    if (!can("security.manage")) return;
     fetchTwoFaUsers();
-  }, [adminRole, fetchTwoFaUsers]);
+  }, [can, fetchTwoFaUsers]);
 
   const handleFilterChange = (tab: FilterTab) => {
     setFilter(tab); setPage(1);
@@ -439,7 +429,7 @@ export default function SecurityPage() {
               Security & Events Log
             </h1>
           </div>
-          {isSuperAdmin && (
+          {can("security.manage") && (
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-[0.72rem] font-semibold text-emerald-700">
                 <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
@@ -476,7 +466,7 @@ export default function SecurityPage() {
       <TwoFactorStatus />
 
       {/* 2FA Adoption Table (super_admin only) */}
-      {isSuperAdmin && (
+      {can("security.manage") && (
         <div className="mb-6 overflow-hidden rounded-2xl bg-white shadow-sm">
           <div className="flex items-center gap-2.5 border-b border-black/[0.06] px-5 py-4">
             <ShieldCheck size={15} className="text-[#5c5e62]" />
@@ -486,7 +476,7 @@ export default function SecurityPage() {
                 {twoFaUsers.filter(u => u.two_factor_enabled).length}/{twoFaUsers.length} enabled
               </span>
             )}
-            {adminRole === "super_admin" && (
+            {can("security.manage") && (
               <button
                 type="button"
                 onClick={() => setShowNoticeModal(true)}
@@ -571,7 +561,7 @@ export default function SecurityPage() {
       )}
 
       {/* System-wide security sections — super_admin only */}
-      {isSuperAdmin && <>
+      {can("security.manage") && <>
 
       {/* Summary Stats */}
       <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
@@ -753,7 +743,7 @@ export default function SecurityPage() {
         </div>
       </div>
 
-      </>} {/* end isSuperAdmin */}
+      </>} {/* end can("security.manage") */}
 
     </div>
   );

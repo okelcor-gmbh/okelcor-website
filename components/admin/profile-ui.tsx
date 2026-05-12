@@ -15,22 +15,7 @@ import {
 } from "lucide-react";
 import { updateProfile, changePassword } from "@/app/admin/profile/actions";
 import type { AdminProfile } from "@/lib/admin-api";
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-const ROLE_LABELS: Record<string, string> = {
-  super_admin: "Super Admin",
-  admin: "Admin",
-  editor: "Editor",
-  order_manager: "Orders",
-};
-
-const ROLE_COLORS: Record<string, string> = {
-  super_admin: "bg-purple-100 text-purple-700",
-  admin: "bg-blue-100 text-blue-700",
-  editor: "bg-emerald-100 text-emerald-700",
-  order_manager: "bg-amber-100 text-amber-700",
-};
+import { ROLE_LABELS, ROLE_COLORS } from "@/lib/admin-permissions";
 
 function formatLastLogin(dt: string | null): string {
   if (!dt) return "First login";
