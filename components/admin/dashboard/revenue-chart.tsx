@@ -106,6 +106,10 @@ export default function RevenueChart() {
       <div className="px-2 py-3">
         {loading ? (
           <SkeletonChart />
+        ) : data === null ? (
+          <div className="flex h-[180px] flex-col items-center justify-center gap-2 text-[#9ca3af]">
+            <p className="text-[0.82rem]">Chart data unavailable.</p>
+          </div>
         ) : (
           <ResponsiveContainer width="100%" height={190}>
             <AreaChart data={data ?? []} margin={{ top: 5, right: 8, left: -20, bottom: 0 }}>
@@ -160,7 +164,7 @@ export default function RevenueChart() {
       </div>
 
       {/* Legend */}
-      {!loading && (
+      {!loading && data !== null && (
         <div className="flex items-center gap-4 border-t border-black/[0.04] px-5 py-2.5">
           <span className="flex items-center gap-1.5 text-[0.72rem] text-[#5c5e62]">
             <span className="h-0.5 w-4 rounded bg-[#E85C1A]" />

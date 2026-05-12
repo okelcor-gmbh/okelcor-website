@@ -164,10 +164,17 @@ export default function RecentOrders() {
               <div className="mt-1.5 h-3 w-24 animate-pulse rounded bg-[#e5e7eb]" />
             </div>
           ))
-        ) : orders?.length === 0 ? (
+        ) : orders === null ? (
+          <p className="px-5 py-8 text-center text-[0.83rem] text-[#9ca3af]">
+            Could not load orders.{" "}
+            <button type="button" onClick={() => void refresh()} className="font-semibold text-[#E85C1A] hover:underline">
+              Retry
+            </button>
+          </p>
+        ) : orders.length === 0 ? (
           <p className="px-5 py-8 text-center text-[0.83rem] text-[#5c5e62]">No orders yet.</p>
         ) : (
-          orders?.map(o => (
+          orders.map(o => (
             <Row
               key={o.id}
               o={o}

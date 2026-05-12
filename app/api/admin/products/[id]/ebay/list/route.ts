@@ -4,7 +4,7 @@ import { listProductOnEbay, type EbayProduct } from "@/lib/ebay";
 
 export const dynamic = "force-dynamic";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
+const API_URL = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
 
 export async function POST(
   _req: NextRequest,

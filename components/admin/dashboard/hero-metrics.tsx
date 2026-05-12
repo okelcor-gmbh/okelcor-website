@@ -1,6 +1,6 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
-import { TrendingUp, TrendingDown, Minus, ShoppingCart, Users, Zap, BarChart2, DollarSign, Activity } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { TrendingUp, TrendingDown, Minus, ShoppingCart, Users, Zap, BarChart2, DollarSign, Activity, AlertCircle, RefreshCw } from "lucide-react";
 import { useCountUp } from "./count-up";
 
 type Metrics = {
@@ -178,43 +178,58 @@ function MetricCard({
 const REFRESH = 30_000;
 
 export default function HeroMetrics() {
-  const [m, setM]       = useState<Metrics | null>(null);
-  const [loading, setL] = useState(true);
+  const [m, setM]             = useState<Metrics | null>(null);
+  const [loading, setL]       = useState(true);
+  const [stale, setStale]     = useState(false);
+  const [fetchErr, setFetchErr] = useState(false);
+  const hasData               = useRef(false);
 
-  const refresh = useCallback(async () => {
+  // background=true → preserve existing data on failure instead of wiping it
+  const refresh = useCallback(async (background = false) => {
+    if (background) setStale(true);
     const [statsRes, phRes] = await Promise.all([
       fetch("/api/admin/dashboard/stats",   { cache: "no-store" }).then(r => r.ok ? r.json() : null).catch(() => null),
       fetch("/api/admin/posthog/dashboard", { cache: "no-store" }).then(r => r.ok ? r.json() : null).catch(() => null),
     ]);
-    setM({
-      revenueToday:           statsRes?.revenueToday           ?? 0,
-      revenueYesterday:       statsRes?.revenueYesterday       ?? 0,
-      pendingRevenueToday:    statsRes?.pendingRevenueToday    ?? 0,
-      ordersToday:            statsRes?.ordersToday            ?? 0,
-      ordersYesterday:        statsRes?.ordersYesterday        ?? 0,
-      ordersConfirmedToday:   statsRes?.ordersConfirmedToday   ?? 0,
-      ordersPendingToday:     statsRes?.ordersPendingToday     ?? 0,
-      newCustomersToday:      statsRes?.newCustomersToday      ?? 0,
-      newCustomersYesterday:  statsRes?.newCustomersYesterday  ?? 0,
-      activeSessionsNow:      phRes?.activeUsersNow            ?? 0,
-      sessionsToday:          phRes?.sessionsToday             ?? 0,
-      avgOrderValueToday:     statsRes?.avgOrderValueToday     ?? 0,
-      avgOrderValueYesterday: statsRes?.avgOrderValueYesterday ?? 0,
-      conversionRate:         statsRes?.conversionRate         ?? 0,
-      aovPeriodLabel:         statsRes?.aovPeriodLabel         ?? null,
-      aovPaidOrdersCount:     statsRes?.aovPaidOrdersCount     ?? null,
-      aovManualOrdersCount:   statsRes?.aovManualOrdersCount   ?? null,
-    });
+
+    if (statsRes) {
+      hasData.current = true;
+      setFetchErr(false);
+      setStale(false);
+      setM({
+        revenueToday:           statsRes.revenueToday           ?? 0,
+        revenueYesterday:       statsRes.revenueYesterday       ?? 0,
+        pendingRevenueToday:    statsRes.pendingRevenueToday    ?? 0,
+        ordersToday:            statsRes.ordersToday            ?? 0,
+        ordersYesterday:        statsRes.ordersYesterday        ?? 0,
+        ordersConfirmedToday:   statsRes.ordersConfirmedToday   ?? 0,
+        ordersPendingToday:     statsRes.ordersPendingToday     ?? 0,
+        newCustomersToday:      statsRes.newCustomersToday      ?? 0,
+        newCustomersYesterday:  statsRes.newCustomersYesterday  ?? 0,
+        activeSessionsNow:      phRes?.activeUsersNow           ?? 0,
+        sessionsToday:          phRes?.sessionsToday            ?? 0,
+        avgOrderValueToday:     statsRes.avgOrderValueToday     ?? 0,
+        avgOrderValueYesterday: statsRes.avgOrderValueYesterday ?? 0,
+        conversionRate:         statsRes.conversionRate         ?? 0,
+        aovPeriodLabel:         statsRes.aovPeriodLabel         ?? null,
+        aovPaidOrdersCount:     statsRes.aovPaidOrdersCount     ?? null,
+        aovManualOrdersCount:   statsRes.aovManualOrdersCount   ?? null,
+      });
+    } else if (!hasData.current) {
+      // Only mark error on first-load failure — background failure just keeps stale=true
+      setFetchErr(true);
+    }
     setL(false);
   }, []);
 
   useEffect(() => {
-    void refresh();
-    const t = setInterval(() => void refresh(), REFRESH);
+    void refresh(false);
+    const t = setInterval(() => void refresh(true), REFRESH);
     return () => clearInterval(t);
   }, [refresh]);
 
-  if (loading) {
+  // First load in progress
+  if (loading && m === null) {
     return (
       <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
         {Array.from({ length: 6 }).map((_, i) => <CardSkeleton key={i} />)}
@@ -222,8 +237,26 @@ export default function HeroMetrics() {
     );
   }
 
+  // First load failed
+  if (m === null && fetchErr) {
+    return (
+      <div className="mb-6 flex items-center gap-3 rounded-2xl bg-white px-5 py-4 shadow-sm">
+        <AlertCircle size={18} className="shrink-0 text-[#9ca3af]" />
+        <p className="text-[0.83rem] text-[#5c5e62]">Could not load dashboard metrics.</p>
+        <button
+          type="button"
+          onClick={() => void refresh(false)}
+          className="ml-auto flex items-center gap-1.5 text-[0.78rem] font-semibold text-[#E85C1A] hover:underline"
+        >
+          <RefreshCw size={12} />
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
+    <div className={`mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-6 transition-opacity duration-300 ${stale ? "opacity-60" : ""}`}>
 
       <RevenueTodayCard
         confirmed={m?.revenueToday ?? 0}

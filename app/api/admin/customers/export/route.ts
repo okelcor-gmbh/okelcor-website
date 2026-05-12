@@ -7,7 +7,7 @@ import { cookies } from "next/headers";
 
 export const dynamic = "force-dynamic";
 
-const BASE = `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1"}/admin`;
+const BASE = `${process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1"}/admin`;
 const PER  = 200;
 
 type Row = {

@@ -7,7 +7,7 @@ import { COMPANY_LEGAL_NAME, COMPANY_ADDRESS_STREET, COMPANY_ADDRESS_CITY } from
 export const maxDuration = 300;
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
+const API_URL = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
 const FROM_EMAIL = process.env.FROM_EMAIL || "Okelcor Website <noreply@okelcor.com>";
 const SITE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://okelcor.com";
 const RESET_URL = `${SITE_URL}/forgot-password`;
