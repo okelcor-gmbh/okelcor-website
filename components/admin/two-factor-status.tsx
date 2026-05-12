@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ShieldCheck, ShieldOff, AlertCircle, Loader2, KeyRound, Download, CheckCircle2, RefreshCw } from "lucide-react";
+import { ShieldCheck, ShieldOff, AlertCircle, Loader2, Download, CheckCircle2, RefreshCw } from "lucide-react";
 import TwoFactorSetup from "@/components/admin/two-factor-setup";
 
 type TwoFaStatus = "loading" | "enabled" | "disabled" | "unavailable";
@@ -35,52 +35,26 @@ function downloadRecoveryCodes(codes: string[]) {
   URL.revokeObjectURL(url);
 }
 
-function CodeInput({
-  id,
-  value,
-  onChange,
-  placeholder,
-}: {
-  id: string;
-  value: string;
-  onChange: (v: string) => void;
-  placeholder?: string;
-}) {
-  return (
-    <input
-      id={id}
-      type="text"
-      inputMode="numeric"
-      autoComplete="one-time-code"
-      value={value}
-      onChange={(e) => onChange(e.target.value.replace(/\D/g, "").slice(0, 6))}
-      placeholder={placeholder ?? "000000"}
-      maxLength={6}
-      className="w-[140px] rounded-xl border border-black/[0.10] bg-[#f5f5f5] px-4 py-2.5 text-center font-mono text-[1rem] font-bold tracking-[0.3em] text-[#1a1a1a] outline-none placeholder:text-[#ccc] placeholder:tracking-normal transition focus:border-[#E85C1A] focus:bg-white focus:ring-2 focus:ring-[#E85C1A]/15"
-    />
-  );
-}
-
 // ── Disable section ───────────────────────────────────────────────────────────
 
 function DisableSection({ onDisabled }: { onDisabled: () => void }) {
-  const [code, setCode]         = useState("");
-  const [error, setError]       = useState<string | null>(null);
+  const [password, setPassword]   = useState("");
+  const [error, setError]         = useState<string | null>(null);
   const [disabling, setDisabling] = useState(false);
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded]   = useState(false);
 
   const handleDisable = async () => {
-    if (code.length !== 6) { setError("Enter the 6-digit code from your authenticator app."); return; }
+    if (!password.trim()) { setError("Please enter your account password."); return; }
     setDisabling(true);
     setError(null);
     try {
       const res  = await fetch("/api/admin/2fa/disable", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({ password }),
       });
       const json = await res.json().catch(() => ({})) as { message?: string };
-      if (!res.ok) { setError(json.message ?? "Disable failed. Check your code and try again."); return; }
+      if (!res.ok) { setError(json.message ?? "Disable failed. Check your password and try again."); return; }
       onDisabled();
     } catch {
       setError("Network error. Please try again.");
@@ -88,6 +62,8 @@ function DisableSection({ onDisabled }: { onDisabled: () => void }) {
       setDisabling(false);
     }
   };
+
+  const handleCancel = () => { setExpanded(false); setError(null); setPassword(""); };
 
   if (!expanded) {
     return (
@@ -103,8 +79,8 @@ function DisableSection({ onDisabled }: { onDisabled: () => void }) {
 
   return (
     <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4">
-      <p className="mb-3 text-[0.82rem] font-semibold text-red-800">Disable Two-Factor Authentication</p>
-      <p className="mb-3 text-[0.78rem] text-red-700">Enter your current authenticator code to confirm.</p>
+      <p className="mb-1 text-[0.82rem] font-semibold text-red-800">Disable Two-Factor Authentication</p>
+      <p className="mb-3 text-[0.78rem] text-red-700">Enter your account password to confirm.</p>
 
       {error && (
         <div className="mb-3 flex items-start gap-2 rounded-lg border border-red-300 bg-white px-3 py-2">
@@ -114,16 +90,24 @@ function DisableSection({ onDisabled }: { onDisabled: () => void }) {
       )}
 
       <div className="flex flex-wrap items-center gap-3">
-        <CodeInput id="disable-code" value={code} onChange={setCode} />
+        <input
+          id="disable-password"
+          type="password"
+          autoComplete="current-password"
+          value={password}
+          onChange={(e) => { setPassword(e.target.value); if (error) setError(null); }}
+          placeholder="Your password"
+          className="rounded-xl border border-black/[0.10] bg-white px-4 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-red-400 focus:ring-2 focus:ring-red-200"
+        />
         <button
           type="button"
           onClick={handleDisable}
-          disabled={disabling || code.length !== 6}
+          disabled={disabling || !password.trim()}
           className="flex h-[42px] items-center gap-1.5 rounded-full bg-red-600 px-5 text-[0.82rem] font-semibold text-white transition hover:bg-red-700 disabled:opacity-60"
         >
           {disabling ? <><Loader2 size={13} className="animate-spin" />Disabling…</> : "Confirm disable"}
         </button>
-        <button type="button" onClick={() => { setExpanded(false); setError(null); setCode(""); }} className="text-[0.8rem] text-[#5c5e62] hover:text-[#1a1a1a] transition">
+        <button type="button" onClick={handleCancel} className="text-[0.8rem] text-[#5c5e62] hover:text-[#1a1a1a] transition">
           Cancel
         </button>
       </div>
@@ -134,35 +118,37 @@ function DisableSection({ onDisabled }: { onDisabled: () => void }) {
 // ── Regenerate section ────────────────────────────────────────────────────────
 
 function RegenerateSection() {
-  const [code, setCode]             = useState("");
-  const [error, setError]           = useState<string | null>(null);
-  const [regenerating, setRegen]    = useState(false);
-  const [newCodes, setNewCodes]     = useState<string[] | null>(null);
-  const [expanded, setExpanded]     = useState(false);
+  const [password, setPassword]  = useState("");
+  const [error, setError]        = useState<string | null>(null);
+  const [regenerating, setRegen] = useState(false);
+  const [newCodes, setNewCodes]  = useState<string[] | null>(null);
+  const [expanded, setExpanded]  = useState(false);
 
   const handleRegenerate = async () => {
-    if (code.length !== 6) { setError("Enter the 6-digit code from your authenticator app."); return; }
+    if (!password.trim()) { setError("Please enter your account password."); return; }
     setRegen(true);
     setError(null);
     try {
       const res  = await fetch("/api/admin/2fa/recovery-codes/regenerate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({ password }),
       });
       const json = await res.json().catch(() => ({})) as {
         data?: { recovery_codes?: string[] };
         message?: string;
       };
-      if (!res.ok) { setError(json.message ?? "Failed. Check your code and try again."); return; }
+      if (!res.ok) { setError(json.message ?? "Failed. Check your password and try again."); return; }
       setNewCodes(json.data?.recovery_codes ?? []);
-      setCode("");
+      setPassword("");
     } catch {
       setError("Network error. Please try again.");
     } finally {
       setRegen(false);
     }
   };
+
+  const handleCancel = () => { setExpanded(false); setError(null); setPassword(""); };
 
   if (!expanded) {
     return (
@@ -217,7 +203,7 @@ function RegenerateSection() {
     <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
       <p className="mb-1 text-[0.82rem] font-semibold text-amber-800">Regenerate recovery codes</p>
       <p className="mb-3 text-[0.78rem] text-amber-700">
-        This will invalidate all existing recovery codes. Enter your current authenticator code to confirm.
+        This will invalidate all existing recovery codes. Enter your account password to confirm.
       </p>
 
       {error && (
@@ -228,16 +214,24 @@ function RegenerateSection() {
       )}
 
       <div className="flex flex-wrap items-center gap-3">
-        <CodeInput id="regen-code" value={code} onChange={setCode} />
+        <input
+          id="regen-password"
+          type="password"
+          autoComplete="current-password"
+          value={password}
+          onChange={(e) => { setPassword(e.target.value); if (error) setError(null); }}
+          placeholder="Your password"
+          className="rounded-xl border border-black/[0.10] bg-white px-4 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-amber-400 focus:ring-2 focus:ring-amber-200"
+        />
         <button
           type="button"
           onClick={handleRegenerate}
-          disabled={regenerating || code.length !== 6}
+          disabled={regenerating || !password.trim()}
           className="flex h-[42px] items-center gap-1.5 rounded-full bg-amber-600 px-5 text-[0.82rem] font-semibold text-white transition hover:bg-amber-700 disabled:opacity-60"
         >
           {regenerating ? <><Loader2 size={13} className="animate-spin" />Regenerating…</> : "Regenerate"}
         </button>
-        <button type="button" onClick={() => { setExpanded(false); setError(null); setCode(""); }} className="text-[0.8rem] text-[#5c5e62] hover:text-[#1a1a1a] transition">
+        <button type="button" onClick={handleCancel} className="text-[0.8rem] text-[#5c5e62] hover:text-[#1a1a1a] transition">
           Cancel
         </button>
       </div>
