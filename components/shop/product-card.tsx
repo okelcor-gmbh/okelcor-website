@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import type { Product } from "./data";
@@ -140,7 +140,7 @@ export default function ProductCard({
             {t.shop.card.viewDetails}
           </Link>
           <Link
-            href="/quote"
+            href="/tyre-supply-quotation"
             className="flex h-[40px] items-center justify-center rounded-full border border-gray-200 bg-white px-4 text-[0.82rem] font-semibold text-[var(--foreground)] transition hover:border-gray-300 hover:bg-gray-50"
           >
             {t.shop.card.quote}

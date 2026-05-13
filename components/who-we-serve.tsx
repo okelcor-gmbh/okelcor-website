@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import Reveal from "@/components/motion/reveal";
@@ -42,7 +42,7 @@ export default function WhoWeServeSection() {
                 </p>
                 <div className="mt-4">
                   <Link
-                    href="/quote"
+                    href="/tyre-supply-quotation"
                     className="inline-flex h-[48px] items-center justify-center rounded-full bg-[var(--primary)] px-6 text-[0.88rem] font-semibold text-white transition hover:bg-[var(--primary-hover)]"
                   >
                     {t.whoWeServe.business.cta}

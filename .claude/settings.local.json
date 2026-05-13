@@ -64,7 +64,10 @@
       "Bash(Select-Object Name, FullName)",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\user\\\\Desktop\\\\Projects\\\\okelcor-website\" -Directory)",
       "Bash(Select-Object Name)",
-      "Bash(del \"components\\\\shop\\\\specials-section.tsx\")"
+      "Bash(del \"components\\\\shop\\\\specials-section.tsx\")",
+      "Bash(dir \"public\\\\images\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\user\\\\Desktop\\\\Projects\\\\okelcor-website\" -Recurse -Name -Filter \"*.ts\" -o \"*.tsx\" -o \"*.js\" -o \"*.jsx\")",
+      "Bash(Select-Object -First 50)"
     ]
   }
 }

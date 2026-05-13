@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -38,14 +38,14 @@ export default function Logistics() {
 
               <div className="mt-4 flex flex-wrap gap-3">
                 <Link
-                  href="/quote"
+                  href="/tyre-supply-quotation"
                   className="inline-flex h-[48px] items-center justify-center rounded-full bg-[var(--primary)] px-6 text-[14px] font-semibold text-white transition hover:bg-[var(--primary-hover)]"
                 >
                   {t.logistics.getQuote}
                 </Link>
 
                 <Link
-                  href="/about"
+                  href="/wholesale-tire-distributors-europe"
                   className="inline-flex h-[48px] items-center justify-center rounded-full bg-white px-6 text-[14px] font-semibold text-black transition hover:bg-gray-100"
                 >
                   {t.logistics.learnMore}

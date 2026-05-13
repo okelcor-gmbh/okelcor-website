@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -151,7 +151,7 @@ export default function ProductInfo({ product }: { product: Product }) {
 
         <div className="flex gap-3">
           <Link
-            href="/quote"
+            href="/tyre-supply-quotation"
             className="flex h-[44px] flex-1 items-center justify-center rounded-full border border-black/10 bg-white text-[0.9rem] font-semibold text-[var(--foreground)] transition hover:bg-[#f5f5f5]"
           >
             {t.shop.info.requestQuote}

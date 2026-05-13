@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import Image from "next/image";
@@ -110,7 +110,7 @@ export default function Brands({ brands: apiBrands }: BrandsProps) {
                 </Link>
 
                 <Link
-                  href="/about"
+                  href="/wholesale-tire-distributors-europe"
                   className="inline-flex h-[48px] items-center justify-center rounded-full bg-white px-6 text-[14px] font-semibold text-black transition hover:bg-gray-100"
                 >
                   {t.brands.learnMore}

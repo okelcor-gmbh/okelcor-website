@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import Reveal from "@/components/motion/reveal";
@@ -62,7 +62,7 @@ export default function CompanyStory() {
 
             <div className="mt-8">
               <Link
-                href="/quote"
+                href="/tyre-supply-quotation"
                 className="inline-flex h-[48px] items-center rounded-full bg-[var(--primary)] px-7 text-[0.9rem] font-semibold text-white transition hover:bg-[var(--primary-hover)]"
               >
                 {t.about.story.workWithUs}

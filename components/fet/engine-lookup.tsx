@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useRef } from "react";
 import { Search, Loader2, Car, Truck, ChevronRight } from "lucide-react";
@@ -182,7 +182,7 @@ export default function EngineLookup({ compact = false }: { compact?: boolean })
                     </td>
                     <td className="px-4 py-3">
                       <Link
-                        href="/quote"
+                        href="/tyre-supply-quotation"
                         className="flex items-center gap-1 text-[0.75rem] font-semibold text-[#22c55e] hover:underline"
                       >
                         Quote <ChevronRight size={11} />

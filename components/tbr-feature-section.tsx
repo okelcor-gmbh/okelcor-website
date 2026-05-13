@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -39,7 +39,7 @@ export default function TbrFeatureSection() {
 
               <div className="mt-7">
                 <Link
-                  href="/quote"
+                  href="/tyre-supply-quotation"
                   className="inline-flex h-[48px] items-center justify-center rounded-full bg-[var(--primary)] px-6 text-[0.9rem] font-semibold text-white transition hover:bg-[var(--primary-hover)]"
                 >
                   {t.tbr.getQuote}

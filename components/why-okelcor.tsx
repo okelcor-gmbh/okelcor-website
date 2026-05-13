@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { StaggerParent, StaggerChild } from "@/components/motion/stagger";
@@ -21,7 +21,7 @@ export default function WhyOkelcor() {
             </p>
             <div className="mt-4">
               <Link
-                href="/about"
+                href="/wholesale-tire-distributors-europe"
                 className="inline-flex h-[48px] items-center justify-center rounded-full bg-[var(--primary)] px-6 text-[14px] font-semibold text-white transition hover:bg-[var(--primary-hover)]"
               >
                 {t.why.card1.button}
@@ -49,7 +49,7 @@ export default function WhyOkelcor() {
             </p>
             <div className="mt-4">
               <Link
-                href="/quote"
+                href="/tyre-supply-quotation"
                 className="inline-flex h-[48px] items-center justify-center rounded-full bg-[var(--primary)] px-6 text-[14px] font-semibold text-white transition hover:bg-[var(--primary-hover)]"
               >
                 {t.why.card2.button}

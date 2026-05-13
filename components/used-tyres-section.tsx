@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -36,7 +36,7 @@ export default function UsedTyresSection() {
                     {t.used.viewCatalogue}
                   </Link>
                   <Link
-                    href="/quote"
+                    href="/tyre-supply-quotation"
                     className="inline-flex h-[48px] items-center justify-center rounded-full border border-black/10 bg-white px-6 text-[0.9rem] font-semibold text-[var(--foreground)] transition hover:bg-[#f0f0f0]"
                   >
                     {t.used.requestQuote}

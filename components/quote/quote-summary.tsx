@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { Mail, Phone, MapPin, Clock, CheckCircle2, ShieldCheck, Globe } from "lucide-react";
@@ -85,7 +85,7 @@ export default function QuoteSummary() {
       {/* Internal SEO link */}
       <div className="rounded-[22px] bg-[#efefef] px-7 py-4">
         <Link
-          href="/about"
+          href="/wholesale-tire-distributors-europe"
           className="flex items-center gap-2 text-[0.85rem] font-semibold text-[var(--primary)] hover:underline"
         >
           <Globe size={14} strokeWidth={1.8} />

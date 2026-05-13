@@ -9,6 +9,20 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      {
+        source:      "/quote",
+        destination: "/tyre-supply-quotation",
+        permanent:   true,
+      },
+      {
+        source:      "/about",
+        destination: "/wholesale-tire-distributors-europe",
+        permanent:   true,
+      },
+    ];
+  },
   experimental: {
     serverActions: {
       bodySizeLimit: "300mb",

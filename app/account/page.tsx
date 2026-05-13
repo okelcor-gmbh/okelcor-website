@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -219,7 +219,7 @@ export default async function AccountPage() {
               Browse Catalogue
             </Link>
             <Link
-              href="/quote"
+              href="/tyre-supply-quotation"
               className="rounded-full bg-[var(--primary)] px-5 py-2.5 text-[0.88rem] font-semibold text-white transition hover:bg-[var(--primary-hover)]"
             >
               Request a Quote

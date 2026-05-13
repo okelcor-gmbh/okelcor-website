@@ -24,13 +24,13 @@ export default function Footer() {
         { label: t.footer.links.pcrTyres, href: "/shop" },
         { label: t.footer.links.tbrTyres, href: "/shop" },
         { label: t.footer.links.usedTyres, href: "/shop" },
-        { label: t.footer.links.requestQuote, href: "/quote" },
+        { label: t.footer.links.requestQuote, href: "/tyre-supply-quotation" },
       ],
     },
     {
       heading: t.footer.col.company,
       links: [
-        { label: t.footer.links.aboutOkelcor, href: "/about" },
+        { label: t.footer.links.aboutOkelcor, href: "/wholesale-tire-distributors-europe" },
         { label: t.footer.links.newsInsights, href: "/news" },
         { label: t.footer.links.contactUs, href: "/contact" },
         { label: t.footer.links.locations, href: "/contact" },
@@ -40,9 +40,9 @@ export default function Footer() {
       heading: t.footer.col.support,
       links: [
         { label: t.footer.links.getHelp, href: "/contact" },
-        { label: t.footer.links.rex, href: "/about" },
-        { label: t.footer.links.wholesale, href: "/quote" },
-        { label: t.footer.links.logistics, href: "/about" },
+        { label: t.footer.links.rex, href: "/wholesale-tire-distributors-europe" },
+        { label: t.footer.links.wholesale, href: "/tyre-supply-quotation" },
+        { label: t.footer.links.logistics, href: "/wholesale-tire-distributors-europe" },
       ],
     },
   ];

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 /**
  * components/navbar.tsx
@@ -78,9 +78,9 @@ export default function Navbar() {
     { label: t.nav.shop,    href: "/shop" },
     { label: "FET",         href: "/fet" },
     { label: t.nav.news,    href: "/news" },
-    { label: t.nav.about,   href: "/about" },
+    { label: t.nav.about,   href: "/wholesale-tire-distributors-europe" },
     { label: t.nav.contact, href: "/contact" },
-    { label: t.nav.quote,   href: "/quote" },
+    { label: t.nav.quote,   href: "/tyre-supply-quotation" },
   ];
 
   const [openMenu, setOpenMenu]             = useState(false);
@@ -415,11 +415,11 @@ export default function Navbar() {
                     );
                   }
 
-                  if (item.href === "/about") {
+                  if (item.href === "/wholesale-tire-distributors-europe") {
                     return (
                       <div key="about" onMouseEnter={openAboutMenu} onMouseLeave={closeAboutMenu}>
                         <Link
-                          href="/about"
+                          href="/wholesale-tire-distributors-europe"
                           className={`tesla-nav-link ${isActive ? "tesla-nav-link-active" : ""}`}
                         >
                           {item.label}
@@ -796,7 +796,7 @@ export default function Navbar() {
                   ))}
                 </div>
                 <Link
-                  href="/quote"
+                  href="/tyre-supply-quotation"
                   onClick={() => setOpenFetMega(false)}
                   className="flex w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-5 py-2.5 text-[0.85rem] font-semibold text-white transition hover:bg-[#d44519]"
                 >
@@ -824,7 +824,7 @@ export default function Navbar() {
                   B2B and B2C tyre wholesale company headquartered in Munich, Germany. Supplying premium tyres to distributors and fleets across Europe, Africa and the Middle East.
                 </p>
                 <Link
-                  href="/about"
+                  href="/wholesale-tire-distributors-europe"
                   onClick={() => setOpenAboutMega(false)}
                   className="inline-flex items-center gap-1.5 text-[0.82rem] font-semibold text-[var(--primary)] transition hover:underline"
                 >

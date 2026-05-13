@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useStagger } from "@/hooks/useStagger";
@@ -35,7 +35,7 @@ export default function CTASection() {
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <MagneticButton>
                 <Link
-                  href="/quote"
+                  href="/tyre-supply-quotation"
                   className="inline-flex items-center justify-center rounded-full bg-[var(--primary)] px-8 py-3 text-[14px] font-semibold text-white shadow-[0_16px_32px_rgba(244,81,30,0.22)] transition hover:bg-[var(--primary-hover)]"
                 >
                   {t.cta.button}

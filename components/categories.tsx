@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
@@ -97,7 +97,7 @@ function CategoryCard({
 
           <div className="mt-4 flex flex-wrap gap-2">
             <Link
-              href="/quote"
+              href="/tyre-supply-quotation"
               className="inline-flex h-[48px] items-center justify-center rounded-full bg-[var(--primary)] px-6 text-[1rem] font-semibold text-white transition hover:bg-[var(--primary-hover)]"
             >
               {orderNow}

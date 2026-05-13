@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -365,7 +365,7 @@ export default function CarFinder({ onSizeSelect }: Props) {
                     <p className="mt-0.5 text-[0.75rem] text-[#5c5e62]">{desc}</p>
                     <p className="mt-2 text-[1rem] font-extrabold text-[#22c55e]">{price}</p>
                     <Link
-                      href="/quote"
+                      href="/tyre-supply-quotation"
                       className="mt-auto pt-3 flex items-center justify-center gap-1.5 rounded-lg bg-[#22c55e] px-4 py-2 text-[0.78rem] font-semibold text-white transition hover:bg-[#16a34a]"
                     >
                       Request a Quote <ArrowRight size={12} strokeWidth={2.5} />

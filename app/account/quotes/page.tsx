@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -192,7 +192,7 @@ export default async function QuotesPage() {
             </h1>
           </div>
           <Link
-            href="/quote"
+            href="/tyre-supply-quotation"
             className="flex items-center gap-2 rounded-full bg-[var(--primary)] px-5 py-2.5 text-[0.88rem] font-semibold text-white transition hover:bg-[var(--primary-hover)]"
           >
             New Quote <ArrowRight size={14} strokeWidth={2.5} />
@@ -212,7 +212,7 @@ export default async function QuotesPage() {
               You have not submitted any quote requests yet. Request a quote and our team will respond within 24 hours.
             </p>
             <Link
-              href="/quote"
+              href="/tyre-supply-quotation"
               className="mt-6 flex items-center gap-2 rounded-full bg-[var(--primary)] px-6 py-3 text-[0.88rem] font-semibold text-white transition hover:bg-[var(--primary-hover)]"
             >
               Request a Quote <ArrowRight size={14} strokeWidth={2.5} />

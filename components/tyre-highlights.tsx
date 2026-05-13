@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import Reveal from "@/components/motion/reveal";
@@ -43,7 +43,7 @@ export default function TyreHighlightsSection() {
                     {t.used.viewCatalogue}
                   </Link>
                   <Link
-                    href="/quote"
+                    href="/tyre-supply-quotation"
                     className="inline-flex h-[48px] items-center justify-center rounded-full border border-black/10 bg-white px-5 text-[0.88rem] font-semibold text-[var(--foreground)] transition hover:bg-[#f0f0f0]"
                   >
                     {t.used.requestQuote}
@@ -74,7 +74,7 @@ export default function TyreHighlightsSection() {
                 </p>
                 <div className="mt-4">
                   <Link
-                    href="/quote"
+                    href="/tyre-supply-quotation"
                     className="inline-flex h-[48px] items-center justify-center rounded-full bg-[var(--primary)] px-5 text-[0.88rem] font-semibold text-white transition hover:bg-[var(--primary-hover)]"
                   >
                     {t.tbr.getQuote}

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
@@ -199,7 +199,7 @@ export default function FetRoiStrip() {
 
           {/* CTA */}
           <Link
-            href="/quote"
+            href="/tyre-supply-quotation"
             className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-[#10b981] py-3.5 text-[0.92rem] font-bold text-white transition hover:bg-[#0d9e6e]"
           >
             Request a Quote <ArrowRight size={15} strokeWidth={2.2} />

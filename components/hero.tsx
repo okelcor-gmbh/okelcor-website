@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
@@ -385,7 +385,7 @@ export default function Hero({ slides: apiSlides }: HeroProps) {
                           </Link>
                         </MagneticButton>
                         <MagneticButton>
-                          <Link href="/quote" className="tesla-hero-btn-primary">
+                          <Link href="/tyre-supply-quotation" className="tesla-hero-btn-primary">
                             Request a Quote
                           </Link>
                         </MagneticButton>
@@ -393,7 +393,7 @@ export default function Hero({ slides: apiSlides }: HeroProps) {
                     ) : (
                       <>
                         <MagneticButton>
-                          <Link href="/quote" className="tesla-hero-btn-primary">
+                          <Link href="/tyre-supply-quotation" className="tesla-hero-btn-primary">
                             {t.hero.ctaPrimary}
                           </Link>
                         </MagneticButton>

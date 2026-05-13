@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import {
   Zap, BarChart3, Leaf, Wrench, CheckCircle2,
@@ -119,7 +119,7 @@ export default function FetPage() {
 
           <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link
-              href="/quote"
+              href="/tyre-supply-quotation"
               className="flex h-[52px] items-center gap-2 rounded-full bg-[#22c55e] px-8 text-[0.95rem] font-semibold text-white shadow-[0_16px_40px_rgba(34,197,94,0.35)] transition hover:bg-[#16a34a]"
             >
               Request a Quote <ArrowRight size={16} strokeWidth={2} />
@@ -494,7 +494,7 @@ export default function FetPage() {
             Not sure if FET is right for your fleet or vehicle? Our team will answer your questions and provide a tailored recommendation — no commitment required.
           </p>
           <Link
-            href="/quote"
+            href="/tyre-supply-quotation"
             className="mt-8 flex h-[54px] items-center gap-2 rounded-full bg-[#22c55e] px-10 text-[1rem] font-semibold text-white shadow-[0_16px_40px_rgba(34,197,94,0.3)] transition hover:bg-[#16a34a]"
           >
             Request a Quote <ArrowRight size={16} strokeWidth={2} />
