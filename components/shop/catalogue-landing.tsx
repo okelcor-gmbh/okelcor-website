@@ -6,14 +6,32 @@ export type RelatedLink = { label: string; href: string };
 export type CatalogueLandingConfig = {
   eyebrow?: string;
   h1: string;
-  intro: string;
+  /** One string or an array of paragraph strings for longer intros. */
+  intro: string | string[];
   filters: Record<string, string>;
   breadcrumbSchema: object;
+  popularSizes?: { label: string; href: string }[];
+  faq?: { q: string; a: string }[];
   relatedGroups?: { heading: string; links: RelatedLink[] }[];
 };
 
 export default function CatalogueLanding({ config }: { config: CatalogueLandingConfig }) {
-  const { eyebrow, h1, intro, filters, breadcrumbSchema, relatedGroups } = config;
+  const { eyebrow, h1, intro, filters, breadcrumbSchema, popularSizes, faq, relatedGroups } = config;
+
+  const introParas = Array.isArray(intro) ? intro : [intro];
+
+  const faqSchema =
+    faq && faq.length > 0
+      ? {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: faq.map((item) => ({
+            "@type": "Question",
+            name: item.q,
+            acceptedAnswer: { "@type": "Answer", text: item.a },
+          })),
+        }
+      : null;
 
   return (
     <>
@@ -21,8 +39,14 @@ export default function CatalogueLanding({ config }: { config: CatalogueLandingC
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
+      {faqSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        />
+      )}
 
-      {/* SEO header — H1 + intro paragraph */}
+      {/* SEO header — H1 + intro */}
       <section
         className="w-full border-b border-black/[0.06] bg-white"
         style={{ paddingTop: "calc(var(--bar-h, 0px) + 76px + 40px)", paddingBottom: "40px" }}
@@ -36,16 +60,66 @@ export default function CatalogueLanding({ config }: { config: CatalogueLandingC
           <h1 className="max-w-2xl text-[1.75rem] font-bold leading-tight text-[var(--foreground)] md:text-[2.4rem]">
             {h1}
           </h1>
-          <p className="mt-3 max-w-2xl text-[0.92rem] leading-relaxed text-[var(--muted)]">
-            {intro}
-          </p>
+          <div className="mt-3 max-w-2xl space-y-3">
+            {introParas.map((para, i) => (
+              <p key={i} className="text-[0.92rem] leading-relaxed text-[var(--muted)]">
+                {para}
+              </p>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Interactive shop catalogue — pre-filtered on mount, campaign specials suppressed */}
       <ShopPageClient initialFilters={filters} noNavbarPad source="seo-landing" />
 
-      {/* Internal linking — explore related pages */}
+      {/* Popular sizes */}
+      {popularSizes && popularSizes.length > 0 && (
+        <section className="w-full border-t border-black/[0.06] bg-white py-10 md:py-12">
+          <div className="tesla-shell">
+            <h2 className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
+              Popular Sizes
+            </h2>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {popularSizes.map((size) => (
+                <Link
+                  key={size.label}
+                  href={size.href}
+                  className="rounded-full border border-black/[0.12] bg-[#f5f5f5] px-4 py-1.5 text-[0.82rem] font-medium text-[var(--foreground)] transition hover:border-[var(--primary)]/60 hover:bg-white hover:text-[var(--primary)]"
+                >
+                  {size.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* FAQ */}
+      {faq && faq.length > 0 && (
+        <section className="w-full border-t border-black/[0.07] bg-[#f5f5f5] py-10 md:py-14">
+          <div className="tesla-shell max-w-3xl">
+            <h2 className="mb-6 text-[1.2rem] font-bold text-[var(--foreground)] md:text-[1.4rem]">
+              Frequently Asked Questions
+            </h2>
+            <div className="divide-y divide-black/[0.07]">
+              {faq.map((item) => (
+                <details key={item.q} className="group py-4">
+                  <summary className="flex cursor-pointer list-none items-start justify-between gap-4 text-[0.9rem] font-semibold text-[var(--foreground)] [&::-webkit-details-marker]:hidden">
+                    <span>{item.q}</span>
+                    <span className="mt-0.5 flex-shrink-0 text-[1.25rem] font-light leading-none text-[var(--muted)] transition-transform duration-200 group-open:rotate-45">
+                      +
+                    </span>
+                  </summary>
+                  <p className="mt-3 text-[0.88rem] leading-relaxed text-[var(--muted)]">{item.a}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Internal linking */}
       {relatedGroups && relatedGroups.length > 0 && (
         <section className="w-full border-t border-black/[0.07] bg-white py-10 md:py-14">
           <div className="tesla-shell">

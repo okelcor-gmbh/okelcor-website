@@ -42,16 +42,49 @@ export default function LightTruckTiresPage() {
         config={{
           eyebrow: "Tyre Category",
           h1: "Truck & Bus Radial Tyres (TBR) — Wholesale Supply",
-          intro:
-            "Source heavy-duty TBR tyres for your commercial fleet or distribution network. We supply drive, steer, and trailer axle tyres from Michelin, Bridgestone, Continental, and other leading manufacturers, with reliable global logistics.",
+          intro: [
+            "Truck and bus radial (TBR) tyres serve the commercial vehicle segment — from regional distribution trucks and long-haul fleets to construction vehicles and intercity buses. Okelcor supplies TBR tyres wholesale to fleet operators, tyre dealers, and distributors across more than 30 countries, with a focus on drive axle, steer axle, and trailer axle applications in the most traded commercial sizes from 17.5-inch to 22.5-inch rims.",
+            "Our TBR sourcing covers premium and mid-range brands including Michelin, Bridgestone, Continental, Dunlop, and Falken. We handle both OEM-grade new tyres and Grade A used TBR for operators requiring cost-conscious sourcing. All TBR shipments benefit from Okelcor's established European logistics infrastructure, with flexible freight options for sea, air, and road delivery to destination. Contact our sales team for current TBR availability and bulk pricing.",
+          ],
           filters: { type: "TBR" },
           breadcrumbSchema: breadcrumb,
+          popularSizes: [
+            { label: "295/80R22.5", href: "/shop?type=TBR&size=295%2F80R22.5" },
+            { label: "315/70R22.5", href: "/shop?type=TBR&size=315%2F70R22.5" },
+            { label: "315/80R22.5", href: "/shop?type=TBR&size=315%2F80R22.5" },
+            { label: "385/65R22.5", href: "/shop?type=TBR&size=385%2F65R22.5" },
+            { label: "315/60R22.5", href: "/shop?type=TBR&size=315%2F60R22.5" },
+            { label: "275/70R22.5", href: "/shop?type=TBR&size=275%2F70R22.5" },
+          ],
+          faq: [
+            {
+              q: "What is the difference between drive, steer, and trailer axle TBR tyres?",
+              a: "Drive axle tyres sit on the rear powered wheels and must resist scrubbing and deliver traction under load. Steer axle tyres prioritise precise handling and even wear under steering forces. Trailer axle tyres are optimised for low rolling resistance and long mileage under static load. Okelcor can supply all three axle positions from the same brand family to simplify fleet management.",
+            },
+            {
+              q: "What TBR sizes are most commonly traded?",
+              a: "The most traded commercial TBR sizes are 295/80R22.5 (steer axle standard), 315/70R22.5 (long-haul drive axle), 315/80R22.5 (heavy-duty drive), 385/65R22.5 (wide-base drive/trailer), and 315/60R22.5 (regional distribution). Contact our sales team for current availability in specific sizes and brands.",
+            },
+            {
+              q: "Do you supply Grade A used TBR tyres?",
+              a: "Yes. Okelcor sources pre-inspected Grade A used TBR tyres suitable for secondary fleet operations and budget-conscious export markets. All used TBR units are checked for minimum tread depth and casing integrity before dispatch.",
+            },
+            {
+              q: "Which brands are available for TBR wholesale?",
+              a: "Our TBR range includes Michelin (X MultiWay, X Line Energy), Bridgestone (Ecopia R192, Duravis), Continental (Hybrid HS3+, EcoPlus), Dunlop, and Falken. Mid-range TBR brands are also available depending on order volume and destination.",
+            },
+            {
+              q: "Can I order a mixed container of PCR and TBR tyres?",
+              a: "Yes. Okelcor accommodates mixed loads combining PCR and TBR tyres in the same shipment, helping wholesale buyers optimise container fill and reduce per-unit logistics cost. Our team can advise on optimal load configurations for your freight route.",
+            },
+          ],
           relatedGroups: [
             {
               heading: "Also Available",
               links: [
                 { label: "Passenger Car Tyres (PCR)", href: "/passenger-tires" },
                 { label: "Full Tyre Catalogue",       href: "/shop" },
+                { label: "Request a Wholesale Quote", href: "/tyre-supply-quotation" },
               ],
             },
             {

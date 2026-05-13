@@ -42,22 +42,51 @@ export default function WinterTiresPage() {
         config={{
           eyebrow: "Season",
           h1: "Winter Tyres — Wholesale Bulk Supply",
-          intro:
-            "Cold-weather and Nordic-rated winter tyres for passenger cars and light commercial vehicles. Stock winter tyres from leading brands for distribution to northern, Alpine, and Eastern European markets.",
+          intro: [
+            "Winter tyres are engineered specifically for conditions where temperatures regularly fall below 7°C. Their silica-enriched tread compounds remain flexible in cold weather, delivering demonstrably superior grip on snow, ice, and cold wet roads compared to summer or general-purpose tyres. Several European countries legally mandate winter tyres during winter months, creating consistent annual demand for wholesale distributors serving Northern Europe, the Alpine region, and Eastern European markets.",
+            "Okelcor sources wholesale winter PCR tyres from leading manufacturers including Goodyear UltraGrip, Michelin Alpin, Continental WinterContact, Bridgestone Blizzak, and Falken Eurowinter. Winter tyre stock planning is time-sensitive — we advise wholesale buyers to place bulk orders between May and September to avoid the pre-season rush and secure sufficient inventory for the October–December swap window.",
+          ],
           filters: { season: "Winter" },
           breadcrumbSchema: breadcrumb,
+          popularSizes: [
+            { label: "205/55R16",  href: "/shop?season=Winter&size=205%2F55R16" },
+            { label: "195/65R15",  href: "/shop?season=Winter&size=195%2F65R15" },
+            { label: "225/45R17",  href: "/shop?season=Winter&size=225%2F45R17" },
+            { label: "175/65R14",  href: "/shop?season=Winter&size=175%2F65R14" },
+            { label: "215/60R16",  href: "/shop?season=Winter&size=215%2F60R16" },
+            { label: "235/40R18",  href: "/shop?season=Winter&size=235%2F40R18" },
+          ],
+          faq: [
+            {
+              q: "Which European countries legally require winter tyres?",
+              a: "Countries with mandatory winter tyre legislation include Austria, Sweden, Finland, Norway, Estonia, Latvia, Lithuania, and Slovenia. Germany requires winter tyres in wintry road conditions (situational mandate). Switzerland, Czech Republic, and Poland have strong winter tyre adoption even without full mandates. This regulatory environment creates steady wholesale demand across the region each autumn.",
+            },
+            {
+              q: "What is the difference between M+S and 3PMSF winter tyres?",
+              a: "The M+S (mud and snow) marking indicates a basic mud and snow traction standard. The Three-Peak Mountain Snowflake (3PMSF) symbol confirms the tyre passed a stricter snow-traction test and is legally accepted as a winter tyre in countries with mandatory regulations. For export to Northern or Central European markets, 3PMSF-rated tyres are recommended.",
+            },
+            {
+              q: "When should wholesale winter tyre orders be placed?",
+              a: "The winter tyre swap season in Europe runs October–December. Wholesale buyers should place bulk orders 8–16 weeks ahead — ideally between May and September — to secure availability and avoid pre-season price increases. Late orders often face stock shortages in popular sizes from top brands.",
+            },
+            {
+              q: "Are Nordic (studded) winter tyres available?",
+              a: "Studded winter tyres are permitted in Finland, Norway, Sweden, and parts of Russia and Canada during defined winter periods. Contact our sales team if your distribution market requires studded winter tyres — these need to be specified separately as they are a distinct product category.",
+            },
+          ],
           relatedGroups: [
             {
               heading: "Other Seasons",
               links: [
-                { label: "Summer Tyres",     href: "/summer-tires" },
-                { label: "All-Season Tyres", href: "/all-season-tires" },
+                { label: "Summer Tyres",               href: "/summer-tires" },
+                { label: "All-Season Tyres",           href: "/all-season-tires" },
+                { label: "Request a Wholesale Quote",  href: "/tyre-supply-quotation" },
               ],
             },
             {
               heading: "Tyre Categories",
               links: [
-                { label: "Passenger Car Tyres (PCR)",     href: "/passenger-tires" },
+                { label: "Passenger Car Tyres (PCR)",      href: "/passenger-tires" },
                 { label: "Truck & Bus Radial Tyres (TBR)", href: "/light-truck-tires" },
                 { label: "Full Tyre Catalogue",            href: "/shop" },
               ],
