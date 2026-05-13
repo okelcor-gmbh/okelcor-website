@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-  FileText, Download, ExternalLink, FilePlus2,
-  Loader2, Upload, Trash2, X, Paperclip,
+  CheckCircle2, Download, ExternalLink, FilePlus2,
+  FileText, Loader2, Mail, Paperclip, Trash2, Upload, X,
 } from "lucide-react";
 import type { TradeDocument } from "@/lib/admin-api";
 import { canDo } from "@/lib/admin-permissions";
@@ -86,17 +86,28 @@ function canViewInline(doc: TradeDocument): boolean {
 type GenerateState = { loading: boolean; error: string | null };
 const IDLE: GenerateState = { loading: false, error: null };
 
+type SendModal = {
+  doc: TradeDocument;
+  recipientEmail: string;
+  message: string;
+  loading: boolean;
+  error: string | null;
+};
+
 // ── Component ──────────────────────────────────────────────────────────────────
 
 export default function TradeDocumentsCard({
   orderId,
   initialDocuments,
   adminRole,
+  customerEmail,
 }: {
   orderId: number;
   initialDocuments: TradeDocument[];
   /** Server-provided role — when present, skips the async cookie read in the hook. */
   adminRole?: string;
+  /** Customer email prefilled in the send-email modal. */
+  customerEmail?: string;
 }) {
   // Use the server-provided role prop for an immediate synchronous check.
   // Fall back to the hook (async cookie read) only when the prop is absent.
@@ -117,6 +128,17 @@ export default function TradeDocumentsCard({
   // Download state
   const [downloading, setDownloading] = useState<number | null>(null);
 
+  // Send email modal state
+  const [sendModal, setSendModal] = useState<SendModal | null>(null);
+
+  // Toast state (auto-clears after 4 s)
+  const [toast, setToast] = useState<string | null>(null);
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(t);
+  }, [toast]);
+
   // Upload state
   const [showUpload,   setShowUpload]   = useState(false);
   const [uploadLabel,  setUploadLabel]  = useState("");
@@ -132,12 +154,12 @@ export default function TradeDocumentsCard({
   const [deleteError,   setDeleteError]   = useState<string | null>(null);
 
   // Derived
-  const hasProforma        = documents.some((d) => d.type === "proforma_invoice");
-  const hasCommercialInv   = documents.some((d) => d.type === "commercial_invoice");
-  const hasPacking         = documents.some((d) => d.type === "packing_list");
-  const hasDeliveryNote    = documents.some((d) => d.type === "delivery_note");
-  const generatedDocs   = documents.filter((d) => d.type !== "shipment_document");
-  const shipmentDocs    = documents.filter((d) => d.type === "shipment_document");
+  const hasProforma      = documents.some((d) => d.type === "proforma_invoice");
+  const hasCommercialInv = documents.some((d) => d.type === "commercial_invoice");
+  const hasPacking       = documents.some((d) => d.type === "packing_list");
+  const hasDeliveryNote  = documents.some((d) => d.type === "delivery_note");
+  const generatedDocs    = documents.filter((d) => d.type !== "shipment_document");
+  const shipmentDocs     = documents.filter((d) => d.type === "shipment_document");
 
   // ── Handlers ────────────────────────────────────────────────────────────────
 
@@ -181,6 +203,52 @@ export default function TradeDocumentsCard({
       // silently fail
     } finally {
       setDownloading(null);
+    }
+  }
+
+  function openSendModal(doc: TradeDocument) {
+    setSendModal({
+      doc,
+      recipientEmail: customerEmail ?? "",
+      message: "",
+      loading: false,
+      error: null,
+    });
+  }
+
+  async function handleSendEmail() {
+    if (!sendModal) return;
+    setSendModal((prev) => prev ? { ...prev, loading: true, error: null } : null);
+    try {
+      const body: Record<string, string> = {};
+      if (sendModal.recipientEmail.trim()) body.recipient_email = sendModal.recipientEmail.trim();
+      if (sendModal.message.trim())        body.message         = sendModal.message.trim();
+
+      const res  = await fetch(`/api/admin/trade-documents/${sendModal.doc.id}/send-email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const json = await res.json().catch(() => ({})) as { data?: { sent_at?: string }; message?: string };
+
+      if (res.ok) {
+        const sentAt = json.data?.sent_at ?? new Date().toISOString();
+        setDocuments((prev) =>
+          prev.map((d) => d.id === sendModal.doc.id ? { ...d, sent_at: sentAt } : d),
+        );
+        setSendModal(null);
+        setToast("Document sent successfully.");
+      } else {
+        setSendModal((prev) => prev
+          ? { ...prev, loading: false, error: json.message ?? "Failed to send. Please try again." }
+          : null,
+        );
+      }
+    } catch {
+      setSendModal((prev) => prev
+        ? { ...prev, loading: false, error: "Network error. Please try again." }
+        : null,
+      );
     }
   }
 
@@ -252,7 +320,7 @@ export default function TradeDocumentsCard({
     }
   }
 
-  // ── Shared action button ──────────────────────────────────────────────────────
+  // ── Shared action buttons ─────────────────────────────────────────────────────
 
   function ActionBtn({ doc }: { doc: TradeDocument }) {
     if (canViewInline(doc)) {
@@ -284,294 +352,421 @@ export default function TradeDocumentsCard({
     );
   }
 
+  function SendBtn({ doc }: { doc: TradeDocument }) {
+    const wasSent = !!doc.sent_at;
+    return (
+      <button
+        type="button"
+        onClick={() => openSendModal(doc)}
+        className="inline-flex h-8 items-center gap-1.5 rounded-full border border-black/[0.09] bg-white px-3 text-[0.75rem] font-semibold text-[#1a1a1a] transition hover:border-emerald-300 hover:text-emerald-700"
+      >
+        <Mail size={13} strokeWidth={2} />
+        {wasSent ? "Send again" : "Send"}
+      </button>
+    );
+  }
+
   // ── Render ────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="rounded-2xl bg-white p-6 shadow-sm">
+    <>
+      <div className="rounded-2xl bg-white p-6 shadow-sm">
 
-      {/* ── Header ── */}
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
-        <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
-          Trade Documents
-        </p>
+        {/* ── Header ── */}
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
+          <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+            Trade Documents
+          </p>
 
-        {canManage && (
-          <div className="flex flex-wrap items-center gap-2">
-            {!hasProforma && (
-              <button type="button" disabled={proforma.loading}
-                onClick={() => generateDoc(`/api/admin/orders/${orderId}/trade-documents/proforma`, setProforma, "proforma invoice")}
-                className="inline-flex items-center gap-1.5 rounded-full border border-[#E85C1A]/30 bg-[#fff5f2] px-3 py-1.5 text-[0.75rem] font-semibold text-[#E85C1A] transition hover:bg-[#fff0ea] disabled:opacity-60"
+          {canManage && (
+            <div className="flex flex-wrap items-center gap-2">
+              {!hasProforma && (
+                <button type="button" disabled={proforma.loading}
+                  onClick={() => generateDoc(`/api/admin/orders/${orderId}/trade-documents/proforma`, setProforma, "proforma invoice")}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[#E85C1A]/30 bg-[#fff5f2] px-3 py-1.5 text-[0.75rem] font-semibold text-[#E85C1A] transition hover:bg-[#fff0ea] disabled:opacity-60"
+                >
+                  {proforma.loading ? <Loader2 size={13} strokeWidth={2} className="animate-spin" /> : <FilePlus2 size={13} strokeWidth={2} />}
+                  {proforma.loading ? "Generating…" : "Generate Proforma"}
+                </button>
+              )}
+              {!hasCommercialInv && (
+                <button type="button" disabled={commercial.loading}
+                  onClick={() => generateDoc(`/api/admin/orders/${orderId}/trade-documents/commercial-invoice`, setCommercial, "commercial invoice")}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-purple-200 bg-purple-50 px-3 py-1.5 text-[0.75rem] font-semibold text-purple-700 transition hover:bg-purple-100 disabled:opacity-60"
+                >
+                  {commercial.loading ? <Loader2 size={13} strokeWidth={2} className="animate-spin" /> : <FilePlus2 size={13} strokeWidth={2} />}
+                  {commercial.loading ? "Generating…" : "Generate Commercial Invoice"}
+                </button>
+              )}
+              {!hasPacking && (
+                <button type="button" disabled={packing.loading}
+                  onClick={() => generateDoc(`/api/admin/orders/${orderId}/trade-documents/packing-list`, setPacking, "packing list")}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[0.75rem] font-semibold text-blue-700 transition hover:bg-blue-100 disabled:opacity-60"
+                >
+                  {packing.loading ? <Loader2 size={13} strokeWidth={2} className="animate-spin" /> : <FilePlus2 size={13} strokeWidth={2} />}
+                  {packing.loading ? "Generating…" : "Generate Packing List"}
+                </button>
+              )}
+              {!hasDeliveryNote && (
+                <button type="button" disabled={delivery.loading}
+                  onClick={() => generateDoc(`/api/admin/orders/${orderId}/trade-documents/delivery-note`, setDelivery, "delivery note")}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-3 py-1.5 text-[0.75rem] font-semibold text-teal-700 transition hover:bg-teal-100 disabled:opacity-60"
+                >
+                  {delivery.loading ? <Loader2 size={13} strokeWidth={2} className="animate-spin" /> : <FilePlus2 size={13} strokeWidth={2} />}
+                  {delivery.loading ? "Generating…" : "Generate Delivery Note"}
+                </button>
+              )}
+              <button type="button"
+                onClick={() => { setShowUpload((v) => !v); setUploadError(null); }}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[0.75rem] font-semibold transition ${
+                  showUpload
+                    ? "border-gray-300 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                }`}
               >
-                {proforma.loading ? <Loader2 size={13} strokeWidth={2} className="animate-spin" /> : <FilePlus2 size={13} strokeWidth={2} />}
-                {proforma.loading ? "Generating…" : "Generate Proforma"}
+                <Upload size={13} strokeWidth={2} />
+                Upload Document
               </button>
+            </div>
+          )}
+        </div>
+
+        {/* ── DEBUG PANEL — remove before production ── */}
+        {process.env.NODE_ENV !== "production" && (
+          <details className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-[0.72rem]">
+            <summary className="cursor-pointer font-bold text-amber-700">
+              [DEBUG] Trade Documents Permissions
+            </summary>
+            <div className="mt-2 space-y-0.5 font-mono text-amber-900">
+              <p>adminRole prop: <strong>{adminRole ?? "(not passed)"}</strong></p>
+              <p>cookieRole (hook): <strong>{loading ? "loading…" : (cookieRole || "(empty)")}</strong></p>
+              <p>permissions cookie: <strong>{permissions ? JSON.stringify(permissions) : "(none)"}</strong></p>
+              <p>canManage: <strong>{String(canManage)}</strong></p>
+              <p>hasCommercialInv: <strong>{String(hasCommercialInv)}</strong></p>
+              <p>existing types: <strong>[{documents.map((d) => d.type).join(", ") || "none"}]</strong></p>
+            </div>
+          </details>
+        )}
+
+        {/* ── Generate errors ── */}
+        {proforma.error   && <p className="mb-3 text-[0.8rem] text-red-600">{proforma.error}</p>}
+        {commercial.error && <p className="mb-3 text-[0.8rem] text-red-600">{commercial.error}</p>}
+        {packing.error    && <p className="mb-3 text-[0.8rem] text-red-600">{packing.error}</p>}
+        {delivery.error   && <p className="mb-3 text-[0.8rem] text-red-600">{delivery.error}</p>}
+        {deleteError      && <p className="mb-3 text-[0.8rem] text-red-600">{deleteError}</p>}
+
+        {/* ── Generated documents ── */}
+        {generatedDocs.length === 0 && shipmentDocs.length === 0 ? (
+          <p className="text-[0.875rem] text-[#5c5e62]">No trade documents have been issued yet.</p>
+        ) : (
+          <>
+            {generatedDocs.length > 0 && (
+              <div className="divide-y divide-black/[0.05]">
+                {generatedDocs.map((doc) => (
+                  <div key={doc.id} className="flex items-center gap-4 py-3">
+                    <FileText size={18} strokeWidth={1.5} className="shrink-0 text-[#5c5e62]" />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-[0.875rem] font-semibold text-[#1a1a1a]">
+                          {TYPE_LABEL[doc.type] ?? doc.type}
+                        </p>
+                        {doc.number && (
+                          <span className="font-mono text-[0.72rem] text-[#5c5e62]">#{doc.number}</span>
+                        )}
+                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[0.68rem] font-bold capitalize ${STATUS_BADGE[doc.status] ?? "bg-gray-100 text-gray-600"}`}>
+                          {doc.status}
+                        </span>
+                      </div>
+                      {TYPE_DESCRIPTION[doc.type] && (
+                        <p className="mt-0.5 text-[0.7rem] text-[#9ca3af]">{TYPE_DESCRIPTION[doc.type]}</p>
+                      )}
+                      <p className="mt-0.5 text-[0.75rem] text-[#5c5e62]">
+                        Issued {shortDate(doc.issued_at)}
+                        {doc.sent_at && ` · Sent ${shortDate(doc.sent_at)}`}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <ActionBtn doc={doc} />
+                      {canManage && <SendBtn doc={doc} />}
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
-            {!hasCommercialInv && (
-              <button type="button" disabled={commercial.loading}
-                onClick={() => generateDoc(`/api/admin/orders/${orderId}/trade-documents/commercial-invoice`, setCommercial, "commercial invoice")}
-                className="inline-flex items-center gap-1.5 rounded-full border border-purple-200 bg-purple-50 px-3 py-1.5 text-[0.75rem] font-semibold text-purple-700 transition hover:bg-purple-100 disabled:opacity-60"
+
+            {/* ── Shipment documents ── */}
+            {shipmentDocs.length > 0 && (
+              <div className={generatedDocs.length > 0 ? "mt-5" : ""}>
+                <p className="mb-3 text-[0.68rem] font-bold uppercase tracking-[0.14em] text-[#5c5e62]">
+                  Shipment Documents
+                </p>
+                <div className="divide-y divide-black/[0.05]">
+                  {shipmentDocs.map((doc) => (
+                    <div key={doc.id} className="flex items-start gap-3 py-3">
+                      <Paperclip size={15} strokeWidth={1.8} className="mt-0.5 shrink-0 text-[#5c5e62]" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[0.875rem] font-semibold text-[#1a1a1a]">
+                          {doc.document_label ?? "Shipment Document"}
+                        </p>
+                        <p className="mt-0.5 truncate text-[0.75rem] text-[#5c5e62]">
+                          {doc.original_filename}
+                          {doc.file_size ? ` · ${fmtSize(doc.file_size)}` : ""}
+                        </p>
+                        <p className="text-[0.72rem] text-[#9ca3af]">
+                          Uploaded {shortDate(doc.issued_at)}
+                          {doc.sent_at && ` · Sent ${shortDate(doc.sent_at)}`}
+                          {doc.notes ? ` · ${doc.notes}` : ""}
+                        </p>
+                      </div>
+
+                      <div className="flex shrink-0 items-center gap-2">
+                        <ActionBtn doc={doc} />
+                        {canManage && <SendBtn doc={doc} />}
+
+                        {canManage && (
+                          confirmDelete === doc.id ? (
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => handleDelete(doc.id)}
+                                disabled={deleting === doc.id}
+                                className="inline-flex h-8 items-center gap-1 rounded-full bg-red-600 px-2.5 text-[0.72rem] font-semibold text-white transition hover:bg-red-700 disabled:opacity-60"
+                              >
+                                {deleting === doc.id ? <Loader2 size={11} className="animate-spin" /> : null}
+                                {deleting === doc.id ? "…" : "Delete"}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setConfirmDelete(null)}
+                                className="inline-flex h-8 items-center rounded-full border border-black/[0.09] bg-white px-2.5 text-[0.72rem] font-semibold text-[#5c5e62] transition hover:bg-gray-50"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => { setConfirmDelete(doc.id); setDeleteError(null); }}
+                              title="Delete document"
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-black/[0.09] bg-white text-[#9ca3af] transition hover:border-red-200 hover:text-red-500"
+                            >
+                              <Trash2 size={13} strokeWidth={2} />
+                            </button>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* ── Upload panel ── */}
+        {canManage && showUpload && (
+          <div className="mt-5 rounded-xl border border-black/[0.08] bg-[#fafafa] p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-[0.78rem] font-bold text-[#1a1a1a]">Upload Shipment Document</p>
+              <button
+                type="button"
+                onClick={() => { setShowUpload(false); setUploadError(null); setUploadFile(null); }}
+                className="text-[#9ca3af] transition hover:text-[#5c5e62]"
               >
-                {commercial.loading ? <Loader2 size={13} strokeWidth={2} className="animate-spin" /> : <FilePlus2 size={13} strokeWidth={2} />}
-                {commercial.loading ? "Generating…" : "Generate Commercial Invoice"}
+                <X size={15} strokeWidth={2} />
               </button>
-            )}
-            {!hasPacking && (
-              <button type="button" disabled={packing.loading}
-                onClick={() => generateDoc(`/api/admin/orders/${orderId}/trade-documents/packing-list`, setPacking, "packing list")}
-                className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[0.75rem] font-semibold text-blue-700 transition hover:bg-blue-100 disabled:opacity-60"
-              >
-                {packing.loading ? <Loader2 size={13} strokeWidth={2} className="animate-spin" /> : <FilePlus2 size={13} strokeWidth={2} />}
-                {packing.loading ? "Generating…" : "Generate Packing List"}
-              </button>
-            )}
-            {!hasDeliveryNote && (
-              <button type="button" disabled={delivery.loading}
-                onClick={() => generateDoc(`/api/admin/orders/${orderId}/trade-documents/delivery-note`, setDelivery, "delivery note")}
-                className="inline-flex items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-3 py-1.5 text-[0.75rem] font-semibold text-teal-700 transition hover:bg-teal-100 disabled:opacity-60"
-              >
-                {delivery.loading ? <Loader2 size={13} strokeWidth={2} className="animate-spin" /> : <FilePlus2 size={13} strokeWidth={2} />}
-                {delivery.loading ? "Generating…" : "Generate Delivery Note"}
-              </button>
-            )}
-            <button type="button"
-              onClick={() => { setShowUpload((v) => !v); setUploadError(null); }}
-              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[0.75rem] font-semibold transition ${
-                showUpload
-                  ? "border-gray-300 bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
-              }`}
-            >
-              <Upload size={13} strokeWidth={2} />
-              Upload Document
-            </button>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              {/* Document type */}
+              <div>
+                <label className="mb-1 block text-[0.72rem] font-semibold text-[#5c5e62]">
+                  Document Type <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={uploadLabel}
+                  onChange={(e) => setUploadLabel(e.target.value)}
+                  className="w-full rounded-lg border border-black/[0.1] bg-white px-3 py-2 text-[0.85rem] text-[#1a1a1a] focus:border-[#E85C1A]/50 focus:outline-none focus:ring-2 focus:ring-[#E85C1A]/10"
+                >
+                  <option value="">Select document type…</option>
+                  {SHIPMENT_LABELS.map((l) => (
+                    <option key={l} value={l}>{l}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Notes */}
+              <div>
+                <label className="mb-1 block text-[0.72rem] font-semibold text-[#5c5e62]">
+                  Notes <span className="text-[#9ca3af]">(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  value={uploadNotes}
+                  onChange={(e) => setUploadNotes(e.target.value)}
+                  placeholder="e.g. Container TCNU1234567"
+                  className="w-full rounded-lg border border-black/[0.1] bg-white px-3 py-2 text-[0.85rem] text-[#1a1a1a] placeholder:text-[#9ca3af] focus:border-[#E85C1A]/50 focus:outline-none focus:ring-2 focus:ring-[#E85C1A]/10"
+                />
+              </div>
+
+              {/* File picker */}
+              <div>
+                <label className="mb-1 block text-[0.72rem] font-semibold text-[#5c5e62]">
+                  File <span className="text-red-500">*</span>
+                </label>
+                <div className="flex items-center gap-2">
+                  <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-black/[0.15] bg-white px-3 py-2 text-[0.82rem] text-[#5c5e62] transition hover:border-[#E85C1A]/40 hover:text-[#E85C1A]">
+                    <Paperclip size={14} strokeWidth={2} />
+                    {uploadFile ? uploadFile.name : "Choose file…"}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png,.xls,.xlsx,.csv"
+                      onChange={handleFileChange}
+                      className="sr-only"
+                    />
+                  </label>
+                  {uploadFile && (
+                    <span className="text-[0.72rem] text-[#9ca3af]">{fmtSize(uploadFile.size)}</span>
+                  )}
+                </div>
+                <p className="mt-1 text-[0.68rem] text-[#9ca3af]">
+                  PDF, JPG, PNG, XLS, XLSX, CSV · max 10 MB
+                </p>
+              </div>
+
+              {uploadError && (
+                <p className="text-[0.8rem] text-red-600">{uploadError}</p>
+              )}
+
+              <div className="flex items-center gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={handleUpload}
+                  disabled={uploading}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-[#E85C1A] px-4 py-2 text-[0.8rem] font-semibold text-white transition hover:bg-[#d04d15] disabled:opacity-60"
+                >
+                  {uploading ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} strokeWidth={2} />}
+                  {uploading ? "Uploading…" : "Upload"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setShowUpload(false); setUploadError(null); setUploadFile(null); }}
+                  className="rounded-full border border-black/[0.08] px-4 py-2 text-[0.8rem] font-semibold text-[#5c5e62] transition hover:bg-gray-100"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
 
-      {/* ── DEBUG PANEL — remove before production ── */}
-      {process.env.NODE_ENV !== "production" && (
-        <details className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-[0.72rem]">
-          <summary className="cursor-pointer font-bold text-amber-700">
-            [DEBUG] Trade Documents Permissions
-          </summary>
-          <div className="mt-2 space-y-0.5 font-mono text-amber-900">
-            <p>adminRole prop: <strong>{adminRole ?? "(not passed)"}</strong></p>
-            <p>cookieRole (hook): <strong>{loading ? "loading…" : (cookieRole || "(empty)")}</strong></p>
-            <p>permissions cookie: <strong>{permissions ? JSON.stringify(permissions) : "(none)"}</strong></p>
-            <p>canManage: <strong>{String(canManage)}</strong></p>
-            <p>hasCommercialInv: <strong>{String(hasCommercialInv)}</strong></p>
-            <p>existing types: <strong>[{documents.map((d) => d.type).join(", ") || "none"}]</strong></p>
-          </div>
-        </details>
-      )}
+      {/* ── Send Email Modal ── */}
+      {sendModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={(e) => { if (e.target === e.currentTarget && !sendModal.loading) setSendModal(null); }}
+        >
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
 
-      {/* ── Generate errors ── */}
-      {proforma.error   && <p className="mb-3 text-[0.8rem] text-red-600">{proforma.error}</p>}
-      {commercial.error && <p className="mb-3 text-[0.8rem] text-red-600">{commercial.error}</p>}
-      {packing.error    && <p className="mb-3 text-[0.8rem] text-red-600">{packing.error}</p>}
-      {delivery.error   && <p className="mb-3 text-[0.8rem] text-red-600">{delivery.error}</p>}
-      {deleteError      && <p className="mb-3 text-[0.8rem] text-red-600">{deleteError}</p>}
-
-      {/* ── Generated documents ── */}
-      {generatedDocs.length === 0 && shipmentDocs.length === 0 ? (
-        <p className="text-[0.875rem] text-[#5c5e62]">No trade documents have been issued yet.</p>
-      ) : (
-        <>
-          {generatedDocs.length > 0 && (
-            <div className="divide-y divide-black/[0.05]">
-              {generatedDocs.map((doc) => (
-                <div key={doc.id} className="flex items-center gap-4 py-3">
-                  <FileText size={18} strokeWidth={1.5} className="shrink-0 text-[#5c5e62]" />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-[0.875rem] font-semibold text-[#1a1a1a]">
-                        {TYPE_LABEL[doc.type] ?? doc.type}
-                      </p>
-                      {doc.number && (
-                        <span className="font-mono text-[0.72rem] text-[#5c5e62]">#{doc.number}</span>
-                      )}
-                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[0.68rem] font-bold capitalize ${STATUS_BADGE[doc.status] ?? "bg-gray-100 text-gray-600"}`}>
-                        {doc.status}
-                      </span>
-                    </div>
-                    {TYPE_DESCRIPTION[doc.type] && (
-                      <p className="mt-0.5 text-[0.7rem] text-[#9ca3af]">{TYPE_DESCRIPTION[doc.type]}</p>
-                    )}
-                    <p className="mt-0.5 text-[0.75rem] text-[#5c5e62]">
-                      Issued {shortDate(doc.issued_at)}
-                      {doc.sent_at && ` · Sent ${shortDate(doc.sent_at)}`}
-                    </p>
-                  </div>
-                  <ActionBtn doc={doc} />
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* ── Shipment documents ── */}
-          {shipmentDocs.length > 0 && (
-            <div className={generatedDocs.length > 0 ? "mt-5" : ""}>
-              <p className="mb-3 text-[0.68rem] font-bold uppercase tracking-[0.14em] text-[#5c5e62]">
-                Shipment Documents
-              </p>
-              <div className="divide-y divide-black/[0.05]">
-                {shipmentDocs.map((doc) => (
-                  <div key={doc.id} className="flex items-start gap-3 py-3">
-                    <Paperclip size={15} strokeWidth={1.8} className="mt-0.5 shrink-0 text-[#5c5e62]" />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[0.875rem] font-semibold text-[#1a1a1a]">
-                        {doc.document_label ?? "Shipment Document"}
-                      </p>
-                      <p className="mt-0.5 truncate text-[0.75rem] text-[#5c5e62]">
-                        {doc.original_filename}
-                        {doc.file_size ? ` · ${fmtSize(doc.file_size)}` : ""}
-                      </p>
-                      <p className="text-[0.72rem] text-[#9ca3af]">
-                        Uploaded {shortDate(doc.issued_at)}
-                        {doc.notes ? ` · ${doc.notes}` : ""}
-                      </p>
-                    </div>
-
-                    <div className="flex shrink-0 items-center gap-2">
-                      <ActionBtn doc={doc} />
-
-                      {canManage && (
-                        confirmDelete === doc.id ? (
-                          <div className="flex items-center gap-1.5">
-                            <button
-                              type="button"
-                              onClick={() => handleDelete(doc.id)}
-                              disabled={deleting === doc.id}
-                              className="inline-flex h-8 items-center gap-1 rounded-full bg-red-600 px-2.5 text-[0.72rem] font-semibold text-white transition hover:bg-red-700 disabled:opacity-60"
-                            >
-                              {deleting === doc.id ? <Loader2 size={11} className="animate-spin" /> : null}
-                              {deleting === doc.id ? "…" : "Delete"}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setConfirmDelete(null)}
-                              className="inline-flex h-8 items-center rounded-full border border-black/[0.09] bg-white px-2.5 text-[0.72rem] font-semibold text-[#5c5e62] transition hover:bg-gray-50"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => { setConfirmDelete(doc.id); setDeleteError(null); }}
-                            title="Delete document"
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-black/[0.09] bg-white text-[#9ca3af] transition hover:border-red-200 hover:text-red-500"
-                          >
-                            <Trash2 size={13} strokeWidth={2} />
-                          </button>
-                        )
-                      )}
-                    </div>
-                  </div>
-                ))}
+            {/* Modal header */}
+            <div className="mb-5 flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[0.68rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+                  Send Document
+                </p>
+                <p className="mt-0.5 text-[0.95rem] font-bold text-[#1a1a1a]">
+                  {TYPE_LABEL[sendModal.doc.type] ?? sendModal.doc.type}
+                  {sendModal.doc.number ? ` · #${sendModal.doc.number}` : ""}
+                  {sendModal.doc.document_label ? ` · ${sendModal.doc.document_label}` : ""}
+                </p>
               </div>
-            </div>
-          )}
-        </>
-      )}
-
-      {/* ── Upload panel ── */}
-      {canManage && showUpload && (
-        <div className="mt-5 rounded-xl border border-black/[0.08] bg-[#fafafa] p-4">
-          <div className="mb-3 flex items-center justify-between">
-            <p className="text-[0.78rem] font-bold text-[#1a1a1a]">Upload Shipment Document</p>
-            <button
-              type="button"
-              onClick={() => { setShowUpload(false); setUploadError(null); setUploadFile(null); }}
-              className="text-[#9ca3af] transition hover:text-[#5c5e62]"
-            >
-              <X size={15} strokeWidth={2} />
-            </button>
-          </div>
-
-          <div className="flex flex-col gap-3">
-            {/* Document type */}
-            <div>
-              <label className="mb-1 block text-[0.72rem] font-semibold text-[#5c5e62]">
-                Document Type <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={uploadLabel}
-                onChange={(e) => setUploadLabel(e.target.value)}
-                className="w-full rounded-lg border border-black/[0.1] bg-white px-3 py-2 text-[0.85rem] text-[#1a1a1a] focus:border-[#E85C1A]/50 focus:outline-none focus:ring-2 focus:ring-[#E85C1A]/10"
+              <button
+                type="button"
+                disabled={sendModal.loading}
+                onClick={() => setSendModal(null)}
+                className="mt-0.5 text-[#9ca3af] transition hover:text-[#5c5e62] disabled:opacity-40"
               >
-                <option value="">Select document type…</option>
-                {SHIPMENT_LABELS.map((l) => (
-                  <option key={l} value={l}>{l}</option>
-                ))}
-              </select>
+                <X size={16} strokeWidth={2} />
+              </button>
             </div>
 
-            {/* Notes */}
-            <div>
-              <label className="mb-1 block text-[0.72rem] font-semibold text-[#5c5e62]">
-                Notes <span className="text-[#9ca3af]">(optional)</span>
-              </label>
-              <input
-                type="text"
-                value={uploadNotes}
-                onChange={(e) => setUploadNotes(e.target.value)}
-                placeholder="e.g. Container TCNU1234567"
-                className="w-full rounded-lg border border-black/[0.1] bg-white px-3 py-2 text-[0.85rem] text-[#1a1a1a] placeholder:text-[#9ca3af] focus:border-[#E85C1A]/50 focus:outline-none focus:ring-2 focus:ring-[#E85C1A]/10"
-              />
-            </div>
-
-            {/* File picker */}
-            <div>
-              <label className="mb-1 block text-[0.72rem] font-semibold text-[#5c5e62]">
-                File <span className="text-red-500">*</span>
-              </label>
-              <div className="flex items-center gap-2">
-                <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-black/[0.15] bg-white px-3 py-2 text-[0.82rem] text-[#5c5e62] transition hover:border-[#E85C1A]/40 hover:text-[#E85C1A]">
-                  <Paperclip size={14} strokeWidth={2} />
-                  {uploadFile ? uploadFile.name : "Choose file…"}
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png,.xls,.xlsx,.csv"
-                    onChange={handleFileChange}
-                    className="sr-only"
-                  />
+            <div className="flex flex-col gap-4">
+              {/* Recipient email */}
+              <div>
+                <label className="mb-1 block text-[0.72rem] font-semibold text-[#5c5e62]">
+                  Recipient Email <span className="text-red-500">*</span>
                 </label>
-                {uploadFile && (
-                  <span className="text-[0.72rem] text-[#9ca3af]">{fmtSize(uploadFile.size)}</span>
-                )}
+                <input
+                  type="email"
+                  value={sendModal.recipientEmail}
+                  onChange={(e) =>
+                    setSendModal((prev) => prev ? { ...prev, recipientEmail: e.target.value } : null)
+                  }
+                  placeholder="customer@example.com"
+                  className="w-full rounded-lg border border-black/[0.1] bg-white px-3 py-2 text-[0.85rem] text-[#1a1a1a] placeholder:text-[#9ca3af] focus:border-[#E85C1A]/50 focus:outline-none focus:ring-2 focus:ring-[#E85C1A]/10"
+                />
               </div>
-              <p className="mt-1 text-[0.68rem] text-[#9ca3af]">
-                PDF, JPG, PNG, XLS, XLSX, CSV · max 10 MB
-              </p>
-            </div>
 
-            {uploadError && (
-              <p className="text-[0.8rem] text-red-600">{uploadError}</p>
-            )}
+              {/* Optional note */}
+              <div>
+                <label className="mb-1 block text-[0.72rem] font-semibold text-[#5c5e62]">
+                  Note <span className="text-[#9ca3af]">(optional)</span>
+                </label>
+                <textarea
+                  value={sendModal.message}
+                  onChange={(e) =>
+                    setSendModal((prev) => prev ? { ...prev, message: e.target.value } : null)
+                  }
+                  placeholder="Add a note for the customer…"
+                  rows={3}
+                  maxLength={1000}
+                  className="w-full resize-none rounded-lg border border-black/[0.1] bg-white px-3 py-2 text-[0.85rem] text-[#1a1a1a] placeholder:text-[#9ca3af] focus:border-[#E85C1A]/50 focus:outline-none focus:ring-2 focus:ring-[#E85C1A]/10"
+                />
+                <p className="mt-0.5 text-right text-[0.68rem] text-[#9ca3af]">
+                  {sendModal.message.length}/1000
+                </p>
+              </div>
 
-            <div className="flex items-center gap-2 pt-1">
-              <button
-                type="button"
-                onClick={handleUpload}
-                disabled={uploading}
-                className="inline-flex items-center gap-1.5 rounded-full bg-[#E85C1A] px-4 py-2 text-[0.8rem] font-semibold text-white transition hover:bg-[#d04d15] disabled:opacity-60"
-              >
-                {uploading ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} strokeWidth={2} />}
-                {uploading ? "Uploading…" : "Upload"}
-              </button>
-              <button
-                type="button"
-                onClick={() => { setShowUpload(false); setUploadError(null); setUploadFile(null); }}
-                className="rounded-full border border-black/[0.08] px-4 py-2 text-[0.8rem] font-semibold text-[#5c5e62] transition hover:bg-gray-100"
-              >
-                Cancel
-              </button>
+              {sendModal.error && (
+                <p className="text-[0.8rem] text-red-600">{sendModal.error}</p>
+              )}
+
+              <div className="flex items-center gap-2 pt-1">
+                <button
+                  type="button"
+                  disabled={sendModal.loading || !sendModal.recipientEmail.trim()}
+                  onClick={handleSendEmail}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-[#E85C1A] px-4 py-2 text-[0.8rem] font-semibold text-white transition hover:bg-[#d04d15] disabled:opacity-60"
+                >
+                  {sendModal.loading
+                    ? <Loader2 size={13} className="animate-spin" />
+                    : <Mail size={13} strokeWidth={2} />
+                  }
+                  {sendModal.loading ? "Sending…" : "Send Document"}
+                </button>
+                <button
+                  type="button"
+                  disabled={sendModal.loading}
+                  onClick={() => setSendModal(null)}
+                  className="rounded-full border border-black/[0.08] px-4 py-2 text-[0.8rem] font-semibold text-[#5c5e62] transition hover:bg-gray-100 disabled:opacity-40"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
-    </div>
+
+      {/* ── Toast ── */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-[0.85rem] font-semibold text-white shadow-lg">
+          <CheckCircle2 size={15} strokeWidth={2.5} />
+          {toast}
+        </div>
+      )}
+    </>
   );
 }

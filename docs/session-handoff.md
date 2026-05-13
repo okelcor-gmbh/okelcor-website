@@ -60,6 +60,81 @@ Development environment: Windows 11, VS Code, Node.js / npm
 
 ---
 
+## Completed in Latest Session — Phase 2C-5: Send Trade Documents by Email (2026-05-13)
+
+---
+
+### Phase 2C-5 — Send Trade Documents by Email
+
+**Goal:** Allow admins to email any trade document (generated or uploaded) directly from the order detail Trade Documents card.
+
+#### New: `app/api/admin/trade-documents/[id]/send-email/route.ts`
+POST proxy → `POST /api/v1/admin/trade-documents/{id}/send-email`
+- Reads `admin_token` cookie, Bearer-authenticates to backend
+- Forwards JSON body `{ recipient_email?, message? }` to backend unchanged
+- Returns raw Laravel response
+
+#### Updated: `components/admin/trade-documents-card.tsx`
+Full rewrite with send-email features:
+
+**New props:**
+- `customerEmail?: string` — prefills recipient field in the modal
+
+**New state:**
+- `sendModal: SendModal | null` — when set, the modal is open for that document
+- `toast: string | null` — auto-clears after 4 s via `useEffect`
+
+**New `SendModal` type:**
+```typescript
+type SendModal = {
+  doc: TradeDocument;
+  recipientEmail: string;
+  message: string;
+  loading: boolean;
+  error: string | null;
+};
+```
+
+**`SendBtn` inner component:** renders "Send" or "Send again" (based on `doc.sent_at`) with a `Mail` icon. Visible to `canManage` roles only. Opens the modal.
+
+**`handleSendEmail`:** POSTs to `/api/admin/trade-documents/{id}/send-email`. On success: updates `sent_at` on the matching document in local state, closes modal, shows toast. On failure: shows inline error inside modal.
+
+**Per-row UI changes:**
+- Generated docs: `<ActionBtn>` and `<SendBtn>` in a flex row per document
+- Shipment docs: `<SendBtn>` added to the action button group; `sent_at` shown in the date line
+
+**Send Email Modal (inline fixed overlay):**
+- Backdrop click closes modal (when not loading)
+- Shows document name + number/label
+- Recipient email input (pre-filled with `customerEmail`, editable)
+- Optional note textarea (1000 char max with live counter)
+- Inline error display
+- "Send Document" button disabled when recipient email is empty or loading
+- Cancel button disabled when loading
+
+**Toast:**
+- Fixed bottom-right, emerald green with `CheckCircle2` icon
+- Auto-dismisses after 4 seconds
+
+#### Updated: `components/admin/order-detail.tsx`
+- Passes `customerEmail={order.customer_email}` to `TradeDocumentsCard`
+
+**Backend requirements (2C-5):**
+- `POST /api/v1/admin/trade-documents/{id}/send-email`
+  - Auth: `admin_token` Bearer
+  - Permission: `trade_documents.manage`
+  - Body: `{ recipient_email?: string, message?: string }`
+  - Validates: `recipient_email` nullable|email, `message` nullable|string|max:1000
+  - Sends email with document attached (from `pdf_path` or `file_path`)
+  - Updates `sent_at = now()` on the `trade_documents` record
+  - Logs `OrderLog: action=document_sent`
+  - Returns: `{ data: { id, sent_at, recipient_email }, message: "Document sent successfully." }`
+  - Failures: 404 if file missing, 500 + log on mail failure
+
+**TypeScript: 0 errors**
+
+---
+
 ## Completed in Latest Session — Phase 2C-4: Commercial Invoice Frontend (2026-05-13)
 
 ---

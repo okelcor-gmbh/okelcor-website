@@ -694,6 +694,7 @@ export default function OrderDetail({
         orderId={order.id}
         initialDocuments={order.trade_documents ?? []}
         adminRole={adminRole}
+        customerEmail={order.customer_email}
       />
 
       {/* ── EU Entry Certificate (Gelangensbestätigung) ── */}
