@@ -97,9 +97,10 @@ type Props = {
   prefilledSize?: string;
   onPrefilledSizeConsumed?: () => void;
   initialFilters?: Record<string, string>;
+  source?: "shop" | "seo-landing";
 };
 
-export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, initialFilters }: Props) {
+export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, initialFilters, source = "shop" }: Props) {
   const { locale, t } = useLanguage();
   const { customer } = useCustomerAuth();
   const customerType: "b2b" | "b2c" | "guest" =
@@ -575,7 +576,8 @@ export default function ShopCatalogue({ prefilledSize, onPrefilledSizeConsumed, 
         </div>
 
         {/* ── Campaign banner + specials — below filter, above results ── */}
-        {campaignBrand && campaignPromoRaw && (
+        {/* Hidden on SEO landing pages so the page's primary filtered results are not pushed down. */}
+        {source !== "seo-landing" && campaignBrand && campaignPromoRaw && (
           <>
             <ShopCampaignBanner promo={campaignPromoRaw} onCtaClick={handleScrollToSpecials} />
             <SpecialsProductList

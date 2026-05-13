@@ -42,8 +42,8 @@ export default function CatalogueLanding({ config }: { config: CatalogueLandingC
         </div>
       </section>
 
-      {/* Interactive shop catalogue — pre-filtered on mount */}
-      <ShopPageClient initialFilters={filters} noNavbarPad />
+      {/* Interactive shop catalogue — pre-filtered on mount, campaign specials suppressed */}
+      <ShopPageClient initialFilters={filters} noNavbarPad source="seo-landing" />
 
       {/* Internal linking — explore related pages */}
       {relatedGroups && relatedGroups.length > 0 && (

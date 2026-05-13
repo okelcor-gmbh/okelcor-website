@@ -10,9 +10,11 @@ import { SHOP_REQUIRES_LOGIN } from "@/lib/flags";
 export default function ShopPageClient({
   initialFilters,
   noNavbarPad,
+  source = "shop",
 }: {
   initialFilters?: Record<string, string>;
   noNavbarPad?: boolean;
+  source?: "shop" | "seo-landing";
 }) {
   const { isAuthenticated, isLoading } = useCustomerAuth();
   const router = useRouter();
@@ -47,6 +49,7 @@ export default function ShopPageClient({
           prefilledSize={prefilledSize}
           onPrefilledSizeConsumed={() => setPrefilledSize("")}
           initialFilters={initialFilters}
+          source={source}
         />
       </div>
     </div>
