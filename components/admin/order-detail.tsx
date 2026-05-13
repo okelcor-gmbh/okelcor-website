@@ -693,6 +693,7 @@ export default function OrderDetail({
       <TradeDocumentsCard
         orderId={order.id}
         initialDocuments={order.trade_documents ?? []}
+        adminRole={adminRole}
       />
 
       {/* ── EU Entry Certificate (Gelangensbestätigung) ── */}

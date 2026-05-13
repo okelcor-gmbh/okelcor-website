@@ -13,6 +13,14 @@ const TYPE_LABEL: Record<string, string> = {
   other:              "Document",
 };
 
+// Short description shown below the document name to clarify purpose
+const TYPE_DESCRIPTION: Record<string, string> = {
+  proforma_invoice:   "Pre-shipment estimate",
+  commercial_invoice: "Export / trade document",
+  packing_list:       "Goods enumeration for customs",
+  delivery_note:      "Delivery confirmation",
+};
+
 // Document types that require EU certificate sign-off before download
 const GATED_TYPES = new Set(["commercial_invoice", "final_invoice"]);
 
@@ -121,6 +129,9 @@ export default function TradeDocumentsCard({
                     <p className={`text-[0.88rem] font-semibold ${locked ? "text-[var(--muted)]" : "text-[var(--foreground)]"}`}>
                       {TYPE_LABEL[doc.type] ?? doc.type}
                     </p>
+                    {TYPE_DESCRIPTION[doc.type] && (
+                      <p className="text-[0.68rem] text-[var(--muted)]">{TYPE_DESCRIPTION[doc.type]}</p>
+                    )}
                     {doc.number && (
                       <p className="font-mono text-[0.72rem] text-[var(--muted)]">#{doc.number}</p>
                     )}

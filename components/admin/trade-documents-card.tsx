@@ -6,6 +6,7 @@ import {
   Loader2, Upload, Trash2, X, Paperclip,
 } from "lucide-react";
 import type { TradeDocument } from "@/lib/admin-api";
+import { canDo } from "@/lib/admin-permissions";
 import { useAdminPermissions } from "@/hooks/use-admin-permissions";
 
 // ── Constants ──────────────────────────────────────────────────────────────────
@@ -26,7 +27,15 @@ const STATUS_BADGE: Record<string, string> = {
 };
 
 // Generated PDFs that always open inline in new tab
-const INLINE_GENERATED = new Set(["packing_list", "delivery_note"]);
+const INLINE_GENERATED = new Set(["commercial_invoice", "packing_list", "delivery_note"]);
+
+// Short description shown below each document type label for UX clarity
+const TYPE_DESCRIPTION: Record<string, string> = {
+  proforma_invoice:   "Pre-shipment estimate",
+  commercial_invoice: "Export / trade document",
+  packing_list:       "Goods enumeration for customs",
+  delivery_note:      "Delivery confirmation",
+};
 
 const SHIPMENT_LABELS = [
   "Bill of Lading",
@@ -82,18 +91,26 @@ const IDLE: GenerateState = { loading: false, error: null };
 export default function TradeDocumentsCard({
   orderId,
   initialDocuments,
+  adminRole,
 }: {
   orderId: number;
   initialDocuments: TradeDocument[];
+  /** Server-provided role — when present, skips the async cookie read in the hook. */
+  adminRole?: string;
 }) {
-  const { can } = useAdminPermissions();
-  const canManage = can("trade_documents.manage");
+  // Use the server-provided role prop for an immediate synchronous check.
+  // Fall back to the hook (async cookie read) only when the prop is absent.
+  const { can, role: cookieRole, loading, permissions } = useAdminPermissions();
+  const canManage = adminRole != null
+    ? canDo(adminRole, "trade_documents.manage")
+    : can("trade_documents.manage");
 
   // Documents state
   const [documents,   setDocuments]  = useState<TradeDocument[]>(initialDocuments);
 
   // Generate states
   const [proforma,    setProforma]   = useState<GenerateState>(IDLE);
+  const [commercial,  setCommercial] = useState<GenerateState>(IDLE);
   const [packing,     setPacking]    = useState<GenerateState>(IDLE);
   const [delivery,    setDelivery]   = useState<GenerateState>(IDLE);
 
@@ -115,9 +132,10 @@ export default function TradeDocumentsCard({
   const [deleteError,   setDeleteError]   = useState<string | null>(null);
 
   // Derived
-  const hasProforma     = documents.some((d) => d.type === "proforma_invoice");
-  const hasPacking      = documents.some((d) => d.type === "packing_list");
-  const hasDeliveryNote = documents.some((d) => d.type === "delivery_note");
+  const hasProforma        = documents.some((d) => d.type === "proforma_invoice");
+  const hasCommercialInv   = documents.some((d) => d.type === "commercial_invoice");
+  const hasPacking         = documents.some((d) => d.type === "packing_list");
+  const hasDeliveryNote    = documents.some((d) => d.type === "delivery_note");
   const generatedDocs   = documents.filter((d) => d.type !== "shipment_document");
   const shipmentDocs    = documents.filter((d) => d.type === "shipment_document");
 
@@ -288,6 +306,15 @@ export default function TradeDocumentsCard({
                 {proforma.loading ? "Generating…" : "Generate Proforma"}
               </button>
             )}
+            {!hasCommercialInv && (
+              <button type="button" disabled={commercial.loading}
+                onClick={() => generateDoc(`/api/admin/orders/${orderId}/trade-documents/commercial-invoice`, setCommercial, "commercial invoice")}
+                className="inline-flex items-center gap-1.5 rounded-full border border-purple-200 bg-purple-50 px-3 py-1.5 text-[0.75rem] font-semibold text-purple-700 transition hover:bg-purple-100 disabled:opacity-60"
+              >
+                {commercial.loading ? <Loader2 size={13} strokeWidth={2} className="animate-spin" /> : <FilePlus2 size={13} strokeWidth={2} />}
+                {commercial.loading ? "Generating…" : "Generate Commercial Invoice"}
+              </button>
+            )}
             {!hasPacking && (
               <button type="button" disabled={packing.loading}
                 onClick={() => generateDoc(`/api/admin/orders/${orderId}/trade-documents/packing-list`, setPacking, "packing list")}
@@ -321,11 +348,29 @@ export default function TradeDocumentsCard({
         )}
       </div>
 
+      {/* ── DEBUG PANEL — remove before production ── */}
+      {process.env.NODE_ENV !== "production" && (
+        <details className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-[0.72rem]">
+          <summary className="cursor-pointer font-bold text-amber-700">
+            [DEBUG] Trade Documents Permissions
+          </summary>
+          <div className="mt-2 space-y-0.5 font-mono text-amber-900">
+            <p>adminRole prop: <strong>{adminRole ?? "(not passed)"}</strong></p>
+            <p>cookieRole (hook): <strong>{loading ? "loading…" : (cookieRole || "(empty)")}</strong></p>
+            <p>permissions cookie: <strong>{permissions ? JSON.stringify(permissions) : "(none)"}</strong></p>
+            <p>canManage: <strong>{String(canManage)}</strong></p>
+            <p>hasCommercialInv: <strong>{String(hasCommercialInv)}</strong></p>
+            <p>existing types: <strong>[{documents.map((d) => d.type).join(", ") || "none"}]</strong></p>
+          </div>
+        </details>
+      )}
+
       {/* ── Generate errors ── */}
-      {proforma.error && <p className="mb-3 text-[0.8rem] text-red-600">{proforma.error}</p>}
-      {packing.error  && <p className="mb-3 text-[0.8rem] text-red-600">{packing.error}</p>}
-      {delivery.error && <p className="mb-3 text-[0.8rem] text-red-600">{delivery.error}</p>}
-      {deleteError    && <p className="mb-3 text-[0.8rem] text-red-600">{deleteError}</p>}
+      {proforma.error   && <p className="mb-3 text-[0.8rem] text-red-600">{proforma.error}</p>}
+      {commercial.error && <p className="mb-3 text-[0.8rem] text-red-600">{commercial.error}</p>}
+      {packing.error    && <p className="mb-3 text-[0.8rem] text-red-600">{packing.error}</p>}
+      {delivery.error   && <p className="mb-3 text-[0.8rem] text-red-600">{delivery.error}</p>}
+      {deleteError      && <p className="mb-3 text-[0.8rem] text-red-600">{deleteError}</p>}
 
       {/* ── Generated documents ── */}
       {generatedDocs.length === 0 && shipmentDocs.length === 0 ? (
@@ -349,6 +394,9 @@ export default function TradeDocumentsCard({
                         {doc.status}
                       </span>
                     </div>
+                    {TYPE_DESCRIPTION[doc.type] && (
+                      <p className="mt-0.5 text-[0.7rem] text-[#9ca3af]">{TYPE_DESCRIPTION[doc.type]}</p>
+                    )}
                     <p className="mt-0.5 text-[0.75rem] text-[#5c5e62]">
                       Issued {shortDate(doc.issued_at)}
                       {doc.sent_at && ` · Sent ${shortDate(doc.sent_at)}`}
