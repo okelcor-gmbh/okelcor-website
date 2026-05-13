@@ -30,6 +30,7 @@ import {
   MessageSquare,
   ShieldAlert,
   FileCheck,
+  Truck,
 } from "lucide-react";
 import { logoutAdmin } from "@/app/admin/actions";
 import { canAccess, PATH_SECTION, ROLE_LABELS, ROLE_BADGE_COLORS } from "@/lib/admin-permissions";
@@ -46,6 +47,7 @@ const NAV = [
   { label: "Orders",         href: "/admin/orders",      icon: ShoppingCart,    section: "orders" },
   { label: "Quote Requests", href: "/admin/quotes",          icon: ClipboardList,   section: "quotes" },
   { label: "EU Declarations", href: "/admin/eu-declarations", icon: FileCheck,      section: "eu_declarations" },
+  { label: "Logistics",       href: "/admin/logistics",    icon: Truck,        section: "logistics" },
   { label: "Hero Slides",    href: "/admin/hero-slides",  icon: Layers,      section: "hero_slides" },
   { label: "Promotions",     href: "/admin/promotions",   icon: Megaphone,   section: "promotions" },
   { label: "FET Engines",    href: "/admin/fet",          icon: Zap,         section: "fet" },

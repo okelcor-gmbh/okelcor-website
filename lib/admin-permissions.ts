@@ -17,12 +17,12 @@ export type AdminRole = (typeof ALL_ROLES)[number];
 // Mirrors backend ROLE_ACCESS table.
 
 export const ROLE_ACCESS: Record<string, string[]> = {
-  super_admin:     ["dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "analytics", "chats", "security", "eu_declarations"],
-  admin:           ["dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "analytics", "chats", "security", "eu_declarations"],
-  order_manager:   ["dashboard", "orders", "quotes", "supplier", "eu_declarations"],
-  sales_manager:   ["dashboard", "orders", "quotes", "customers", "analytics"],
+  super_admin:     ["dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "analytics", "chats", "security", "eu_declarations", "logistics"],
+  admin:           ["dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "analytics", "chats", "security", "eu_declarations", "logistics"],
+  order_manager:   ["dashboard", "orders", "quotes", "supplier", "eu_declarations", "logistics"],
+  sales_manager:   ["dashboard", "orders", "quotes", "customers", "analytics", "logistics"],
   content_manager: ["dashboard", "articles", "hero_slides", "promotions", "fet", "brands"],
-  support:         ["dashboard", "orders", "quotes", "customers", "chats"],
+  support:         ["dashboard", "orders", "quotes", "customers", "chats", "logistics"],
   editor:          ["dashboard", "articles", "hero_slides", "promotions", "fet"],
   viewer:          ["dashboard", "analytics"],
 };
@@ -51,6 +51,7 @@ export const PATH_SECTION: Record<string, string> = {
   "/admin/analytics":       "analytics",
   "/admin/chats":           "chats",
   "/admin/eu-declarations": "eu_declarations",
+  "/admin/logistics":       "logistics",
 };
 
 // ── Permission map ─────────────────────────────────────────────────────────────
