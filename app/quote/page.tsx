@@ -7,20 +7,20 @@ import QuoteSummary from "@/components/quote/quote-summary";
 import QuoteTrust from "@/components/quote/quote-trust";
 
 export const metadata: Metadata = {
-  title: "Request a Tyre Supply Quote",
+  title: "Get Instant Tyre Supply Quotation With Competitive Prices",
   description:
-    "Request a tailored tyre supply quotation from Okelcor. PCR, TBR, used tyres, and mixed requests. Global delivery. Response within 1 business day.",
+    "Get a competitive bulk tyre supply quotation from Okelcor. We supply PCR, TBR, and used tyres at wholesale prices with international logistics to over 30 countries.",
   openGraph: {
-    title: "Request a Tyre Supply Quote | Okelcor Tires",
+    title: "Get Instant Tyre Supply Quotation With Competitive Prices | Okelcor",
     description:
-      "Get a tailored quotation for PCR, TBR, or used tyres. Global delivery. Our team responds within 1 business day.",
+      "Competitive bulk tyre supply pricing for PCR, TBR, and used tyres. Okelcor delivers globally with trusted international logistics. Response within 1 business day.",
     url: "https://www.okelcor.com/quote",
     type: "website",
   },
   twitter: {
-    title: "Request a Tyre Supply Quote – Okelcor",
+    title: "Get Instant Tyre Supply Quotation — Okelcor",
     description:
-      "Tailored PCR, TBR, and used tyre quotations. Global delivery. Response within 1 business day.",
+      "Bulk PCR, TBR, and used tyre supplies at competitive prices. International logistics. Response within 1 business day.",
   },
 };
 

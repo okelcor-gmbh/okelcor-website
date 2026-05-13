@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Mail, Phone, MapPin, Clock, CheckCircle2, ShieldCheck, Globe } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
 import { COMPANY_EMAIL, COMPANY_PHONE } from "@/lib/constants";
@@ -79,6 +80,17 @@ export default function QuoteSummary() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Internal SEO link */}
+      <div className="rounded-[22px] bg-[#efefef] px-7 py-4">
+        <Link
+          href="/about"
+          className="flex items-center gap-2 text-[0.85rem] font-semibold text-[var(--primary)] hover:underline"
+        >
+          <Globe size={14} strokeWidth={1.8} />
+          International logistics support
+        </Link>
       </div>
 
     </div>

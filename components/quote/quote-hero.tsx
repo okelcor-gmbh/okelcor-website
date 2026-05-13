@@ -11,6 +11,7 @@ export default function QuoteHero() {
       title={t.quote.hero.title}
       subtitle={t.quote.hero.subtitle}
       image="/images/tyre-primary.png"
+      imageAlt="Get a quote for our extensive tire supply. We offer bulk supplies to meet every commercial need."
     />
   );
 }

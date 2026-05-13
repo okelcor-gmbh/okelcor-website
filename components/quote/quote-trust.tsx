@@ -76,6 +76,28 @@ export default function QuoteTrust() {
               <FaqItem key={faq.q} q={faq.q} a={faq.a} />
             ))}
           </div>
+
+          {/* Outbound freight partner links */}
+          <div className="mt-6 border-t border-black/[0.07] pt-5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.8rem] text-[var(--muted)]">
+            <span>Shipped via trusted freight partners:</span>
+            <a
+              href="https://www.hapag-lloyd.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-[var(--foreground)] hover:text-[var(--primary)] hover:underline"
+            >
+              Hapag-Lloyd
+            </a>
+            <span>·</span>
+            <a
+              href="https://www.dbschenker.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-[var(--foreground)] hover:text-[var(--primary)] hover:underline"
+            >
+              DB Schenker
+            </a>
+          </div>
         </Reveal>
 
       </div>

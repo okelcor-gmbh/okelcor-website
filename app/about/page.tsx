@@ -5,20 +5,20 @@ import AboutPageUI from "@/components/about/about-page-ui";
 import CTASection from "@/components/cta-section";
 
 export const metadata: Metadata = {
-  title: "About Us – Munich-Based Global Tyre Supplier",
+  title: "Get your tires from one of the leading European wholesale tire distributors",
   description:
-    "Okelcor is a Munich-based global tyre supplier delivering PCR, TBR, and used tyres to wholesalers and distributors worldwide.",
+    "Okelcor is one of Europe's leading wholesale tire distributors for PCR, TBR, and top-quality used tires at competitive rates — supplying wholesalers in over 30 countries.",
   openGraph: {
-    title: "About Us – Munich-Based Global Tyre Supplier | Okelcor Tires",
+    title: "Leading European Wholesale Tire Distributors | Okelcor",
     description:
-      "Headquartered in Munich, Okelcor supplies premium PCR, TBR, and used tyres to distributors in over 30 countries.",
+      "Okelcor is one of Europe's leading wholesale tire distributors — supplying PCR, TBR, and used tires to wholesalers and distributors in over 30 countries.",
     url: "https://www.okelcor.com/about",
     type: "website",
   },
   twitter: {
-    title: "About Okelcor – Global Tyre Supply Partner",
+    title: "European Wholesale Tire Distributor — Okelcor",
     description:
-      "Headquartered in Munich. Premium PCR, TBR, and used tyres for distributors in over 30 countries.",
+      "One of Europe's leading wholesale tire distributors for PCR, TBR, and top-quality used tires at competitive rates.",
   },
 };
 

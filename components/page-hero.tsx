@@ -6,6 +6,7 @@ type PageHeroProps = {
   title: string;
   subtitle: string;
   image: string;
+  imageAlt?: string;
 };
 
 export default function PageHero({
@@ -13,13 +14,14 @@ export default function PageHero({
   title,
   subtitle,
   image,
+  imageAlt = "",
 }: PageHeroProps) {
   return (
     <section className="w-full pt-[76px] lg:pt-20">
       <div className="relative min-h-[62vh] overflow-hidden">
         <Image
           src={image}
-          alt=""
+          alt={imageAlt}
           fill
           priority
           className="object-cover"

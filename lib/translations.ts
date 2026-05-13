@@ -353,7 +353,7 @@ const en: Translations = {
   about: {
     hero: {
       eyebrow: "About Okelcor",
-      title: "Your trusted global tyre supply partner.",
+      title: "European Wholesale Tire Distributor",
       subtitle: "Headquartered in Munich. Supplying premium PCR, TBR, LT, and used tyres to wholesalers and distributors in over 30 countries.",
     },
     story: {
@@ -388,7 +388,7 @@ const en: Translations = {
   quote: {
     hero: {
       eyebrow: "Quote Request",
-      title: "Request a Tyre Supply Quote",
+      title: "Get Instant Tyre Supply Quotation",
       subtitle: "Whether you are stocking a retail tire shop or outfitting a commercial fleet, Okelcor delivers. Share your inventory requirements below to receive a custom quote and lock in your exclusive wholesale rates.",
     },
     form: {

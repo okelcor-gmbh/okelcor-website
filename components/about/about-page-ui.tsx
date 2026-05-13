@@ -15,6 +15,7 @@ export default function AboutPageUI() {
         title={t.about.hero.title}
         subtitle={t.about.hero.subtitle}
         image="/images/tyre-primary.png"
+        imageAlt="Get your tires from one of the leading European wholesale tire distributors"
       />
       <CompanyStory />
       <Services />
