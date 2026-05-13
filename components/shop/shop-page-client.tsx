@@ -9,8 +9,10 @@ import { SHOP_REQUIRES_LOGIN } from "@/lib/flags";
 
 export default function ShopPageClient({
   initialFilters,
+  noNavbarPad,
 }: {
   initialFilters?: Record<string, string>;
+  noNavbarPad?: boolean;
 }) {
   const { isAuthenticated, isLoading } = useCustomerAuth();
   const router = useRouter();
@@ -38,7 +40,7 @@ export default function ShopPageClient({
   }
 
   return (
-    <div style={{ paddingTop: "calc(var(--bar-h, 0px) + 76px)" }}>
+    <div style={noNavbarPad ? undefined : { paddingTop: "calc(var(--bar-h, 0px) + 76px)" }}>
       <CarFinder onSizeSelect={setPrefilledSize} />
       <div id="shop-catalogue">
         <ShopCatalogue
