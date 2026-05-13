@@ -1,9 +1,8 @@
 import type { MetadataRoute } from "next";
 import { ALL_PRODUCTS } from "@/components/shop/data";
 import { ALL_ARTICLES } from "@/components/news/data";
-import { SITE_URL } from "@/lib/constants";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || SITE_URL;
+const BASE_URL = "https://www.okelcor.com";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -22,17 +21,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "daily",
       priority: 0.9,
     },
+    // SEO-canonical routes (Phase 2 — old /quote and /about now 301 here)
     {
-      url: `${BASE_URL}/quote`,
+      url: `${BASE_URL}/tyre-supply-quotation`,
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.9,
     },
     {
-      url: `${BASE_URL}/about`,
+      url: `${BASE_URL}/wholesale-tire-distributors-europe`,
       lastModified: now,
       changeFrequency: "monthly",
-      priority: 0.7,
+      priority: 0.8,
     },
     {
       url: `${BASE_URL}/news`,

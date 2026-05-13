@@ -107,10 +107,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: article.title,
     description: article.summary,
+    alternates: {
+      canonical: `https://www.okelcor.com/news/${article.slug}`,
+    },
     openGraph: {
       title: `${article.title} – Okelcor`,
       description: article.summary,
-      url: `/news/${article.slug}`,
+      url: `https://www.okelcor.com/news/${article.slug}`,
       type: "article",
       images: [{ url: article.image, width: 1200, height: 630, alt: article.title }],
     },

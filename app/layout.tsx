@@ -54,6 +54,9 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+    ? { verification: { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION } }
+    : {}),
 };
 
 export default async function RootLayout({
@@ -66,6 +69,55 @@ export default async function RootLayout({
   return (
     <html lang="en" className="w-full">
       <body className="m-0 w-full p-0">
+        {/* ── Site-wide structured data ── */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify([
+              {
+                "@context": "https://schema.org",
+                "@type": "Organization",
+                name: "Okelcor",
+                legalName: "Okelcor GmbH",
+                url: "https://www.okelcor.com",
+                logo: "https://www.okelcor.com/logo/okelcor-logo.png",
+                description:
+                  "Munich-based global tyre supplier delivering PCR, TBR, and used tyres to wholesalers and distributors in over 30 countries.",
+                address: {
+                  "@type": "PostalAddress",
+                  streetAddress: "Landsberger Str. 155",
+                  addressLocality: "Munich",
+                  postalCode: "80687",
+                  addressCountry: "DE",
+                },
+                contactPoint: {
+                  "@type": "ContactPoint",
+                  telephone: "+49-89-545-583-60",
+                  contactType: "sales",
+                  email: "support@okelcor.com",
+                  areaServed: "Worldwide",
+                },
+                vatID: "DE343138173",
+                sameAs: ["https://okelcor.com"],
+              },
+              {
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                name: "Okelcor Tires",
+                url: "https://www.okelcor.com",
+                potentialAction: {
+                  "@type": "SearchAction",
+                  target: {
+                    "@type": "EntryPoint",
+                    urlTemplate:
+                      "https://www.okelcor.com/shop?q={search_term_string}",
+                  },
+                  "query-input": "required name=search_term_string",
+                },
+              },
+            ]),
+          }}
+        />
         <PostHogProvider>
         <CustomerAuthProvider>
           <SiteSettingsProvider settings={settings}>

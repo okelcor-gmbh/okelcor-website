@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   title: "Buy Tyres Online – PCR, TBR & Used Tyres",
   description:
     "Browse premium PCR, TBR, OTR, and used tyres from leading global brands. Filter by brand, season, and tyre type.",
+  alternates: {
+    canonical: "https://www.okelcor.com/shop",
+  },
   openGraph: {
     title: "Buy Tyres Online – PCR, TBR & Used Tyres | Okelcor Tires",
     description:
