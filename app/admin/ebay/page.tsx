@@ -22,6 +22,8 @@ import {
   Upload,
   Settings,
   ChevronDown,
+  Copy,
+  ClipboardCheck,
 } from "lucide-react";
 import { useAdminPermissions } from "@/hooks/use-admin-permissions";
 import EbayLogsPanel from "@/components/admin/ebay-logs-panel";
@@ -102,6 +104,25 @@ type ReadinessData = {
 type TestResult = { success: boolean; message: string };
 
 type Notification = { type: "success" | "error"; message: string };
+
+type EbayPolicy  = { id: string; name: string };
+type EbayPolicies = { payment: EbayPolicy[]; fulfillment: EbayPolicy[]; return: EbayPolicy[] };
+
+// Normalises various backend key-naming conventions into a single shape.
+function normalizePolicies(raw: Record<string, unknown>): EbayPolicies {
+  const pick = (...keys: string[]): EbayPolicy[] => {
+    for (const k of keys) {
+      const v = raw[k];
+      if (Array.isArray(v) && v.length > 0) return v as EbayPolicy[];
+    }
+    return [];
+  };
+  return {
+    payment:     pick("payment", "payment_policies", "paymentPolicies"),
+    fulfillment: pick("fulfillment", "fulfillment_policies", "fulfillmentPolicies", "shipping", "shipping_policies", "shippingPolicies"),
+    return:      pick("return", "return_policies", "returnPolicies"),
+  };
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -187,9 +208,44 @@ function ReadinessPanel({
 }) {
   const [open, setOpen] = useState(false);
 
+  const [policies, setPolicies]               = useState<EbayPolicies | null>(null);
+  const [policiesLoading, setPoliciesLoading] = useState(false);
+  const [policiesError, setPoliciesError]     = useState<string | null>(null);
+  const [copiedId, setCopiedId]               = useState<string | null>(null);
+
   useEffect(() => {
     if (readiness?.checks.some((c) => c.status === "fail")) setOpen(true);
   }, [readiness]);
+
+  const handleFetchPolicies = async () => {
+    setPoliciesLoading(true);
+    setPoliciesError(null);
+    try {
+      const res  = await fetch("/api/admin/ebay/policies");
+      const json = await res.json().catch(() => ({} as Record<string, unknown>));
+      if (!res.ok) {
+        setPoliciesError(
+          typeof json.error === "string"   ? json.error
+          : typeof json.message === "string" ? json.message
+          : "Failed to fetch business policies."
+        );
+      } else {
+        const raw = (json as { data?: Record<string, unknown> }).data
+          ?? (json as Record<string, unknown>);
+        setPolicies(normalizePolicies(raw));
+      }
+    } catch {
+      setPoliciesError("Network error — could not fetch policies.");
+    } finally {
+      setPoliciesLoading(false);
+    }
+  };
+
+  const copyId = (id: string) => {
+    navigator.clipboard.writeText(id).catch(() => {});
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   const passCount = readiness?.checks.filter((c) => c.status === "pass").length    ?? 0;
   const warnCount = readiness?.checks.filter((c) => c.status === "warning").length ?? 0;
@@ -302,9 +358,103 @@ function ReadinessPanel({
                 </div>
               )}
 
-              {/* Help text */}
-              <p className="mb-4 text-[0.75rem] text-[#5c5e62]">
-                Business policy IDs must come from the connected eBay seller account. Set them in your server environment variables.
+              {/* ── Seller Business Policies ─────────────────────────────── */}
+              <div className="mb-4 border-t border-black/[0.06] pt-4">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <p className="text-[0.8rem] font-bold text-[#1a1a1a]">Seller Business Policies</p>
+                  {canManage && (
+                    <button
+                      type="button"
+                      onClick={() => void handleFetchPolicies()}
+                      disabled={policiesLoading}
+                      className="flex shrink-0 items-center gap-1.5 rounded-xl border border-black/[0.09] bg-white px-3 py-1.5 text-[0.78rem] font-semibold text-[#1a1a1a] transition hover:bg-[#f0f2f5] disabled:opacity-50"
+                    >
+                      {policiesLoading
+                        ? <Loader2  size={12} className="animate-spin" />
+                        : <RefreshCw size={12} strokeWidth={2} />}
+                      {policies ? "Refresh" : "Fetch Business Policies"}
+                    </button>
+                  )}
+                </div>
+
+                {policiesError && (
+                  <p className="mb-3 flex items-center gap-1.5 text-[0.78rem] font-semibold text-red-600">
+                    <AlertCircle size={12} strokeWidth={2} className="shrink-0" />
+                    {policiesError}
+                  </p>
+                )}
+
+                {policies && (() => {
+                  const groups: { label: string; envKey: string; items: EbayPolicy[] }[] = [
+                    { label: "Payment Policies",             envKey: "EBAY_PAYMENT_POLICY_ID",     items: policies.payment },
+                    { label: "Fulfillment / Shipping Policies", envKey: "EBAY_FULFILLMENT_POLICY_ID", items: policies.fulfillment },
+                    { label: "Return Policies",              envKey: "EBAY_RETURN_POLICY_ID",      items: policies.return },
+                  ];
+                  const totalPolicies = groups.reduce((n, g) => n + g.items.length, 0);
+                  if (totalPolicies === 0) {
+                    return (
+                      <p className="text-[0.78rem] text-[#5c5e62]">
+                        No policies found. Create business policies in{" "}
+                        <a href="https://www.ebay.de/sh/ovw" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
+                          eBay Seller Hub
+                        </a>{" "}
+                        first.
+                      </p>
+                    );
+                  }
+                  return (
+                    <div className="space-y-4">
+                      {groups.map((group) => (
+                        <div key={group.envKey}>
+                          <p className="mb-1.5 text-[0.72rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">
+                            {group.label}
+                          </p>
+                          {group.items.length === 0 ? (
+                            <p className="text-[0.75rem] text-[#aaa]">No {group.label.toLowerCase()} found.</p>
+                          ) : (
+                            <div className="space-y-1.5">
+                              {group.items.map((pol) => (
+                                <div
+                                  key={pol.id}
+                                  className="flex items-center justify-between gap-3 rounded-xl border border-black/[0.07] bg-[#fafafa] px-3 py-2"
+                                >
+                                  <div className="min-w-0">
+                                    <p className="truncate text-[0.8rem] font-semibold text-[#1a1a1a]">{pol.name}</p>
+                                    <p className="mt-0.5 font-mono text-[0.69rem] text-[#5c5e62]">{pol.id}</p>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => copyId(pol.id)}
+                                    title="Copy policy ID"
+                                    className="flex shrink-0 items-center gap-1 rounded-lg border border-black/[0.09] bg-white px-2.5 py-1.5 text-[0.72rem] font-semibold text-[#5c5e62] transition hover:border-green-300 hover:text-green-700"
+                                  >
+                                    {copiedId === pol.id
+                                      ? <><ClipboardCheck size={11} strokeWidth={2} className="text-green-600" /> Copied</>
+                                      : <><Copy size={11} strokeWidth={2} /> Copy ID</>}
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
+
+                {!policies && !policiesLoading && !policiesError && (
+                  <p className="text-[0.75rem] text-[#aaa]">
+                    Click &ldquo;Fetch Business Policies&rdquo; to retrieve available policies from your connected eBay account.
+                  </p>
+                )}
+              </div>
+
+              {/* Help text + env var guide */}
+              <p className="mb-4 rounded-xl bg-[#f5f7f5] px-3 py-2.5 text-[0.74rem] leading-5 text-[#5c5e62]">
+                Copy one policy ID from each group into your backend <code className="font-mono text-[0.7rem]">.env</code>:{" "}
+                <code className="font-mono text-[0.7rem] text-[#1a1a1a]">EBAY_PAYMENT_POLICY_ID</code>,{" "}
+                <code className="font-mono text-[0.7rem] text-[#1a1a1a]">EBAY_FULFILLMENT_POLICY_ID</code>,{" "}
+                <code className="font-mono text-[0.7rem] text-[#1a1a1a]">EBAY_RETURN_POLICY_ID</code>.
               </p>
 
               {/* Test connection */}
