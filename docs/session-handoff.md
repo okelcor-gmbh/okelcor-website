@@ -82,6 +82,70 @@ If the status endpoint is not yet deployed or returns an error, `connStatus` sta
 
 ---
 
+## Completed in Latest Session — eBay Phase EB-3: Price/Title Update Sync & Listing Validation (2026-05-14)
+
+---
+
+### EB-3 — Per-product Update Listing, Bulk Update, Stale Indicator, Confirmation Modals
+
+**Goal:** Ensure eBay listings stay aligned with Okelcor product data after initial publish.
+
+**TypeScript: 0 errors | Build: clean**
+
+#### New: `app/api/admin/products/[id]/ebay/update/route.ts`
+PATCH proxy → `PATCH /admin/products/{id}/ebay/update`. Passes Bearer token. Returns updated eBay fields on success; surfaces backend validation errors (missing image, invalid price, etc.) directly to the frontend.
+
+#### Updated: `lib/admin-api.ts`
+Added `updated_at?: string | null` to `AdminProduct` type. Used by the "Needs update" stale indicator.
+
+#### Updated: `app/admin/ebay/page.tsx`
+Full rewrite for EB-3 on top of EB-2. Key additions:
+
+**`isStale(product)` helper (module-level):**
+Returns `true` when `product.updated_at > product.ebay_last_synced_at`. Safely returns `false` if either field is missing — indicator is entirely opt-in from the backend.
+
+**Per-product "Update eBay Listing" action:**
+- Visible for listed products when `canManage`
+- Shows `Upload` icon button in the Action column (amber-tinted when stale, neutral otherwise)
+- Clicking opens `ConfirmUpdateModal`: "Push latest price, title, description, and stock for [product] to eBay?"
+- On confirm, calls `PATCH /api/admin/products/{id}/ebay/update`
+- On success: optimistically updates `ebay_status → active`, `ebay_last_synced_at → now`, clears `ebay_sync_error`, shows success notification
+- On failure: surfaces backend error message directly in action error banner (e.g. "Product needs at least one public image before listing on eBay.")
+- Tracked by separate `updateLoading: Set<number>` state
+
+**Bulk "Update Selected Listings" action:**
+- Separate `selectedListed: Set<number>` state (distinct from `selected` for bulk listing)
+- Listed product rows show blue checkboxes (vs orange for unlisted)
+- Header checkbox context-aware: selects all listed on "eBay Live" tab, all unlisted otherwise
+- Blue bulk update toolbar appears when `selectedListed.size > 0`
+- Clicking "Update Selected Listings" → `ConfirmBulkUpdateModal` (shows count + disclaimer that individual failures don't abort the batch)
+- Sequential PATCH calls with blue progress bar
+- `bulkUpdateResult` banner on completion (blue for all-success, amber for partial failures)
+
+**"Needs update" indicator:**
+- Shown in eBay Status column as amber `Clock` badge: "Needs update"
+- Conditionally rendered only when `isStale(product)` returns `true`
+- Update button for that row is also amber-tinted as a visual cue
+- Silently absent if backend does not return `updated_at`
+
+**Action column for listed products now has three buttons:**
+1. Remove (red, existing)
+2. Update (blue/amber-on-stale, new EB-3) — opens confirmation modal
+3. Refresh Status (sky, existing EB-2)
+
+All three disabled (with `busy` flag) when any one operation is in flight for that product.
+
+---
+
+**Backend endpoints required for EB-3 (not yet implemented):**
+- `PATCH /api/v1/admin/products/{id}/ebay/update` → calls Trading API `ReviseFixedPriceItem`; updates title, price, quantity; sets `ebay_last_synced_at`; clears `ebay_sync_error` on success; returns `{ ebay_status, ebay_last_synced_at, ebay_sync_error }`
+- Validation before update: SKU present, title ≤ 80 chars, price > 0, stock > 0, at least one public https image, eBay account connected, business policies configured
+- Safe error messages on each validation failure (surfaced directly to frontend)
+- Sync-all endpoint should also call updateListing() per product, not fail whole batch on single error
+- Products API should return `updated_at` to enable the stale indicator
+
+---
+
 ## Completed in Latest Session — eBay Phase EB-2: Listing Status Tracking & Sync Logs (2026-05-14)
 
 ---

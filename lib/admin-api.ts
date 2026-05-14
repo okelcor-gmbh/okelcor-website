@@ -88,6 +88,7 @@ export type AdminProduct = {
   ebay_last_synced_at?: string | null;
   ebay_sync_error?: string | null;
   created_at?: string;
+  updated_at?: string | null;
   deleted_at?: string | null;
   // Extended tyre specification fields (populated via CSV import)
   width?: number | null;
