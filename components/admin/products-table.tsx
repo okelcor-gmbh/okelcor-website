@@ -3,7 +3,7 @@
 import { useState, useTransition, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Search, Pencil, Trash2, ToggleLeft, ToggleRight, ChevronLeft, ChevronRight, X, ShoppingBag, PackageX, PackageCheck, AlertTriangle } from "lucide-react";
+import { Search, Pencil, Trash2, ToggleLeft, ToggleRight, ChevronLeft, ChevronRight, X, ShoppingBag, PackageX, PackageCheck, AlertTriangle, ExternalLink, AlertCircle } from "lucide-react";
 import { toggleProductActive, deleteProduct, listOnEbay, removeFromEbay, toggleProductStock, markAllOutOfStock, markAllInStock } from "@/app/admin/products/actions";
 import type { AdminProduct } from "@/lib/admin-api";
 import { getProductImageUrl } from "@/lib/utils";
@@ -60,6 +60,56 @@ function StockBadge({ inStock }: { inStock: boolean }) {
       {inStock ? <PackageCheck size={10} strokeWidth={2.5} /> : <PackageX size={10} strokeWidth={2.5} />}
       {inStock ? "In Stock" : "Out of Stock"}
     </span>
+  );
+}
+
+function EbayProductBadge({ product }: { product: AdminProduct }) {
+  if (!product.ebay_listed && !product.ebay_status) {
+    return <span className="text-[0.72rem] text-[#aaa]">—</span>;
+  }
+
+  const STATUS_STYLES: Record<string, string> = {
+    active:    "bg-green-100 text-green-700",
+    draft:     "bg-amber-100 text-amber-700",
+    error:     "bg-red-100 text-red-600",
+    ended:     "bg-gray-100 text-gray-500",
+    withdrawn: "bg-gray-100 text-gray-500",
+    unknown:   "bg-gray-100 text-gray-500",
+  };
+
+  const status = product.ebay_status ?? (product.ebay_listed ? "active" : null);
+  const label  = status ? status.charAt(0).toUpperCase() + status.slice(1) : "Live";
+  const style  = status ? (STATUS_STYLES[status] ?? "bg-gray-100 text-gray-500") : "bg-green-100 text-green-700";
+
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center gap-1">
+        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.68rem] font-bold ${style}`}>
+          <ShoppingBag size={9} strokeWidth={2.5} />
+          {label}
+        </span>
+        {product.ebay_item_id && (
+          <a
+            href={`https://www.ebay.de/itm/${product.ebay_item_id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={`eBay item ${product.ebay_item_id}`}
+            className="flex h-4 w-4 items-center justify-center rounded text-[#5c5e62] hover:text-green-600"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <ExternalLink size={10} strokeWidth={2} />
+          </a>
+        )}
+        {product.ebay_sync_error && (
+          <span
+            title={product.ebay_sync_error}
+            className="flex h-4 w-4 items-center justify-center text-red-500"
+          >
+            <AlertCircle size={10} strokeWidth={2} />
+          </span>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -534,14 +584,7 @@ export default function ProductsTable({
 
                       {/* eBay status */}
                       <td className="px-4 py-3">
-                        {product.ebay_listed ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-[0.68rem] font-bold text-green-700">
-                            <ShoppingBag size={10} strokeWidth={2.5} />
-                            eBay Live
-                          </span>
-                        ) : (
-                          <span className="text-[0.72rem] text-[#aaa]">—</span>
-                        )}
+                        <EbayProductBadge product={product} />
                       </td>
 
                       {/* Actions */}

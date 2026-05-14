@@ -109,6 +109,9 @@ const PERMISSION_ROLES: Record<string, string[]> = {
   // Trade documents
   "trade_documents.manage": ["super_admin", "admin", "order_manager"],
 
+  // eBay
+  "ebay.manage": ["super_admin", "admin"],
+
   // Users / audit
   "users.manage":          ["super_admin", "admin"],
   "audit.view":            ["super_admin"],

@@ -82,6 +82,78 @@ If the status endpoint is not yet deployed or returns an error, `connStatus` sta
 
 ---
 
+## Completed in Latest Session — eBay Phase EB-2: Listing Status Tracking & Sync Logs (2026-05-14)
+
+---
+
+### EB-2 — eBay Status Visibility, RBAC Gates, Refresh Action, and Logs Panel
+
+**Goal:** Make eBay operations visible and diagnosable before production testing.
+
+**TypeScript: 0 errors | Build: clean**
+
+#### Updated: `lib/admin-api.ts`
+Added three new fields to `AdminProduct` type:
+```typescript
+ebay_offer_id?: string | null;
+ebay_last_synced_at?: string | null;
+ebay_sync_error?: string | null;
+```
+
+#### Updated: `lib/admin-permissions.ts`
+Added `"ebay.manage": ["super_admin", "admin"]` to `PERMISSION_ROLES`. Used for fine-grained UI gates (action buttons, logs panel write controls).
+
+#### New: `app/api/admin/ebay/logs/route.ts`
+GET proxy → `GET /admin/ebay/logs`. Forwards all filter params: `product_id`, `sku`, `action`, `status`, `from`, `to`, `page`, `per_page`. Graceful: returns `{ data: [], meta: {} }` on error if backend not yet deployed.
+
+#### New: `app/api/admin/products/[id]/ebay/refresh-status/route.ts`
+POST proxy → `POST /admin/products/{id}/ebay/refresh-status`. Fetches latest eBay listing status from Trading API via backend, returns updated product eBay fields.
+
+#### New: `components/admin/ebay-logs-panel.tsx`
+Collapsible "eBay Listing Logs" panel, lazy-loaded on first open (`everLoaded` ref guards the fetch).
+
+**Filter bar:** Action dropdown (publish / publish_failed / remove / remove_failed / sync / sync_failed / refresh_status / refresh_status_failed), SKU text input, date From/To range, Clear + Refresh buttons.
+
+**Table columns:** Action badge | SKU / Product ID | eBay Item ID (linked to ebay.de/itm/…) | Status badge | Error (truncated, full text in `title`) | When (relative).
+
+**Pagination:** 20 per page, prev/next controls.
+
+**Read-only notice:** shown at top when `canManage = false`.
+
+**Graceful:** returns empty state without error if backend endpoint not yet deployed.
+
+#### Updated: `app/admin/ebay/page.tsx`
+Full rewrite for EB-2. Key additions on top of EB-1:
+
+- `useAdminPermissions()` hook → `canManage = can("ebay.manage")` gates all mutation buttons
+- Extended `EbayStatus` type: `"active" | "draft" | "error" | "ended" | "withdrawn" | "unknown" | null`
+- Extended `Product` type with: `ebay_status`, `ebay_offer_id`, `ebay_last_synced_at`, `ebay_sync_error`
+- `EbayStatusBadge` sub-component — color-coded pill (active=green, draft=amber, error=red, ended/withdrawn/unknown=gray)
+- `fmtSynced()` helper — shows relative time or ISO date for `ebay_last_synced_at`
+- New "Last Synced" column in the listing table
+- Inline `ebay_sync_error` display in table row (red text, full error in `title`)
+- Per-row "Refresh Status" button (RotateCcw icon) — only shown for listed products when `canManage`; calls `/api/admin/products/{id}/ebay/refresh-status` and optimistically updates the row
+- Separate `refreshLoading: Set<number>` state (independent from `actionLoading`)
+- All action buttons (`toggleEbay`, `handleSync`, bulk list) gated on `canManage` — disabled with tooltip when lacking permission
+- Table `min-w-[1020px]` (was 780px) to accommodate 9 columns
+- `<EbayLogsPanel>` rendered at page bottom
+
+#### Updated: `components/admin/products-table.tsx`
+Replaced the simple "eBay Live" badge in the eBay column with `EbayProductBadge` sub-component:
+- Shows status-colored pill: active=green, draft=amber, error=red, ended/withdrawn/unknown=gray
+- If `ebay_item_id` present: small `ExternalLink` icon linking to `https://www.ebay.de/itm/{id}`
+- If `ebay_sync_error` present: small `AlertCircle` icon (red) with full error text in `title`
+- Falls back to "—" if neither `ebay_listed` nor `ebay_status` is set
+
+---
+
+**Backend endpoints required for EB-2 (not yet implemented):**
+- `GET /api/v1/admin/ebay/logs` → paginated log entries with `action`, `status`, `ebay_item_id`, `sku`, `product_id`, `error`, `created_at`
+- `POST /api/v1/admin/products/{id}/ebay/refresh-status` → fetches live eBay item status and returns updated `{ ebay_status, ebay_item_id, ebay_last_synced_at, ebay_sync_error }`
+- Products API must include `ebay_offer_id`, `ebay_last_synced_at`, `ebay_sync_error` in product responses
+
+---
+
 ## Project Summary
 
 This project builds the **Okelco corporate website**.
