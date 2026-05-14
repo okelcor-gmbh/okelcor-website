@@ -20,6 +20,8 @@ import {
   AlertTriangle,
   RotateCcw,
   Upload,
+  Settings,
+  ChevronDown,
 } from "lucide-react";
 import { useAdminPermissions } from "@/hooks/use-admin-permissions";
 import EbayLogsPanel from "@/components/admin/ebay-logs-panel";
@@ -71,6 +73,33 @@ type EbayConnectionStatus = {
   last_refreshed_at?: string | null;
   missing_config?:    string[];
 };
+
+type ReadinessCheck = {
+  key:     string;
+  label:   string;
+  status:  "pass" | "warning" | "fail";
+  message?: string;
+};
+
+type ReadinessData = {
+  connected:       boolean;
+  environment?:    string;
+  marketplace_id?: string;
+  category_id?:    string;
+  policies?: {
+    payment_policy_id?:     string | null;
+    fulfillment_policy_id?: string | null;
+    return_policy_id?:      string | null;
+  };
+  seller_location?: {
+    postal_code?: string;
+    location?:    string;
+  };
+  checks:          ReadinessCheck[];
+  missing_config?: string[];
+};
+
+type TestResult = { success: boolean; message: string };
 
 type Notification = { type: "success" | "error"; message: string };
 
@@ -137,6 +166,178 @@ function EbayBadge({ itemId }: { itemId?: string | null }) {
         </a>
       )}
     </span>
+  );
+}
+
+const CHECK_ICON = {
+  pass:    <CheckCircle2  size={13} strokeWidth={2.5} className="shrink-0 text-green-500" />,
+  warning: <AlertTriangle size={13} strokeWidth={2.5} className="shrink-0 text-amber-500" />,
+  fail:    <XCircle       size={13} strokeWidth={2.5} className="shrink-0 text-red-500"   />,
+};
+
+function ReadinessPanel({
+  readiness, loading, testLoading, testResult, onTest, canManage,
+}: {
+  readiness:   ReadinessData | null;
+  loading:     boolean;
+  testLoading: boolean;
+  testResult:  TestResult | null;
+  onTest:      () => void;
+  canManage:   boolean;
+}) {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (readiness?.checks.some((c) => c.status === "fail")) setOpen(true);
+  }, [readiness]);
+
+  const passCount = readiness?.checks.filter((c) => c.status === "pass").length    ?? 0;
+  const warnCount = readiness?.checks.filter((c) => c.status === "warning").length ?? 0;
+  const failCount = readiness?.checks.filter((c) => c.status === "fail").length    ?? 0;
+  const allPass   = !loading && failCount === 0 && warnCount === 0 && passCount > 0;
+
+  return (
+    <div className="mb-6 overflow-hidden rounded-2xl bg-white shadow-sm">
+      {/* Header toggle */}
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center justify-between px-5 py-4 text-left transition hover:bg-[#fafafa]"
+      >
+        <div className="flex items-center gap-3">
+          <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${allPass ? "bg-green-100" : failCount > 0 ? "bg-red-100" : "bg-amber-50"}`}>
+            <Settings
+              size={17}
+              strokeWidth={1.8}
+              className={allPass ? "text-green-600" : failCount > 0 ? "text-red-500" : "text-amber-500"}
+            />
+          </div>
+          <div>
+            <p className="text-[0.83rem] font-bold text-[#1a1a1a]">Setup &amp; Readiness</p>
+            <div className="mt-0.5 flex items-center gap-2 text-[0.7rem] font-semibold">
+              {loading && <span className="text-[#aaa]">Checking…</span>}
+              {!loading && readiness === null && <span className="text-[#aaa]">Not deployed — skipped</span>}
+              {!loading && passCount > 0 && <span className="text-green-600">{passCount} pass</span>}
+              {!loading && warnCount > 0 && <span className="text-amber-600">{warnCount} warning{warnCount > 1 ? "s" : ""}</span>}
+              {!loading && failCount > 0 && <span className="text-red-600">{failCount} fail{failCount > 1 ? "s" : ""}</span>}
+            </div>
+          </div>
+        </div>
+        <ChevronDown
+          size={16}
+          strokeWidth={2}
+          className={`shrink-0 text-[#5c5e62] transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {/* Body */}
+      {open && (
+        <div className="border-t border-black/[0.06] px-5 pb-5 pt-4">
+          {loading ? (
+            <div className="space-y-2.5">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="h-9 w-full animate-pulse rounded-xl bg-[#f0f2f5]" />
+              ))}
+            </div>
+          ) : !readiness ? (
+            <p className="text-[0.83rem] text-[#5c5e62]">
+              Readiness endpoint not yet deployed. Configure your eBay environment variables and deploy the backend readiness check to see results here.
+            </p>
+          ) : (
+            <>
+              {/* Config tags */}
+              {(readiness.environment || readiness.marketplace_id || readiness.category_id || readiness.seller_location?.location) && (
+                <div className="mb-4 flex flex-wrap gap-2">
+                  {readiness.environment && (
+                    <span className={`rounded-full px-2.5 py-1 text-[0.7rem] font-bold uppercase tracking-wide ${readiness.environment === "production" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>
+                      {readiness.environment}
+                    </span>
+                  )}
+                  {readiness.marketplace_id && (
+                    <span className="rounded-full bg-blue-100 px-2.5 py-1 text-[0.7rem] font-bold text-blue-700">
+                      {readiness.marketplace_id}
+                    </span>
+                  )}
+                  {readiness.category_id && (
+                    <span className="rounded-full bg-gray-100 px-2.5 py-1 text-[0.7rem] font-semibold text-gray-700">
+                      Category {readiness.category_id}
+                    </span>
+                  )}
+                  {readiness.seller_location?.location && (
+                    <span className="rounded-full bg-gray-100 px-2.5 py-1 text-[0.7rem] font-semibold text-gray-700">
+                      {readiness.seller_location.location}
+                      {readiness.seller_location.postal_code && ` · ${readiness.seller_location.postal_code}`}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {/* Checklist grid */}
+              {readiness.checks.length > 0 && (
+                <div className="mb-4 grid gap-2 sm:grid-cols-2">
+                  {readiness.checks.map((check) => (
+                    <div
+                      key={check.key}
+                      className={`flex items-start gap-2.5 rounded-xl px-3 py-2.5 ${
+                        check.status === "fail"    ? "bg-red-50"
+                        : check.status === "warning" ? "bg-amber-50"
+                        : "bg-[#f5f7f5]"
+                      }`}
+                    >
+                      {CHECK_ICON[check.status]}
+                      <div className="min-w-0">
+                        <p className={`text-[0.8rem] font-semibold leading-snug ${
+                          check.status === "fail"    ? "text-red-700"
+                          : check.status === "warning" ? "text-amber-700"
+                          : "text-[#1a1a1a]"
+                        }`}>
+                          {check.label}
+                        </p>
+                        {check.message && (
+                          <p className="mt-0.5 text-[0.72rem] text-[#5c5e62]">{check.message}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Help text */}
+              <p className="mb-4 text-[0.75rem] text-[#5c5e62]">
+                Business policy IDs must come from the connected eBay seller account. Set them in your server environment variables.
+              </p>
+
+              {/* Test connection */}
+              <div className="flex items-center justify-between gap-4">
+                <div className="min-w-0">
+                  {testResult && (
+                    <span className={`flex items-center gap-1.5 text-[0.8rem] font-semibold ${testResult.success ? "text-green-700" : "text-red-600"}`}>
+                      {testResult.success
+                        ? <CheckCircle2 size={13} strokeWidth={2.5} />
+                        : <XCircle      size={13} strokeWidth={2.5} />}
+                      {testResult.message}
+                    </span>
+                  )}
+                </div>
+                {canManage && (
+                  <button
+                    type="button"
+                    onClick={onTest}
+                    disabled={testLoading}
+                    className="flex shrink-0 items-center gap-1.5 rounded-xl border border-black/[0.09] bg-white px-3.5 py-2 text-[0.8rem] font-semibold text-[#1a1a1a] transition hover:bg-[#f0f2f5] disabled:opacity-50"
+                  >
+                    {testLoading
+                      ? <Loader2  size={13} className="animate-spin" />
+                      : <RefreshCw size={13} strokeWidth={2} />}
+                    Test Connection
+                  </button>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -297,31 +498,37 @@ export default function EbayPage() {
   const [bulkResult, setBulkResult]     = useState<BulkResult | null>(null);
 
   // ── Bulk update state ───────────────────────────────────────────────────────
-  const [selectedListed, setSelectedListed]           = useState<Set<number>>(new Set());
-  const [confirmBulkUpdate, setConfirmBulkUpdate]     = useState(false);
-  const [bulkUpdateProgress, setBulkUpdateProgress]   = useState<{ done: number; total: number } | null>(null);
-  const [bulkUpdateResult, setBulkUpdateResult]       = useState<BulkResult | null>(null);
+  const [selectedListed, setSelectedListed]         = useState<Set<number>>(new Set());
+  const [confirmBulkUpdate, setConfirmBulkUpdate]   = useState(false);
+  const [bulkUpdateProgress, setBulkUpdateProgress] = useState<{ done: number; total: number } | null>(null);
+  const [bulkUpdateResult, setBulkUpdateResult]     = useState<BulkResult | null>(null);
 
   // ── Per-product update state ────────────────────────────────────────────────
-  const [confirmUpdate, setConfirmUpdate]   = useState<Product | null>(null);
-  const [updateLoading, setUpdateLoading]   = useState<Set<number>>(new Set());
+  const [confirmUpdate, setConfirmUpdate] = useState<Product | null>(null);
+  const [updateLoading, setUpdateLoading] = useState<Set<number>>(new Set());
 
   const [, startTransition] = useTransition();
 
-  // eBay sync state
+  // ── eBay sync state ─────────────────────────────────────────────────────────
   const [syncData, setSyncData] = useState<SyncData | null>(null);
   const [syncing, setSyncing]   = useState(false);
 
-  // Per-product action tracking
+  // ── Per-product action tracking ─────────────────────────────────────────────
   const [actionLoading, setActionLoading]   = useState<Set<number>>(new Set());
   const [refreshLoading, setRefreshLoading] = useState<Set<number>>(new Set());
 
-  // Connection state
+  // ── Connection state ────────────────────────────────────────────────────────
   const [connStatus, setConnStatus]               = useState<EbayConnectionStatus | null>(null);
   const [connLoading, setConnLoading]             = useState(true);
   const [connectLoading, setConnectLoading]       = useState(false);
   const [disconnectLoading, setDisconnectLoading] = useState(false);
   const [notification, setNotification]           = useState<Notification | null>(null);
+
+  // ── Readiness state ─────────────────────────────────────────────────────────
+  const [readiness, setReadiness]               = useState<ReadinessData | null>(null);
+  const [readinessLoading, setReadinessLoading] = useState(false);
+  const [testLoading, setTestLoading]           = useState(false);
+  const [testResult, setTestResult]             = useState<TestResult | null>(null);
 
   const searchParams = useSearchParams();
   const router       = useRouter();
@@ -377,6 +584,43 @@ export default function EbayPage() {
 
   useEffect(() => { void fetchStatus(); }, [fetchStatus]);
 
+  // ── Readiness ───────────────────────────────────────────────────────────────
+
+  const fetchReadiness = useCallback(async () => {
+    setReadinessLoading(true);
+    try {
+      const res = await fetch("/api/admin/ebay/readiness");
+      if (!res.ok) { setReadiness(null); return; }
+      const json = await res.json() as { data?: ReadinessData } & ReadinessData;
+      setReadiness(json.data ?? json);
+    } catch {
+      setReadiness(null);
+    } finally {
+      setReadinessLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { void fetchReadiness(); }, [fetchReadiness]);
+
+  const handleTestConnection = async () => {
+    setTestLoading(true);
+    setTestResult(null);
+    try {
+      const res  = await fetch("/api/admin/ebay/test-connection", { method: "POST" });
+      const json = await res.json().catch(() => ({} as Record<string, unknown>));
+      const msg  = typeof json.message === "string" ? json.message
+                 : res.ok ? "Connection successful — token is valid." : "Connection test failed.";
+      setTestResult({ success: res.ok, message: msg });
+    } catch {
+      setTestResult({ success: false, message: "Network error — could not reach the eBay service." });
+    } finally {
+      setTestLoading(false);
+      setTimeout(() => setTestResult(null), 8000);
+    }
+  };
+
+  // ── OAuth connect / disconnect ──────────────────────────────────────────────
+
   const handleConnect = async () => {
     setConnectLoading(true);
     setActionError(null);
@@ -416,7 +660,12 @@ export default function EbayPage() {
     }
   };
 
+  // ── Derived connection + readiness state ────────────────────────────────────
+  // Graceful degradation: if endpoint not deployed (null), default to true so
+  // existing actions are never blocked by a missing backend feature.
+
   const isConnected = connStatus === null ? true : connStatus.connected;
+  const isReady     = readiness === null   ? true : !readiness.checks.some((c) => c.status === "fail");
 
   // ── Fetch products ──────────────────────────────────────────────────────────
 
@@ -453,7 +702,7 @@ export default function EbayPage() {
   // ── eBay Sync ───────────────────────────────────────────────────────────────
 
   const handleSync = async () => {
-    if (!isConnected || !canManage) return;
+    if (!isConnected || !isReady || !canManage) return;
     setSyncing(true);
     setActionError(null);
     try {
@@ -483,7 +732,7 @@ export default function EbayPage() {
   // ── Per-product eBay toggle ─────────────────────────────────────────────────
 
   const toggleEbay = async (product: Product) => {
-    if (!isConnected || !canManage) return;
+    if (!isConnected || !isReady || !canManage) return;
     setActionError(null);
     setBulkResult(null);
     setActionLoading((prev) => new Set(prev).add(product.id));
@@ -569,7 +818,7 @@ export default function EbayPage() {
   // ── Per-product Update Listing ──────────────────────────────────────────────
 
   const updateListing = async (product: Product) => {
-    if (!isConnected || !canManage) return;
+    if (!isConnected || !isReady || !canManage) return;
     setActionError(null);
     setBulkUpdateResult(null);
     setUpdateLoading((prev) => new Set(prev).add(product.id));
@@ -610,7 +859,7 @@ export default function EbayPage() {
   // ── Bulk list ───────────────────────────────────────────────────────────────
 
   const handleBulkList = () => {
-    if (!isConnected || !canManage) return;
+    if (!isConnected || !isReady || !canManage) return;
     const ids = Array.from(selected);
     if (ids.length === 0) return;
     setBulkProgress({ done: 0, total: ids.length });
@@ -656,7 +905,7 @@ export default function EbayPage() {
   // ── Bulk update ─────────────────────────────────────────────────────────────
 
   const handleBulkUpdate = () => {
-    if (!isConnected || !canManage) return;
+    if (!isConnected || !isReady || !canManage) return;
     const ids = Array.from(selectedListed);
     if (ids.length === 0) return;
     setConfirmBulkUpdate(false);
@@ -739,7 +988,6 @@ export default function EbayPage() {
     });
   };
 
-  // Header checkbox toggles listed on "eBay Live" tab, unlisted otherwise
   const headerChecked   = filter === "listed" ? allListedSelected : allUnlistedSelected;
   const toggleHeaderAll = filter === "listed" ? toggleSelectAllListed : toggleSelectAll;
 
@@ -846,8 +1094,13 @@ export default function EbayPage() {
           <button
             type="button"
             onClick={() => void handleSync()}
-            disabled={syncing || !isConnected || !canManage}
-            title={!isConnected ? "Connect eBay account first" : !canManage ? "Insufficient permissions" : "Sync listing status from eBay"}
+            disabled={syncing || !isConnected || !isReady || !canManage}
+            title={
+              !isConnected ? "Connect eBay account first"
+              : !isReady   ? "Complete eBay setup before syncing"
+              : !canManage ? "Insufficient permissions"
+              : "Sync listing status from eBay"
+            }
             className="flex items-center gap-1.5 rounded-xl border border-black/[0.09] bg-white px-3.5 py-2 text-[0.8rem] font-semibold text-[#1a1a1a] transition hover:bg-[#f0f2f5] disabled:opacity-50"
           >
             <RefreshCw size={13} strokeWidth={2} className={syncing ? "animate-spin" : ""} />
@@ -893,6 +1146,16 @@ export default function EbayPage() {
         onDisconnect={() => void handleDisconnect()}
         connectLoading={connectLoading}
         disconnectLoading={disconnectLoading}
+        canManage={canManage}
+      />
+
+      {/* Setup & Readiness panel */}
+      <ReadinessPanel
+        readiness={readiness}
+        loading={readinessLoading}
+        testLoading={testLoading}
+        testResult={testResult}
+        onTest={() => void handleTestConnection()}
         canManage={canManage}
       />
 
@@ -999,7 +1262,7 @@ export default function EbayPage() {
       )}
 
       {/* Bulk list action bar */}
-      {selected.size > 0 && !bulkProgress && isConnected && canManage && (
+      {selected.size > 0 && !bulkProgress && isConnected && isReady && canManage && (
         <div className="mb-4 flex items-center justify-between rounded-xl border border-green-200 bg-green-50 px-4 py-3">
           <p className="text-[0.83rem] font-semibold text-green-800">
             {selected.size} unlisted product{selected.size > 1 ? "s" : ""} selected
@@ -1025,7 +1288,7 @@ export default function EbayPage() {
       )}
 
       {/* Bulk update action bar */}
-      {selectedListed.size > 0 && !bulkUpdateProgress && isConnected && canManage && (
+      {selectedListed.size > 0 && !bulkUpdateProgress && isConnected && isReady && canManage && (
         <div className="mb-4 flex items-center justify-between rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
           <p className="text-[0.83rem] font-semibold text-blue-800">
             {selectedListed.size} listed product{selectedListed.size > 1 ? "s" : ""} selected
@@ -1055,6 +1318,14 @@ export default function EbayPage() {
         <div className="mb-4 flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[0.83rem] text-amber-800">
           <AlertTriangle size={15} className="shrink-0" />
           Connect your eBay seller account above to enable listing and sync.
+        </div>
+      )}
+
+      {/* Setup incomplete warning — only shown when readiness data is available and has failures */}
+      {readiness !== null && !isReady && !readinessLoading && (
+        <div className="mb-4 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[0.83rem] text-red-700">
+          <AlertCircle size={15} className="shrink-0" />
+          Complete eBay setup before listing products. See the Setup &amp; Readiness checklist above.
         </div>
       )}
 
@@ -1108,12 +1379,11 @@ export default function EbayPage() {
           <table className="w-full min-w-[1100px] text-left">
             <thead>
               <tr className="border-b border-black/[0.06] bg-[#fafafa]">
-                {/* Unified select-all checkbox — selects listed on eBay Live tab, unlisted otherwise */}
                 <th className="px-4 py-3">
                   <button
                     type="button"
                     onClick={toggleHeaderAll}
-                    disabled={!isConnected || !canManage}
+                    disabled={!isConnected || !isReady || !canManage}
                     title={filter === "listed" ? "Select all listed" : "Select all unlisted"}
                     className="text-[#5c5e62] hover:text-[#1a1a1a] disabled:cursor-default"
                   >
@@ -1144,9 +1414,9 @@ export default function EbayPage() {
                   return (
                     <tr key={product.id} className="group transition hover:bg-[#fafafa]">
 
-                      {/* Checkbox — listed products select for update; unlisted select for list */}
+                      {/* Checkbox */}
                       <td className="px-4 py-3">
-                        {isConnected && canManage && (
+                        {isConnected && isReady && canManage && (
                           product.ebay_listed ? (
                             <button
                               type="button"
@@ -1245,8 +1515,13 @@ export default function EbayPage() {
                           <button
                             type="button"
                             onClick={() => void toggleEbay(product)}
-                            disabled={busy || !isConnected || !canManage}
-                            title={!isConnected ? "Connect eBay account first" : !canManage ? "Insufficient permissions" : undefined}
+                            disabled={busy || !isConnected || !isReady || !canManage}
+                            title={
+                              !isConnected ? "Connect eBay account first"
+                              : !isReady   ? "Complete eBay setup first"
+                              : !canManage ? "Insufficient permissions"
+                              : undefined
+                            }
                             className={[
                               "flex h-8 min-w-[76px] items-center justify-center gap-1.5 rounded-lg px-3 text-[0.78rem] font-semibold transition disabled:opacity-40",
                               product.ebay_listed
@@ -1263,13 +1538,17 @@ export default function EbayPage() {
                             )}
                           </button>
 
-                          {/* Update Listing — only for listed products */}
+                          {/* Update Listing */}
                           {product.ebay_listed && canManage && (
                             <button
                               type="button"
                               onClick={() => setConfirmUpdate(product)}
-                              disabled={busy || !isConnected}
-                              title="Update price, title, description and stock on eBay"
+                              disabled={busy || !isConnected || !isReady}
+                              title={
+                                !isConnected ? "Connect eBay account first"
+                                : !isReady   ? "Complete eBay setup first"
+                                : "Update price, title, description and stock on eBay"
+                              }
                               className={[
                                 "flex h-8 w-8 items-center justify-center rounded-lg border transition disabled:opacity-40",
                                 stale
@@ -1283,7 +1562,7 @@ export default function EbayPage() {
                             </button>
                           )}
 
-                          {/* Refresh Status — only for listed products */}
+                          {/* Refresh Status */}
                           {product.ebay_listed && canManage && (
                             <button
                               type="button"
@@ -1293,7 +1572,7 @@ export default function EbayPage() {
                               className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] bg-white text-[#5c5e62] transition hover:border-sky-300 hover:text-sky-600 disabled:opacity-40"
                             >
                               {isRefreshing
-                                ? <Loader2  size={13} className="animate-spin" />
+                                ? <Loader2   size={13} className="animate-spin" />
                                 : <RotateCcw size={13} strokeWidth={2} />}
                             </button>
                           )}

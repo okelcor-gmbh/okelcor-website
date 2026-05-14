@@ -82,6 +82,73 @@ If the status endpoint is not yet deployed or returns an error, `connStatus` sta
 
 ---
 
+## Completed in Latest Session — eBay Phase EB-4: Setup & Readiness Checklist (2026-05-14)
+
+---
+
+### EB-4 — Readiness Panel, Test Connection, Setup-Gated Actions
+
+**Goal:** Before admins list products, show exactly what is configured, missing, or unsafe.
+
+**TypeScript: 0 errors | Build: clean**
+
+#### New: `app/api/admin/ebay/readiness/route.ts`
+GET proxy → `GET /admin/ebay/readiness`. Returns full readiness payload including checks array. Gracefully returns `null` on non-2xx so frontend doesn't block if endpoint isn't deployed.
+
+#### New: `app/api/admin/ebay/test-connection/route.ts`
+POST proxy → `POST /admin/ebay/test-connection`. Triggers token refresh + lightweight eBay API call on backend. Returns `{ message, success }`.
+
+#### Updated: `app/admin/ebay/page.tsx`
+Full rewrite for EB-4 on top of EB-3. Key additions:
+
+**New types:** `ReadinessCheck`, `ReadinessData`, `TestResult`
+
+**`fetchReadiness()` + useEffect:**
+Calls `GET /api/admin/ebay/readiness` on mount. If endpoint returns non-2xx or throws, sets `readiness = null` — all actions remain available (graceful degradation). Populates `ReadinessData` with `checks[]`, `environment`, `marketplace_id`, `category_id`, `policies`, `seller_location`.
+
+**`handleTestConnection()`:**
+POST to `/api/admin/ebay/test-connection`, shows inline success/error message in the panel. Auto-clears after 8 seconds.
+
+**`isReady` derived value:**
+```typescript
+const isReady = readiness === null ? true : !readiness.checks.some((c) => c.status === "fail");
+```
+Mirrors the `isConnected` graceful-degradation pattern from EB-1.
+
+**`ReadinessPanel` sub-component:**
+- Collapsible card (auto-expands when any check fails)
+- Header: Settings gear icon (green/amber/red based on state) + pass/warning/fail counts
+- Config tag strip: environment pill (green=production, amber=sandbox), marketplace_id, category_id, seller location
+- Checklist grid (2-col on desktop): each check shows status icon (✓/⚠/✗) + label + optional message, colored background per status
+- Help text: "Business policy IDs must come from the connected eBay seller account."
+- "Test Connection" button (canManage only) + inline result message
+
+**Setup-gated actions:**
+All mutation actions now require both `isConnected && isReady`:
+- Sync button: `disabled` with tooltip "Complete eBay setup before syncing"
+- Bulk List toolbar: hidden when `!isReady`
+- Bulk Update toolbar: hidden when `!isReady`
+- Per-row List/Remove button: `disabled`
+- Per-row Update button: `disabled`
+- All function guards updated: `handleSync`, `toggleEbay`, `handleBulkList`, `handleBulkUpdate`, `updateListing`
+- Header checkbox: `disabled` when `!isReady`
+
+**Setup incomplete warning banner:**
+Shown between "Not Connected" warning and the search bar when `readiness !== null && !isReady`:
+> "Complete eBay setup before listing products. See the Setup & Readiness checklist above."
+
+**Panel placement:** Connection Card → Readiness Panel → Stat Cards → Table
+
+---
+
+**Backend endpoints required for EB-4:**
+- `GET /api/v1/admin/ebay/readiness` → full readiness payload with `checks[]` (key, label, status, message)
+  - Required checks: client_id, client_secret, runame, connected, marketplace_id, category_id, payment_policy_id, fulfillment_policy_id, return_policy_id, seller_postal_code, environment, token_refresh
+- `POST /api/v1/admin/ebay/test-connection` → refreshes token + calls eBay account endpoint → `{ success, message }`
+- Do NOT expose secrets or tokens in the response
+
+---
+
 ## Completed in Latest Session — eBay Phase EB-3: Price/Title Update Sync & Listing Validation (2026-05-14)
 
 ---
