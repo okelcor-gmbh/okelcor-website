@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useTransition } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   ShoppingBag,
   RefreshCw,
@@ -14,6 +15,9 @@ import {
   CheckCircle2,
   XCircle,
   Clock,
+  Link2,
+  Link2Off,
+  AlertTriangle,
 } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -50,6 +54,17 @@ type SyncData = {
 };
 
 type BulkResult = { listed: number; failed: number; errors: string[] };
+
+type EbayConnectionStatus = {
+  connected:         boolean;
+  marketplace_id?:   string;
+  seller_username?:  string | null;
+  connected_at?:     string | null;
+  last_refreshed_at?: string | null;
+  missing_config?:   string[];
+};
+
+type Notification = { type: "success" | "error"; message: string };
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
@@ -158,30 +173,264 @@ function StatCards({
   );
 }
 
+function ConnectionCard({
+  status,
+  loading,
+  onConnect,
+  onDisconnect,
+  connectLoading,
+  disconnectLoading,
+}: {
+  status:             EbayConnectionStatus | null;
+  loading:            boolean;
+  onConnect:          () => void;
+  onDisconnect:       () => void;
+  connectLoading:     boolean;
+  disconnectLoading:  boolean;
+}) {
+  // Backend status endpoint not yet available — render nothing
+  if (!loading && status === null) return null;
+
+  if (loading) {
+    return (
+      <div className="mb-6 h-[76px] animate-pulse overflow-hidden rounded-2xl bg-white shadow-sm" />
+    );
+  }
+
+  if (status?.connected) {
+    return (
+      <div className="mb-6 flex items-center justify-between gap-4 overflow-hidden rounded-2xl bg-white shadow-sm">
+        <div className="flex items-center gap-3 border-l-4 border-green-500 px-5 py-4">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-green-100">
+            <CheckCircle2 size={18} className="text-green-600" />
+          </div>
+          <div>
+            <p className="text-[0.83rem] font-bold text-[#1a1a1a]">eBay Account Connected</p>
+            <div className="mt-0.5 flex flex-wrap items-center gap-x-4 gap-y-0.5 text-[0.73rem] text-[#5c5e62]">
+              {status.marketplace_id && (
+                <span>
+                  Marketplace:{" "}
+                  <span className="font-semibold text-[#1a1a1a]">{status.marketplace_id}</span>
+                </span>
+              )}
+              {status.seller_username && (
+                <span>
+                  Seller:{" "}
+                  <span className="font-semibold text-[#1a1a1a]">{status.seller_username}</span>
+                </span>
+              )}
+              {status.last_refreshed_at && (
+                <span>
+                  Token refreshed:{" "}
+                  {new Date(status.last_refreshed_at).toLocaleString()}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="shrink-0 pr-5">
+          <button
+            type="button"
+            onClick={onDisconnect}
+            disabled={disconnectLoading}
+            className="flex items-center gap-1.5 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2 text-[0.78rem] font-semibold text-red-600 transition hover:bg-red-100 disabled:opacity-50"
+          >
+            {disconnectLoading ? (
+              <Loader2 size={13} className="animate-spin" />
+            ) : (
+              <Link2Off size={13} strokeWidth={2} />
+            )}
+            Disconnect
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Not connected
+  const missing = status?.missing_config ?? [];
+
+  return (
+    <div className="mb-6 overflow-hidden rounded-2xl bg-white shadow-sm">
+      <div className="flex items-center justify-between gap-4 border-l-4 border-amber-400 px-5 py-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50">
+            <Link2Off size={18} className="text-amber-500" />
+          </div>
+          <div>
+            <p className="text-[0.83rem] font-bold text-[#1a1a1a]">eBay Account Not Connected</p>
+            <p className="mt-0.5 text-[0.73rem] text-[#5c5e62]">
+              Connect your eBay seller account to enable listing and sync.
+            </p>
+            {missing.length > 0 && (
+              <p className="mt-1 text-[0.72rem] font-semibold text-red-600">
+                Missing configuration: {missing.join(", ")}
+              </p>
+            )}
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={onConnect}
+          disabled={connectLoading}
+          className="flex shrink-0 items-center gap-1.5 rounded-xl bg-[#E85C1A] px-4 py-2 text-[0.8rem] font-semibold text-white transition hover:bg-[#d45218] disabled:opacity-50"
+        >
+          {connectLoading ? (
+            <Loader2 size={13} className="animate-spin" />
+          ) : (
+            <Link2 size={13} strokeWidth={2} />
+          )}
+          Connect eBay Account
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function EbayPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [meta, setMeta] = useState<Meta>({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [products, setProducts]       = useState<Product[]>([]);
+  const [meta, setMeta]               = useState<Meta>({});
+  const [loading, setLoading]         = useState(true);
+  const [error, setError]             = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const [q, setQ] = useState("");
+  const [q, setQ]           = useState("");
   const [filter, setFilter] = useState<"all" | "listed" | "unlisted">("all");
-  const [page, setPage] = useState(1);
+  const [page, setPage]     = useState(1);
 
-  const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [selected, setSelected]         = useState<Set<number>>(new Set());
   const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number } | null>(null);
-  const [bulkResult, setBulkResult] = useState<BulkResult | null>(null);
-  const [, startTransition] = useTransition();
+  const [bulkResult, setBulkResult]     = useState<BulkResult | null>(null);
+  const [, startTransition]             = useTransition();
 
   // eBay sync state
   const [syncData, setSyncData] = useState<SyncData | null>(null);
-  const [syncing, setSyncing] = useState(false);
+  const [syncing, setSyncing]   = useState(false);
 
   // Per-product action loading
   const [actionLoading, setActionLoading] = useState<Set<number>>(new Set());
+
+  // ── Connection status state ─────────────────────────────────────────────────
+  const [connStatus, setConnStatus]         = useState<EbayConnectionStatus | null>(null);
+  const [connLoading, setConnLoading]       = useState(true);
+  const [connectLoading, setConnectLoading] = useState(false);
+  const [disconnectLoading, setDisconnectLoading] = useState(false);
+  const [notification, setNotification]   = useState<Notification | null>(null);
+
+  const searchParams = useSearchParams();
+  const router       = useRouter();
+
+  // ── Handle OAuth callback result from URL params ────────────────────────────
+
+  useEffect(() => {
+    const connected   = searchParams.get("connected");
+    const disconnected = searchParams.get("disconnected");
+    const ebayError   = searchParams.get("ebay_error");
+
+    if (connected === "1") {
+      setNotification({ type: "success", message: "eBay account connected successfully." });
+      router.replace("/admin/ebay");
+    } else if (disconnected === "1") {
+      setNotification({ type: "success", message: "eBay account disconnected." });
+      router.replace("/admin/ebay");
+    } else if (ebayError) {
+      setNotification({
+        type: "error",
+        message: `eBay connection failed: ${ebayError.replace(/_/g, " ")}`,
+      });
+      router.replace("/admin/ebay");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Auto-dismiss notification after 6 s
+  useEffect(() => {
+    if (!notification) return;
+    const t = setTimeout(() => setNotification(null), 6000);
+    return () => clearTimeout(t);
+  }, [notification]);
+
+  // ── Fetch eBay connection status ────────────────────────────────────────────
+
+  const fetchStatus = useCallback(async () => {
+    setConnLoading(true);
+    try {
+      const res = await fetch("/api/admin/ebay/status");
+      if (res.status === 401) return;
+      if (!res.ok) {
+        // Endpoint not yet deployed — degrade gracefully, don't block listing
+        setConnStatus(null);
+        return;
+      }
+      const json = await res.json() as { data?: EbayConnectionStatus } & EbayConnectionStatus;
+      setConnStatus(json.data ?? json);
+    } catch {
+      setConnStatus(null); // degrade gracefully
+    } finally {
+      setConnLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { void fetchStatus(); }, [fetchStatus]);
+
+  // ── Connect: get auth URL and redirect to eBay ─────────────────────────────
+
+  const handleConnect = async () => {
+    setConnectLoading(true);
+    setActionError(null);
+    try {
+      const res  = await fetch("/api/admin/ebay/auth-url");
+      const json = await res.json() as { data?: { url?: string }; url?: string; error?: string };
+
+      if (!res.ok) {
+        setActionError(json.error ?? "Could not get eBay authorization URL.");
+        return;
+      }
+
+      const url = json.data?.url ?? (json as { url?: string }).url;
+      if (!url) {
+        setActionError("Backend did not return an authorization URL. Check eBay API configuration.");
+        return;
+      }
+
+      window.location.href = url;
+    } catch {
+      setActionError("Network error — could not reach authorization service.");
+    } finally {
+      setConnectLoading(false);
+    }
+  };
+
+  // ── Disconnect ──────────────────────────────────────────────────────────────
+
+  const handleDisconnect = async () => {
+    setDisconnectLoading(true);
+    setActionError(null);
+    try {
+      const res  = await fetch("/api/admin/ebay/disconnect", { method: "POST" });
+      const json = await res.json().catch(() => ({} as Record<string, unknown>));
+      if (res.ok) {
+        setConnStatus((prev) => prev ? { ...prev, connected: false, seller_username: null } : null);
+        setNotification({ type: "success", message: "eBay account disconnected." });
+      } else {
+        const msg = typeof json.error === "string" ? json.error
+                  : typeof json.message === "string" ? json.message
+                  : "Disconnect failed.";
+        setActionError(msg);
+      }
+    } catch {
+      setActionError("Network error — could not disconnect.");
+    } finally {
+      setDisconnectLoading(false);
+    }
+  };
+
+  // ── Derived: whether eBay actions are enabled ───────────────────────────────
+  // Only block if we received a definitive "not connected" from the status endpoint.
+  // If status is null (endpoint unavailable / error), assume connected to avoid blocking.
+  const isConnected = connStatus === null ? true : connStatus.connected;
 
   // ── Fetch products ──────────────────────────────────────────────────────────
 
@@ -200,7 +449,7 @@ export default function EbayPage() {
     params.set("page", String(pageVal));
 
     try {
-      const res = await fetch(`/api/admin/products?${params}`);
+      const res  = await fetch(`/api/admin/products?${params}`);
       if (res.status === 401) { setError("Session expired. Please log in again."); return; }
       const json = await res.json() as { data?: Product[] };
       setProducts(Array.isArray(json.data) ? json.data : []);
@@ -218,6 +467,7 @@ export default function EbayPage() {
   // ── eBay Sync ───────────────────────────────────────────────────────────────
 
   const handleSync = async () => {
+    if (!isConnected) return;
     setSyncing(true);
     setActionError(null);
     try {
@@ -227,7 +477,6 @@ export default function EbayPage() {
         setActionError(`Sync error: ${data.error}`);
       } else {
         setSyncData(data);
-        // Update local ebay_listed flags based on eBay's active SKU list
         if (data.activeSKUs.length > 0) {
           setProducts((prev) =>
             prev.map((p) => ({
@@ -248,6 +497,7 @@ export default function EbayPage() {
   // ── Per-product eBay toggle ─────────────────────────────────────────────────
 
   const toggleEbay = async (product: Product) => {
+    if (!isConnected) return;
     setActionError(null);
     setBulkResult(null);
     setActionLoading((prev) => new Set(prev).add(product.id));
@@ -262,7 +512,7 @@ export default function EbayPage() {
       const json = await res.json().catch(() => ({} as Record<string, unknown>));
       if (!res.ok) {
         setActionError(
-          typeof json.error === "string" ? json.error :
+          typeof json.error === "string"   ? json.error :
           typeof json.message === "string" ? json.message :
           "eBay action failed."
         );
@@ -295,6 +545,7 @@ export default function EbayPage() {
   // ── Bulk list ───────────────────────────────────────────────────────────────
 
   const handleBulkList = () => {
+    if (!isConnected) return;
     const ids = Array.from(selected);
     if (ids.length === 0) return;
     setBulkProgress({ done: 0, total: ids.length });
@@ -340,7 +591,7 @@ export default function EbayPage() {
 
   // ── Selection helpers ───────────────────────────────────────────────────────
 
-  const unlistedProducts   = products.filter((p) => !p.ebay_listed);
+  const unlistedProducts    = products.filter((p) => !p.ebay_listed);
   const allUnlistedSelected =
     unlistedProducts.length > 0 && unlistedProducts.every((p) => selected.has(p.id));
 
@@ -388,8 +639,8 @@ export default function EbayPage() {
           <button
             type="button"
             onClick={() => void handleSync()}
-            disabled={syncing}
-            title="Sync listing status from eBay"
+            disabled={syncing || !isConnected}
+            title={!isConnected ? "Connect eBay account first" : "Sync listing status from eBay"}
             className="flex items-center gap-1.5 rounded-xl border border-black/[0.09] bg-white px-3.5 py-2 text-[0.8rem] font-semibold text-[#1a1a1a] transition hover:bg-[#f0f2f5] disabled:opacity-50"
           >
             <RefreshCw size={13} strokeWidth={2} className={syncing ? "animate-spin" : ""} />
@@ -406,6 +657,40 @@ export default function EbayPage() {
           </a>
         </div>
       </div>
+
+      {/* Notification banner (OAuth callback result or disconnect confirm) */}
+      {notification && (
+        <div
+          className={[
+            "mb-5 flex items-center justify-between gap-3 rounded-xl border px-4 py-3 text-[0.83rem] font-semibold",
+            notification.type === "success"
+              ? "border-green-200 bg-green-50 text-green-800"
+              : "border-red-200 bg-red-50 text-red-700",
+          ].join(" ")}
+        >
+          <span className="flex items-center gap-2">
+            {notification.type === "success" ? (
+              <CheckCircle2 size={15} className="shrink-0" />
+            ) : (
+              <AlertCircle size={15} className="shrink-0" />
+            )}
+            {notification.message}
+          </span>
+          <button type="button" onClick={() => setNotification(null)} className="shrink-0">
+            <X size={14} />
+          </button>
+        </div>
+      )}
+
+      {/* Connection status card */}
+      <ConnectionCard
+        status={connStatus}
+        loading={connLoading}
+        onConnect={() => void handleConnect()}
+        onDisconnect={() => void handleDisconnect()}
+        connectLoading={connectLoading}
+        disconnectLoading={disconnectLoading}
+      />
 
       {/* Stat cards */}
       <StatCards
@@ -477,7 +762,7 @@ export default function EbayPage() {
       )}
 
       {/* Bulk action bar */}
-      {selected.size > 0 && !bulkProgress && (
+      {selected.size > 0 && !bulkProgress && isConnected && (
         <div className="mb-4 flex items-center justify-between rounded-xl border border-green-200 bg-green-50 px-4 py-3">
           <p className="text-[0.83rem] font-semibold text-green-800">
             {selected.size} product{selected.size > 1 ? "s" : ""} selected
@@ -499,6 +784,14 @@ export default function EbayPage() {
               Clear
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Not connected — inline table warning */}
+      {!isConnected && !connLoading && (
+        <div className="mb-4 flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[0.83rem] text-amber-800">
+          <AlertTriangle size={15} className="shrink-0" />
+          Connect your eBay seller account above to enable listing and sync.
         </div>
       )}
 
@@ -557,7 +850,7 @@ export default function EbayPage() {
             <thead>
               <tr className="border-b border-black/[0.06] bg-[#fafafa]">
                 <th className="px-4 py-3">
-                  <button type="button" onClick={toggleSelectAll} className="text-[#5c5e62] hover:text-[#1a1a1a]">
+                  <button type="button" onClick={toggleSelectAll} className="text-[#5c5e62] hover:text-[#1a1a1a]" disabled={!isConnected}>
                     {allUnlistedSelected
                       ? <CheckSquare size={15} strokeWidth={2} className="text-[#E85C1A]" />
                       : <Square     size={15} strokeWidth={1.8} />}
@@ -591,7 +884,7 @@ export default function EbayPage() {
 
                       {/* Checkbox */}
                       <td className="px-4 py-3">
-                        {!product.ebay_listed && (
+                        {!product.ebay_listed && isConnected && (
                           <button
                             type="button"
                             onClick={() => toggleSelect(product.id)}
@@ -655,9 +948,10 @@ export default function EbayPage() {
                         <button
                           type="button"
                           onClick={() => void toggleEbay(product)}
-                          disabled={isActing}
+                          disabled={isActing || !isConnected}
+                          title={!isConnected ? "Connect eBay account first" : undefined}
                           className={[
-                            "flex h-8 min-w-[88px] items-center justify-center gap-1.5 rounded-lg px-3 text-[0.78rem] font-semibold transition disabled:opacity-50",
+                            "flex h-8 min-w-[88px] items-center justify-center gap-1.5 rounded-lg px-3 text-[0.78rem] font-semibold transition disabled:opacity-40",
                             product.ebay_listed
                               ? "bg-red-50 text-red-600 hover:bg-red-100"
                               : "bg-green-50 text-green-700 hover:bg-green-100",

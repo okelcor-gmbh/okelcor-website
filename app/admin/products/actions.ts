@@ -3,8 +3,16 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import {
+  listProductOnEbay,
+  removeProductFromEbay,
+  type EbayProduct,
+} from "@/lib/ebay";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
+const API_URL =
+  process.env.API_URL ??
+  process.env.NEXT_PUBLIC_API_URL ??
+  "http://localhost:8000/api/v1";
 
 // ── Auth helper ───────────────────────────────────────────────────────────────
 
@@ -332,20 +340,44 @@ export async function listOnEbay(
   id: number
 ): Promise<{ error?: string }> {
   const token = await getToken();
-  let res: Response;
+
+  // 1. Fetch product from backend
+  let product: EbayProduct;
   try {
-    res = await fetch(`${API_URL}/admin/products/${id}/ebay/list`, {
-      method: "POST",
-      headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
+    const res = await fetch(`${API_URL}/admin/products/${id}`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
       cache: "no-store",
     });
+    if (!res.ok) return { error: "Product not found." };
+    const json = await res.json().catch(() => ({})) as { data?: EbayProduct } & EbayProduct;
+    product = json.data ?? json;
+    if (!product?.id) return { error: "Could not load product data." };
   } catch {
     return { error: "Network error. Could not reach the server." };
   }
 
-  const json = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    return { error: json.message || `Failed to list product on eBay (HTTP ${res.status}).` };
+  // 2. List on eBay via Trading API
+  const { itemId, error } = await listProductOnEbay(product);
+  if (error) return { error };
+
+  // 3. Persist ebay_listed + ebay_item_id on the backend
+  try {
+    await fetch(`${API_URL}/admin/products/${id}`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ebay_listed: true,
+        ...(itemId ? { ebay_item_id: itemId } : {}),
+      }),
+      cache: "no-store",
+    });
+  } catch {
+    // Listing is live — log but don't fail the action
+    console.error(`[listOnEbay] backend PATCH failed for product ${id}`);
   }
 
   revalidateProducts(id);
@@ -357,20 +389,45 @@ export async function removeFromEbay(
   id: number
 ): Promise<{ error?: string }> {
   const token = await getToken();
-  let res: Response;
+
+  // 1. Get ebay_item_id from backend
+  let ebayItemId: string | null = null;
   try {
-    res = await fetch(`${API_URL}/admin/products/${id}/ebay/remove`, {
-      method: "DELETE",
-      headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
+    const res = await fetch(`${API_URL}/admin/products/${id}`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+      cache: "no-store",
+    });
+    if (res.ok) {
+      const json = await res.json().catch(() => ({})) as { data?: { ebay_item_id?: string }; ebay_item_id?: string };
+      const p = json.data ?? json;
+      ebayItemId = (p as { ebay_item_id?: string }).ebay_item_id ?? null;
+    }
+  } catch {
+    // Continue — will skip EndItem if no item ID
+  }
+
+  // 2. End eBay listing via Trading API
+  if (ebayItemId) {
+    const { error } = await removeProductFromEbay(ebayItemId);
+    if (error) return { error };
+  } else {
+    console.warn(`[removeFromEbay] product ${id} has no ebay_item_id — skipping EndItem call`);
+  }
+
+  // 3. Clear ebay_listed + ebay_item_id on backend
+  try {
+    await fetch(`${API_URL}/admin/products/${id}`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ ebay_listed: false, ebay_item_id: null }),
       cache: "no-store",
     });
   } catch {
-    return { error: "Network error. Could not reach the server." };
-  }
-
-  if (!res.ok && res.status !== 204) {
-    const json = await res.json().catch(() => ({}));
-    return { error: json.message || `Failed to remove product from eBay (HTTP ${res.status}).` };
+    console.error(`[removeFromEbay] backend PATCH failed for product ${id}`);
   }
 
   revalidateProducts(id);

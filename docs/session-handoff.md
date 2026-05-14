@@ -1,5 +1,87 @@
 # Session Handoff
 
+---
+
+## Completed in Latest Session — eBay Phase EB-1: OAuth Connection & Token Stability (2026-05-14)
+
+---
+
+### EB-1 — eBay OAuth Connection UI + Critical Bug Fixes
+
+**Goal:** Make the eBay listing pipeline production-safe by adding an OAuth connection flow, connection status card, and fixing a critical broken action.
+
+**TypeScript: 0 errors | Build: clean**
+
+#### New: `app/api/admin/ebay/status/route.ts`
+GET proxy → `GET /admin/ebay/status`. Returns connection status object including `connected`, `marketplace_id`, `seller_username`, `last_refreshed_at`, `missing_config[]`. Graceful: non-2xx treated as unavailable (not a hard error).
+
+#### New: `app/api/admin/ebay/auth-url/route.ts`
+GET proxy → `GET /admin/ebay/auth-url`. Returns `{ data: { url, state } }`. Frontend redirects admin browser to the returned eBay OAuth URL.
+
+#### New: `app/api/admin/ebay/disconnect/route.ts`
+POST proxy → `POST /admin/ebay/disconnect`. Deactivates the active eBay token on the backend.
+
+#### Fixed (critical): `app/admin/products/actions.ts`
+**Root cause:** `listOnEbay()` and `removeFromEbay()` server actions were calling `${API_URL}/admin/products/{id}/ebay/list` — targeting the Laravel backend directly. This endpoint does not exist on Laravel. The listing logic lives in Next.js route handlers.
+
+**Fix:** Both actions now import `listProductOnEbay()` and `removeProductFromEbay()` directly from `lib/ebay.ts` and call the Trading API themselves — identical logic to the route handlers but without the circular HTTP call. Also fixed `API_URL` to use `process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL` (private var first).
+
+**Effect:** Products Table eBay toggle now works correctly.
+
+#### Updated: `lib/admin-api.ts`
+Added `ebay_item_id?: string | null` and `ebay_status?: string | null` to `AdminProduct` type. Previously only `ebay_listed?: boolean` existed.
+
+#### Updated: `app/admin/ebay/page.tsx`
+Full rewrite. New additions on top of existing listing manager:
+
+**New `EbayConnectionStatus` type:**
+```typescript
+{
+  connected: boolean;
+  marketplace_id?: string;
+  seller_username?: string | null;
+  connected_at?: string | null;
+  last_refreshed_at?: string | null;
+  missing_config?: string[];
+}
+```
+
+**`ConnectionCard` sub-component:**
+- Connected state: green left-border card, shows marketplace/seller/last-refresh, "Disconnect" button
+- Not connected state: amber left-border card, "Connect eBay Account" button, missing config list
+- Loading state: animated skeleton placeholder
+- Hidden entirely if status endpoint returns an error (graceful degradation — existing listing flow unaffected)
+
+**OAuth flow:**
+1. "Connect eBay Account" button → `GET /api/admin/ebay/auth-url` → `window.location.href = url`
+2. eBay → backend callback → backend redirects to `/admin/ebay?connected=1` (or `?ebay_error=xxx`)
+3. Frontend reads URL params on mount, shows 6-second auto-dismiss notification banner, cleans up URL with `router.replace("/admin/ebay")`
+
+**Disconnect flow:**
+- POST `/api/admin/ebay/disconnect` → optimistic state update → success notification
+
+**Disabled states when not connected:**
+- "Sync from eBay" button: `disabled` + tooltip "Connect eBay account first"
+- Per-row "List on eBay" buttons: `disabled` + tooltip
+- Bulk "List on eBay" bar: hidden
+- Row checkboxes for unlisted products: hidden
+- Amber warning banner shown above table: "Connect your eBay seller account above to enable listing and sync."
+- `handleSync()`, `toggleEbay()`, `handleBulkList()` all guard with `if (!isConnected) return`
+
+**Graceful degradation rule:** `isConnected = connStatus === null ? true : connStatus.connected`
+If the status endpoint is not yet deployed or returns an error, `connStatus` stays `null` and `isConnected` defaults to `true` — all listing actions remain available.
+
+---
+
+**Backend endpoints required for EB-1 (not yet implemented):**
+- `GET /api/v1/admin/ebay/auth-url` → `{ data: { url: string, state: string } }`
+- `GET /api/v1/admin/ebay/status` → `{ data: { connected, marketplace_id, seller_username, connected_at, last_refreshed_at, missing_config[] } }`
+- `POST /api/v1/admin/ebay/disconnect` → `{ message: "..." }`
+- `GET /api/v1/admin/ebay/callback` → OAuth code exchange → redirect to `/admin/ebay?connected=1` or `?ebay_error=xxx`
+- DB migration: `ebay_tokens` table (see backend spec)
+
+---
+
 ## Project Summary
 
 This project builds the **Okelco corporate website**.
@@ -57,6 +139,215 @@ Development environment: Windows 11, VS Code, Node.js / npm
 | CTA hover | `#16a34a` |
 
 **Rule:** The Fuel Echo Tech page uses its own green-based palette. Never apply `var(--primary)` (orange) to FET-specific UI.
+
+---
+
+## Completed in Latest Session — SEO Phases 1–3, 4A, 4B + Phase 2C-6 (2026-05-13)
+
+---
+
+### Phase 2C-6 — Admin Logistics Dashboard
+
+**Goal:** Add `/admin/logistics` — a real-time operations view for which orders are ready for shipment, missing trade documents, or pending EU compliance. Frontend only.
+
+**Commits:** `e340113`
+
+#### Updated: `lib/admin-permissions.ts`
+- Added `"logistics"` to `ROLE_ACCESS` for: `super_admin`, `admin`, `order_manager`, `sales_manager`, `support`
+- Added `"/admin/logistics": "logistics"` to `PATH_SECTION`
+
+#### Updated: `components/admin/admin-shell.tsx`
+- Added `Truck` icon (lucide-react)
+- Nav item added: `{ label: "Logistics", href: "/admin/logistics", icon: Truck, section: "logistics" }` after EU Declarations
+
+#### New: `app/api/admin/logistics/dashboard/route.ts`
+GET proxy → `GET /admin/logistics/dashboard`. Reads `admin_token` cookie, Bearer-authenticates to backend, forwards all query params.
+
+#### New: `app/admin/logistics/page.tsx`
+Server wrapper — reads `admin_token` + `admin_role` from cookies; redirects on missing auth; renders `<LogisticsDashboard adminRole={adminRole} />`.
+
+#### New: `components/admin/logistics-dashboard.tsx`
+Full `"use client"` component:
+
+**4 summary cards:** Ready for Shipment, Missing Documents, EU Compliance Pending, Completed
+
+**Filter bar:** `status`, `missing_document`, `risk_level`, `reverse_charge_only` checkbox
+
+**Checklist table columns:**
+Order ref (linked) | Customer | Country | Status | Payment | Documents (PI/CI/PL/DN/SD pills — emerald=present, red=missing, gray=N/A) | EU Declaration | Risk | Next Action | Generate
+
+**Quick-generate `GenBtn`:** per-row buttons for missing generable docs; calls existing trade-document proxy routes. Gated on `canDo(adminRole, "trade_documents.manage")`.
+
+States: loading skeleton, error banner + retry, empty state, pagination with ellipsis, gen-error toast (auto-dismiss).
+
+---
+
+### SEO Phase 1 — Quote & About Page Optimisation
+
+**Goal:** Meta titles/descriptions, H1s, image alt text, internal link ("International logistics support"), outbound links to Hapag-Lloyd and DB Schenker.
+
+**Commits:** `933d89d`
+
+#### Updated: `app/quote/page.tsx` and `app/about/page.tsx`
+- Quote title: `"Get Instant Tyre Supply Quotation With Competitive Prices"`
+- About title: `"Get your tires from one of the leading European wholesale tire distributors"`
+- Both descriptions updated to include PCR/TBR/used tyres, wholesale, 30+ countries
+
+#### Updated: `lib/translations.ts` (English locale only)
+- `about.hero.title` → `"European Wholesale Tire Distributor"`
+- `quote.hero.title` → `"Get Instant Tyre Supply Quotation"`
+
+#### Updated: `components/page-hero.tsx`
+Added `imageAlt?: string` prop (default `""`).
+
+#### Updated: `components/quote/quote-hero.tsx` and `components/about/about-page-ui.tsx`
+Descriptive `imageAlt` values added for SEO.
+
+#### Updated: `components/quote/quote-summary.tsx`
+Internal SEO link added: "International logistics support" → `/wholesale-tire-distributors-europe`
+
+#### Updated: `components/quote/quote-trust.tsx`
+Outbound links added: Hapag-Lloyd and DB Schenker as trusted freight partners.
+
+#### Updated: `components/about/logistics-partners.tsx`
+Hapag-Lloyd and DB Schenker partner tiles wrapped in `<a href target="_blank" rel="noopener noreferrer">`.
+
+---
+
+### SEO Phase 2 — SEO-Friendly URL Aliases with 301 Redirects
+
+**Goal:** Create canonical SEO URLs; 301-redirect old URLs.
+
+**Commits:** `da147c8`
+
+**New canonical routes:**
+- `/tyre-supply-quotation` (replaces `/quote`)
+- `/wholesale-tire-distributors-europe` (replaces `/about`)
+
+#### New: `app/tyre-supply-quotation/page.tsx`
+Full quote page at canonical URL — same component tree as old `/quote`, plus `alternates.canonical` and BreadcrumbList JSON-LD.
+
+#### New: `app/wholesale-tire-distributors-europe/page.tsx`
+Full about page at canonical URL — same component tree as old `/about`, plus `alternates.canonical` and BreadcrumbList JSON-LD.
+
+#### Updated: `next.config.ts`
+```typescript
+async redirects() {
+  return [
+    { source: "/quote",  destination: "/tyre-supply-quotation",             permanent: true },
+    { source: "/about",  destination: "/wholesale-tire-distributors-europe", permanent: true },
+  ];
+}
+```
+
+#### Updated: 25+ files
+All internal links updated — `href="/quote"` → `href="/tyre-supply-quotation"` and `href="/about"` → `href="/wholesale-tire-distributors-europe"` across `components/navbar.tsx` (NAV array + mega-menu + special-case `if` check), `components/footer.tsx` (5 entries), and 21 other component and page files.
+
+---
+
+### SEO Phase 3 — Sitemap, Robots.txt, Structured Data & Canonical Cleanup
+
+**Goal:** Technical SEO foundation — sitemap, robots.txt, Organization/WebSite JSON-LD, canonical tags, Google Search Console.
+
+**Commits:** `e9ab6f4`
+
+#### New: `app/robots.ts`
+```
+Allow: /, /shop, /news, /contact, /fet, /tyre-supply-quotation, /wholesale-tire-distributors-europe
+Disallow: /admin, /account, /checkout, /api
+Sitemap: https://www.okelcor.com/sitemap.xml
+```
+
+#### Updated: `app/sitemap.ts`
+- Removed `/quote` and `/about` (both 301 to new canonicals)
+- Added `/tyre-supply-quotation` (priority 0.9) and `/wholesale-tire-distributors-europe` (priority 0.8)
+- `BASE_URL = "https://www.okelcor.com"` (www form, matches `metadataBase`)
+
+#### Updated: `app/layout.tsx`
+- Google site verification injected from `process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` env var
+- **Organization JSON-LD** in `<body>`: name, legalName, url, logo, Munich address, contactPoint, vatID
+- **WebSite JSON-LD** in `<body>`: name, url, `potentialAction` SearchAction → `/shop?q={search_term_string}`
+
+#### Updated: `app/shop/page.tsx`, `app/shop/[id]/page.tsx`, `app/news/[slug]/page.tsx`
+Added `alternates.canonical` and absolute `openGraph.url` to all `generateMetadata` / static metadata exports.
+
+---
+
+### SEO Phase 4A — 12 New SEO Catalogue Landing Pages
+
+**Goal:** Statically pre-rendered SEO pages for tyre categories, seasons, and brands — each pre-applies a filter to the interactive shop catalogue.
+
+**Commits:** `d58b7da`
+
+#### New: `components/shop/catalogue-landing.tsx`
+Shared server component used by all 12 landing pages. `CatalogueLandingConfig` type:
+```typescript
+{
+  eyebrow?: string;
+  h1: string;
+  intro: string | string[];
+  filters: Record<string, string>;
+  breadcrumbSchema: object;
+  popularSizes?: { label: string; href: string }[];
+  faq?: { q: string; a: string }[];
+  relatedGroups?: { heading: string; links: RelatedLink[] }[];
+}
+```
+Renders: BreadcrumbList + FAQPage JSON-LD → H1 section → `ShopPageClient` (pre-filtered, `source="seo-landing"`) → Popular Sizes chips → FAQ accordion → Related links grid.
+
+#### Updated: `components/shop/shop-page-client.tsx`
+- Added `noNavbarPad?: boolean` — skips internal navbar padding offset so `CatalogueLanding` controls clearance
+- Added `source?: "shop" | "seo-landing"` — passed through to `ShopCatalogue`
+
+#### Updated: `components/shop/shop-catalogue.tsx`
+- Added `source?: "shop" | "seo-landing"` (default `"shop"`)
+- Campaign banner (`ShopCampaignBanner`) + Rapid Specials list (`SpecialsProductList`) gated on `source !== "seo-landing"` — hidden on SEO landing pages so filtered results are primary content. `/shop` behaviour unchanged.
+
+#### New: 12 static page routes (all pre-rendered as `○ Static`):
+
+| URL | Filter | Priority |
+|---|---|---|
+| `/passenger-tires` | `type=PCR` | 0.85 |
+| `/light-truck-tires` | `type=TBR` | 0.85 |
+| `/summer-tires` | `season=Summer` | 0.80 |
+| `/winter-tires` | `season=Winter` | 0.80 |
+| `/all-season-tires` | `season=All Season` | 0.80 |
+| `/michelin-tires` | `brand=Michelin` | 0.75 |
+| `/bridgestone-tires` | `brand=Bridgestone` | 0.75 |
+| `/continental-tires` | `brand=Continental` | 0.75 |
+| `/pirelli-tires` | `brand=Pirelli` | 0.75 |
+| `/goodyear-tires` | `brand=Goodyear` | 0.75 |
+| `/dunlop-tires` | `brand=Dunlop` | 0.75 |
+| `/falken-tires` | `brand=Falken` | 0.75 |
+
+All 12 routes added to `app/sitemap.ts`.
+
+---
+
+### SEO Phase 4B — Content Depth for All 12 Catalogue Landing Pages
+
+**Goal:** Strengthen all SEO landing pages against thin-content issues; add unique useful content while keeping the product grid near the top.
+
+**Commits:** `5019e5d`
+
+**All 12 page files fully rewritten.** Each page now has:
+
+1. **Multi-paragraph intro (150–250 words)** — unique per page; covers product category/brand context, wholesale/export/logistics relevance, target markets
+2. **Popular Sizes section** — 6–7 clickable chips linking to pre-filtered shop searches:
+   - Category pages: `/shop?type=PCR&size=205%2F55R16`
+   - Season pages: `/shop?season=Summer&size=205%2F55R16`
+   - Brand pages: `/shop?brand=Michelin&size=205%2F55R16`
+3. **FAQ section** — 4–5 questions per page, unique by page type:
+   - Category FAQs: definitions, MOQ, brands, used tyres, documentation
+   - Season FAQs: temperature range, regulations, stocking windows, 3PMSF vs M+S
+   - Brand FAQs: manufacturer origin, quality tier, popular models, TBR availability, export markets
+4. **FAQPage JSON-LD** — auto-built from the `faq` array inside `CatalogueLanding`, injected as a second `<script type="application/ld+json">` alongside BreadcrumbList
+5. **Internal links** — every page links to: quote page (`/tyre-supply-quotation`), full shop, related categories, seasons, and brands
+
+**Rendering order per page:**
+SEO hero (H1 + intro) → Product filter/grid → Popular Sizes → FAQ → Internal links
+
+**TypeScript: 0 errors | Build: clean, 97 pages, all 12 pages `○ Static`**
 
 ---
 
