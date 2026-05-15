@@ -6,21 +6,21 @@ import CatalogueLanding from "@/components/shop/catalogue-landing";
 const CANONICAL = "https://www.okelcor.com/light-truck-tires";
 
 export const metadata: Metadata = {
-  title: "Truck & Bus Radial Tyres Wholesale — TBR Tyres | Okelcor",
+  title: "Buy Light Truck Tires | Van & Commercial Tires at OKELCOR",
   description:
-    "Wholesale TBR tyres (truck & bus radial) from Michelin, Bridgestone, Continental, and more. Bulk commercial tyre supply with global logistics for fleets and distributors in 30+ countries.",
+    "Shop light truck tires for vans, pickups, fleets, and dealers. Find all-season, summer, and winter commercial tires at competitive prices.",
   alternates: { canonical: CANONICAL },
   openGraph: {
-    title: "Truck & Bus Radial Tyres Wholesale — TBR | Okelcor",
+    title: "Buy Light Truck Tires | Van & Commercial Tires at OKELCOR",
     description:
-      "Wholesale TBR commercial tyres — drive, steer, and trailer axle. Competitive bulk pricing with international logistics for commercial fleet operators and distributors.",
+      "Shop light truck tires for vans, pickups, fleets, and dealers. Find all-season, summer, and winter commercial tires at competitive prices.",
     url: CANONICAL,
     type: "website",
   },
   twitter: {
-    title: "Truck & Bus Radial Tyres Wholesale — TBR | Okelcor",
+    title: "Buy Light Truck Tires | Van & Commercial Tires at OKELCOR",
     description:
-      "Wholesale TBR tyres from Michelin, Bridgestone, Continental, and more. Global commercial tyre supply.",
+      "Shop light truck tires for vans, pickups, fleets, and dealers. Find all-season, summer, and winter commercial tires at competitive prices.",
   },
 };
 
@@ -41,10 +41,9 @@ export default function LightTruckTiresPage() {
       <CatalogueLanding
         config={{
           eyebrow: "Tyre Category",
-          h1: "Truck & Bus Radial Tyres (TBR) — Wholesale Supply",
+          h1: "Light Truck Tires for Sale – Browse our complete TBR Tyres",
           intro: [
-            "Truck and bus radial (TBR) tyres serve the commercial vehicle segment — from regional distribution trucks and long-haul fleets to construction vehicles and intercity buses. Okelcor supplies TBR tyres wholesale to fleet operators, tyre dealers, and distributors across more than 30 countries, with a focus on drive axle, steer axle, and trailer axle applications in the most traded commercial sizes from 17.5-inch to 22.5-inch rims.",
-            "Our TBR sourcing covers premium and mid-range brands including Michelin, Bridgestone, Continental, Dunlop, and Falken. We handle both OEM-grade new tyres and Grade A used TBR for operators requiring cost-conscious sourcing. All TBR shipments benefit from Okelcor's established European logistics infrastructure, with flexible freight options for sea, air, and road delivery to destination. Contact our sales team for current TBR availability and bulk pricing.",
+            "Shop durable light truck tires at OKELCOR GmbH for vans, pickups, commercial vehicles, and fleet operations. We supply high-performance light truck tires, van tires, all-season tires, summer tires, and winter tires for both retail and wholesale buyers. Browse the catalog below or use the filters to quickly find the right tire size, load rating, brand, or seasonal option for your vehicle or business needs.",
           ],
           filters: { type: "TBR" },
           breadcrumbSchema: breadcrumb,

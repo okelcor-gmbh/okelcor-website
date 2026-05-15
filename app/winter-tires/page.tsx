@@ -6,21 +6,21 @@ import CatalogueLanding from "@/components/shop/catalogue-landing";
 const CANONICAL = "https://www.okelcor.com/winter-tires";
 
 export const metadata: Metadata = {
-  title: "Winter Tyres Wholesale — Bulk Winter Tyre Supply | Okelcor",
+  title: "Buy Winter Tires For Snow, Ice & Cold Weather Conditions | OKELCOR",
   description:
-    "Wholesale winter tyres from Goodyear, Michelin, Continental, and more. Bulk cold-weather PCR tyre supply for distributors in northern, Alpine, and Eastern European markets.",
+    "Shop winter tires for cars, SUVs, and fleets. Find safe, high-performance snow and ice tyres from trusted brands at competitive prices.",
   alternates: { canonical: CANONICAL },
   openGraph: {
-    title: "Winter Tyres Wholesale — Bulk Supply | Okelcor",
+    title: "Buy Winter Tires For Snow, Ice & Cold Weather Conditions | OKELCOR",
     description:
-      "Wholesale winter tyres for northern and Alpine markets — PCR from all major brands. Bulk pricing with international logistics from Europe.",
+      "Shop winter tires for cars, SUVs, and fleets. Find safe, high-performance snow and ice tyres from trusted brands at competitive prices.",
     url: CANONICAL,
     type: "website",
   },
   twitter: {
-    title: "Winter Tyres Wholesale — Okelcor",
+    title: "Buy Winter Tires For Snow, Ice & Cold Weather Conditions | OKELCOR",
     description:
-      "Wholesale winter tyres from Goodyear, Michelin, Continental, and more. Global bulk supply.",
+      "Shop winter tires for cars, SUVs, and fleets. Find safe, high-performance snow and ice tyres from trusted brands at competitive prices.",
   },
 };
 
@@ -41,10 +41,9 @@ export default function WinterTiresPage() {
       <CatalogueLanding
         config={{
           eyebrow: "Season",
-          h1: "Winter Tyres — Wholesale Bulk Supply",
+          h1: "Winter Tires for Sale – Safe & High-Performance Snow, Ice & Cold Weather Tyres",
           intro: [
-            "Winter tyres are engineered specifically for conditions where temperatures regularly fall below 7°C. Their silica-enriched tread compounds remain flexible in cold weather, delivering demonstrably superior grip on snow, ice, and cold wet roads compared to summer or general-purpose tyres. Several European countries legally mandate winter tyres during winter months, creating consistent annual demand for wholesale distributors serving Northern Europe, the Alpine region, and Eastern European markets.",
-            "Okelcor sources wholesale winter PCR tyres from leading manufacturers including Goodyear UltraGrip, Michelin Alpin, Continental WinterContact, Bridgestone Blizzak, and Falken Eurowinter. Winter tyre stock planning is time-sensitive — we advise wholesale buyers to place bulk orders between May and September to avoid the pre-season rush and secure sufficient inventory for the October–December swap window.",
+            "Shop high-performance winter tires at OKELCOR GmbH for maximum safety, traction, and control in snow, ice, and cold weather conditions. We supply premium winter tires for passenger cars, SUVs, and light trucks, available for both retail customers and wholesale buyers including tire dealers, workshops, and fleet operators. Browse the catalog below or use the filters to quickly find the right tyre size, brand, load rating, and winter performance specifications for your needs.",
           ],
           filters: { season: "Winter" },
           breadcrumbSchema: breadcrumb,

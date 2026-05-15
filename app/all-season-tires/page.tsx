@@ -6,21 +6,21 @@ import CatalogueLanding from "@/components/shop/catalogue-landing";
 const CANONICAL = "https://www.okelcor.com/all-season-tires";
 
 export const metadata: Metadata = {
-  title: "All-Season Tyres Wholesale — Bulk Year-Round Supply | Okelcor",
+  title: "Buy All-Season Tires at Affordable Prices | Year-Round Passenger, SUV & TBR Tyres",
   description:
-    "Wholesale all-season tyres for passenger and commercial vehicles. Year-round PCR and TBR tyre solutions from leading brands, available for bulk export to distributors in 30+ countries.",
+    "Shop all-season tires for cars, SUVs, and fleets. Find durable year-round tires from trusted brands at competitive wholesale and retail prices.",
   alternates: { canonical: CANONICAL },
   openGraph: {
-    title: "All-Season Tyres Wholesale — Bulk Supply | Okelcor",
+    title: "Buy All-Season Tires at Affordable Prices | Year-Round Passenger, SUV & TBR Tyres",
     description:
-      "Wholesale all-season tyres — PCR and TBR — for simplified fleet management. Bulk pricing with international logistics from Europe.",
+      "Shop all-season tires for cars, SUVs, and fleets. Find durable year-round tires from trusted brands at competitive wholesale and retail prices.",
     url: CANONICAL,
     type: "website",
   },
   twitter: {
-    title: "All-Season Tyres Wholesale — Okelcor",
+    title: "Buy All-Season Tires at Affordable Prices | Year-Round Passenger, SUV & TBR Tyres",
     description:
-      "Wholesale all-season tyres for passenger and commercial vehicles. Global bulk supply.",
+      "Shop all-season tires for cars, SUVs, and fleets. Find durable year-round tires from trusted brands at competitive wholesale and retail prices.",
   },
 };
 
@@ -41,10 +41,9 @@ export default function AllSeasonTiresPage() {
       <CatalogueLanding
         config={{
           eyebrow: "Season",
-          h1: "All-Season Tyres — Wholesale Bulk Supply",
+          h1: "All-Season Tires for Sale – Year-Round Tyres Available",
           intro: [
-            "All-season tyres offer a practical single-tyre solution for climates where temperatures remain mild for most of the year, or for distributors looking to simplify their tyre portfolio without holding separate summer and winter stock. Modern all-season tyres carrying the Three-Peak Mountain Snowflake (3PMSF) rating are legally accepted as winter tyres in most European countries with mandatory cold-weather regulations.",
-            "The all-season segment has grown significantly across the UK, Benelux, Ireland, and Central Europe, driven by milder winters and a consumer preference for year-round convenience. Okelcor supplies all-season PCR and TBR tyres wholesale from brands including Michelin CrossClimate, Continental AllSeasonContact, Goodyear Vector, and Bridgestone Weather Control. This growing category offers wholesale distributors a consistently in-demand product with reduced seasonal stocking pressure.",
+            "Shop versatile all-season tires at OKELCOR GmbH for year-round performance in changing weather conditions. We supply high-quality all-season passenger tires, SUV tires, and light truck tires for private drivers, workshops, tire dealers, and fleet operators. Browse our catalog below or use the filters to quickly find the right tire size, brand, load rating, and performance level for your needs.",
           ],
           filters: { season: "All Season" },
           breadcrumbSchema: breadcrumb,

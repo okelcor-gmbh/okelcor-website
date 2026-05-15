@@ -6,21 +6,21 @@ import CatalogueLanding from "@/components/shop/catalogue-landing";
 const CANONICAL = "https://www.okelcor.com/passenger-tires";
 
 export const metadata: Metadata = {
-  title: "Passenger Car Tyres Wholesale — PCR Tyres | Okelcor",
+  title: "Buy Passenger Tires at Affordable Prices | See Current Offers | OKELCOR",
   description:
-    "Wholesale passenger car tyres (PCR) from Michelin, Bridgestone, Continental, Pirelli, Goodyear, and Dunlop. Bulk PCR tyre supply with international logistics to 30+ countries.",
+    "Shop premium passenger tires for cars, SUVs, fleets, and dealers. Find all-season, summer, and winter tires at competitive prices.",
   alternates: { canonical: CANONICAL },
   openGraph: {
-    title: "Passenger Car Tyres Wholesale — PCR Tyres | Okelcor",
+    title: "Buy Passenger Tires at Affordable Prices | See Current Offers | OKELCOR",
     description:
-      "Wholesale PCR tyres from top global brands. Bulk orders with competitive pricing and international logistics to distributors in 30+ countries.",
+      "Shop premium passenger tires for cars, SUVs, fleets, and dealers. Find all-season, summer, and winter tires at competitive prices.",
     url: CANONICAL,
     type: "website",
   },
   twitter: {
-    title: "Passenger Car Tyres Wholesale — PCR | Okelcor",
+    title: "Buy Passenger Tires at Affordable Prices | See Current Offers | OKELCOR",
     description:
-      "Wholesale PCR passenger car tyres from Michelin, Bridgestone, Continental, and more.",
+      "Shop premium passenger tires for cars, SUVs, fleets, and dealers. Find all-season, summer, and winter tires at competitive prices.",
   },
 };
 
@@ -41,10 +41,9 @@ export default function PassengerTiresPage() {
       <CatalogueLanding
         config={{
           eyebrow: "Tyre Category",
-          h1: "Passenger Car Tyres (PCR) — Wholesale Supply",
+          h1: "Passenger Tires for Sale – Browse Available PCR Tyres",
           intro: [
-            "Passenger car radial (PCR) tyres are the most traded category in the global tyre wholesale market. As one of Europe's dedicated wholesale tyre distributors, Okelcor supplies PCR tyres in bulk to tyre retailers, wholesalers, and fleet operators across more than 30 countries. Our PCR sourcing network spans all major global brands — Michelin, Bridgestone, Continental, Pirelli, Goodyear, and Dunlop — covering sizes from compact 14-inch to large 21-inch rims across summer, winter, and all-season specifications.",
-            "Whether you are building a summer stocking programme for Southern European markets, sourcing winter tyres for Scandinavian distribution, or assembling a year-round mixed-brand PCR portfolio, Okelcor delivers within competitive lead times via consolidated sea and air freight. All PCR tyres are sourced through authorised channels with complete export documentation for EU customs compliance. Contact our sales team for a personalised PCR wholesale quotation.",
+            "Shop premium passenger tires at OKELCOR GmbH for private drivers, tire dealers, workshops, and fleet buyers. Explore high-quality passenger car tires, SUV tires, all-season tires, summer tires, and winter tires from trusted brands at competitive prices. Browse the catalog below or use the filters to quickly find the right tires for your vehicle or business needs.",
           ],
           filters: { type: "PCR" },
           breadcrumbSchema: breadcrumb,

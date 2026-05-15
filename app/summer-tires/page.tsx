@@ -6,21 +6,21 @@ import CatalogueLanding from "@/components/shop/catalogue-landing";
 const CANONICAL = "https://www.okelcor.com/summer-tires";
 
 export const metadata: Metadata = {
-  title: "Summer Tyres Wholesale — Bulk Summer Tyre Supply | Okelcor",
+  title: "Buy Summer Tires For Passenger car, SUVs & Light Truck | OKELCOR",
   description:
-    "Wholesale summer tyres from Michelin, Bridgestone, Pirelli, Goodyear, and Dunlop. Bulk summer PCR and TBR tyre supply for distributors worldwide with international logistics.",
+    "Shop summer tires for cars, SUVs, Light Trucks, and fleets. Find high-performance tyres for warm weather at competitive retail and wholesale prices.",
   alternates: { canonical: CANONICAL },
   openGraph: {
-    title: "Summer Tyres Wholesale — Bulk Supply | Okelcor",
+    title: "Buy Summer Tires For Passenger car, SUVs & Light Truck | OKELCOR",
     description:
-      "Wholesale summer tyres — PCR and TBR — from all major brands. Competitive bulk pricing with reliable international logistics for distributors in 30+ countries.",
+      "Shop summer tires for cars, SUVs, Light Trucks, and fleets. Find high-performance tyres for warm weather at competitive retail and wholesale prices.",
     url: CANONICAL,
     type: "website",
   },
   twitter: {
-    title: "Summer Tyres Wholesale — Okelcor",
+    title: "Buy Summer Tires For Passenger car, SUVs & Light Truck | OKELCOR",
     description:
-      "Wholesale summer tyres from Michelin, Bridgestone, Pirelli, Goodyear, and Dunlop. Global bulk supply.",
+      "Shop summer tires for cars, SUVs, Light Trucks, and fleets. Find high-performance tyres for warm weather at competitive retail and wholesale prices.",
   },
 };
 
@@ -41,10 +41,9 @@ export default function SummerTiresPage() {
       <CatalogueLanding
         config={{
           eyebrow: "Season",
-          h1: "Summer Tyres — Wholesale Bulk Supply",
+          h1: "Summer Tires for Sale – See Available Tyres At Competitive Prices",
           intro: [
-            "Summer tyres use tread compounds optimised for temperatures consistently above 7°C, delivering superior grip, braking performance, and fuel efficiency on both dry and wet warm-weather roads. As a wholesale tyre distributor, Okelcor sources summer PCR and TBR tyres in bulk from all major manufacturers including Michelin, Bridgestone, Continental, Pirelli, Goodyear, and Dunlop — spanning economy, mid-range, and ultra-high-performance (UHP) segments.",
-            "Demand for summer PCR peaks across Western and Southern European markets in the March–May stocking window, with African and Middle Eastern markets running summer-specification tyres year-round. Okelcor advises wholesale buyers to plan bulk orders 6–12 weeks ahead of the peak season to secure preferred sizes and competitive pricing. All summer tyre shipments include full trade documentation for EU customs compliance.",
+            "Shop high-performance summer tires at OKELCOR GmbH for optimal grip, braking, and fuel efficiency in warm weather conditions. We supply premium summer tyres for passenger cars, SUVs, and light trucks, available for both individual drivers and wholesale buyers including tire dealers, workshops, and fleet operators. Browse the catalog below or use the filters to quickly find the right tire size, brand, performance level, and price range for your needs.",
           ],
           filters: { season: "Summer" },
           breadcrumbSchema: breadcrumb,
