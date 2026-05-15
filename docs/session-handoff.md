@@ -2,6 +2,143 @@
 
 ---
 
+## Completed in Latest Session — SEO Phase 5B: Brand Catalogue Pages Copy Sync (2026-05-15)
+
+---
+
+### SEO Phase 5B — Approved SEO Copy Applied to All 7 Brand Landing Pages
+
+**Goal:** Synchronize exact approved SEO content (title, meta description, H1, intro paragraph) across all 7 brand catalogue landing pages. Replace prior wholesale-focused B2B copy with approved retail/wholesale-hybrid tone.
+
+**Commits:** `83a0ac1`
+**TypeScript: 0 errors | Build: clean | All 7 pages `○ Static`**
+
+#### Pages Updated
+
+| Page | New Title | New H1 |
+|---|---|---|
+| `/michelin-tires` | Buy Michelin Tires for Passenger Cars and SUVs at Affordable Prices | Michelin Tires for Sale – Passenger and SUV Tires - Best Prices |
+| `/bridgestone-tires` | Buy Affordable Bridgestone Tires for Passenger cars and SUVs and Light Truck | Bridgestone Tires for Sale – Passenger, SUV & Light Truck Tyres |
+| `/continental-tires` | Buy Continental Tires for Passenger Car and SUVs at Affordable Prices | Continental Tires for Sale – Premium Tyres For Passenger cars, SUV & Fleets |
+| `/dunlop-tires` | Buy Affordable Dunlop Tires for Passenger cars, SUV & Light Truck vehicles | Dunlop Tires for Sale – Performance Passenger cars, SUVs & Light Trucks |
+| `/pirelli-tires` | Buy Pirelli Tires for Passenger Cars at Affordable Prices \| Fast Shipping | Pirelli Tires for Sale – Premium Performance for Passenger Cars, SUVs & Fleets |
+| `/goodyear-tires` | Buy Affordable Goodyear Tires For Passenger cars, Light Trucks & SUVs | Goodyear Tires for Sale – Premium Passenger, SUV & Wholesale Tires |
+| `/falken-tires` | Buy Premium Falken Tires at Affordable Prices - Fast Shipping | Falken Tires for Sale – Performance Passenger Cars, SUVs & Light Truck Tyres |
+
+#### What changed per page (all 7)
+- `metadata.title` → exact approved title
+- `metadata.description` → exact approved meta description
+- `openGraph.title` + `openGraph.description` → mirrored from metadata
+- `twitter.title` + `twitter.description` → mirrored from metadata
+- `config.h1` → exact approved H1
+- `config.intro[]` → exact approved supporting paragraph (single paragraph, retail/wholesale hybrid tone)
+
+#### What was NOT changed (preserved)
+- Canonical URLs (`CANONICAL` const)
+- `alternates.canonical`
+- Breadcrumb JSON-LD schema
+- FAQ JSON-LD schema + all FAQ items
+- `popularSizes` chips + href patterns
+- `relatedGroups` internal links
+- `filters` (brand filter values)
+- `eyebrow` ("Brand")
+- Static prerendering — all pages remain `○ Static`
+- Sitemap entries
+
+---
+
+## Completed in Latest Session — SEO Phase 5A: Season/Category Catalogue Pages Copy Sync (2026-05-15)
+
+---
+
+### SEO Phase 5A — Approved SEO Copy Applied to 5 Season/Category Landing Pages
+
+**Goal:** Replace prior wholesale-only copy with exact approved SEO content across the 5 season/category catalogue landing pages.
+
+**Commits:** `ce827c9`
+**TypeScript: 0 errors | Build: clean | All 5 pages `○ Static`**
+
+#### Pages Updated
+
+| Page | New Title | New H1 |
+|---|---|---|
+| `/passenger-tires` | Buy Passenger Tires at Affordable Prices \| See Current Offers \| OKELCOR | Passenger Tires for Sale – Browse Available PCR Tyres |
+| `/light-truck-tires` | Buy Light Truck Tires \| Van & Commercial Tires at OKELCOR | Light Truck Tires for Sale – Browse our complete TBR Tyres |
+| `/all-season-tires` | Buy All-Season Tires at Affordable Prices \| Year-Round Passenger, SUV & TBR Tyres | All-Season Tires for Sale – Year-Round Tyres Available |
+| `/summer-tires` | Buy Summer Tires For Passenger car, SUVs & Light Truck \| OKELCOR | Summer Tires for Sale – See Available Tyres At Competitive Prices |
+| `/winter-tires` | Buy Winter Tires For Snow, Ice & Cold Weather Conditions \| OKELCOR | Winter Tires for Sale – Safe & High-Performance Snow, Ice & Cold Weather Tyres |
+
+#### What changed per page (all 5)
+- `metadata.title` / `metadata.description` → exact approved text
+- `openGraph.title` + `openGraph.description` → mirrored from metadata
+- `twitter.title` + `twitter.description` → mirrored from metadata
+- `config.h1` → exact approved H1
+- `config.intro[]` → exact approved supporting paragraph (single paragraph replacing the previous 2-paragraph wholesale-focused intro)
+
+#### What was NOT changed (preserved)
+- Canonical URLs, breadcrumb schema, FAQ schema, `popularSizes`, `relatedGroups`, `filters`, `eyebrow`, sitemap entries, static prerendering
+
+---
+
+## Completed in Latest Session — eBay Business Policies: Expose in Readiness Panel (2026-05-14)
+
+---
+
+### eBay Business Policies — Fetch & Display Seller Business Policies
+
+**Goal:** Surface the connected seller's eBay business policies (Payment, Fulfillment, Return) inside the Readiness Panel so admins can copy policy IDs into environment variables without leaving the admin.
+
+**Commits:** pushed with EB-4 session
+**TypeScript: 0 errors | Build: clean**
+
+#### New: `app/api/admin/ebay/policies/route.ts`
+GET proxy → `GET /admin/ebay/policies`. Reads `admin_token` cookie, Bearer-authenticates to backend, returns raw policy payload. Gracefully returns `{}` on error.
+
+#### New types in `app/admin/ebay/page.tsx`
+```typescript
+type EbayPolicy   = { id: string; name: string };
+type EbayPolicies = { payment: EbayPolicy[]; fulfillment: EbayPolicy[]; return: EbayPolicy[] };
+```
+
+#### New helper: `normalizePolicies(raw)`
+Handles all backend key-naming variants without requiring backend changes:
+```typescript
+payment:     pick("payment", "payment_policies", "paymentPolicies")
+fulfillment: pick("fulfillment", "fulfillment_policies", "fulfillmentPolicies", "shipping", "shipping_policies", "shippingPolicies")
+return:      pick("return", "return_policies", "returnPolicies")
+```
+
+#### Updated: `ReadinessPanel` sub-component (inside `app/admin/ebay/page.tsx`)
+New state added to `ReadinessPanel`:
+- `policies: EbayPolicies | null`
+- `policiesLoading: boolean`
+- `policiesError: string | null`
+- `copiedId: string | null`
+
+**"Fetch Business Policies" button:**
+- Calls `GET /api/admin/ebay/policies`
+- Normalizes response with `normalizePolicies()`
+- Graceful: if backend returns error or empty, shows error message without breaking the panel
+
+**Policies display (three groups):**
+- Payment Policies
+- Fulfillment Policies
+- Return Policies
+
+Per-policy row: policy name + policy ID (monospace) + "Copy ID" button. On click: copies ID to clipboard, button text changes to "Copied!" for 2 seconds, then resets.
+
+**Help text:** References `EBAY_PAYMENT_POLICY_ID`, `EBAY_FULFILLMENT_POLICY_ID`, `EBAY_RETURN_POLICY_ID` env vars.
+
+**Graceful degradation:** If backend policies endpoint not deployed, panel shows a dismissable error rather than blocking readiness checks.
+
+---
+
+**Backend endpoint required:**
+- `GET /api/v1/admin/ebay/policies` → `{ payment: [{id, name}], fulfillment: [{id, name}], return: [{id, name}] }`
+  - OR any of the key-name variants handled by `normalizePolicies()` (snake_case or camelCase)
+
+---
+
 ## Completed in Latest Session — eBay Phase EB-1: OAuth Connection & Token Stability (2026-05-14)
 
 ---
