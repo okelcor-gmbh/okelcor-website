@@ -6,20 +6,21 @@ import CatalogueLanding from "@/components/shop/catalogue-landing";
 const CANONICAL = "https://www.okelcor.com/pirelli-tires";
 
 export const metadata: Metadata = {
-  title: "Pirelli Tyres Wholesale — Bulk Pirelli Tyre Supply | Okelcor",
+  title: "Buy Pirelli Tires for Passenger Cars at Affordable Prices | Fast Shipping",
   description:
-    "Wholesale Pirelli tyres — PCR — at competitive bulk prices. Okelcor supplies Pirelli passenger tyres to distributors in over 30 countries with international logistics.",
+    "Shop affordable Pirelli tires for cars, SUVs, and fleets. Find premium all-season, summer, and winter performance tyres at competitive prices.",
   alternates: { canonical: CANONICAL },
   openGraph: {
-    title: "Pirelli Tyres Wholesale — Bulk Supply | Okelcor",
+    title: "Buy Pirelli Tires for Passenger Cars at Affordable Prices | Fast Shipping",
     description:
-      "Wholesale Pirelli PCR tyres from Okelcor. Competitive bulk pricing with reliable international logistics.",
+      "Shop affordable Pirelli tires for cars, SUVs, and fleets. Find premium all-season, summer, and winter performance tyres at competitive prices.",
     url: CANONICAL,
     type: "website",
   },
   twitter: {
-    title: "Pirelli Tyres Wholesale — Okelcor",
-    description: "Wholesale Pirelli tyres for distributors worldwide.",
+    title: "Buy Pirelli Tires for Passenger Cars at Affordable Prices | Fast Shipping",
+    description:
+      "Shop affordable Pirelli tires for cars, SUVs, and fleets. Find premium all-season, summer, and winter performance tyres at competitive prices.",
   },
 };
 
@@ -40,10 +41,9 @@ export default function PirelliTiresPage() {
       <CatalogueLanding
         config={{
           eyebrow: "Brand",
-          h1: "Pirelli Tyres — Wholesale Supply",
+          h1: "Pirelli Tires for Sale – Premium Performance for Passenger Cars, SUVs & Fleets",
           intro: [
-            "Pirelli is an Italian tyre manufacturer with over 150 years of history, renowned globally for its ultra-high-performance (UHP) tyre technology and its exclusive position as Formula 1's sole tyre supplier since 2011. Headquartered in Milan, Pirelli focuses on the premium and prestige PCR segment, with OEM fitments on Ferrari, Porsche, Maserati, Lamborghini, and other luxury vehicle platforms. This positioning commands a price premium that reflects the brand's exclusivity and performance credentials.",
-            "For wholesale distributors, Pirelli's demand is strongest in markets with high concentrations of premium vehicles — Western Europe, the Gulf states, and parts of Southeast Asia. The Cinturato P7 offers sustainable performance for standard passenger cars; the P Zero targets sports and performance vehicles; and the Scorpion range covers premium SUVs and crossovers. Okelcor supplies Pirelli PCR tyres at wholesale prices to distribution partners who serve quality-driven end markets. Contact our sales team for Pirelli availability and pricing.",
+            "Shop premium Pirelli tires at OKELCOR for passenger cars, SUVs, luxury vehicles, and fleet operations. Pirelli is globally recognized for high-performance tire technology, sporty handling, safety, and premium driving comfort across all-season, summer, and winter conditions. We supply genuine Pirelli tyres for both retail customers and wholesale buyers. Browse the catalog below or use the filters to quickly find the right tire by size, vehicle type, season, or performance category.",
           ],
           filters: { brand: "Pirelli" },
           breadcrumbSchema: breadcrumb,

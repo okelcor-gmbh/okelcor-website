@@ -6,20 +6,21 @@ import CatalogueLanding from "@/components/shop/catalogue-landing";
 const CANONICAL = "https://www.okelcor.com/continental-tires";
 
 export const metadata: Metadata = {
-  title: "Continental Tyres Wholesale — Bulk Continental Supply | Okelcor",
+  title: "Buy Continental Tires for Passenger Car and SUVs at Affordable Prices",
   description:
-    "Wholesale Continental tyres — PCR and TBR — at competitive bulk prices. Okelcor supplies Continental passenger and commercial tyres to distributors in over 30 countries.",
+    "Shop affordable Continental tires for cars, SUVs, and fleets. Find premium all-season, summer, and winter tires at competitive retail and wholesale prices.",
   alternates: { canonical: CANONICAL },
   openGraph: {
-    title: "Continental Tyres Wholesale — Bulk Supply | Okelcor",
+    title: "Buy Continental Tires for Passenger Car and SUVs at Affordable Prices",
     description:
-      "Wholesale Continental PCR and TBR tyres from Okelcor. Competitive bulk pricing with reliable international logistics.",
+      "Shop affordable Continental tires for cars, SUVs, and fleets. Find premium all-season, summer, and winter tires at competitive retail and wholesale prices.",
     url: CANONICAL,
     type: "website",
   },
   twitter: {
-    title: "Continental Tyres Wholesale — Okelcor",
-    description: "Wholesale Continental tyres — PCR and TBR — for distributors worldwide.",
+    title: "Buy Continental Tires for Passenger Car and SUVs at Affordable Prices",
+    description:
+      "Shop affordable Continental tires for cars, SUVs, and fleets. Find premium all-season, summer, and winter tires at competitive retail and wholesale prices.",
   },
 };
 
@@ -40,10 +41,9 @@ export default function ContinentalTiresPage() {
       <CatalogueLanding
         config={{
           eyebrow: "Brand",
-          h1: "Continental Tyres — Wholesale Supply",
+          h1: "Continental Tires for Sale – Premium Tyres For Passenger cars, SUV & Fleets",
           intro: [
-            "Continental is one of Europe's most respected tyre manufacturers, headquartered in Hanover, Germany, with a reputation built on engineering precision and safety technology. Continental holds strong OEM fitments across Volkswagen Group, BMW, Mercedes-Benz, and other major European manufacturers, which drives substantial aftermarket demand in the replacement market. The brand competes at the premium tier for both PCR and TBR, consistently ranking at or near the top in independent European tyre tests.",
-            "Okelcor distributes Continental PCR and TBR tyres at competitive wholesale prices to established distribution partners in over 30 countries. Continental's EcoContact range leads in fuel-efficiency PCR; the ContiPremiumContact delivers high-performance touring comfort; and its TBR commercial range covers the full spectrum of axle positions for long-haul and regional fleets. Continental's German-engineering heritage is a compelling selling point in quality-sensitive export markets. Contact our sales team for Continental availability and bulk pricing.",
+            "Find premium Continental tires at OKELCOR GmbH for passenger cars, SUVs, vans, and fleet vehicles. We offer a full range of Continental tyres available in all-season, summer, and winter conditions for both retail customers and wholesale buyers, including tire dealers, workshops, and export businesses. Browse the catalog below or use the filters to quickly find the right tire by size, season, performance, or vehicle type.",
           ],
           filters: { brand: "Continental" },
           breadcrumbSchema: breadcrumb,

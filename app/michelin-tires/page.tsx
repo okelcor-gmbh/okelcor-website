@@ -6,20 +6,21 @@ import CatalogueLanding from "@/components/shop/catalogue-landing";
 const CANONICAL = "https://www.okelcor.com/michelin-tires";
 
 export const metadata: Metadata = {
-  title: "Michelin Tyres Wholesale — Bulk Michelin Tyre Supply | Okelcor",
+  title: "Buy Michelin Tires for Passenger Cars and SUVs at Affordable Prices",
   description:
-    "Wholesale Michelin tyres — PCR and TBR — at competitive bulk prices. Okelcor supplies Michelin passenger and commercial tyres to distributors in over 30 countries with international logistics.",
+    "Shop Michelin tires for cars, SUVs, and fleets. Find premium all-season, summer, and winter tires at competitive retail and wholesale prices.",
   alternates: { canonical: CANONICAL },
   openGraph: {
-    title: "Michelin Tyres Wholesale — Bulk Supply | Okelcor",
+    title: "Buy Michelin Tires for Passenger Cars and SUVs at Affordable Prices",
     description:
-      "Wholesale Michelin PCR and TBR tyres from Okelcor. Competitive bulk pricing with reliable international logistics.",
+      "Shop Michelin tires for cars, SUVs, and fleets. Find premium all-season, summer, and winter tires at competitive retail and wholesale prices.",
     url: CANONICAL,
     type: "website",
   },
   twitter: {
-    title: "Michelin Tyres Wholesale — Okelcor",
-    description: "Wholesale Michelin tyres — PCR and TBR — for distributors worldwide.",
+    title: "Buy Michelin Tires for Passenger Cars and SUVs at Affordable Prices",
+    description:
+      "Shop Michelin tires for cars, SUVs, and fleets. Find premium all-season, summer, and winter tires at competitive retail and wholesale prices.",
   },
 };
 
@@ -40,10 +41,9 @@ export default function MichelinTiresPage() {
       <CatalogueLanding
         config={{
           eyebrow: "Brand",
-          h1: "Michelin Tyres — Wholesale Supply",
+          h1: "Michelin Tires for Sale – Passenger and SUV Tires - Best Prices",
           intro: [
-            "Michelin is consistently ranked among the world's most recognised tyre brands, with a global reputation for durability, fuel efficiency, and safety. Founded in France in 1889, Michelin manufactures tyres for passenger cars, trucks, and commercial vehicles at facilities across Europe, North America, and Asia. For wholesale tyre distributors, Michelin represents the premium end of both the PCR and TBR market — high brand recognition drives strong consumer pull, with end buyers frequently requesting Michelin by name.",
-            "Okelcor sources Michelin PCR and TBR tyres at competitive wholesale prices and supplies distribution partners across Africa, the Middle East, and Eastern Europe. Key wholesale products include the Energy Saver+ (fuel-efficient PCR), CrossClimate 2 (all-season PCR), Pilot Sport 4 (performance PCR), and the X MultiWay family for long-haul truck and bus applications. Contact our sales team for current Michelin availability and bulk pricing.",
+            "Find premium Michelin tires at OKELCOR for passenger cars, SUVs, vans, and fleet vehicles. We supply a wide range of Michelin passenger, all-season, summer, and winter tires for both retail customers and wholesale buyers, including tire dealers, workshops, and fleet operators. Browse the catalog below or use the filters to quickly find the right tire by size, season, or performance needs.",
           ],
           filters: { brand: "Michelin" },
           breadcrumbSchema: breadcrumb,

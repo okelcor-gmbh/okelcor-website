@@ -6,20 +6,21 @@ import CatalogueLanding from "@/components/shop/catalogue-landing";
 const CANONICAL = "https://www.okelcor.com/dunlop-tires";
 
 export const metadata: Metadata = {
-  title: "Dunlop Tyres Wholesale — Bulk Dunlop Tyre Supply | Okelcor",
+  title: "Buy Affordable Dunlop Tires for Passenger cars, SUV & Light Truck vehicles",
   description:
-    "Wholesale Dunlop tyres — PCR — at competitive bulk prices. Okelcor supplies Dunlop sport and performance passenger tyres to distributors in over 30 countries.",
+    "Shop Dunlop tires for cars, SUVs, Light Trucks, and fleets. Find performance all-season, summer, and winter tyres at competitive retail and wholesale prices.",
   alternates: { canonical: CANONICAL },
   openGraph: {
-    title: "Dunlop Tyres Wholesale — Bulk Supply | Okelcor",
+    title: "Buy Affordable Dunlop Tires for Passenger cars, SUV & Light Truck vehicles",
     description:
-      "Wholesale Dunlop PCR tyres from Okelcor. Competitive bulk pricing with reliable international logistics.",
+      "Shop Dunlop tires for cars, SUVs, Light Trucks, and fleets. Find performance all-season, summer, and winter tyres at competitive retail and wholesale prices.",
     url: CANONICAL,
     type: "website",
   },
   twitter: {
-    title: "Dunlop Tyres Wholesale — Okelcor",
-    description: "Wholesale Dunlop tyres for distributors worldwide.",
+    title: "Buy Affordable Dunlop Tires for Passenger cars, SUV & Light Truck vehicles",
+    description:
+      "Shop Dunlop tires for cars, SUVs, Light Trucks, and fleets. Find performance all-season, summer, and winter tyres at competitive retail and wholesale prices.",
   },
 };
 
@@ -40,10 +41,9 @@ export default function DunlopTiresPage() {
       <CatalogueLanding
         config={{
           eyebrow: "Brand",
-          h1: "Dunlop Tyres — Wholesale Supply",
+          h1: "Dunlop Tires for Sale – Performance Passenger cars, SUVs & Light Trucks",
           intro: [
-            "Dunlop is one of the world's oldest tyre brands, founded in 1889 by John Boyd Dunlop in Belfast, Northern Ireland. Today, Dunlop's European tyre business operates within the Goodyear group, sharing manufacturing at Goodyear facilities while maintaining a distinct sport-performance brand identity. Dunlop specialises in high-performance and sport-oriented PCR tyres, competing in the upper-mid to premium segment with strong independent test results and a performance heritage that resonates with driving-enthusiast buyers.",
-            "For wholesale distributors, Dunlop offers a credible alternative to more expensive premium brands — delivering strong performance at a price point accessible to a broader market. The Sport Maxx RT2 and SportMaxx Race 2 cover a wide range of high-performance PCR sizes from 17 to 21 inches. Okelcor distributes Dunlop PCR tyres at wholesale prices to partners across Europe and international export markets. Contact our sales team for current Dunlop availability and volume pricing.",
+            "Shop high-quality Dunlop tires for passenger cars, SUVs, vans, light trucks, and fleet vehicles now available at an attractive rate. We supply a full range of Dunlop tires for both retail customers and wholesale buyers, including tire dealers, workshops, and export partners. Browse the catalog below or use the filters to quickly find the right tire by size, season, performance, or vehicle type.",
           ],
           filters: { brand: "Dunlop" },
           breadcrumbSchema: breadcrumb,

@@ -6,20 +6,21 @@ import CatalogueLanding from "@/components/shop/catalogue-landing";
 const CANONICAL = "https://www.okelcor.com/bridgestone-tires";
 
 export const metadata: Metadata = {
-  title: "Bridgestone Tyres Wholesale — Bulk Bridgestone Supply | Okelcor",
+  title: "Buy Affordable Bridgestone Tires for Passenger cars and SUVs and Light Truck",
   description:
-    "Wholesale Bridgestone tyres — PCR and TBR — at competitive bulk prices. Okelcor supplies Bridgestone passenger and commercial tyres to distributors in over 30 countries.",
+    "Shop Bridgestone tires for cars, SUVs, light trucks and fleets. Find premium all-season, summer, and winter tires at competitive prices.",
   alternates: { canonical: CANONICAL },
   openGraph: {
-    title: "Bridgestone Tyres Wholesale — Bulk Supply | Okelcor",
+    title: "Buy Affordable Bridgestone Tires for Passenger cars and SUVs and Light Truck",
     description:
-      "Wholesale Bridgestone PCR and TBR tyres from Okelcor. Competitive bulk pricing with reliable international logistics.",
+      "Shop Bridgestone tires for cars, SUVs, light trucks and fleets. Find premium all-season, summer, and winter tires at competitive prices.",
     url: CANONICAL,
     type: "website",
   },
   twitter: {
-    title: "Bridgestone Tyres Wholesale — Okelcor",
-    description: "Wholesale Bridgestone tyres — PCR and TBR — for distributors worldwide.",
+    title: "Buy Affordable Bridgestone Tires for Passenger cars and SUVs and Light Truck",
+    description:
+      "Shop Bridgestone tires for cars, SUVs, light trucks and fleets. Find premium all-season, summer, and winter tires at competitive prices.",
   },
 };
 
@@ -40,10 +41,9 @@ export default function BridgestoneTiresPage() {
       <CatalogueLanding
         config={{
           eyebrow: "Brand",
-          h1: "Bridgestone Tyres — Wholesale Supply",
+          h1: "Bridgestone Tires for Sale – Passenger, SUV & Light Truck Tyres",
           intro: [
-            "Bridgestone is the world's largest tyre manufacturer by revenue, headquartered in Japan with production facilities across Europe, North America, and Asia. The brand spans the full spectrum from premium PCR touring and performance tyres to commercial TBR for long-haul and regional distribution. Bridgestone also owns the Firestone brand. For wholesale distributors, Bridgestone offers one of the broadest product portfolios in the market, with strong OEM fitments across major European and Asian vehicle platforms driving consistent aftermarket demand.",
-            "Okelcor distributes Bridgestone tyres to wholesale partners across Europe, Africa, the Middle East, and Southeast Asia. The Turanza range is a premium PCR touring staple; the Blizzak winter series is among the best-selling winter tyres globally; and the Ecopia commercial range appeals to fleet operators focused on fuel efficiency and total cost of ownership. Contact our sales team for current Bridgestone availability and competitive bulk pricing.",
+            "Find premium Bridgestone tires for passenger cars, SUVs, vans, light trucks and fleet vehicles at exclusive affordable prices. Go through our available all-season, summer, winter, and fuel-efficient tires, designed for safety, comfort, and durability. We supply Bridgestone tires for both retail customers and wholesale buyers such as tire dealers, workshops, and export businesses. Browse the catalog below or use the filters to quickly find the right tire size, model, and performance category for your needs.",
           ],
           filters: { brand: "Bridgestone" },
           breadcrumbSchema: breadcrumb,

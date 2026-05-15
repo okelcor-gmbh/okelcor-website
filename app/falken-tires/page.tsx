@@ -6,20 +6,21 @@ import CatalogueLanding from "@/components/shop/catalogue-landing";
 const CANONICAL = "https://www.okelcor.com/falken-tires";
 
 export const metadata: Metadata = {
-  title: "Falken Tyres Wholesale — Bulk Falken Tyre Supply | Okelcor",
+  title: "Buy Premium Falken Tires at Affordable Prices - Fast Shipping",
   description:
-    "Wholesale Falken tyres — PCR and TBR — at competitive bulk prices. Okelcor supplies Falken passenger and commercial tyres to distributors in over 30 countries.",
+    "Shop Falken tires for cars, SUVs, and fleets. Find high-performance all-season, summer, and winter tires at competitive prices.",
   alternates: { canonical: CANONICAL },
   openGraph: {
-    title: "Falken Tyres Wholesale — Bulk Supply | Okelcor",
+    title: "Buy Premium Falken Tires at Affordable Prices - Fast Shipping",
     description:
-      "Wholesale Falken tyres from Okelcor. Competitive bulk pricing with reliable international logistics.",
+      "Shop Falken tires for cars, SUVs, and fleets. Find high-performance all-season, summer, and winter tires at competitive prices.",
     url: CANONICAL,
     type: "website",
   },
   twitter: {
-    title: "Falken Tyres Wholesale — Okelcor",
-    description: "Wholesale Falken tyres for distributors worldwide.",
+    title: "Buy Premium Falken Tires at Affordable Prices - Fast Shipping",
+    description:
+      "Shop Falken tires for cars, SUVs, and fleets. Find high-performance all-season, summer, and winter tires at competitive prices.",
   },
 };
 
@@ -40,10 +41,9 @@ export default function FalkenTiresPage() {
       <CatalogueLanding
         config={{
           eyebrow: "Brand",
-          h1: "Falken Tyres — Wholesale Supply",
+          h1: "Falken Tires for Sale – Performance Passenger Cars, SUVs & Light Truck Tyres",
           intro: [
-            "Falken is a global tyre brand owned by Sumitomo Rubber Industries (SRI) of Japan, operating as a distinct brand identity within the SRI group alongside Dunlop (licensed in Asia and Africa). Originally positioned as a budget-performance brand, Falken has invested steadily in product quality over the past decade and now occupies a credible mid-range position in the European PCR and TBR market, with improving independent test scores and growing OEM fitments.",
-            "For wholesale tyre distributors, Falken offers an attractive value proposition — meaningful brand recognition, acceptable quality, and pricing typically 25–40% below the premium tier. This positioning makes Falken popular for markets where customers want a branded tyre at a competitive price point. Falken's range spans PCR summer, winter, and all-season variants, as well as TBR for commercial vehicles. Okelcor distributes Falken tyres wholesale to partners across Europe, Africa, and the Middle East. Contact our team for availability and bulk pricing.",
+            "Shop top-performance Falken tires for passenger cars, SUVs, vans, and fleet vehicles now available at unbeatable prices. The tires below are available for both retail and B2B customers like; tire dealers, workshops, exporters, and fleet operators. Browse the catalog below or use the filters to quickly find the right Falken tyre by size, season, vehicle type, or performance category.",
           ],
           filters: { brand: "Falken" },
           breadcrumbSchema: breadcrumb,

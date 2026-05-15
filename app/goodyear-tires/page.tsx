@@ -6,20 +6,21 @@ import CatalogueLanding from "@/components/shop/catalogue-landing";
 const CANONICAL = "https://www.okelcor.com/goodyear-tires";
 
 export const metadata: Metadata = {
-  title: "Goodyear Tyres Wholesale — Bulk Goodyear Tyre Supply | Okelcor",
+  title: "Buy Affordable Goodyear Tires For Passenger cars, Light Trucks & SUVs",
   description:
-    "Wholesale Goodyear tyres — PCR summer and winter — at competitive bulk prices. Okelcor supplies Goodyear passenger tyres to distributors in over 30 countries.",
+    "Shop Goodyear tires for cars, SUVs, Light trucks and fleets. Find reliable all-season, summer, and winter tires at competitive prices.",
   alternates: { canonical: CANONICAL },
   openGraph: {
-    title: "Goodyear Tyres Wholesale — Bulk Supply | Okelcor",
+    title: "Buy Affordable Goodyear Tires For Passenger cars, Light Trucks & SUVs",
     description:
-      "Wholesale Goodyear PCR tyres from Okelcor. Competitive bulk pricing with reliable international logistics.",
+      "Shop Goodyear tires for cars, SUVs, Light trucks and fleets. Find reliable all-season, summer, and winter tires at competitive prices.",
     url: CANONICAL,
     type: "website",
   },
   twitter: {
-    title: "Goodyear Tyres Wholesale — Okelcor",
-    description: "Wholesale Goodyear tyres for distributors worldwide.",
+    title: "Buy Affordable Goodyear Tires For Passenger cars, Light Trucks & SUVs",
+    description:
+      "Shop Goodyear tires for cars, SUVs, Light trucks and fleets. Find reliable all-season, summer, and winter tires at competitive prices.",
   },
 };
 
@@ -40,10 +41,9 @@ export default function GoodyearTiresPage() {
       <CatalogueLanding
         config={{
           eyebrow: "Brand",
-          h1: "Goodyear Tyres — Wholesale Supply",
+          h1: "Goodyear Tires for Sale – Premium Passenger, SUV & Wholesale Tires",
           intro: [
-            "Goodyear is one of the world's most recognised tyre brands, founded in Akron, Ohio in 1898 and now operating across 23 countries. In Europe, Goodyear manufactures tyres at facilities in Luxembourg, Germany, Poland, and Turkey. The brand is positioned in the upper-mid to premium tier, offering broad product depth across its three main PCR lines: the EfficientGrip range (fuel economy), the Eagle range (high performance), and the UltraGrip range (winter). Goodyear also owns the Dunlop brand in Europe.",
-            "For wholesale tyre distributors, Goodyear offers particular strength in the winter tyre segment — the UltraGrip Performance+ and its successor consistently rank among the top winter PCR tyres in independent European tests. Okelcor distributes Goodyear PCR tyres at competitive bulk prices to wholesale partners in over 30 countries. The brand's global recognition and consistent test performance make it a reliable seller across diverse markets. Contact our sales team for current availability and volume pricing.",
+            "Shop premium Goodyear tires for your car, SUV, van, or fleet vehicles. Whether you are looking for summer, winter, or all-season tires as a retail or wholesale customer, we have you covered. Browse the catalog below or use the filters to quickly find the right Goodyear tire by size, vehicle type, season, or performance needs.",
           ],
           filters: { brand: "Goodyear" },
           breadcrumbSchema: breadcrumb,
