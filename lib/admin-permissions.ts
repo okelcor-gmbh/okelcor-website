@@ -17,8 +17,8 @@ export type AdminRole = (typeof ALL_ROLES)[number];
 // Mirrors backend ROLE_ACCESS table.
 
 export const ROLE_ACCESS: Record<string, string[]> = {
-  super_admin:     ["dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "analytics", "chats", "security", "eu_declarations", "logistics"],
-  admin:           ["dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "analytics", "chats", "security", "eu_declarations", "logistics"],
+  super_admin:     ["dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "analytics", "chats", "security", "eu_declarations", "logistics", "system_health"],
+  admin:           ["dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "analytics", "chats", "security", "eu_declarations", "logistics", "system_health"],
   order_manager:   ["dashboard", "orders", "quotes", "supplier", "eu_declarations", "logistics"],
   sales_manager:   ["dashboard", "orders", "quotes", "customers", "analytics", "logistics"],
   content_manager: ["dashboard", "articles", "hero_slides", "promotions", "fet", "brands"],
@@ -52,6 +52,7 @@ export const PATH_SECTION: Record<string, string> = {
   "/admin/chats":           "chats",
   "/admin/eu-declarations": "eu_declarations",
   "/admin/logistics":       "logistics",
+  "/admin/system-health":   "system_health",
 };
 
 // ── Permission map ─────────────────────────────────────────────────────────────
@@ -111,6 +112,9 @@ const PERMISSION_ROLES: Record<string, string[]> = {
 
   // eBay
   "ebay.manage": ["super_admin", "admin"],
+
+  // System health
+  "system.manage":         ["super_admin", "admin"],
 
   // Users / audit
   "users.manage":          ["super_admin", "admin"],

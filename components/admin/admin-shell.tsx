@@ -31,6 +31,7 @@ import {
   ShieldAlert,
   FileCheck,
   Truck,
+  Activity,
 } from "lucide-react";
 import { logoutAdmin } from "@/app/admin/actions";
 import { canAccess, PATH_SECTION, ROLE_LABELS, ROLE_BADGE_COLORS } from "@/lib/admin-permissions";
@@ -54,6 +55,7 @@ const NAV = [
   { label: "Brands",         href: "/admin/brands",       icon: Star,        section: "brands" },
   { label: "Customers",      href: "/admin/customers",   icon: ContactRound,    section: "customers" },
   { label: "Security",       href: "/admin/security",    icon: ShieldAlert,     section: "security" },
+  { label: "System Health",  href: "/admin/system-health", icon: Activity,      section: "system_health" },
   { label: "Settings",       href: "/admin/settings",    icon: Settings,        section: "settings" },
   { label: "Supplier Intel", href: "/admin/supplier",    icon: TrendingUp,      section: "supplier" },
   { label: "Users",          href: "/admin/users",       icon: Users,           section: "users" },
