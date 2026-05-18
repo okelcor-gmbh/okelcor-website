@@ -1,25 +1,22 @@
 /**
- * lib/ebay.ts
- * eBay Trading API integration — lists tyre products on EBAY_DE.
+ * lib/ebay.ts — QUARANTINED: Legacy Trading API (XML/SOAP)
  *
- * Uses the eBay Trading API (XML/SOAP) which:
- *   - doesn't require pre-configured seller policies
- *   - ships/return policies are included inline in each listing
- *   - works with OAuth 2.0 Bearer tokens
+ * NOT used by any seller listing, remove, or sync action.
+ * All seller operations now route through the Laravel backend
+ * (EbaySellingService + DB-backed OAuth tokens via ebay_tokens table).
  *
- * Required env vars:
- *   EBAY_APP_ID          — Application ID (Client ID)
- *   EBAY_DEV_ID          — Developer ID
- *   EBAY_CERT_ID         — Certificate ID (Client Secret)
- *   EBAY_ACCESS_TOKEN    — Current OAuth access token
- *   EBAY_REFRESH_TOKEN   — Long-lived refresh token (for auto-refresh)
- *   EBAY_MARKETPLACE_ID  — e.g. EBAY_DE
+ * Route handlers and server actions that previously imported from here
+ * have been replaced with direct proxies to the Laravel Sell API:
+ *   POST   /api/v1/admin/products/{id}/ebay/list
+ *   DELETE /api/v1/admin/products/{id}/ebay/remove
+ *   PATCH  /api/v1/admin/products/{id}/ebay/update
+ *   POST   /api/v1/admin/products/{id}/ebay/refresh-status
+ *   GET    /api/v1/admin/ebay/sync
  *
- * Optional env vars:
- *   EBAY_SELLER_POSTAL_CODE  — Seller postal code (e.g. "60306")
- *   EBAY_SELLER_LOCATION     — City/description (e.g. "Frankfurt")
- *   EBAY_SHIPPING_COST       — Flat shipping cost in EUR (default "5.99")
- *   EBAY_DEFAULT_QUANTITY    — Default quantity when inventory is unknown (default "4")
+ * This file is retained for reference only. Do NOT re-import its
+ * listProductOnEbay / removeProductFromEbay / getActiveListings
+ * functions into any production listing flow — they use the stale
+ * EBAY_ACCESS_TOKEN env var which produces error 932 (token expired).
  */
 
 const TRADING_API_URL = "https://api.ebay.com/ws/api.dll";

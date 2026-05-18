@@ -2,6 +2,69 @@
 
 ---
 
+## Completed in Latest Session — eBay Error 932: Trading API Quarantine (2026-05-18)
+
+---
+
+### Root Cause: Error 932 "Token irrevocably expired"
+
+**Error 932** (`Das Authentifizierungs-Token ist unwiderruflich abgelaufen`) is a Trading API error. It comes from `lib/ebay.ts` using `EBAY_ACCESS_TOKEN` (a static env var) — not from the Laravel backend's DB-backed OAuth token.
+
+**Three code paths were still calling `lib/ebay.ts` in production:**
+
+| Admin action | Next.js entry point | Bad call chain |
+|---|---|---|
+| Products table eBay toggle | Server actions `listOnEbay` / `removeFromEbay` in `actions.ts` | → `listProductOnEbay()` / `removeProductFromEbay()` in `lib/ebay.ts` → Trading API (XML/SOAP) |
+| eBay admin page toggle | `POST /api/admin/products/[id]/ebay/list` + `DELETE /remove` | → same `lib/ebay.ts` functions → Trading API |
+| Sync from eBay button | `GET /api/admin/ebay/sync` | → `getActiveListings()` in `lib/ebay.ts` → Trading API |
+
+**Clean paths (already correct, unaffected):** `/update` and `/refresh-status` route handlers were already pure Laravel proxies.
+
+### Files Changed
+
+#### `app/api/admin/products/[id]/ebay/list/route.ts` — full rewrite
+Removed `listProductOnEbay` import from `lib/ebay.ts`. Now a pure proxy:
+`POST ${API_URL}/admin/products/${id}/ebay/list` → Laravel backend (Sell API, DB token)
+
+#### `app/api/admin/products/[id]/ebay/remove/route.ts` — full rewrite
+Removed `removeProductFromEbay` import from `lib/ebay.ts`. Now a pure proxy:
+`DELETE ${API_URL}/admin/products/${id}/ebay/remove` → Laravel backend
+
+#### `app/api/admin/ebay/sync/route.ts` — full rewrite
+Removed `getActiveListings` / `isEbayConfigured` imports from `lib/ebay.ts`. Now a pure proxy:
+`GET ${API_URL}/admin/ebay/sync` → Laravel backend
+
+#### `app/admin/products/actions.ts` — rewrite of `listOnEbay` + `removeFromEbay`
+Removed `listProductOnEbay`, `removeProductFromEbay`, `EbayProduct` imports from `lib/ebay.ts`.
+Both server actions now call the Laravel backend directly (same pattern as all other server actions):
+- `listOnEbay(id)` → `POST ${API_URL}/admin/products/${id}/ebay/list`
+- `removeFromEbay(id)` → `DELETE ${API_URL}/admin/products/${id}/ebay/remove`
+
+#### `lib/ebay.ts` — quarantine notice added
+Prominent block comment at top explains the file is quarantined. Lists exact backend routes to use instead. The file is kept for reference; its functions must never be re-imported into any listing flow.
+
+### Final eBay Action Flow (All Seller Operations)
+
+```
+Admin UI (browser)
+  → Next.js route handler or server action
+    → Laravel backend EbaySellingService (DB-backed ebay_tokens OAuth)
+      → eBay Sell API (REST)
+```
+
+`EBAY_ACCESS_TOKEN` / `EBAY_REFRESH_TOKEN` env vars are now irrelevant to any seller listing action.
+
+### Verification
+- `grep -r 'from.*lib/ebay' app/` → **no matches**
+- `npx tsc --noEmit` → **0 errors**
+
+### Backend routes required (confirm Laravel has these)
+- `POST   /api/v1/admin/products/{id}/ebay/list`
+- `DELETE /api/v1/admin/products/{id}/ebay/remove`
+- `GET    /api/v1/admin/ebay/sync` → returns `{ activeCount, activeSKUs[], listings[], syncedAt }`
+
+---
+
 ## Completed in Latest Session — SEO Phase 5B: Brand Catalogue Pages Copy Sync (2026-05-15)
 
 ---
