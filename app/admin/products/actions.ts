@@ -335,54 +335,88 @@ export async function listOnEbay(
   id: number
 ): Promise<{ error?: string }> {
   const token = await getToken();
+  let res: Response;
   try {
-    const res = await fetch(`${API_URL}/admin/products/${id}/ebay/list`, {
+    res = await fetch(`${API_URL}/admin/products/${id}/ebay/list`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
       cache: "no-store",
     });
-    const json = await res.json().catch(() => ({})) as Record<string, unknown>;
-    if (!res.ok) {
-      return {
-        error:
-          (typeof json.message === "string" ? json.message : null) ??
-          (typeof json.error === "string" ? json.error : null) ??
-          `Failed to list on eBay (HTTP ${res.status}).`,
-      };
-    }
-    revalidateProducts(id);
-    revalidatePath("/admin/ebay");
-    return {};
-  } catch {
-    return { error: "Network error. Could not reach the server." };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`[listOnEbay] network error for product ${id}: ${msg}`);
+    return { error: `Network error — ${msg}` };
   }
+
+  const text = await res.text();
+  let json: Record<string, unknown> = {};
+  try {
+    json = JSON.parse(text) as Record<string, unknown>;
+  } catch {
+    console.error(
+      `[listOnEbay] backend non-JSON response (HTTP ${res.status}) for product ${id}:`,
+      text.slice(0, 500)
+    );
+    return { error: `eBay listing failed — backend returned HTTP ${res.status}. Check server logs.` };
+  }
+
+  if (!res.ok) {
+    console.error(`[listOnEbay] backend error (HTTP ${res.status}) for product ${id}:`, JSON.stringify(json));
+    return {
+      error:
+        (typeof json.message === "string" ? json.message : null) ??
+        (typeof json.error === "string" ? json.error : null) ??
+        `Failed to list on eBay (HTTP ${res.status}).`,
+    };
+  }
+
+  revalidateProducts(id);
+  revalidatePath("/admin/ebay");
+  return {};
 }
 
 export async function removeFromEbay(
   id: number
 ): Promise<{ error?: string }> {
   const token = await getToken();
+  let res: Response;
   try {
-    const res = await fetch(`${API_URL}/admin/products/${id}/ebay/remove`, {
+    res = await fetch(`${API_URL}/admin/products/${id}/ebay/remove`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
       cache: "no-store",
     });
-    const json = await res.json().catch(() => ({})) as Record<string, unknown>;
-    if (!res.ok) {
-      return {
-        error:
-          (typeof json.message === "string" ? json.message : null) ??
-          (typeof json.error === "string" ? json.error : null) ??
-          `Failed to remove from eBay (HTTP ${res.status}).`,
-      };
-    }
-    revalidateProducts(id);
-    revalidatePath("/admin/ebay");
-    return {};
-  } catch {
-    return { error: "Network error. Could not reach the server." };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`[removeFromEbay] network error for product ${id}: ${msg}`);
+    return { error: `Network error — ${msg}` };
   }
+
+  const text = await res.text();
+  let json: Record<string, unknown> = {};
+  try {
+    json = JSON.parse(text) as Record<string, unknown>;
+  } catch {
+    console.error(
+      `[removeFromEbay] backend non-JSON response (HTTP ${res.status}) for product ${id}:`,
+      text.slice(0, 500)
+    );
+    return { error: `eBay remove failed — backend returned HTTP ${res.status}. Check server logs.` };
+  }
+
+  if (!res.ok) {
+    console.error(`[removeFromEbay] backend error (HTTP ${res.status}) for product ${id}:`, JSON.stringify(json));
+    return {
+      error:
+        (typeof json.message === "string" ? json.message : null) ??
+        (typeof json.error === "string" ? json.error : null) ??
+        `Failed to remove from eBay (HTTP ${res.status}).`,
+    };
+  }
+
+  revalidateProducts(id);
+  revalidatePath("/admin/ebay");
+  return {};
 }
 
 export async function restoreProduct(

@@ -18,8 +18,9 @@ export async function DELETE(
 
   const { id } = await params;
 
+  let res: Response;
   try {
-    const res = await fetch(`${API_URL}/admin/products/${id}/ebay/remove`, {
+    res = await fetch(`${API_URL}/admin/products/${id}/ebay/remove`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -27,14 +28,33 @@ export async function DELETE(
       },
       cache: "no-store",
     });
-
-    const json = await res.json().catch(() => ({}));
-    return NextResponse.json(json, { status: res.ok ? 200 : res.status });
   } catch (err) {
-    console.error(
-      `[ebay/remove] proxy error for product ${id}:`,
-      err instanceof Error ? err.message : String(err)
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`[ebay/remove] network error for product ${id}: ${msg}`);
+    return NextResponse.json(
+      { error: `Could not reach API server — ${msg}` },
+      { status: 502 }
     );
-    return NextResponse.json({ error: "Could not reach API server." }, { status: 502 });
   }
+
+  const text = await res.text();
+  let json: Record<string, unknown> = {};
+  try {
+    json = JSON.parse(text) as Record<string, unknown>;
+  } catch {
+    console.error(
+      `[ebay/remove] backend non-JSON response (HTTP ${res.status}) for product ${id}:`,
+      text.slice(0, 500)
+    );
+    return NextResponse.json(
+      { error: `eBay remove failed — backend returned HTTP ${res.status}. Check server logs.` },
+      { status: res.status }
+    );
+  }
+
+  if (!res.ok) {
+    console.error(`[ebay/remove] backend error (HTTP ${res.status}) for product ${id}:`, JSON.stringify(json));
+  }
+
+  return NextResponse.json(json, { status: res.ok ? 200 : res.status });
 }
