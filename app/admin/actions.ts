@@ -65,9 +65,9 @@ export async function loginAdmin(
   }
 
   // Backend signals that 2FA has never been configured on this account.
-  // Contract: { requires_2fa_setup: true, data: { temp_token: "..." } }
+  // Contract: { requires_2fa_setup: true, temp_token: "...", user: {...} }
   if (json.requires_2fa_setup === true) {
-    const tempToken: string = json.data?.temp_token ?? "";
+    const tempToken: string = (json.temp_token ?? json.data?.temp_token ?? "") as string;
     if (!tempToken) return { error: "Could not start 2FA setup. Please try logging in again." };
     const cookieStore = await cookies();
     cookieStore.set("admin_setup_token", tempToken, {

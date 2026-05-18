@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useRef, useState, useTransition } from "react";
+import { Suspense, useEffect, useRef, useState, useTransition } from "react";
 import { useSearchParams } from "next/navigation";
 import { loginAdmin, submitAdminTwoFactor } from "@/app/admin/actions";
 
@@ -267,7 +267,8 @@ function MandatoryTwoFactorSetupFlow() {
   };
 
   // Run once on mount
-  useState(() => { fetchQr(); });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { fetchQr(); }, []);
 
   const handleVerify = (e: React.FormEvent) => {
     e.preventDefault();
