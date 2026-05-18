@@ -192,7 +192,8 @@ export type TradeDocument = {
   id: number;
   type: "proforma_invoice" | "commercial_invoice" | "packing_list" | "delivery_note" | "shipment_document" | "other" | string;
   number?: string | null;
-  status: "draft" | "issued" | "sent" | string;
+  status: "draft" | "issued" | "sent" | "superseded" | "void" | string;
+  supersede_reason?: string | null;
   issued_at?: string | null;
   sent_at?: string | null;
   original_filename?: string | null;

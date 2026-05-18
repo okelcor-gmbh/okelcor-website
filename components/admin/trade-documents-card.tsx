@@ -21,9 +21,11 @@ const TYPE_LABEL: Record<string, string> = {
 };
 
 const STATUS_BADGE: Record<string, string> = {
-  draft:  "bg-gray-100 text-gray-600",
-  issued: "bg-blue-100 text-blue-700",
-  sent:   "bg-emerald-100 text-emerald-700",
+  draft:      "bg-gray-100 text-gray-600",
+  issued:     "bg-blue-100 text-blue-700",
+  sent:       "bg-emerald-100 text-emerald-700",
+  superseded: "bg-amber-100 text-amber-700",
+  void:       "bg-red-100 text-red-600",
 };
 
 // Generated PDFs that always open inline in new tab
@@ -70,6 +72,10 @@ function fmtSize(bytes?: number | null): string {
 
 function fileExt(filename?: string | null): string {
   return (filename ?? "").split(".").pop()?.toLowerCase() ?? "";
+}
+
+function isSuperseded(doc: TradeDocument): boolean {
+  return doc.status === "superseded" || doc.status === "void";
 }
 
 function canViewInline(doc: TradeDocument): boolean {
@@ -462,12 +468,14 @@ export default function TradeDocumentsCard({
           <>
             {generatedDocs.length > 0 && (
               <div className="divide-y divide-black/[0.05]">
-                {generatedDocs.map((doc) => (
-                  <div key={doc.id} className="flex items-center gap-4 py-3">
+                {generatedDocs.map((doc) => {
+                  const superseded = isSuperseded(doc);
+                  return (
+                  <div key={doc.id} className={`flex items-center gap-4 py-3 ${superseded ? "opacity-60" : ""}`}>
                     <FileText size={18} strokeWidth={1.5} className="shrink-0 text-[#5c5e62]" />
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-[0.875rem] font-semibold text-[#1a1a1a]">
+                        <p className={`text-[0.875rem] font-semibold ${superseded ? "line-through text-[#9ca3af]" : "text-[#1a1a1a]"}`}>
                           {TYPE_LABEL[doc.type] ?? doc.type}
                         </p>
                         {doc.number && (
@@ -480,17 +488,22 @@ export default function TradeDocumentsCard({
                       {TYPE_DESCRIPTION[doc.type] && (
                         <p className="mt-0.5 text-[0.7rem] text-[#9ca3af]">{TYPE_DESCRIPTION[doc.type]}</p>
                       )}
+                      {superseded && doc.supersede_reason && (
+                        <p className="mt-0.5 text-[0.7rem] text-amber-700">Reason: {doc.supersede_reason}</p>
+                      )}
                       <p className="mt-0.5 text-[0.75rem] text-[#5c5e62]">
                         Issued {shortDate(doc.issued_at)}
                         {doc.sent_at && ` · Sent ${shortDate(doc.sent_at)}`}
                       </p>
                     </div>
                     <div className="flex shrink-0 items-center gap-2">
+                      {/* Admin can still view/download superseded docs for records */}
                       <ActionBtn doc={doc} />
-                      {canManage && <SendBtn doc={doc} />}
+                      {canManage && !superseded && <SendBtn doc={doc} />}
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
 
@@ -501,13 +514,22 @@ export default function TradeDocumentsCard({
                   Shipment Documents
                 </p>
                 <div className="divide-y divide-black/[0.05]">
-                  {shipmentDocs.map((doc) => (
-                    <div key={doc.id} className="flex items-start gap-3 py-3">
+                  {shipmentDocs.map((doc) => {
+                    const superseded = isSuperseded(doc);
+                    return (
+                    <div key={doc.id} className={`flex items-start gap-3 py-3 ${superseded ? "opacity-60" : ""}`}>
                       <Paperclip size={15} strokeWidth={1.8} className="mt-0.5 shrink-0 text-[#5c5e62]" />
                       <div className="min-w-0 flex-1">
-                        <p className="text-[0.875rem] font-semibold text-[#1a1a1a]">
-                          {doc.document_label ?? "Shipment Document"}
-                        </p>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className={`text-[0.875rem] font-semibold ${superseded ? "line-through text-[#9ca3af]" : "text-[#1a1a1a]"}`}>
+                            {doc.document_label ?? "Shipment Document"}
+                          </p>
+                          {superseded && (
+                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[0.68rem] font-bold capitalize ${STATUS_BADGE[doc.status] ?? "bg-amber-100 text-amber-700"}`}>
+                              {doc.status}
+                            </span>
+                          )}
+                        </div>
                         <p className="mt-0.5 truncate text-[0.75rem] text-[#5c5e62]">
                           {doc.original_filename}
                           {doc.file_size ? ` · ${fmtSize(doc.file_size)}` : ""}
@@ -517,11 +539,14 @@ export default function TradeDocumentsCard({
                           {doc.sent_at && ` · Sent ${shortDate(doc.sent_at)}`}
                           {doc.notes ? ` · ${doc.notes}` : ""}
                         </p>
+                        {superseded && doc.supersede_reason && (
+                          <p className="mt-0.5 text-[0.7rem] text-amber-700">Reason: {doc.supersede_reason}</p>
+                        )}
                       </div>
 
                       <div className="flex shrink-0 items-center gap-2">
                         <ActionBtn doc={doc} />
-                        {canManage && <SendBtn doc={doc} />}
+                        {canManage && !superseded && <SendBtn doc={doc} />}
 
                         {canManage && (
                           confirmDelete === doc.id ? (
@@ -556,7 +581,8 @@ export default function TradeDocumentsCard({
                         )}
                       </div>
                     </div>
-                  ))}
+                  );
+                  })}
                 </div>
               </div>
             )}

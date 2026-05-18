@@ -91,8 +91,13 @@ export default function TradeDocumentsCard({
     }
   }
 
-  const tradeDocs    = documents.filter((d) => d.type !== "shipment_document");
-  const shipmentDocs = documents.filter((d) => d.type === "shipment_document");
+  // Customers only see active documents — superseded/void are internal admin records
+  const tradeDocs    = documents.filter(
+    (d) => d.type !== "shipment_document" && d.status !== "superseded" && d.status !== "void"
+  );
+  const shipmentDocs = documents.filter(
+    (d) => d.type === "shipment_document" && d.status !== "superseded" && d.status !== "void"
+  );
 
   if (documents.length === 0) {
     return (
