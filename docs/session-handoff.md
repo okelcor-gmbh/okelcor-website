@@ -2,7 +2,204 @@
 
 ---
 
-## Completed in Latest Session — eBay Error 932: Trading API Quarantine (2026-05-18)
+## Completed in Latest Session — System Health, 2FA Security & eBay Fixes (2026-05-18)
+
+---
+
+### Admin → System Health Page (NEW)
+
+**Feature:** `/admin/system-health` — real-time infrastructure and endpoint monitor visible to `super_admin` and `admin` roles.
+
+**Commits:** `8ae5911`
+**TypeScript: 0 errors**
+
+#### Files Added / Changed
+
+| File | Role |
+|---|---|
+| `app/api/admin/system/health/route.ts` | Proxy `GET /api/v1/admin/system/health` with Bearer token |
+| `app/api/admin/system/errors/route.ts` | Proxy `GET /api/v1/admin/system/errors?limit=N` with Bearer token |
+| `app/admin/system-health/page.tsx` | Full client-side health dashboard (~500 lines) |
+| `lib/admin-permissions.ts` | Added `system_health` section (super_admin + admin); path mapping; `system.manage` permission |
+| `components/admin/admin-shell.tsx` | "System Health" nav entry with `Activity` icon |
+
+#### Dashboard Sections
+
+- **Overall status banner** — green/amber/red ring: "All Systems Healthy / Issues Detected / Critical Problems"
+- **6 summary cards** — Overall, Critical count, Warnings, Failed Jobs, Last Backup, Recent Error count
+- **Health group cards** — 2-column grid; groups: Application, Database, Queue/Backups, Mail, Security, API Endpoints, Integrations; each check shows status icon, message, fix hint on fail/warning
+- **Issues requiring attention** — flattened, severity-sorted list of all non-passing checks
+- **Recent errors table** — time, METHOD/route, level badge, message, IP — no secrets or stack traces exposed
+- **Run Health Check** button with spinner + auto-fetch on mount
+- Graceful fallback: shows "Backend integration pending" if endpoint returns 404
+
+#### Backend Routes Required
+
+```
+GET /api/v1/admin/system/health
+GET /api/v1/admin/system/errors?limit=N
+```
+
+Expected health response shape:
+```json
+{
+  "overall": "pass | warning | fail",
+  "generated_at": "ISO timestamp",
+  "last_backup": "ISO timestamp | null",
+  "failed_jobs": 0,
+  "summary": { "total": 0, "pass": 0, "warning": 0, "fail": 0, "critical": 0 },
+  "groups": [
+    {
+      "group": "application",
+      "label": "Application",
+      "checks": [
+        {
+          "key": "app_env",
+          "label": "App Environment",
+          "status": "pass | warning | fail",
+          "severity": "low | medium | high | critical",
+          "message": "...",
+          "fix_hint": "... | null"
+        }
+      ]
+    }
+  ]
+}
+```
+
+---
+
+### Mandatory Admin 2FA Setup — Token Auth Bug Fix (2026-05-18)
+
+**Problem:** QR code showed "unavailable" and backend returned "Unauthenticated." — setup token was being sent the wrong way.
+
+**Commits:** `474f4e8`
+
+#### Root Causes (4 bugs fixed)
+
+| # | File | Bug | Fix |
+|---|---|---|---|
+| 1 | `app/admin/actions.ts` | `json.data?.temp_token` — but backend puts `temp_token` at top level | `json.temp_token ?? json.data?.temp_token` |
+| 2 | `app/api/admin/2fa/enable/route.ts` | Used `admin_setup_token` as Bearer on normal `/admin/2fa/enable` endpoint | When only setup token: `POST /admin/2fa/setup/enable` with `{ temp_token }` in body — no Bearer |
+| 3 | `app/api/admin/2fa/setup/confirm/route.ts` | Sent `admin_setup_token` as `Authorization: Bearer` | Send `{ temp_token, code }` in body; handle response with or without `data` wrapper |
+| 4 | `app/admin/login/page.tsx` | `useState(() => fetchQr())` — wrong hook, is a no-op side effect | `useEffect(() => fetchQr(), [])` + added `useEffect` import |
+
+#### Correct Backend Endpoints for Mandatory Setup Flow
+
+```
+POST /api/v1/admin/2fa/setup/enable    body: { temp_token }              # get QR/secret
+POST /api/v1/admin/2fa/setup/confirm   body: { temp_token, code }        # confirm TOTP + get full session
+```
+
+The temp token goes in the **request body**, not as a Bearer header, for both setup endpoints.
+
+---
+
+### Mandatory Admin 2FA + 5-Hour Session (2026-05-18)
+
+**Commits:** `4577470`
+
+#### Part A — Mandatory 2FA Setup Flow
+
+When the backend returns `{ requires_2fa_setup: true, temp_token: "..." }` on login:
+
+1. `loginAdmin()` sets `admin_setup_token` cookie (httpOnly, 10-min TTL), returns `{ requires_2fa_setup: true }`
+2. Login page transitions to `"2fa_setup"` view → `MandatoryTwoFactorSetupFlow` (non-skippable, no back button)
+3. `useEffect` on mount → `POST /api/admin/2fa/enable` → proxy reads `admin_setup_token`, calls `POST /admin/2fa/setup/enable` with `{ temp_token }`
+4. QR + manual key shown; admin scans and enters code
+5. `POST /api/admin/2fa/setup/confirm` → proxy sends `{ temp_token, code }` → backend returns full token + recovery codes → full 5h session cookies set, `admin_setup_token` deleted
+6. Recovery codes shown → "Continue to admin panel" → `window.location.replace("/admin")`
+
+#### Part B — 5-Hour Session TTL
+
+- `SESSION_MAX_AGE = 60 * 60 * 5` constant in `app/admin/actions.ts`
+- All session cookies (`admin_token`, `admin_name`, `admin_display_name`, `admin_role`, `admin_role_label`, `admin_must_change`) use 5h `maxAge`
+- `admin-shell.tsx`: `401` from `GET /api/admin/me` → `router.replace("/admin/login?expired=1")`
+- Login page shows amber banner: *"Your admin session expired. Please sign in again."*
+- `logoutAdmin()` also deletes `admin_setup_token` cookie
+
+#### Files Changed
+
+| File | Change |
+|---|---|
+| `app/admin/actions.ts` | `SESSION_MAX_AGE = 60*60*5`; `requires_2fa_setup` handling; `logoutAdmin` clears `admin_setup_token` |
+| `app/admin/login/page.tsx` | 3rd view state `"2fa_setup"` → `MandatoryTwoFactorSetupFlow`; `expired`/`setup_2fa` URL param banners in `Suspense` |
+| `app/api/admin/2fa/enable/route.ts` | Split: `admin_token` → normal Bearer flow; `admin_setup_token` → `POST /admin/2fa/setup/enable` with body auth |
+| `app/api/admin/2fa/setup/confirm/route.ts` | **New** — reads `admin_setup_token`, sends `{ temp_token, code }`, sets full 5h session cookies, returns recovery codes, deletes setup token |
+| `components/admin/admin-shell.tsx` | `401` from `/api/admin/me` → redirect to `/admin/login?expired=1` |
+
+#### Full Backend Contracts
+
+```
+POST /api/v1/admin/login
+  ← { requires_2fa_setup: true, temp_token: "...", user: {...} }     # no 2FA configured yet
+  ← { requires_2fa: true, data: { session_token: "..." } }           # existing 2FA users
+  ← { data: { token: "...", user: {...} } }                           # direct login (no 2FA)
+
+POST /api/v1/admin/2fa/setup/enable    body: { temp_token }
+  ← { data: { otpauth_uri: "...", secret: "..." } }
+
+POST /api/v1/admin/2fa/setup/confirm   body: { temp_token, code }
+  ← { data: { token: "...", user: {...}, recovery_codes: ["...", ...] } }
+```
+
+---
+
+### Trade Document Superseded Status (2026-05-18)
+
+**Feature:** Admins see superseded/void trade documents with visual treatment. Customers never see them.
+
+**Commits:** `56891e9`
+
+#### Files Changed
+
+| File | Change |
+|---|---|
+| `lib/admin-api.ts` | `TradeDocument.status` union extended with `"superseded" \| "void"`; added `supersede_reason?: string \| null` |
+| `components/admin/trade-documents-card.tsx` | Superseded docs: 60% opacity, strikethrough title, amber badge, reason shown, Send button hidden, Download remains enabled |
+| `components/account/trade-documents-card.tsx` | Filter: `status !== "superseded" && status !== "void"` on both `tradeDocs` and `shipmentDocs` |
+
+#### Behaviour
+
+- **Admin view:** Superseded generated docs shown dimmed + strikethrough + reason text + "Superseded" badge. Send disabled, Download still works. Superseded shipment docs same treatment.
+- **Customer view:** All `superseded` and `void` documents filtered out entirely — never rendered.
+
+---
+
+### eBay 502 Error — Surface Real Backend Errors (2026-05-18)
+
+**Problem:** Next.js proxy catch blocks collapsed all eBay errors into the generic `"eBay action failed"` message. Backend reasons (e.g. misconfigured policies, missing fields) were never visible in the UI.
+
+**Commits:** `a4cb50a`
+
+#### Fix Pattern (applied to list + remove route handlers and server actions)
+
+```typescript
+// Read as text first to prevent silent JSON parse failure when hosting returns HTML
+const text = await res.text();
+let json: Record<string, unknown> = {};
+try {
+  json = JSON.parse(text);
+} catch {
+  console.error(`[handler] non-JSON response (HTTP ${res.status}):`, text.slice(0, 500));
+  return { error: `eBay listing failed — backend returned HTTP ${res.status}. Check server logs.` };
+}
+if (!res.ok) {
+  console.error(`[handler] backend error (HTTP ${res.status}):`, JSON.stringify(json));
+}
+// Chain: message → error → generic
+return { error: json.message ?? json.error ?? `Failed (HTTP ${res.status}).` };
+```
+
+#### Files Changed
+
+- `app/api/admin/products/[id]/ebay/list/route.ts` — text-first parse + error propagation
+- `app/api/admin/products/[id]/ebay/remove/route.ts` — same pattern
+- `app/admin/products/actions.ts` — `listOnEbay` + `removeFromEbay` same pattern
+
+---
+
+## Completed in Earlier Session — eBay Error 932: Trading API Quarantine (2026-05-18)
 
 ---
 
