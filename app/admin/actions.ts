@@ -8,19 +8,28 @@ const API_URL =
   process.env.NEXT_PUBLIC_API_URL ??
   "http://localhost:8000/api/v1";
 
+// Admin session cookie lifetime — 5 hours
+const SESSION_MAX_AGE = 60 * 60 * 5;
+
 // ── Login ─────────────────────────────────────────────────────────────────────
 
 /**
  * Authenticates an admin user against POST /api/v1/admin/login.
  *
  * On success: sets httpOnly admin_token cookie and redirects to /admin.
- * On 2FA required: returns { requires_2fa: true, session_token } — no redirect.
+ * On 2FA challenge: returns { requires_2fa: true, session_token } — no redirect.
+ * On 2FA setup required: sets admin_setup_token cookie, returns { requires_2fa_setup: true }.
  * On failure: returns { error: string }.
  */
 export async function loginAdmin(
   email: string,
   password: string
-): Promise<{ error: string } | { requires_2fa: true; session_token: string } | void> {
+): Promise<
+  | { error: string }
+  | { requires_2fa: true; session_token: string }
+  | { requires_2fa_setup: true }
+  | void
+> {
   let res: Response;
   try {
     res = await fetch(`${API_URL}/admin/login`, {
@@ -55,6 +64,22 @@ export async function loginAdmin(
     return { requires_2fa: true, session_token: sessionToken };
   }
 
+  // Backend signals that 2FA has never been configured on this account.
+  // Contract: { requires_2fa_setup: true, data: { temp_token: "..." } }
+  if (json.requires_2fa_setup === true) {
+    const tempToken: string = json.data?.temp_token ?? "";
+    if (!tempToken) return { error: "Could not start 2FA setup. Please try logging in again." };
+    const cookieStore = await cookies();
+    cookieStore.set("admin_setup_token", tempToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 10, // 10 minutes — only valid for the setup flow
+    });
+    return { requires_2fa_setup: true };
+  }
+
   const token: string | undefined = json.data?.token;
   if (!token) {
     return { error: "Authentication failed. No token received." };
@@ -67,7 +92,7 @@ export async function loginAdmin(
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: 60 * 60 * 24, // 24 hours
+    maxAge: SESSION_MAX_AGE,
   });
 
   const admin = json.data?.user ?? {};
@@ -81,7 +106,7 @@ export async function loginAdmin(
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax" as const,
     path: "/",
-    maxAge: 60 * 60 * 24,
+    maxAge: SESSION_MAX_AGE,
   };
 
   if (adminName)   cookieStore.set("admin_name",         adminName,   cookieOpts);
@@ -119,6 +144,7 @@ export async function logoutAdmin(): Promise<void> {
   cookieStore.delete("admin_role");
   cookieStore.delete("admin_role_label");
   cookieStore.delete("admin_must_change");
+  cookieStore.delete("admin_setup_token");
   redirect("/admin/login");
 }
 
@@ -181,7 +207,7 @@ export async function submitAdminTwoFactor(
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax" as const,
     path: "/",
-    maxAge: 60 * 60 * 24,
+    maxAge: SESSION_MAX_AGE,
   };
 
   cookieStore.set("admin_token", token, { ...cookieOpts, httpOnly: true });

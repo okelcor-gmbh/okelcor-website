@@ -277,6 +277,10 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           two_factor_required?: boolean;
           data?: { two_factor_enabled?: boolean };
         };
+        if (r.status === 401) {
+          router.replace("/admin/login?expired=1");
+          return;
+        }
         if (r.status === 403 && json.two_factor_required) {
           router.replace("/admin/security?require_2fa=1");
           return;

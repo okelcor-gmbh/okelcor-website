@@ -9,7 +9,9 @@ const API_URL =
 export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
-  const token = request.cookies.get("admin_token")?.value;
+  const token =
+    request.cookies.get("admin_token")?.value ??
+    request.cookies.get("admin_setup_token")?.value;
   if (!token) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
