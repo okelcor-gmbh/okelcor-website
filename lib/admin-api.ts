@@ -150,7 +150,7 @@ export type AdminOrder = {
   customer_name: string;
   customer_email: string;
   total: number;
-  status: "pending" | "confirmed" | "shipped" | "delivered" | "cancelled" | string;
+  status: "pending" | "confirmed" | "awaiting_proforma" | "shipped" | "delivered" | "cancelled" | string;
   payment_method?: string;
   payment_status?: "paid" | "unpaid" | "refunded" | string;
   created_at: string;
@@ -190,7 +190,7 @@ export type ShipmentEvent = {
 
 export type TradeDocument = {
   id: number;
-  type: "proforma_invoice" | "commercial_invoice" | "packing_list" | "delivery_note" | "shipment_document" | "other" | string;
+  type: "order_confirmation" | "proforma_invoice" | "commercial_invoice" | "packing_list" | "delivery_note" | "shipment_document" | "other" | string;
   number?: string | null;
   status: "draft" | "issued" | "sent" | "superseded" | "void" | string;
   supersede_reason?: string | null;

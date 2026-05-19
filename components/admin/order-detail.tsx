@@ -13,23 +13,33 @@ import TradeDocumentsCard from "@/components/admin/trade-documents-card";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-const ORDER_STATUSES = ["pending", "confirmed", "shipped", "delivered", "cancelled"] as const;
+const ORDER_STATUSES = ["pending", "confirmed", "awaiting_proforma", "shipped", "delivered", "cancelled"] as const;
 type OrderStatus = (typeof ORDER_STATUSES)[number];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const STATUS_STYLES: Record<string, string> = {
-  pending:   "bg-amber-100 text-amber-700",
-  confirmed: "bg-blue-100 text-blue-700",
-  shipped:   "bg-purple-100 text-purple-700",
-  delivered: "bg-emerald-100 text-emerald-700",
-  cancelled: "bg-red-100 text-red-600",
+  pending:            "bg-amber-100 text-amber-700",
+  confirmed:          "bg-blue-100 text-blue-700",
+  awaiting_proforma:  "bg-indigo-100 text-indigo-700",
+  shipped:            "bg-purple-100 text-purple-700",
+  delivered:          "bg-emerald-100 text-emerald-700",
+  cancelled:          "bg-red-100 text-red-600",
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  pending:           "Pending",
+  confirmed:         "Confirmed",
+  awaiting_proforma: "Awaiting Proforma",
+  shipped:           "Shipped",
+  delivered:         "Delivered",
+  cancelled:         "Cancelled",
 };
 
 function StatusBadge({ status }: { status: string }) {
   return (
-    <span className={`inline-flex items-center rounded-full px-3 py-1 text-[0.75rem] font-bold capitalize ${STATUS_STYLES[status] ?? "bg-gray-100 text-gray-500"}`}>
-      {status}
+    <span className={`inline-flex items-center rounded-full px-3 py-1 text-[0.75rem] font-bold ${STATUS_STYLES[status] ?? "bg-gray-100 text-gray-500"}`}>
+      {STATUS_LABEL[status] ?? status.charAt(0).toUpperCase() + status.slice(1)}
     </span>
   );
 }
@@ -566,8 +576,8 @@ export default function OrderDetail({
                 className="h-10 appearance-none rounded-xl border border-black/[0.09] bg-white pl-3.5 pr-9 text-[0.875rem] font-semibold text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
               >
                 {ORDER_STATUSES.map((s) => (
-                  <option key={s} value={s} className="capitalize">
-                    {s.charAt(0).toUpperCase() + s.slice(1)}
+                  <option key={s} value={s}>
+                    {STATUS_LABEL[s] ?? s.charAt(0).toUpperCase() + s.slice(1)}
                   </option>
                 ))}
               </select>

@@ -5,6 +5,7 @@ import { Download, ExternalLink, FileText, Loader2, Lock, Paperclip } from "luci
 import type { TradeDocument } from "@/lib/admin-api";
 
 const TYPE_LABEL: Record<string, string> = {
+  order_confirmation: "Order Confirmation",
   proforma_invoice:   "Proforma Invoice",
   commercial_invoice: "Commercial Invoice",
   packing_list:       "Packing List",
@@ -15,6 +16,7 @@ const TYPE_LABEL: Record<string, string> = {
 
 // Short description shown below the document name to clarify purpose
 const TYPE_DESCRIPTION: Record<string, string> = {
+  order_confirmation: "Confirmed order summary",
   proforma_invoice:   "Pre-shipment estimate",
   commercial_invoice: "Export / trade document",
   packing_list:       "Goods enumeration for customs",
@@ -25,7 +27,7 @@ const TYPE_DESCRIPTION: Record<string, string> = {
 const GATED_TYPES = new Set(["commercial_invoice", "final_invoice"]);
 
 // Generated doc types that always open inline in a new tab
-const INLINE_GENERATED = new Set(["commercial_invoice", "final_invoice", "packing_list", "delivery_note"]);
+const INLINE_GENERATED = new Set(["order_confirmation", "commercial_invoice", "final_invoice", "packing_list", "delivery_note"]);
 
 function shortDate(iso?: string | null): string {
   if (!iso) return "—";

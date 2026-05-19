@@ -2,6 +2,54 @@
 
 ---
 
+## Completed in Latest Session — DOC-1: Order Confirmation Stage (2026-05-19)
+
+---
+
+### DOC-1 — Order Confirmation (AB) Between Proposal and Proforma Invoice
+
+**Goal:** Insert an Order Confirmation (AB-YYYY-XXXX) stage between proposal acceptance and Proforma Invoice generation. Proforma remains a manual admin action.
+
+**TypeScript: 0 errors | Build: clean**
+
+#### Flow Change
+
+```
+BEFORE:  Proposal (AN) → Order → auto-generate Proforma Invoice (PI)
+AFTER:   Proposal (AN) → Order (status: awaiting_proforma)
+                       → Generate Order Confirmation (AB)   ← NEW manual step
+                       → Generate Proforma Invoice (PI)     ← still manual, unchanged
+```
+
+#### Files Changed / Added
+
+| File | Change |
+|---|---|
+| `lib/admin-api.ts` | `TradeDocument.type` union extended with `"order_confirmation"`; `AdminOrder.status` union extended with `"awaiting_proforma"` |
+| `app/api/admin/orders/[id]/trade-documents/order-confirmation/route.ts` | **New** — POST proxy → `POST /admin/orders/{id}/trade-documents/order-confirmation` with Bearer token |
+| `components/admin/trade-documents-card.tsx` | Added `order_confirmation` to `TYPE_LABEL`, `TYPE_DESCRIPTION`, `INLINE_GENERATED`; added `orderConf` generate state + `hasOrderConf` derived; added indigo "Generate Order Confirmation" button (appears first, before Proforma); added `orderConf.error` display |
+| `components/account/trade-documents-card.tsx` | Added `order_confirmation` to `TYPE_LABEL`, `TYPE_DESCRIPTION`, `INLINE_GENERATED` — customers can view/download the Order Confirmation PDF inline |
+| `components/admin/order-detail.tsx` | Added `"awaiting_proforma"` to `ORDER_STATUSES`; added `awaiting_proforma: "bg-indigo-100 text-indigo-700"` to `STATUS_STYLES`; added `STATUS_LABEL` map (fixes snake_case badge rendering); updated dropdown options to use `STATUS_LABEL` |
+| `components/admin/orders-table.tsx` | Added `"awaiting_proforma"` to `STATUS_OPTIONS`; added `STATUS_LABEL` map; updated `StatusBadge` and filter dropdown to use label map; added `awaiting_proforma: "bg-indigo-100 text-indigo-700"` to `STATUS_STYLES` |
+| `app/admin/orders/actions.ts` | Added `"awaiting_proforma"` to `OrderStatus` type so `updateOrderStatus` server action accepts the new status |
+
+#### Backend Endpoints Required (frontend is ready)
+
+```
+POST /api/v1/admin/orders/{id}/trade-documents/order-confirmation
+  ← { data: TradeDocument }   (same contract as /proforma, /commercial-invoice etc.)
+  Document type must be: "order_confirmation"
+  Number format:         AB-YYYY-XXXX
+```
+
+#### Safety Constraints Met
+- No changes to proforma route or generation logic — existing PI documents unaffected
+- Customer filter (`status !== "superseded" && status !== "void"`) unchanged — order_confirmation visible, superseded order_confirmations hidden
+- Historical orders with no order_confirmation simply show no button (hasOrderConf guard)
+- `awaiting_proforma` falls through to `bg-gray-100 text-gray-500` in any component that hasn't been updated (graceful fallback via `?? "bg-gray-100 text-gray-500"`)
+
+---
+
 ## Completed in Latest Session — System Health, 2FA Security & eBay Fixes (2026-05-18)
 
 ---

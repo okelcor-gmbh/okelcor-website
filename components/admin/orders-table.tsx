@@ -27,17 +27,27 @@ type Props = {
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const STATUS_OPTIONS = ["all", "pending", "confirmed", "shipped", "delivered", "cancelled"] as const;
+const STATUS_OPTIONS = ["all", "pending", "confirmed", "awaiting_proforma", "shipped", "delivered", "cancelled"] as const;
+
+const STATUS_LABEL: Record<string, string> = {
+  pending:           "Pending",
+  confirmed:         "Confirmed",
+  awaiting_proforma: "Awaiting Proforma",
+  shipped:           "Shipped",
+  delivered:         "Delivered",
+  cancelled:         "Cancelled",
+};
 const PAYMENT_STATUS_OPTIONS = ["all", "paid", "unpaid", "refunded"] as const;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const STATUS_STYLES: Record<string, string> = {
-  pending:   "bg-amber-100 text-amber-700",
-  confirmed: "bg-blue-100 text-blue-700",
-  shipped:   "bg-purple-100 text-purple-700",
-  delivered: "bg-emerald-100 text-emerald-700",
-  cancelled: "bg-red-100 text-red-600",
+  pending:            "bg-amber-100 text-amber-700",
+  confirmed:          "bg-blue-100 text-blue-700",
+  awaiting_proforma:  "bg-indigo-100 text-indigo-700",
+  shipped:            "bg-purple-100 text-purple-700",
+  delivered:          "bg-emerald-100 text-emerald-700",
+  cancelled:          "bg-red-100 text-red-600",
 };
 
 const PAYMENT_STATUS_STYLES: Record<string, string> = {
@@ -56,8 +66,8 @@ function PaymentStatusBadge({ status }: { status: string }) {
 
 function StatusBadge({ status }: { status: string }) {
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[0.68rem] font-bold capitalize ${STATUS_STYLES[status] ?? "bg-gray-100 text-gray-500"}`}>
-      {status}
+    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[0.68rem] font-bold ${STATUS_STYLES[status] ?? "bg-gray-100 text-gray-500"}`}>
+      {STATUS_LABEL[status] ?? status.charAt(0).toUpperCase() + status.slice(1)}
     </span>
   );
 }
@@ -147,7 +157,7 @@ export default function OrdersTable({
         >
           <option value="">All statuses</option>
           {STATUS_OPTIONS.filter((s) => s !== "all").map((s) => (
-            <option key={s} value={s} className="capitalize">{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+            <option key={s} value={s}>{STATUS_LABEL[s] ?? s.charAt(0).toUpperCase() + s.slice(1)}</option>
           ))}
         </select>
 

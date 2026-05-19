@@ -12,6 +12,7 @@ import { useAdminPermissions } from "@/hooks/use-admin-permissions";
 // ── Constants ──────────────────────────────────────────────────────────────────
 
 const TYPE_LABEL: Record<string, string> = {
+  order_confirmation: "Order Confirmation",
   proforma_invoice:   "Proforma Invoice",
   commercial_invoice: "Commercial Invoice",
   packing_list:       "Packing List",
@@ -29,10 +30,11 @@ const STATUS_BADGE: Record<string, string> = {
 };
 
 // Generated PDFs that always open inline in new tab
-const INLINE_GENERATED = new Set(["commercial_invoice", "packing_list", "delivery_note"]);
+const INLINE_GENERATED = new Set(["order_confirmation", "commercial_invoice", "packing_list", "delivery_note"]);
 
 // Short description shown below each document type label for UX clarity
 const TYPE_DESCRIPTION: Record<string, string> = {
+  order_confirmation: "Confirmed order summary (AB-xxxx)",
   proforma_invoice:   "Pre-shipment estimate",
   commercial_invoice: "Export / trade document",
   packing_list:       "Goods enumeration for customs",
@@ -126,6 +128,7 @@ export default function TradeDocumentsCard({
   const [documents,   setDocuments]  = useState<TradeDocument[]>(initialDocuments);
 
   // Generate states
+  const [orderConf,   setOrderConf]  = useState<GenerateState>(IDLE);
   const [proforma,    setProforma]   = useState<GenerateState>(IDLE);
   const [commercial,  setCommercial] = useState<GenerateState>(IDLE);
   const [packing,     setPacking]    = useState<GenerateState>(IDLE);
@@ -160,6 +163,7 @@ export default function TradeDocumentsCard({
   const [deleteError,   setDeleteError]   = useState<string | null>(null);
 
   // Derived
+  const hasOrderConf     = documents.some((d) => d.type === "order_confirmation");
   const hasProforma      = documents.some((d) => d.type === "proforma_invoice");
   const hasCommercialInv = documents.some((d) => d.type === "commercial_invoice");
   const hasPacking       = documents.some((d) => d.type === "packing_list");
@@ -386,6 +390,15 @@ export default function TradeDocumentsCard({
 
           {canManage && (
             <div className="flex flex-wrap items-center gap-2">
+              {!hasOrderConf && (
+                <button type="button" disabled={orderConf.loading}
+                  onClick={() => generateDoc(`/api/admin/orders/${orderId}/trade-documents/order-confirmation`, setOrderConf, "order confirmation")}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-[0.75rem] font-semibold text-indigo-700 transition hover:bg-indigo-100 disabled:opacity-60"
+                >
+                  {orderConf.loading ? <Loader2 size={13} strokeWidth={2} className="animate-spin" /> : <FilePlus2 size={13} strokeWidth={2} />}
+                  {orderConf.loading ? "Generating…" : "Generate Order Confirmation"}
+                </button>
+              )}
               {!hasProforma && (
                 <button type="button" disabled={proforma.loading}
                   onClick={() => generateDoc(`/api/admin/orders/${orderId}/trade-documents/proforma`, setProforma, "proforma invoice")}
@@ -455,6 +468,7 @@ export default function TradeDocumentsCard({
         )}
 
         {/* ── Generate errors ── */}
+        {orderConf.error  && <p className="mb-3 text-[0.8rem] text-red-600">{orderConf.error}</p>}
         {proforma.error   && <p className="mb-3 text-[0.8rem] text-red-600">{proforma.error}</p>}
         {commercial.error && <p className="mb-3 text-[0.8rem] text-red-600">{commercial.error}</p>}
         {packing.error    && <p className="mb-3 text-[0.8rem] text-red-600">{packing.error}</p>}

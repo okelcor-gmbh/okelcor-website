@@ -13,7 +13,7 @@ async function getToken(): Promise<string> {
   return token;
 }
 
-type OrderStatus = "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
+type OrderStatus = "pending" | "confirmed" | "awaiting_proforma" | "shipped" | "delivered" | "cancelled";
 
 type ShipmentFields = {
   container_number?: string;  // legacy
