@@ -71,9 +71,10 @@ const PERMISSION_ROLES: Record<string, string[]> = {
   "security.manage":       ["super_admin"],   // events log, adoption table, 2FA notices
 
   // Orders
-  "orders.view":           ["super_admin", "admin", "order_manager", "sales_manager", "support"],
-  "orders.update":         ["super_admin", "admin", "order_manager"],
-  "orders.delete":         ["super_admin"],
+  "orders.view":                          ["super_admin", "admin", "order_manager", "sales_manager", "support"],
+  "orders.update":                        ["super_admin", "admin", "order_manager"],
+  "orders.delete":                        ["super_admin"],
+  "orders.approve_financial_revision":    ["super_admin", "admin"],
 
   // Payments
   "payments.mark_paid":    ["super_admin", "admin", "order_manager"],

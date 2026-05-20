@@ -227,6 +227,12 @@ export type AdminOrderFull = AdminOrder & {
   declaration_signed_at?: string | null;
   // Trade documents (proforma, commercial invoice, packing list, etc.)
   trade_documents?: TradeDocument[];
+  // DOC-5 financial lock
+  financials_locked?: boolean | null;
+  financials_locked_at?: string | null;
+  financials_lock_reason?: string | null;
+  financials_revision_required?: boolean | null;
+  financials_revision_reason?: string | null;
 };
 
 export type AdminQuote = {

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
-  CheckCircle2, Download, ExternalLink, FilePlus2,
+  AlertTriangle, CheckCircle2, Download, ExternalLink, FilePlus2,
   FileText, Loader2, Mail, Paperclip, Trash2, Upload, X,
 } from "lucide-react";
 import type { TradeDocument } from "@/lib/admin-api";
@@ -109,6 +109,7 @@ export default function TradeDocumentsCard({
   initialDocuments,
   adminRole,
   customerEmail,
+  financialsRevisionPending,
 }: {
   orderId: number;
   initialDocuments: TradeDocument[];
@@ -116,6 +117,8 @@ export default function TradeDocumentsCard({
   adminRole?: string;
   /** Customer email prefilled in the send-email modal. */
   customerEmail?: string;
+  /** When true, shows a warning that docs may be superseded after revision approval. */
+  financialsRevisionPending?: boolean;
 }) {
   // Use the server-provided role prop for an immediate synchronous check.
   // Fall back to the hook (async cookie read) only when the prop is absent.
@@ -449,6 +452,16 @@ export default function TradeDocumentsCard({
             </div>
           )}
         </div>
+
+        {/* ── Financial revision warning ── */}
+        {financialsRevisionPending && (
+          <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3">
+            <AlertTriangle size={14} className="mt-0.5 shrink-0 text-orange-500" strokeWidth={2} />
+            <p className="text-[0.78rem] text-orange-700">
+              A financial revision is pending approval. Current documents may be superseded once the revision is approved and new versions regenerated.
+            </p>
+          </div>
+        )}
 
         {/* ── DEBUG PANEL — remove before production ── */}
         {process.env.NODE_ENV !== "production" && (

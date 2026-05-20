@@ -3,8 +3,8 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
-  AlertCircle, CheckCircle2, ChevronDown, Landmark, Loader2,
-  MapPin, Truck, Plus, Pencil, Trash2,
+  AlertCircle, AlertTriangle, CheckCircle2, ChevronDown, FileWarning,
+  Landmark, Lock, Loader2, MapPin, Plus, Pencil, RotateCcw, Trash2,
 } from "lucide-react";
 import { updateOrderStatus, cancelOrder, deleteOrder, addShipmentEvent, updateShipmentEvent, deleteShipmentEvent } from "@/app/admin/orders/actions";
 import type { AdminOrderFull, AdminOrderLog, ShipmentEvent } from "@/lib/admin-api";
@@ -432,10 +432,121 @@ export default function OrderDetail({
   const [markPaidSuccess,   setMarkPaidSuccess]   = useState(false);
   const [isMarkPaidPending, setIsMarkPaidPending] = useState(false);
 
+  // Financial revision request modal
+  const [revisionModalOpen,    setRevisionModalOpen]    = useState(false);
+  const [revisionReason,       setRevisionReason]       = useState("");
+  const [revisionDeliveryFee,  setRevisionDeliveryFee]  = useState("");
+  const [revisionLoading,      setRevisionLoading]      = useState(false);
+  const [revisionError,        setRevisionError]        = useState<string | null>(null);
+  const [revisionSubmitted,    setRevisionSubmitted]    = useState(false);
+
+  // Approve revision modal
+  const [approveModalOpen,   setApproveModalOpen]   = useState(false);
+  const [approveConfirmed,   setApproveConfirmed]   = useState(false);
+  const [approveLoading,     setApproveLoading]     = useState(false);
+  const [approveError,       setApproveError]       = useState<string | null>(null);
+
+  // Reject revision
+  const [rejectLoading,   setRejectLoading]   = useState(false);
+  const [rejectError,     setRejectError]     = useState<string | null>(null);
+  const [rejectSuccess,   setRejectSuccess]   = useState(false);
+
+  // Local revision state (mirrors order prop, updated optimistically after actions)
+  const [revisionRequired, setRevisionRequired] = useState(order.financials_revision_required ?? false);
+
   // Permission-based access
-  const canCancel = canDo(adminRole, "orders.update");
-  const canDelete  = canDo(adminRole, "orders.delete");
+  const canCancel              = canDo(adminRole, "orders.update");
+  const canDelete              = canDo(adminRole, "orders.delete");
+  const canApproveRevision     = canDo(adminRole, "orders.approve_financial_revision");
+  const isLocked               = order.financials_locked === true;
   const cancelDisabled = ["cancelled", "delivered"].includes(status);
+
+  const closeRevisionModal = () => {
+    setRevisionModalOpen(false);
+    setRevisionReason("");
+    setRevisionDeliveryFee("");
+    setRevisionError(null);
+  };
+
+  const handleRevisionRequest = async () => {
+    if (!revisionReason.trim()) { setRevisionError("Please describe the correction needed."); return; }
+    setRevisionLoading(true);
+    setRevisionError(null);
+    try {
+      const body: Record<string, unknown> = { reason: revisionReason.trim() };
+      const fee = parseFloat(revisionDeliveryFee);
+      if (revisionDeliveryFee.trim() && !isNaN(fee)) {
+        body.changes = { delivery_fee: fee };
+      }
+      const res  = await fetch(`/api/admin/orders/${order.id}/financials/revision-request`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const json = await res.json().catch(() => ({})) as Record<string, unknown>;
+      if (!res.ok) {
+        setRevisionError((json.message as string) ?? "Failed to submit revision request.");
+        return;
+      }
+      closeRevisionModal();
+      setRevisionRequired(true);
+      setRevisionSubmitted(true);
+      setTimeout(() => setRevisionSubmitted(false), 5000);
+      router.refresh();
+    } catch {
+      setRevisionError("Network error. Please try again.");
+    } finally {
+      setRevisionLoading(false);
+    }
+  };
+
+  const handleApproveRevision = async () => {
+    setApproveLoading(true);
+    setApproveError(null);
+    try {
+      const res  = await fetch(`/api/admin/orders/${order.id}/financials/approve-revision`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const json = await res.json().catch(() => ({})) as Record<string, unknown>;
+      if (!res.ok) {
+        setApproveError((json.message as string) ?? "Failed to approve revision.");
+        return;
+      }
+      setApproveModalOpen(false);
+      setApproveConfirmed(false);
+      setRevisionRequired(false);
+      router.refresh();
+    } catch {
+      setApproveError("Network error. Please try again.");
+    } finally {
+      setApproveLoading(false);
+    }
+  };
+
+  const handleRejectRevision = async () => {
+    setRejectLoading(true);
+    setRejectError(null);
+    try {
+      const res  = await fetch(`/api/admin/orders/${order.id}/financials/reject-revision`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const json = await res.json().catch(() => ({})) as Record<string, unknown>;
+      if (!res.ok) {
+        setRejectError((json.message as string) ?? "Failed to reject revision.");
+        return;
+      }
+      setRevisionRequired(false);
+      setRejectSuccess(true);
+      setTimeout(() => setRejectSuccess(false), 4000);
+      router.refresh();
+    } catch {
+      setRejectError("Network error. Please try again.");
+    } finally {
+      setRejectLoading(false);
+    }
+  };
 
   const isDirty =
     status            !== order.status                                            ||
@@ -651,6 +762,70 @@ export default function OrderDetail({
         </div>
       </div>
 
+      {/* ── Financial Lock Banner ── */}
+      {isLocked && !revisionRequired && (
+        <div className="flex items-start gap-3.5 rounded-2xl border border-indigo-200 bg-indigo-50 px-5 py-4">
+          <Lock size={16} className="mt-0.5 shrink-0 text-indigo-500" strokeWidth={2} />
+          <div className="min-w-0 flex-1">
+            <p className="text-[0.83rem] font-bold text-indigo-800">Financials Locked</p>
+            <p className="mt-0.5 text-[0.78rem] text-indigo-700">
+              {order.financials_lock_reason ?? "A commercial document has been issued for this order."}
+              {order.financials_locked_at && (
+                <span className="ml-1.5 text-indigo-500">· {shortDate(order.financials_locked_at)}</span>
+              )}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Pending Financial Revision Card ── */}
+      {revisionRequired && (
+        <div className="rounded-2xl border border-orange-200 bg-orange-50 p-5">
+          <div className="flex items-start gap-3.5">
+            <FileWarning size={16} className="mt-0.5 shrink-0 text-orange-500" strokeWidth={2} />
+            <div className="min-w-0 flex-1">
+              <p className="text-[0.83rem] font-bold text-orange-800">Financial Revision Pending</p>
+              {order.financials_revision_reason && (
+                <p className="mt-0.5 text-[0.78rem] text-orange-700">
+                  Reason: {order.financials_revision_reason}
+                </p>
+              )}
+              <p className="mt-1 text-[0.75rem] text-orange-600">
+                Existing commercial documents will be superseded upon approval and corrected versions regenerated.
+              </p>
+            </div>
+          </div>
+
+          {canApproveRevision && (
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setApproveModalOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-4 py-1.5 text-[0.78rem] font-semibold text-white transition hover:bg-emerald-700"
+              >
+                <CheckCircle2 size={12} strokeWidth={2.5} />
+                Approve Revision
+              </button>
+              <button
+                type="button"
+                onClick={handleRejectRevision}
+                disabled={rejectLoading}
+                className="inline-flex items-center gap-1.5 rounded-full border border-red-300 bg-white px-4 py-1.5 text-[0.78rem] font-semibold text-red-600 transition hover:bg-red-50 disabled:opacity-50"
+              >
+                {rejectLoading && <Loader2 size={12} className="animate-spin" />}
+                {rejectLoading ? "Rejecting…" : "Reject"}
+              </button>
+              {rejectError && (
+                <p className="text-[0.78rem] text-red-600">{rejectError}</p>
+              )}
+              {rejectSuccess && (
+                <p className="text-[0.78rem] text-emerald-700">Revision rejected.</p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ── Two-column: customer info + order summary ── */}
       <div className="grid gap-6 lg:grid-cols-2">
 
@@ -705,6 +880,7 @@ export default function OrderDetail({
         initialDocuments={order.trade_documents ?? []}
         adminRole={adminRole}
         customerEmail={order.customer_email}
+        financialsRevisionPending={revisionRequired}
       />
 
       {/* ── EU Entry Certificate (Gelangensbestätigung) ── */}
@@ -832,6 +1008,17 @@ export default function OrderDetail({
         </p>
 
         <div className="flex flex-wrap gap-3">
+          {isLocked && !revisionRequired && canCancel && (
+            <button
+              type="button"
+              onClick={() => setRevisionModalOpen(true)}
+              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-indigo-300 bg-indigo-50 px-5 text-[0.83rem] font-semibold text-indigo-700 transition hover:bg-indigo-100"
+            >
+              <RotateCcw size={13} strokeWidth={2} />
+              Request Financial Revision
+            </button>
+          )}
+
           {canCancel && (
             <button
               type="button"
@@ -882,6 +1069,12 @@ export default function OrderDetail({
           <div className="mt-3 flex items-center gap-2 text-[0.83rem] text-emerald-600">
             <CheckCircle2 size={14} className="shrink-0" />
             Payment marked as received.
+          </div>
+        )}
+        {revisionSubmitted && (
+          <div className="mt-3 flex items-center gap-2 text-[0.83rem] text-indigo-700">
+            <CheckCircle2 size={14} className="shrink-0" />
+            Revision request submitted. Awaiting admin approval.
           </div>
         )}
       </div>
@@ -1015,6 +1208,144 @@ export default function OrderDetail({
                 className="h-9 rounded-full bg-red-600 px-5 text-[0.83rem] font-semibold text-white transition hover:bg-red-700 disabled:opacity-50"
               >
                 {isDeletePending ? "Deleting…" : "Confirm Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Request Financial Revision Modal ── */}
+      {revisionModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={(e) => { if (e.target === e.currentTarget && !revisionLoading) closeRevisionModal(); }}
+        >
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+            <p className="mb-1 text-[0.75rem] font-bold uppercase tracking-[0.15em] text-indigo-600">
+              Request Financial Revision
+            </p>
+            <p className="mb-5 text-[0.875rem] text-[#1a1a1a]">
+              Financials are locked because a commercial document has been issued. Describe the correction — a super admin or admin will review and approve it.
+            </p>
+
+            <div className="flex flex-col gap-4">
+              <div>
+                <p className="mb-1.5 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">
+                  Reason <span className="text-red-500">*</span>
+                </p>
+                <textarea
+                  value={revisionReason}
+                  onChange={(e) => setRevisionReason(e.target.value)}
+                  placeholder="e.g. Delivery fee entered as €2.50 — should be €2500.00"
+                  rows={3}
+                  className="w-full resize-none rounded-xl border border-black/[0.09] bg-white px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+                />
+              </div>
+
+              <div>
+                <p className="mb-1.5 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">
+                  Proposed Delivery Fee (EUR) <span className="text-[#9ca3af]">(optional)</span>
+                </p>
+                <input
+                  type="number"
+                  value={revisionDeliveryFee}
+                  onChange={(e) => setRevisionDeliveryFee(e.target.value)}
+                  placeholder="e.g. 2500.00"
+                  step="0.01"
+                  min="0"
+                  className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+                />
+              </div>
+
+              {revisionError && (
+                <div className="flex items-start gap-2 rounded-xl border border-red-100 bg-red-50 px-3 py-2.5 text-[0.83rem] text-red-700">
+                  <AlertCircle size={14} className="mt-0.5 shrink-0" />
+                  {revisionError}
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={closeRevisionModal}
+                  disabled={revisionLoading}
+                  className="h-9 rounded-full border border-black/[0.09] bg-white px-5 text-[0.83rem] font-semibold text-[#5c5e62] transition hover:border-black/20 disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleRevisionRequest}
+                  disabled={revisionLoading || !revisionReason.trim()}
+                  className="h-9 rounded-full bg-indigo-600 px-5 text-[0.83rem] font-semibold text-white transition hover:bg-indigo-700 disabled:opacity-50"
+                >
+                  {revisionLoading ? "Submitting…" : "Submit Request"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Approve Revision Modal ── */}
+      {approveModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+            <p className="mb-1 text-[0.75rem] font-bold uppercase tracking-[0.15em] text-emerald-700">
+              Approve Financial Revision
+            </p>
+
+            <div className="mb-5 flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[0.83rem] text-amber-800">
+              <AlertTriangle size={14} className="mt-0.5 shrink-0 text-amber-600" />
+              This will supersede the existing Order Confirmation, Proforma Invoice, and any Commercial Invoice, then regenerate corrected versions.
+            </div>
+
+            {order.financials_revision_reason && (
+              <div className="mb-4 rounded-xl bg-[#f5f5f5] px-4 py-3">
+                <p className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">
+                  Revision Reason
+                </p>
+                <p className="mt-1 text-[0.875rem] text-[#1a1a1a]">
+                  {order.financials_revision_reason}
+                </p>
+              </div>
+            )}
+
+            <label className="mb-4 flex cursor-pointer items-start gap-3">
+              <input
+                type="checkbox"
+                checked={approveConfirmed}
+                onChange={(e) => setApproveConfirmed(e.target.checked)}
+                className="mt-0.5 h-4 w-4 accent-emerald-600"
+              />
+              <span className="text-[0.875rem] text-[#1a1a1a]">
+                I confirm that existing documents will be superseded and corrected versions regenerated.
+              </span>
+            </label>
+
+            {approveError && (
+              <div className="mb-4 flex items-start gap-2 rounded-xl border border-red-100 bg-red-50 px-3 py-2.5 text-[0.83rem] text-red-700">
+                <AlertCircle size={14} className="mt-0.5 shrink-0" />
+                {approveError}
+              </div>
+            )}
+
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => { setApproveModalOpen(false); setApproveConfirmed(false); setApproveError(null); }}
+                disabled={approveLoading}
+                className="h-9 rounded-full border border-black/[0.09] bg-white px-5 text-[0.83rem] font-semibold text-[#5c5e62] transition hover:border-black/20 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleApproveRevision}
+                disabled={approveLoading || !approveConfirmed}
+                className="h-9 rounded-full bg-emerald-600 px-5 text-[0.83rem] font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-50"
+              >
+                {approveLoading ? "Approving…" : "Confirm Approval"}
               </button>
             </div>
           </div>
