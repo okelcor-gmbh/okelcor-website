@@ -1,7 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronLeft, Truck } from "lucide-react";
+import { ChevronLeft, Clock, Truck } from "lucide-react";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import ShipmentTracker from "@/components/account/shipment-tracker";
@@ -9,6 +9,7 @@ import OrderPaymentCard from "@/components/account/order-payment-card";
 import EntryCertificateCard from "@/components/account/entry-certificate-card";
 import DeliveryConfirmationCard from "@/components/account/delivery-confirmation-card";
 import TradeDocumentsCard from "@/components/account/trade-documents-card";
+import OrderConfirmationAcceptance from "@/components/account/order-confirmation-acceptance";
 import { getCustomerFromCookie } from "@/lib/get-customer";
 import { StatusBadge, formatDate, type Order, type OrderStatus } from "../page";
 
@@ -255,6 +256,14 @@ export default async function OrderDetailPage({ params }: Props) {
               </div>
             </div>
           </div>
+
+          {/* ── Acceptance banner (DOC-6) ── */}
+          {order.customer_acceptance_status === "pending" && (
+            <OrderConfirmationAcceptance
+              orderRef={order.ref}
+              initialStatus={order.customer_accepted_at ? "accepted" : "pending"}
+            />
+          )}
 
           {/* ── Payment ── */}
           {order.payment_status && (

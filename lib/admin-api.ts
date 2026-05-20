@@ -233,6 +233,10 @@ export type AdminOrderFull = AdminOrder & {
   financials_lock_reason?: string | null;
   financials_revision_required?: boolean | null;
   financials_revision_reason?: string | null;
+  // DOC-6 customer acceptance
+  customer_acceptance_status?: "pending" | "accepted" | "rejected" | null;
+  customer_accepted_at?: string | null;
+  customer_rejection_reason?: string | null;
 };
 
 export type AdminQuote = {

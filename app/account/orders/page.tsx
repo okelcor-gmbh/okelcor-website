@@ -50,6 +50,9 @@ export type Order = {
   declaration_signed_name?: string | null;
   country?: string | null;
   trade_documents?: TradeDocument[];
+  // DOC-6 customer acceptance
+  customer_acceptance_status?: "pending" | "accepted" | "rejected" | null;
+  customer_accepted_at?: string | null;
 };
 
 // ─── Status badge config ──────────────────────────────────────────────────────

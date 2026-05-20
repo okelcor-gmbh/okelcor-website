@@ -9,6 +9,7 @@ import {
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import OrderPaymentCard from "@/components/account/order-payment-card";
+import QuoteAcceptanceActions from "@/components/account/quote-acceptance-actions";
 import { getCustomerFromCookie } from "@/lib/get-customer";
 
 export const dynamic = "force-dynamic";
@@ -65,6 +66,10 @@ type QuoteDetail = {
   order_delivery_cost?: number | null;
   order_total?: number | null;
   order_items?: OrderItem[];
+  // DOC-6 customer acceptance
+  customer_acceptance_status?: "pending" | "accepted" | "rejected" | null;
+  customer_accepted_at?: string | null;
+  proposal_doc_url?: string | null;
 };
 
 type DetailStatus = "received" | "reviewed" | "quoted" | "converted" | "closed";
@@ -406,30 +411,44 @@ export default async function QuoteDetailPage({ params }: Props) {
 
           {/* ── Quoted, no order yet ── */}
           {normalized === "quoted" && !hasOrder && (
-            <div className="rounded-[22px] border border-green-200 bg-green-50/60 p-6 sm:p-8">
-              <div className="flex items-start gap-3">
-                <CheckCircle2
-                  size={20}
-                  strokeWidth={1.8}
-                  className="mt-0.5 shrink-0 text-green-600"
+            <>
+              {/* Acceptance actions (shown when acceptance is pending or already resolved) */}
+              {quote.customer_acceptance_status != null && (
+                <QuoteAcceptanceActions
+                  quoteRef={quote.ref || ref}
+                  proposalDocUrl={quote.proposal_doc_url}
+                  initialStatus={quote.customer_acceptance_status}
                 />
-                <div>
-                  <p className="text-[0.95rem] font-bold text-green-900">
-                    Your quote is ready.
-                  </p>
-                  <p className="mt-1 text-[0.85rem] leading-relaxed text-green-800">
-                    Okelcor is preparing your order details. Our team will be in touch
-                    shortly to confirm availability and next steps.
-                  </p>
-                  <Link
-                    href={`/contact?quote_ref=${encodeURIComponent(quote.ref || ref)}`}
-                    className="mt-4 inline-flex items-center gap-2 rounded-full bg-[var(--primary)] px-5 py-2.5 text-[0.85rem] font-semibold text-white transition hover:bg-[var(--primary-hover)]"
-                  >
-                    Contact Okelcor about this quote <ArrowRight size={13} strokeWidth={2.5} />
-                  </Link>
+              )}
+
+              {/* Generic "ready" block shown when no acceptance flow is active */}
+              {quote.customer_acceptance_status == null && (
+                <div className="rounded-[22px] border border-green-200 bg-green-50/60 p-6 sm:p-8">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2
+                      size={20}
+                      strokeWidth={1.8}
+                      className="mt-0.5 shrink-0 text-green-600"
+                    />
+                    <div>
+                      <p className="text-[0.95rem] font-bold text-green-900">
+                        Your quote is ready.
+                      </p>
+                      <p className="mt-1 text-[0.85rem] leading-relaxed text-green-800">
+                        Okelcor is preparing your order details. Our team will be in touch
+                        shortly to confirm availability and next steps.
+                      </p>
+                      <Link
+                        href={`/contact?quote_ref=${encodeURIComponent(quote.ref || ref)}`}
+                        className="mt-4 inline-flex items-center gap-2 rounded-full bg-[var(--primary)] px-5 py-2.5 text-[0.85rem] font-semibold text-white transition hover:bg-[var(--primary-hover)]"
+                      >
+                        Contact Okelcor about this quote <ArrowRight size={13} strokeWidth={2.5} />
+                      </Link>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+              )}
+            </>
           )}
 
           {/* ── Linked order ── */}

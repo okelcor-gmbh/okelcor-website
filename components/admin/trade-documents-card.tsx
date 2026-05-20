@@ -110,6 +110,7 @@ export default function TradeDocumentsCard({
   adminRole,
   customerEmail,
   financialsRevisionPending,
+  customerAcceptancePending,
 }: {
   orderId: number;
   initialDocuments: TradeDocument[];
@@ -119,6 +120,8 @@ export default function TradeDocumentsCard({
   customerEmail?: string;
   /** When true, shows a warning that docs may be superseded after revision approval. */
   financialsRevisionPending?: boolean;
+  /** When true, Proforma generation is blocked until customer accepts the order confirmation. */
+  customerAcceptancePending?: boolean;
 }) {
   // Use the server-provided role prop for an immediate synchronous check.
   // Fall back to the hook (async cookie read) only when the prop is absent.
@@ -126,6 +129,11 @@ export default function TradeDocumentsCard({
   const canManage = adminRole != null
     ? canDo(adminRole, "trade_documents.manage")
     : can("trade_documents.manage");
+  const isSuperAdmin = (adminRole ?? cookieRole) === "super_admin";
+
+  // Override modal (super_admin can bypass acceptance gate)
+  const [overrideModalOpen, setOverrideModalOpen] = useState(false);
+  const [overrideConfirmed, setOverrideConfirmed] = useState(false);
 
   // Documents state
   const [documents,   setDocuments]  = useState<TradeDocument[]>(initialDocuments);
@@ -402,7 +410,7 @@ export default function TradeDocumentsCard({
                   {orderConf.loading ? "Generating…" : "Generate Order Confirmation"}
                 </button>
               )}
-              {!hasProforma && (
+              {!hasProforma && !customerAcceptancePending && (
                 <button type="button" disabled={proforma.loading}
                   onClick={() => generateDoc(`/api/admin/orders/${orderId}/trade-documents/proforma`, setProforma, "proforma invoice")}
                   className="inline-flex items-center gap-1.5 rounded-full border border-[#E85C1A]/30 bg-[#fff5f2] px-3 py-1.5 text-[0.75rem] font-semibold text-[#E85C1A] transition hover:bg-[#fff0ea] disabled:opacity-60"
@@ -410,6 +418,26 @@ export default function TradeDocumentsCard({
                   {proforma.loading ? <Loader2 size={13} strokeWidth={2} className="animate-spin" /> : <FilePlus2 size={13} strokeWidth={2} />}
                   {proforma.loading ? "Generating…" : "Generate Proforma"}
                 </button>
+              )}
+              {!hasProforma && customerAcceptancePending && (
+                isSuperAdmin ? (
+                  <button type="button"
+                    onClick={() => setOverrideModalOpen(true)}
+                    title="Customer acceptance pending — click to override as super admin"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3 py-1.5 text-[0.75rem] font-semibold text-amber-700 transition hover:bg-amber-100"
+                  >
+                    <FilePlus2 size={13} strokeWidth={2} />
+                    Generate Proforma (Override)
+                  </button>
+                ) : (
+                  <span
+                    title="Customer acceptance required before generating proforma"
+                    className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-full border border-[#E85C1A]/30 bg-[#fff5f2] px-3 py-1.5 text-[0.75rem] font-semibold text-[#E85C1A] opacity-40"
+                  >
+                    <FilePlus2 size={13} strokeWidth={2} />
+                    Generate Proforma
+                  </span>
+                )
               )}
               {!hasCommercialInv && (
                 <button type="button" disabled={commercial.loading}
@@ -459,6 +487,17 @@ export default function TradeDocumentsCard({
             <AlertTriangle size={14} className="mt-0.5 shrink-0 text-orange-500" strokeWidth={2} />
             <p className="text-[0.78rem] text-orange-700">
               A financial revision is pending approval. Current documents may be superseded once the revision is approved and new versions regenerated.
+            </p>
+          </div>
+        )}
+
+        {/* ── Customer acceptance pending warning ── */}
+        {customerAcceptancePending && (
+          <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
+            <AlertTriangle size={14} className="mt-0.5 shrink-0 text-blue-500" strokeWidth={2} />
+            <p className="text-[0.78rem] text-blue-700">
+              Awaiting customer acceptance. Proforma generation is on hold until the customer accepts the order confirmation.
+              {isSuperAdmin && " Super admins may override this."}
             </p>
           </div>
         )}
@@ -714,6 +753,59 @@ export default function TradeDocumentsCard({
           </div>
         )}
       </div>
+
+      {/* ── Proforma Override Modal (super_admin only) ── */}
+      {overrideModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={(e) => { if (e.target === e.currentTarget) { setOverrideModalOpen(false); setOverrideConfirmed(false); } }}
+        >
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+            <p className="mb-1 text-[0.75rem] font-bold uppercase tracking-[0.15em] text-amber-700">
+              Override Acceptance Gate
+            </p>
+
+            <div className="mb-5 flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[0.83rem] text-amber-800">
+              <AlertTriangle size={14} className="mt-0.5 shrink-0 text-amber-600" />
+              The customer has not yet accepted the order confirmation. Generating a proforma without acceptance may create a compliance mismatch.
+            </div>
+
+            <label className="mb-5 flex cursor-pointer items-start gap-3">
+              <input
+                type="checkbox"
+                checked={overrideConfirmed}
+                onChange={(e) => setOverrideConfirmed(e.target.checked)}
+                className="mt-0.5 h-4 w-4 accent-amber-600"
+              />
+              <span className="text-[0.875rem] text-[#1a1a1a]">
+                I confirm I want to generate the proforma before customer acceptance.
+              </span>
+            </label>
+
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => { setOverrideModalOpen(false); setOverrideConfirmed(false); }}
+                className="h-9 rounded-full border border-black/[0.09] bg-white px-5 text-[0.83rem] font-semibold text-[#5c5e62] transition hover:border-black/20"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={!overrideConfirmed || proforma.loading}
+                onClick={() => {
+                  setOverrideModalOpen(false);
+                  setOverrideConfirmed(false);
+                  generateDoc(`/api/admin/orders/${orderId}/trade-documents/proforma`, setProforma, "proforma invoice");
+                }}
+                className="h-9 rounded-full bg-amber-600 px-5 text-[0.83rem] font-semibold text-white transition hover:bg-amber-700 disabled:opacity-50"
+              >
+                Generate Proforma
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Send Email Modal ── */}
       {sendModal && (

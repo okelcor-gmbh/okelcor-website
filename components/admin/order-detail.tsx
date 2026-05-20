@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   AlertCircle, AlertTriangle, CheckCircle2, ChevronDown, FileWarning,
-  Landmark, Lock, Loader2, MapPin, Plus, Pencil, RotateCcw, Trash2,
+  Landmark, Lock, Loader2, MapPin, Plus, Pencil, RotateCcw, Trash2, UserCheck,
 } from "lucide-react";
 import { updateOrderStatus, cancelOrder, deleteOrder, addShipmentEvent, updateShipmentEvent, deleteShipmentEvent } from "@/app/admin/orders/actions";
 import type { AdminOrderFull, AdminOrderLog, ShipmentEvent } from "@/lib/admin-api";
@@ -454,6 +454,9 @@ export default function OrderDetail({
   // Local revision state (mirrors order prop, updated optimistically after actions)
   const [revisionRequired, setRevisionRequired] = useState(order.financials_revision_required ?? false);
 
+  // DOC-6: customer acceptance pending (drives proforma gate in TradeDocumentsCard)
+  const customerAcceptancePending = order.customer_acceptance_status === "pending";
+
   // Permission-based access
   const canCancel              = canDo(adminRole, "orders.update");
   const canDelete              = canDo(adminRole, "orders.delete");
@@ -826,6 +829,57 @@ export default function OrderDetail({
         </div>
       )}
 
+      {/* ── Customer Acceptance Status Card (DOC-6) ── */}
+      {order.customer_acceptance_status != null && (
+        <div className="rounded-2xl border bg-white p-5 shadow-sm">
+          <div className="flex items-center gap-2 mb-3">
+            <UserCheck size={14} className="shrink-0 text-[#E85C1A]" strokeWidth={2} />
+            <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+              Customer Acceptance
+            </p>
+          </div>
+          {order.customer_acceptance_status === "pending" && (
+            <div className="flex items-start gap-3">
+              <span className="mt-0.5 inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-[0.72rem] font-bold text-amber-700">
+                Pending
+              </span>
+              <p className="text-[0.83rem] text-[#5c5e62]">
+                Awaiting customer review and acceptance of the document.
+              </p>
+            </div>
+          )}
+          {order.customer_acceptance_status === "accepted" && (
+            <div className="flex items-start gap-3">
+              <span className="mt-0.5 inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-[0.72rem] font-bold text-emerald-700">
+                Accepted
+              </span>
+              <p className="text-[0.83rem] text-[#5c5e62]">
+                Customer accepted on{" "}
+                {order.customer_accepted_at
+                  ? shortDate(order.customer_accepted_at)
+                  : "—"
+                }.
+              </p>
+            </div>
+          )}
+          {order.customer_acceptance_status === "rejected" && (
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-start gap-3">
+                <span className="mt-0.5 inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-[0.72rem] font-bold text-red-600">
+                  Rejected
+                </span>
+                <p className="text-[0.83rem] text-[#5c5e62]">Customer declined this document.</p>
+              </div>
+              {order.customer_rejection_reason && (
+                <p className="mt-1 rounded-xl bg-[#fafafa] px-3.5 py-2.5 text-[0.83rem] italic text-[#5c5e62]">
+                  &ldquo;{order.customer_rejection_reason}&rdquo;
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ── Two-column: customer info + order summary ── */}
       <div className="grid gap-6 lg:grid-cols-2">
 
@@ -881,6 +935,7 @@ export default function OrderDetail({
         adminRole={adminRole}
         customerEmail={order.customer_email}
         financialsRevisionPending={revisionRequired}
+        customerAcceptancePending={customerAcceptancePending}
       />
 
       {/* ── EU Entry Certificate (Gelangensbestätigung) ── */}
