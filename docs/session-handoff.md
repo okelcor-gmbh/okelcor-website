@@ -2,6 +2,71 @@
 
 ---
 
+## Completed in Latest Session — LOG-2: Logistics Dashboard v2 (2026-05-21)
+
+---
+
+### LOG-2 — Logistics Dashboard v2 / Unified Operations View (Frontend)
+
+**Goal:** Upgrade the Logistics Dashboard to reflect the full order workflow and include both website and eBay orders. The old dashboard showed no useful data because it predated payment milestones, customer acceptance, financial locks, eBay imports, and shipment release.
+
+**Commits:** `af5038c`
+**TypeScript: 0 errors | Build: clean**
+
+#### Root Cause of Empty Dashboard
+The old `LogisticsOrder` type had no `payment_stage`, `source`, `customer_acceptance_status`, or eBay fields. Only 4 summary cards existed. The status filter didn't include `awaiting_proforma` / `awaiting_confirmation` / `awaiting_acceptance`. Empty state said "There are no active shipments to review."
+
+#### Files Changed
+
+| File | Change |
+|---|---|
+| `components/admin/logistics-dashboard.tsx` | Full upgrade — expanded types, 9-card summary, new filters, new table columns, eBay source badge, payment-gate on GenBtn, updated empty state |
+| `app/admin/logistics/page.tsx` | Updated subtitle to "Unified operations view — website and eBay orders requiring logistics action" |
+
+#### Type Changes
+- `LogisticsOrder` — added `payment_stage`, `customer_acceptance_status`, `financials_locked`, `financials_revision_required`, `source`, `ebay_order_id`, `ebay_payment_status`, `ebay_fulfillment_status`
+- `LogisticsSummary` — expanded from 4 fields to 9 new fields with legacy fallback compat
+
+#### 9-Card Summary Grid
+| Card | Field |
+|---|---|
+| Ready for Logistics | `ready_for_logistics` (falls back to `ready_for_shipment`) |
+| Awaiting Acceptance | `awaiting_acceptance` |
+| Awaiting Deposit | `awaiting_deposit` |
+| Deposit Paid / Docs Needed | `deposit_paid_docs_needed` |
+| Balance Due | `balance_due` |
+| Ready for Shipment Release | `ready_for_shipment_release` |
+| eBay Needing Fulfilment | `ebay_needing_fulfillment` |
+| Missing Documents | `missing_documents` |
+| EU Compliance Pending | `eu_compliance_pending` |
+
+#### New Filters (sent as query params to backend)
+- `source` → `all / website / ebay`
+- `payment_stage` → full enum
+- `acceptance_status` → `pending / accepted / rejected`
+- `ebay_fulfillment_status` → `not_started / in_progress / fulfilled / cancelled`
+- Status filter updated: added `awaiting_proforma`, `awaiting_confirmation`, `awaiting_acceptance`
+- Existing: `status`, `missing_document`, `risk_level`, `reverse_charge_only`, `page`
+
+#### New Table Columns
+- **Pay. Stage** — `PAYMENT_STAGE_COLORS` + `PAYMENT_STAGE_LABEL` maps
+- **Acceptance** — `ACCEPTANCE_COLORS` map
+- **Order cell** — green eBay badge (`ShoppingBag` icon) shown below ref when `source === "ebay"`
+- **Payment cell** — eBay orders show `ebay_payment_status` + `ebay_fulfillment_status` stacked; website orders show standard `payment_status`
+- **Status cell** — financials locked icon (`Lock`) shown inline when `financials_locked === true`
+
+#### Generate Button Gating
+`isDocGated(docKey, order)` checks `payment_stage`:
+- CI / PL → gated until `deposit_paid` or later stage
+- DN → gated until `shipment_released` or `status === "delivered"`
+- `payment_stage = null` (legacy orders) → no gate applied
+- Gated buttons render as a locked grey pill with tooltip; actual enforcement is backend-side
+
+#### Empty State
+Changed from "There are no active shipments to review." → "No logistics actions are currently pending."
+
+---
+
 ## Completed in Latest Session — EB-5: eBay Order Sync + Blog Rich Text Editor (2026-05-21)
 
 ---
