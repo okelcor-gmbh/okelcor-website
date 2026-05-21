@@ -39,8 +39,11 @@ async function fetchOrder(ref: string, token?: string): Promise<Order | null> {
     process.env.NEXT_PUBLIC_API_URL ??
     "http://localhost:8000/api/v1";
 
-  const url = `${API_URL}/orders/${ref}`;
-  console.log("[order-detail] fetching:", url);
+  // Use the authenticated endpoint (/auth/orders/{ref}) so the backend can
+  // include customer-visible trade documents (order_confirmation, proforma, etc.).
+  const url = token
+    ? `${API_URL}/auth/orders/${ref}`
+    : `${API_URL}/orders/${ref}`;
 
   try {
     const res = await fetch(url, {
@@ -52,17 +55,36 @@ async function fetchOrder(ref: string, token?: string): Promise<Order | null> {
     });
 
     const json = await res.json();
-    console.log("[order-detail] status:", res.status, "data:", JSON.stringify(json).slice(0, 200));
 
     if (res.status === 404) return null;
-    if (!res.ok) {
-      console.error("[order-detail] API error:", res.status, json);
-      return null;
-    }
+    if (!res.ok) return null;
 
     return json.data ?? null;
-  } catch (err) {
-    console.error("[order-detail] fetch failed:", err);
+  } catch {
+    return null;
+  }
+}
+
+async function fetchTradeDocuments(ref: string, token: string) {
+  const API_URL =
+    process.env.API_URL ??
+    process.env.NEXT_PUBLIC_API_URL ??
+    "http://localhost:8000/api/v1";
+
+  try {
+    const res = await fetch(`${API_URL}/auth/orders/${ref}/trade-documents`, {
+      cache: "no-store",
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    // Backend may wrap in { data: [...] } or return array directly
+    const raw = json.data ?? json;
+    return Array.isArray(raw) ? raw : null;
+  } catch {
     return null;
   }
 }
@@ -198,6 +220,13 @@ export default async function OrderDetailPage({ params }: Props) {
 
   const order = await fetchOrder(ref, token);
   if (!order) notFound();
+
+  // If the order endpoint didn't include trade_documents (undefined), try the
+  // dedicated /auth/orders/{ref}/trade-documents endpoint as a fallback.
+  if (order.trade_documents === undefined && token) {
+    const docs = await fetchTradeDocuments(ref, token);
+    if (docs !== null) order.trade_documents = docs;
+  }
 
   return (
     <main className="min-h-screen bg-[#f5f5f5]">

@@ -93,15 +93,18 @@ export default function TradeDocumentsCard({
     }
   }
 
-  // Customers only see active documents — superseded/void are internal admin records
+  // Customer-visible statuses: issued and sent only — draft/superseded/void hidden
+  const HIDDEN_STATUSES = new Set(["draft", "superseded", "void"]);
+
   const tradeDocs    = documents.filter(
-    (d) => d.type !== "shipment_document" && d.status !== "superseded" && d.status !== "void"
+    (d) => d.type !== "shipment_document" && !HIDDEN_STATUSES.has(d.status),
   );
   const shipmentDocs = documents.filter(
-    (d) => d.type === "shipment_document" && d.status !== "superseded" && d.status !== "void"
+    (d) => d.type === "shipment_document" && !HIDDEN_STATUSES.has(d.status),
   );
 
-  if (documents.length === 0) {
+  // Show empty state when there are genuinely no customer-visible docs
+  if (tradeDocs.length === 0 && shipmentDocs.length === 0) {
     return (
       <div className="rounded-[18px] bg-[#efefef] p-4 sm:rounded-[22px] sm:p-6 lg:p-8">
         <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--primary)] sm:mb-5 sm:text-[11px]">
