@@ -2,6 +2,72 @@
 
 ---
 
+## Completed in Latest Session — EB-5: eBay Order Sync + Blog Rich Text Editor (2026-05-21)
+
+---
+
+### EB-5 — eBay Order Status Sync (Frontend)
+
+**Goal:** Sync eBay seller orders into Okelcor admin — new "eBay Orders" tab on `/admin/ebay`, source badge in orders table, eBay info panel in order detail, 3 proxy routes.
+
+**Commits:** `d516c68`
+**TypeScript: 0 errors | Build: clean**
+
+#### Files Changed / Added
+
+| File | Change |
+|---|---|
+| `lib/admin-api.ts` | Added `source?: string \| null` to `AdminOrder`; added `EbayOrder`, `EbaySyncResult` types; added eBay fields to `AdminOrderFull` (`ebay_order_id`, `ebay_order_status`, `ebay_payment_status`, `ebay_fulfillment_status`, `ebay_buyer_username`, `ebay_last_synced_at`) |
+| `app/api/admin/ebay/orders/route.ts` | **New** — GET proxy → `GET /admin/ebay/orders` with filters (`payment_status`, `fulfillment_status`, `page`) |
+| `app/api/admin/ebay/orders/sync/route.ts` | **New** — POST proxy → `POST /admin/ebay/orders/sync` |
+| `app/api/admin/ebay/orders/[ebayOrderId]/sync/route.ts` | **New** — POST proxy → `POST /admin/ebay/orders/{ebayOrderId}/sync` |
+| `components/admin/orders-table.tsx` | Added `SourceBadge` (green ShoppingBag when `source === "ebay"`) rendered below order ref |
+| `components/admin/order-detail.tsx` | Added eBay source info panel in overview tab when `order.source === "ebay"` (order ID, buyer, payment/fulfillment status badges, last synced) |
+| `app/admin/ebay/page.tsx` | Added `EbayOrdersPanel` component + `pageTab` state to switch between "Product Listings" and "eBay Orders" tabs; panel has filters, bulk sync, per-row sync, pagination |
+
+#### Backend Endpoints Required
+```
+GET  /api/v1/admin/ebay/orders?payment_status=&fulfillment_status=&page=
+POST /api/v1/admin/ebay/orders/sync
+POST /api/v1/admin/ebay/orders/{ebayOrderId}/sync
+```
+
+---
+
+### Blog/News Rich Text Editor Upgrade (Frontend)
+
+**Goal:** Replace the simple ParagraphBuilder in the article CMS with a full TipTap v3 rich text editor. Backward compatible with legacy `string[]` article bodies.
+
+**Commits:** `077680b`
+**TypeScript: 0 errors | Build: clean**
+
+#### Files Changed / Added
+
+| File | Change |
+|---|---|
+| `components/admin/article-rich-editor.tsx` | **New** — TipTap v3 editor with Write/Preview/HTML tabs, full toolbar (H1–H3, bold/italic/underline/strike/code, bullet/ordered lists, blockquote, code block, HR, align left/center/right, link, image, table), DOMPurify preview sanitization |
+| `components/admin/article-form.tsx` | Replaced `ParagraphBuilder` with `ArticleRichEditor`; `body` field changed from `string[]` to `string`; `bodyToHtml()` migrates legacy arrays on load |
+| `lib/admin-api.ts` | `ArticleTranslation.body` changed from `string[]` to `string \| string[]` |
+| `lib/api.ts` | `ApiArticle.body` changed from `string[] \| null` to `string \| string[] \| null` |
+| `components/news/data.ts` | `ArticleContent.body` changed from `string[]` to `string \| string[]` |
+| `app/admin/articles/actions.ts` | `ArticleLocale.body` changed from `string[]` to `string` |
+| `components/news/article-ui.tsx` | Added `renderBody()` — detects HTML string vs legacy `string[]`; HTML body rendered via `dangerouslySetInnerHTML` with full prose styles |
+| `app/news/[slug]/page.tsx` | `toArticle()` body mapping updated for `string \| string[]` |
+
+#### Packages Installed
+```
+@tiptap/react@3.23.5  @tiptap/pm  @tiptap/starter-kit@3.23.5
+@tiptap/extension-underline  @tiptap/extension-link  @tiptap/extension-image
+@tiptap/extension-table  @tiptap/extension-placeholder  @tiptap/extension-text-align
+dompurify@3.4.5  @types/dompurify
+```
+
+#### Backward Compatibility
+- Legacy articles with `body: string[]` are converted to HTML by `bodyToHtml()` on editor load — no data migration needed
+- Public article rendering detects HTML strings (starts with `<`) vs legacy arrays and renders accordingly
+
+---
+
 ## Completed in Latest Session — DOC-7/8/9: Payment Milestones, Email Notifications & Workflow Command Center (2026-05-21)
 
 ---
