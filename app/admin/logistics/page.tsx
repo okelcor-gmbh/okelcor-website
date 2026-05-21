@@ -31,7 +31,7 @@ export default async function LogisticsPage() {
           Logistics Dashboard
         </h1>
         <p className="mt-0.5 text-[0.83rem] text-[#5c5e62]">
-          Document completion status, EU compliance, and shipment readiness across active orders
+          Unified operations view — website and eBay orders requiring logistics action
         </p>
       </div>
 
