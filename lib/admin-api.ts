@@ -236,6 +236,12 @@ export type AdminOrderFull = AdminOrder & {
   balance_paid_at?: string | null;
   shipment_released_at?: string | null;
   shipment_release_note?: string | null;
+  // DOC-8 milestone email tracking (null = not sent, string = ISO sent-at)
+  deposit_requested_email_sent_at?: string | null;
+  deposit_paid_email_sent_at?: string | null;
+  balance_due_email_sent_at?: string | null;
+  balance_paid_email_sent_at?: string | null;
+  shipment_released_email_sent_at?: string | null;
   // DOC-5 financial lock
   financials_locked?: boolean | null;
   financials_locked_at?: string | null;

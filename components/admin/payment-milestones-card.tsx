@@ -1,7 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { AlertCircle, AlertTriangle, CheckCircle2, Loader2, Package, Truck } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  AlertCircle, AlertTriangle, CheckCircle2,
+  Loader2, Mail, MailCheck, MailX, RotateCcw,
+} from "lucide-react";
 import { canDo } from "@/lib/admin-permissions";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -13,6 +16,8 @@ type PaymentStage =
   | "balance_due"
   | "balance_paid"
   | "shipment_released";
+
+type EmailRecord = Record<PaymentStage, string | null>;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -139,7 +144,10 @@ function ConfirmModal({
             disabled={loading}
             className={`h-9 rounded-full px-5 text-[0.83rem] font-semibold text-white transition disabled:opacity-50 ${confirmClass}`}
           >
-            {loading ? <span className="flex items-center gap-1.5"><Loader2 size={13} className="animate-spin" /> Working…</span> : confirmLabel}
+            {loading
+              ? <span className="flex items-center gap-1.5"><Loader2 size={13} className="animate-spin" /> Working…</span>
+              : confirmLabel
+            }
           </button>
         </div>
       </div>
@@ -160,6 +168,12 @@ export default function PaymentMilestonesCard({
   balancePaidAt,
   shipmentReleasedAt,
   shipmentReleaseNote: initialReleaseNote,
+  // DOC-8: email tracking fields (null = not sent, string = ISO sent-at)
+  depositRequestedEmailAt,
+  depositPaidEmailAt,
+  balanceDueEmailAt,
+  balancePaidEmailAt,
+  shipmentReleasedEmailAt,
 }: {
   orderId: number;
   adminRole: string;
@@ -171,6 +185,11 @@ export default function PaymentMilestonesCard({
   balancePaidAt?: string | null;
   shipmentReleasedAt?: string | null;
   shipmentReleaseNote?: string | null;
+  depositRequestedEmailAt?: string | null;
+  depositPaidEmailAt?: string | null;
+  balanceDueEmailAt?: string | null;
+  balancePaidEmailAt?: string | null;
+  shipmentReleasedEmailAt?: string | null;
 }) {
   const [stage,       setStage]       = useState<PaymentStage>(initialStage);
   const [depPaidAt,   setDepPaidAt]   = useState(depositPaidAt);
@@ -178,19 +197,48 @@ export default function PaymentMilestonesCard({
   const [releasedAt,  setReleasedAt]  = useState(shipmentReleasedAt);
   const [releaseNote, setReleaseNote] = useState(initialReleaseNote ?? "");
 
+  // DOC-8: email sent tracking per stage
+  const [emailSent, setEmailSent] = useState<EmailRecord>({
+    pending_proforma:  null,
+    deposit_requested: depositRequestedEmailAt ?? null,
+    deposit_paid:      depositPaidEmailAt ?? null,
+    balance_due:       balanceDueEmailAt ?? null,
+    balance_paid:      balancePaidEmailAt ?? null,
+    shipment_released: shipmentReleasedEmailAt ?? null,
+  });
+  const [resendLoading, setResendLoading] = useState<PaymentStage | null>(null);
+
   // Modal states
   const [modal,   setModal]   = useState<"deposit" | "balance_due" | "balance" | "release" | null>(null);
   const [note,    setNote]    = useState("");
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState<string | null>(null);
 
-  const canMarkPaid   = canDo(adminRole, "payments.mark_paid");
-  const canRelease    = canDo(adminRole, "payments.release_shipment");
-  const stageIdx      = STAGE_INDEX[stage];
+  // Toast
+  const [toast, setToast] = useState<{ message: string; variant: "success" | "warning" } | null>(null);
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 5000);
+    return () => clearTimeout(t);
+  }, [toast]);
+
+  const canMarkPaid = canDo(adminRole, "payments.mark_paid");
+  const canRelease  = canDo(adminRole, "payments.release_shipment");
+  const stageIdx    = STAGE_INDEX[stage];
 
   const closeModal = () => { setModal(null); setNote(""); setError(null); };
 
-  async function callAction(endpoint: string, body?: object) {
+  function showActionToast(emailSentResult?: boolean) {
+    if (emailSentResult === true) {
+      setToast({ message: "Milestone updated. Customer has been notified by email.", variant: "success" });
+    } else if (emailSentResult === false) {
+      setToast({ message: "Milestone updated, but the customer notification email failed.", variant: "warning" });
+    } else {
+      setToast({ message: "Milestone updated.", variant: "success" });
+    }
+  }
+
+  async function callAction(endpoint: string, body?: object): Promise<{ ok: boolean; emailSent?: boolean }> {
     setLoading(true);
     setError(null);
     try {
@@ -199,43 +247,89 @@ export default function PaymentMilestonesCard({
         headers: { "Content-Type": "application/json" },
         body: body ? JSON.stringify(body) : undefined,
       });
-      const json = await res.json().catch(() => ({})) as { message?: string; data?: { payment_stage?: PaymentStage; deposit_paid_at?: string; balance_paid_at?: string; shipment_released_at?: string } };
+      const json = await res.json().catch(() => ({})) as {
+        message?: string;
+        data?: {
+          payment_stage?: PaymentStage;
+          deposit_paid_at?: string;
+          balance_paid_at?: string;
+          shipment_released_at?: string;
+          email_sent?: boolean;
+          // Backend may echo the updated email timestamps directly
+          deposit_requested_email_sent_at?: string | null;
+          deposit_paid_email_sent_at?: string | null;
+          balance_due_email_sent_at?: string | null;
+          balance_paid_email_sent_at?: string | null;
+          shipment_released_email_sent_at?: string | null;
+        };
+      };
       if (!res.ok) {
         setError(json.message ?? "Action failed. Please try again.");
-        return false;
+        return { ok: false };
       }
-      // Update local state from response if backend echoes fields
+      // Update optimistic state from backend echo
       if (json.data?.payment_stage) setStage(json.data.payment_stage);
       if (json.data?.deposit_paid_at) setDepPaidAt(json.data.deposit_paid_at);
       if (json.data?.balance_paid_at) setBalPaidAt(json.data.balance_paid_at);
       if (json.data?.shipment_released_at) setReleasedAt(json.data.shipment_released_at);
-      return true;
+      // Update email tracking from backend echo
+      setEmailSent((prev) => ({
+        ...prev,
+        ...(json.data?.deposit_requested_email_sent_at !== undefined && { deposit_requested: json.data!.deposit_requested_email_sent_at! }),
+        ...(json.data?.deposit_paid_email_sent_at !== undefined      && { deposit_paid:      json.data!.deposit_paid_email_sent_at! }),
+        ...(json.data?.balance_due_email_sent_at !== undefined       && { balance_due:       json.data!.balance_due_email_sent_at! }),
+        ...(json.data?.balance_paid_email_sent_at !== undefined      && { balance_paid:      json.data!.balance_paid_email_sent_at! }),
+        ...(json.data?.shipment_released_email_sent_at !== undefined && { shipment_released: json.data!.shipment_released_email_sent_at! }),
+      }));
+      return { ok: true, emailSent: json.data?.email_sent };
     } catch {
       setError("Network error. Please try again.");
-      return false;
+      return { ok: false };
     } finally {
       setLoading(false);
     }
   }
 
   async function handleDepositPaid() {
-    const ok = await callAction("mark-deposit-paid", note ? { note } : undefined);
-    if (ok) { setStage("deposit_paid"); setDepPaidAt(new Date().toISOString()); closeModal(); }
+    const { ok, emailSent: es } = await callAction("mark-deposit-paid", note ? { note } : undefined);
+    if (ok) { setStage("deposit_paid"); setDepPaidAt(new Date().toISOString()); closeModal(); showActionToast(es); }
   }
 
   async function handleBalanceDue() {
-    const ok = await callAction("mark-balance-due");
-    if (ok) { setStage("balance_due"); closeModal(); }
+    const { ok, emailSent: es } = await callAction("mark-balance-due");
+    if (ok) { setStage("balance_due"); closeModal(); showActionToast(es); }
   }
 
   async function handleBalancePaid() {
-    const ok = await callAction("mark-balance-paid", note ? { note } : undefined);
-    if (ok) { setStage("balance_paid"); setBalPaidAt(new Date().toISOString()); closeModal(); }
+    const { ok, emailSent: es } = await callAction("mark-balance-paid", note ? { note } : undefined);
+    if (ok) { setStage("balance_paid"); setBalPaidAt(new Date().toISOString()); closeModal(); showActionToast(es); }
   }
 
   async function handleReleaseShipment() {
-    const ok = await callAction("release-shipment", note ? { note } : undefined);
-    if (ok) { setStage("shipment_released"); setReleasedAt(new Date().toISOString()); setReleaseNote(note); closeModal(); }
+    const { ok, emailSent: es } = await callAction("release-shipment", note ? { note } : undefined);
+    if (ok) { setStage("shipment_released"); setReleasedAt(new Date().toISOString()); setReleaseNote(note); closeModal(); showActionToast(es); }
+  }
+
+  async function handleResendEmail(targetStage: PaymentStage) {
+    setResendLoading(targetStage);
+    try {
+      const res  = await fetch(`/api/admin/orders/${orderId}/payments/resend-milestone-email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stage: targetStage }),
+      });
+      const json = await res.json().catch(() => ({})) as { message?: string };
+      if (res.ok) {
+        setEmailSent((prev) => ({ ...prev, [targetStage]: new Date().toISOString() }));
+        setToast({ message: "Email resent to customer.", variant: "success" });
+      } else {
+        setToast({ message: json.message ?? "Failed to resend email. Please try again.", variant: "warning" });
+      }
+    } catch {
+      setToast({ message: "Network error. Could not resend email.", variant: "warning" });
+    } finally {
+      setResendLoading(null);
+    }
   }
 
   // ── Steps definition ──────────────────────────────────────────────────────
@@ -319,10 +413,12 @@ export default function PaymentMilestonesCard({
         ) : (
           <ol className="relative space-y-0 border-l-2 border-black/[0.06] pl-5">
             {steps.map((step, i) => {
-              const idx      = STAGE_INDEX[step.id];
-              const isDone   = stageIdx > idx;
-              const isCurr   = stageIdx === idx;
-              const isLast   = i === steps.length - 1;
+              const idx    = STAGE_INDEX[step.id];
+              const isDone = stageIdx > idx;
+              const isCurr = stageIdx === idx;
+              const isLast = i === steps.length - 1;
+              const reached = isDone || isCurr;
+              const sentAt  = emailSent[step.id];
 
               return (
                 <li key={step.id} className={isLast ? "pb-0 pt-1" : "pb-5 pt-1"}>
@@ -354,6 +450,36 @@ export default function PaymentMilestonesCard({
                           Confirmed {shortDate(step.date)}
                         </p>
                       )}
+
+                      {/* ── Email status (DOC-8) — only for reached milestones ── */}
+                      {reached && (
+                        sentAt ? (
+                          <p className="mt-1 flex items-center gap-1 text-[0.7rem] text-emerald-600">
+                            <MailCheck size={11} strokeWidth={2} />
+                            Email sent {shortDate(sentAt)}
+                          </p>
+                        ) : (
+                          <div className="mt-1 flex items-center gap-2">
+                            <span className="flex items-center gap-1 text-[0.7rem] text-amber-600">
+                              <MailX size={11} strokeWidth={2} />
+                              Email not sent
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleResendEmail(step.id)}
+                              disabled={resendLoading === step.id}
+                              title={`Resend ${STAGE_LABEL[step.id]} notification`}
+                              className="inline-flex h-5 items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2 text-[0.68rem] font-semibold text-amber-700 transition hover:bg-amber-100 disabled:opacity-50"
+                            >
+                              {resendLoading === step.id
+                                ? <Loader2 size={9} className="animate-spin" />
+                                : <RotateCcw size={9} strokeWidth={2.5} />
+                              }
+                              {resendLoading === step.id ? "…" : "Resend"}
+                            </button>
+                          </div>
+                        )
+                      )}
                     </div>
 
                     {/* Action button */}
@@ -378,7 +504,7 @@ export default function PaymentMilestonesCard({
       {modal === "deposit" && (
         <ConfirmModal
           title="Mark Deposit as Paid"
-          body={`Confirm that the deposit of ${eur(depositAmount)} has been received.`}
+          body={`Confirm that the deposit of ${eur(depositAmount)} has been received. The customer will be notified by email.`}
           noteLabel="Payment Reference"
           noteValue={note}
           onNoteChange={setNote}
@@ -395,7 +521,7 @@ export default function PaymentMilestonesCard({
       {modal === "balance_due" && (
         <ConfirmModal
           title="Mark Balance as Due"
-          body={`Notify the system that the balance of ${eur(balanceAmount)} is now due from the customer.`}
+          body={`Notify the system that the balance of ${eur(balanceAmount)} is now due. The customer will be sent a balance-due notification email.`}
           onConfirm={handleBalanceDue}
           onCancel={closeModal}
           loading={loading}
@@ -409,7 +535,7 @@ export default function PaymentMilestonesCard({
       {modal === "balance" && (
         <ConfirmModal
           title="Mark Balance as Paid"
-          body={`Confirm that the balance payment of ${eur(balanceAmount)} has been received.`}
+          body={`Confirm that the balance payment of ${eur(balanceAmount)} has been received. The customer will be notified by email.`}
           noteLabel="Payment Reference"
           noteValue={note}
           onNoteChange={setNote}
@@ -426,7 +552,7 @@ export default function PaymentMilestonesCard({
       {modal === "release" && (
         <ConfirmModal
           title="Release Shipment"
-          body="All payments have been received. Confirm shipment release to proceed with logistics."
+          body="All payments have been received. Confirm shipment release. The customer will receive a shipment-released notification."
           warning="This will unlock delivery note generation and signal the logistics team to proceed."
           noteLabel="Release Note"
           noteValue={note}
@@ -438,6 +564,21 @@ export default function PaymentMilestonesCard({
           confirmLabel="Release Shipment"
           confirmClass="bg-[#E85C1A] hover:bg-[#d04d15]"
         />
+      )}
+
+      {/* ── Toast ── */}
+      {toast && (
+        <div
+          className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl px-4 py-3 text-[0.85rem] font-semibold text-white shadow-lg ${
+            toast.variant === "success" ? "bg-emerald-600" : "bg-amber-600"
+          }`}
+        >
+          {toast.variant === "success"
+            ? <CheckCircle2 size={15} strokeWidth={2.5} />
+            : <Mail size={15} strokeWidth={2} />
+          }
+          {toast.message}
+        </div>
       )}
     </>
   );

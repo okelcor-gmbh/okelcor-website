@@ -894,6 +894,11 @@ export default function OrderDetail({
           balancePaidAt={order.balance_paid_at ?? null}
           shipmentReleasedAt={order.shipment_released_at ?? null}
           shipmentReleaseNote={order.shipment_release_note ?? null}
+          depositRequestedEmailAt={order.deposit_requested_email_sent_at ?? null}
+          depositPaidEmailAt={order.deposit_paid_email_sent_at ?? null}
+          balanceDueEmailAt={order.balance_due_email_sent_at ?? null}
+          balancePaidEmailAt={order.balance_paid_email_sent_at ?? null}
+          shipmentReleasedEmailAt={order.shipment_released_email_sent_at ?? null}
         />
       )}
 
