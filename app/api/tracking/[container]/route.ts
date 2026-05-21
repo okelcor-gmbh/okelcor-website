@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { rateLimit, retryAfter, getClientIp, rateLimitResponse, warnRateLimit } from "@/lib/rate-limit";
 
 // Public endpoint — no auth token required.
 // Proxies to the Laravel tracking API so the backend URL stays server-side
@@ -10,9 +11,15 @@ const API_URL =
   "http://localhost:8000/api/v1";
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ container: string }> },
 ) {
+  const ip = getClientIp(req);
+  if (!rateLimit(`tracking:${ip}`, 30, 60 * 60 * 1000)) {
+    warnRateLimit("/api/tracking/[container]", "GET", ip, req.headers.get("user-agent") ?? "");
+    return rateLimitResponse(retryAfter(`tracking:${ip}`));
+  }
+
   const { container } = await params;
 
   if (!container?.trim()) {

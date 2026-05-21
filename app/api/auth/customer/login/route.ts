@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { rateLimit, retryAfter, getClientIp, rateLimitResponse, warnRateLimit } from "@/lib/rate-limit";
 
 const API_URL =
   process.env.API_URL ??
@@ -65,6 +66,12 @@ async function recordLoginActivity(
 // ── Route handler ─────────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
+  const ip = getClientIp(request);
+  if (!rateLimit(`login:${ip}`, 10, 15 * 60 * 1000)) {
+    warnRateLimit("/api/auth/customer/login", "POST", ip, request.headers.get("user-agent") ?? "");
+    return rateLimitResponse(retryAfter(`login:${ip}`));
+  }
+
   // Extract real client IP (works behind proxies / Vercel / Cloudflare)
   const clientIp =
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??

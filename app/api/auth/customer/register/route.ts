@@ -6,6 +6,7 @@ import {
   COMPANY_ADDRESS_CITY,
   SITE_URL,
 } from "@/lib/constants";
+import { rateLimit, retryAfter, getClientIp, rateLimitResponse, warnRateLimit } from "@/lib/rate-limit";
 
 const API_URL =
   process.env.API_URL ??
@@ -114,6 +115,12 @@ async function sendWelcomeEmail(
 // ── Route handler ──────────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
+  const ip = getClientIp(request);
+  if (!rateLimit(`register:${ip}`, 5, 60 * 60 * 1000)) {
+    warnRateLimit("/api/auth/customer/register", "POST", ip, request.headers.get("user-agent") ?? "");
+    return rateLimitResponse(retryAfter(`register:${ip}`));
+  }
+
   let body: Record<string, unknown> = {};
   try {
     body = await request.json();

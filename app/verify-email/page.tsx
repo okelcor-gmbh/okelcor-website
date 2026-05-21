@@ -30,7 +30,12 @@ export default function VerifyEmailPage() {
       setResent(true);
     } catch (err: unknown) {
       const e = err as Record<string, unknown>;
-      setError((e?.message as string) ?? "Failed to resend. Please try again.");
+      const retryAfter = typeof e?.retry_after === "number" ? (e.retry_after as number) : null;
+      setError(
+        retryAfter
+          ? `Too many attempts. Please wait ${retryAfter} seconds and try again.`
+          : (e?.message as string) ?? "Failed to resend. Please try again."
+      );
     } finally {
       setResending(false);
     }

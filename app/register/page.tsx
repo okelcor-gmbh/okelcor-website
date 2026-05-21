@@ -213,7 +213,12 @@ export default function RegisterPage() {
       setSubmitted(true);
     } catch (err: unknown) {
       const e = err as Record<string, unknown>;
-      setApiError((e?.message as string) ?? "Registration failed. Please try again.");
+      const retryAfter = typeof e?.retry_after === "number" ? (e.retry_after as number) : null;
+      setApiError(
+        retryAfter
+          ? `Too many attempts. Please wait ${retryAfter} seconds and try again.`
+          : (e?.message as string) ?? "Registration failed. Please try again."
+      );
     } finally {
       setSubmitting(false);
     }

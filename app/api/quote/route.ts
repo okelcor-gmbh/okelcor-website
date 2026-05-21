@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { COMPANY_NAME, COMPANY_LEGAL_NAME, COMPANY_EMAIL, COMPANY_NOREPLY_EMAIL, COMPANY_PHONE, COMPANY_ADDRESS_STREET, COMPANY_ADDRESS_CITY, COMPANY_ADDRESS_COUNTRY } from "@/lib/constants";
 import { getSiteSettings } from "@/lib/site-settings";
+import { rateLimit, retryAfter, getClientIp, rateLimitResponse, warnRateLimit } from "@/lib/rate-limit";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -267,6 +268,12 @@ function buildConfirmationHtml(data: QuoteData, refNumber: string): string {
 // ─── Route handler ─────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
+  const ip = getClientIp(req);
+  if (!rateLimit(`quote:${ip}`, 5, 60 * 60 * 1000)) {
+    warnRateLimit("/api/quote", "POST", ip, req.headers.get("user-agent") ?? "");
+    return rateLimitResponse(retryAfter(`quote:${ip}`));
+  }
+
   if (!process.env.RESEND_API_KEY) {
     console.error("[/api/quote] RESEND_API_KEY is not set");
     return NextResponse.json(

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { rateLimit, retryAfter, getClientIp, rateLimitResponse, warnRateLimit } from "@/lib/rate-limit";
 
 const API_URL =
   process.env.API_URL ??
@@ -6,6 +7,12 @@ const API_URL =
   "http://localhost:8000/api/v1";
 
 export async function POST(request: NextRequest) {
+  const ip = getClientIp(request);
+  if (!rateLimit(`resend-verification:${ip}`, 3, 60 * 60 * 1000)) {
+    warnRateLimit("/api/auth/customer/resend-verification", "POST", ip, request.headers.get("user-agent") ?? "");
+    return rateLimitResponse(retryAfter(`resend-verification:${ip}`));
+  }
+
   try {
     const body = await request.json();
 

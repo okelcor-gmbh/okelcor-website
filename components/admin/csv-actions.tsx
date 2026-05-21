@@ -72,7 +72,7 @@ export default function CsvActions({
 
   const handleDeleteAll = async () => {
     setDeleteAll({ phase: "deleting" });
-    const result = await deleteAllProducts();
+    const result = await deleteAllProducts("delete-all-products");
     if (result.error) {
       setDeleteAll({ phase: "error", message: result.error });
     } else {

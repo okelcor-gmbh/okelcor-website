@@ -30,7 +30,12 @@ export default function ForgotPasswordPage() {
       setSubmitted(true);
     } catch (err: unknown) {
       const e = err as Record<string, unknown>;
-      setError((e?.message as string) ?? "Something went wrong. Please try again.");
+      const retryAfter = typeof e?.retry_after === "number" ? (e.retry_after as number) : null;
+      setError(
+        retryAfter
+          ? `Too many attempts. Please wait ${retryAfter} seconds and try again.`
+          : (e?.message as string) ?? "Something went wrong. Please try again."
+      );
     } finally {
       setSubmitting(false);
     }

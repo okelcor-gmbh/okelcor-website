@@ -30,6 +30,11 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const contentLength = Number(request.headers.get("content-length") ?? 0);
+  if (contentLength > 50 * 1024 * 1024) {
+    return NextResponse.json({ error: "File too large. Maximum upload size is 50 MB." }, { status: 413 });
+  }
+
   const contentType = request.headers.get("content-type") ?? "";
 
   let res: Response;

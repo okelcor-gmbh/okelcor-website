@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { rateLimit, retryAfter, getClientIp, rateLimitResponse, warnRateLimit } from "@/lib/rate-limit";
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
@@ -26,6 +27,11 @@ Current page the user is on: ${currentPage}`;
 // ── Route handler ─────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
+  const ip = getClientIp(req);
+  if (!rateLimit(`chat:${ip}`, 30, 15 * 60 * 1000)) {
+    warnRateLimit("/api/chat", "POST", ip, req.headers.get("user-agent") ?? "");
+    return rateLimitResponse(retryAfter(`chat:${ip}`));
+  }
 
   if (!OPENROUTER_API_KEY) {
     return NextResponse.json(

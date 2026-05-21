@@ -444,7 +444,11 @@ export async function restoreProduct(
   return {};
 }
 
-export async function deleteAllProducts(): Promise<{ error?: string; deleted?: number }> {
+export async function deleteAllProducts(confirm?: string): Promise<{ error?: string; deleted?: number }> {
+  if (confirm !== "delete-all-products") {
+    return { error: "Confirmation token required." };
+  }
+
   const token = await getToken();
   let res: Response;
   try {

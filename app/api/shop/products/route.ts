@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { rateLimit, retryAfter, getClientIp, rateLimitResponse, warnRateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -8,6 +9,12 @@ const API_URL =
   "http://localhost:8000/api/v1";
 
 export async function GET(request: NextRequest) {
+  const ip = getClientIp(request);
+  if (!rateLimit(`shop-products:${ip}`, 300, 15 * 60 * 1000)) {
+    warnRateLimit("/api/shop/products", "GET", ip, request.headers.get("user-agent") ?? "");
+    return rateLimitResponse(retryAfter(`shop-products:${ip}`));
+  }
+
   const search = request.nextUrl.search;
   const upstream = `${API_URL}/products${search}`;
 

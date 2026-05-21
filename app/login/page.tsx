@@ -158,8 +158,11 @@ export default function LoginPage() {
         router.push(`/forgot-password?email=${encodeURIComponent(email)}`);
         return;
       }
+      const retryAfter = typeof e?.retry_after === "number" ? (e.retry_after as number) : null;
       setAuthError(
-        (e?.message as string) ?? "Invalid email or password. Please try again."
+        retryAfter
+          ? `Too many attempts. Please wait ${retryAfter} seconds and try again.`
+          : (e?.message as string) ?? "Invalid email or password. Please try again."
       );
     }
   };

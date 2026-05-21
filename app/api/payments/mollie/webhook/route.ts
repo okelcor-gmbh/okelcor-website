@@ -89,6 +89,15 @@ function buildCustomerEmail(orderRef: string, amount: string, method: string): s
 // ── POST handler ──────────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
+  // If MOLLIE_WEBHOOK_SECRET is set, the webhook URL must include ?secret=<value>
+  if (WEBHOOK_SECRET) {
+    const incomingSecret = request.nextUrl.searchParams.get("secret");
+    if (incomingSecret !== WEBHOOK_SECRET) {
+      console.warn("[Mollie webhook] Invalid or missing secret — request ignored");
+      return NextResponse.json({ received: true });
+    }
+  }
+
   // Mollie sends form-encoded body with "id" field
   let paymentId: string | null = null;
   try {
