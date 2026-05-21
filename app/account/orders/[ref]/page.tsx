@@ -59,11 +59,16 @@ async function fetchOrder(ref: string, token?: string): Promise<Order | null> {
     }
   }
 
-  // Public fallback (also the sole path when no token is present)
+  // Fallback to /orders/{ref} — mirrors the original working fetch: send the
+  // token here too, because the backend uses it to verify ownership and may
+  // return 404/401 for unauthenticated requests even on the "public" path.
   try {
     const res = await fetch(`${API_URL}/orders/${ref}`, {
       cache: "no-store",
-      headers: { Accept: "application/json" },
+      headers: {
+        Accept: "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
     });
     const json = await res.json().catch(() => ({}));
     if (!res.ok) return null;
@@ -227,7 +232,32 @@ export default async function OrderDetailPage({ params }: Props) {
   const token = cookieStore.get("customer_token")?.value;
 
   const order = await fetchOrder(ref, token);
-  if (!order) notFound();
+  if (!order) {
+    return (
+      <main className="min-h-screen bg-[#f5f5f5]">
+        <Navbar />
+        <div className="tesla-shell pb-16 pt-[88px] sm:pt-[96px]">
+          <Link
+            href="/account/orders"
+            className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-black/[0.08] bg-white px-4 py-2 text-[0.82rem] font-semibold text-[var(--foreground)] transition hover:bg-[#f0f0f0] sm:mb-6 sm:text-[0.85rem]"
+          >
+            <ChevronLeft size={15} strokeWidth={2.2} /> My Orders
+          </Link>
+          <div className="rounded-[18px] bg-[#efefef] p-6 sm:rounded-[22px] sm:p-8">
+            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--primary)] sm:text-[11px]">
+              Order not found
+            </p>
+            <p className="mt-2 text-[0.9rem] text-[var(--muted)]">
+              We couldn&apos;t load order{" "}
+              <span className="font-mono font-semibold text-[var(--foreground)]">{ref}</span>.
+              It may not exist or you may not have access to it.
+            </p>
+          </div>
+        </div>
+        <Footer />
+      </main>
+    );
+  }
 
   // If the order endpoint didn't include trade_documents (undefined), try the
   // dedicated /auth/orders/{ref}/trade-documents endpoint as a fallback.
