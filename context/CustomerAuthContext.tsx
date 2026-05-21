@@ -37,6 +37,12 @@ export function CustomerAuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const refreshCustomer = useCallback(async () => {
+    // Admin routes use a separate cookie-based auth system.
+    // Skip the customer /me fetch there — it would always 401 and pollute the network tab.
+    if (typeof window !== "undefined" && window.location.pathname.startsWith("/admin")) {
+      setIsLoading(false);
+      return;
+    }
     try {
       const profile = await getCustomerProfile();
       setCustomer(profile);

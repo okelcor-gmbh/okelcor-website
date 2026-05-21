@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
+const API_URL = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
 
 // ── Auth helper ───────────────────────────────────────────────────────────────
 
@@ -35,8 +35,31 @@ export type ArticleInput = {
     en: ArticleLocale;
     de?: ArticleLocale;
     fr?: ArticleLocale;
+    es?: ArticleLocale;
   };
 };
+
+// ── Error helpers ─────────────────────────────────────────────────────────────
+
+/**
+ * Turn a Laravel error response into a readable string.
+ * Handles both plain { message } and validation { message, errors: { field: string[] } } shapes.
+ */
+function extractError(json: Record<string, unknown>, status: number): string {
+  const message = (json.message as string | undefined) || `Request failed (HTTP ${status}).`;
+  const errors = json.errors as Record<string, string[]> | undefined;
+  if (!errors || typeof errors !== "object") return message;
+
+  const lines = Object.entries(errors).flatMap(([field, msgs]) => {
+    const label = field
+      .replace(/^translations\.\w+\./, "")
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+    return (msgs as string[]).map((m) => `${label}: ${m}`);
+  });
+
+  return lines.length ? `${message}\n${lines.join("\n")}` : message;
+}
 
 // ── CRUD actions ──────────────────────────────────────────────────────────────
 
@@ -62,7 +85,7 @@ export async function createArticle(
 
   const json = await res.json().catch(() => ({}));
   if (!res.ok) {
-    return { error: json.message || `Failed to create article (HTTP ${res.status}).` };
+    return { error: extractError(json, res.status) };
   }
 
   revalidatePath("/admin/articles");
@@ -92,7 +115,7 @@ export async function updateArticle(
 
   const json = await res.json().catch(() => ({}));
   if (!res.ok) {
-    return { error: json.message || `Failed to update article (HTTP ${res.status}).` };
+    return { error: extractError(json, res.status) };
   }
 
   revalidatePath(`/admin/articles/${id}`);

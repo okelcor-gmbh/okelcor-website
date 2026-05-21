@@ -2,6 +2,43 @@
 
 ---
 
+## Completed in Latest Session — ART-1: Article Editor Bugfixes (2026-05-21)
+
+---
+
+### ART-1 — Article Publish Server Error + TipTap Duplicate Extension Fix
+
+**Goal:** Fix "Server Error" on article publish, silence TipTap duplicate-extension warnings, improve error display, and suppress noisy 401s on admin pages.
+
+**TypeScript: 0 errors | Build: clean**
+
+#### Root Causes
+
+| # | Symptom | Cause |
+|---|---|---|
+| 1 | `[tiptap warn]: Duplicate extension names found: ['link', 'underline']` | `@tiptap/starter-kit@3.23.5` bundles `extension-link` and `extension-underline` internally — adding them again as standalone caused duplicates |
+| 2 | "Server Error" shown for all backend failures | `actions.ts` only read `json.message`, missing Laravel's `json.errors` validation detail |
+| 3 | `/api/auth/customer/me` 401 on every admin page | `CustomerAuthProvider` in `app/layout.tsx` wraps all routes including `/admin/**` and calls `/me` unconditionally on mount |
+| 4 | Locale tab content not syncing | `prevValueRef = { current: value }` was a plain object recreated each render — `setContent` never ran when switching EN → DE |
+| 5 | `API_URL` missing private env var fallback | Server action used `NEXT_PUBLIC_API_URL` only |
+| 6 | `es` locale missing from `ArticleInput` type | Type only had `en/de/fr` |
+
+#### Files Changed
+
+| File | Change |
+|---|---|
+| `components/admin/article-rich-editor.tsx` | `StarterKit.configure({ link: false, underline: false })` — disables bundled link/underline so our standalone configured versions win; fixed locale sync by removing broken `prevValueRef` pattern |
+| `app/admin/articles/actions.ts` | Added `extractError()` helper — parses `json.errors` field map and formats as readable lines; applied to `createArticle` + `updateArticle`; `API_URL` private fallback; added `es` to translations type |
+| `components/admin/article-form.tsx` | Error banner uses `<pre class="whitespace-pre-wrap font-sans">` so multi-line validation errors render correctly |
+| `context/CustomerAuthContext.tsx` | `refreshCustomer` bails out early on `/admin/**` paths — no more 401 noise in admin network tab |
+
+#### Backend Notes (for backend team)
+- Ensure `PUT /admin/articles/{id}` and `POST /admin/articles` accept `body` as an HTML string (not `string[]`)
+- Return 422 with `errors` object on validation failure, not 500
+- HTML sanitizer should strip unknown tags silently, not throw — TipTap outputs `<p>`, `<h1>`–`<h3>`, `<strong>`, `<em>`, `<u>`, `<s>`, `<code>`, `<pre>`, `<ul>`, `<ol>`, `<li>`, `<blockquote>`, `<hr>`, `<a href target rel>`, `<img src alt>`, `<table>`, `<thead>`, `<tbody>`, `<tr>`, `<th>`, `<td>`, `style` on block elements (text-align), `class` on `<pre>`
+
+---
+
 ## Completed in Latest Session — LOG-2: Logistics Dashboard v2 (2026-05-21)
 
 ---

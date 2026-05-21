@@ -339,7 +339,9 @@ export default function ArticleRichEditor({ value, onChange, placeholder = "Writ
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      // StarterKit v3 bundles extension-link + extension-underline internally.
+      // Disable them here so we can configure them ourselves below.
+      StarterKit.configure({ link: false, underline: false }),
       Underline,
       Link.configure({ openOnClick: false, HTMLAttributes: { rel: "noopener noreferrer" } }),
       Image.configure({ inline: false, allowBase64: false }),
@@ -365,14 +367,14 @@ export default function ArticleRichEditor({ value, onChange, placeholder = "Writ
     immediatelyRender: false,
   });
 
-  // Sync value → editor when parent changes locale tab
-  const prevValueRef = { current: value };
+  // Sync value → editor when parent changes locale tab (e.g. EN → DE switch).
   useEffect(() => {
-    if (!editor || prevValueRef.current === value) return;
+    if (!editor) return;
     if (editor.getHTML() !== value) {
       editor.commands.setContent(value);
       setHtmlSource(value);
     }
+  // editor is intentionally omitted — it's stable after mount
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 

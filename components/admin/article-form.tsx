@@ -266,9 +266,9 @@ export default function ArticleForm(props: Props) {
 
       {/* ── Global error ── */}
       {error && (
-        <div className="flex items-center justify-between rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[0.83rem] text-red-700">
-          <span>{error}</span>
-          <button type="button" onClick={() => setError(null)}><X size={14} /></button>
+        <div className="flex items-start justify-between rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[0.83rem] text-red-700">
+          <pre className="whitespace-pre-wrap font-sans">{error}</pre>
+          <button type="button" onClick={() => setError(null)} className="ml-3 shrink-0"><X size={14} /></button>
         </div>
       )}
 
