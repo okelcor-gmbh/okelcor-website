@@ -2,6 +2,126 @@
 
 ---
 
+## Completed in Latest Session — DOC-7/8/9: Payment Milestones, Email Notifications & Workflow Command Center (2026-05-21)
+
+---
+
+### DOC-7 — Payment Milestone Workflow (Frontend)
+
+**Goal:** Full deposit/balance payment milestone tracking visible to both admin and customer, with payment-stage-gating on trade document generation.
+
+**Commits:** `a1ef863`
+**TypeScript: 0 errors | Build: clean**
+
+#### Files Changed / Added
+
+| File | Change |
+|---|---|
+| `lib/admin-api.ts` | Added `payment_stage`, `deposit_percent`, `deposit_amount`, `deposit_paid_at`, `balance_amount`, `balance_paid_at`, `shipment_released_at`, `shipment_release_note` to `AdminOrderFull` |
+| `lib/admin-permissions.ts` | Added `"payments.release_shipment"` permission for `super_admin`, `admin`, `order_manager` |
+| `components/admin/payment-milestones-card.tsx` | **New** — 5-step milestone progress card for admin order detail; Mark Deposit Paid / Mark Balance Paid / Release Shipment action buttons with role permission gating |
+| `components/admin/trade-documents-card.tsx` | Added `paymentStage` + `orderStatus` props; Commercial Invoice and Packing List gated until `deposit_paid`; Delivery Note gated until `shipment_released` or `delivered`; graceful degradation when `paymentStage` is null (old orders unaffected) |
+| `components/admin/order-detail.tsx` | Wired `PaymentMilestonesCard` into Payments tab; passes all milestone fields as props |
+| `components/account/payment-milestone-progress.tsx` | **New** — customer-facing read-only 5-step timeline (deposit_requested → shipment_released) with dates and amounts |
+| `components/account/order-payment-card.tsx` | Added `paymentStage`, `depositAmount`, `balanceAmount` props; bank transfer section shows staged amount highlight box when deposit/balance stage active |
+| `app/account/orders/[ref]/page.tsx` | Renders `PaymentMilestoneProgress` after `OrderPaymentCard` when stage is past `pending_proforma`; passes payment stage props |
+| `app/account/orders/page.tsx` | Added `payment_stage`, `deposit_amount`, `balance_amount`, `deposit_paid_at`, `balance_paid_at` to `Order` type |
+
+#### Payment Stage Enum
+```
+pending_proforma → deposit_requested → deposit_paid → balance_due → balance_paid → shipment_released
+```
+
+#### Trade Document Gating Logic
+- `commercialGated = !!paymentStage && !DEPOSIT_PAID_STAGES.has(paymentStage)` — blocks until `deposit_paid`
+- `packingGated` — same rule as commercial
+- `deliveryGated = !!paymentStage && !SHIPMENT_RELEASED_STAGES.has(paymentStage) && !isDelivered`
+- Null `paymentStage` (legacy orders) → no gates applied
+
+#### Backend Endpoints Required
+```
+POST /api/v1/admin/orders/{id}/payments/mark-deposit-paid
+POST /api/v1/admin/orders/{id}/payments/mark-balance-paid
+POST /api/v1/admin/orders/{id}/payments/release-shipment
+  ← All return updated order fields (payment_stage, *_paid_at, etc.)
+```
+
+---
+
+### DOC-8 — Payment Milestone Email Notifications (Frontend)
+
+**Goal:** Show per-milestone email status in admin panel (Sent/Not Sent with timestamp), Resend button per sent milestone, toast after milestone actions indicating whether customer was notified.
+
+**Commits:** `8c8acd4`
+**TypeScript: 0 errors | Build: clean**
+
+#### Files Changed / Added
+
+| File | Change |
+|---|---|
+| `lib/admin-api.ts` | Added email tracking fields to `AdminOrderFull`: `deposit_requested_email_sent_at`, `deposit_paid_email_sent_at`, `balance_due_email_sent_at`, `balance_paid_email_sent_at`, `shipment_released_email_sent_at` (null = not sent, ISO string = sent at date) |
+| `components/admin/payment-milestones-card.tsx` | Full rewrite — added `MailCheck`/`MailX`/`RotateCcw` icons; `emailSent` state per stage; `resendLoading` state; toast system (emerald success / amber warning); `callAction` returns `{ok, emailSent}` and updates email state from backend echo; `handleResendEmail(stage)` POSTs to resend endpoint; per-step email status row shows icon + date or "Email not sent" + Resend button |
+| `app/api/admin/orders/[id]/payments/resend-milestone-email/route.ts` | **New** — thin proxy `POST /admin/orders/{id}/payments/resend-milestone-email` with Bearer auth |
+
+#### Email Status Display Logic
+- Each reached milestone shows: `MailCheck` green + "Email sent [date]" OR `MailX` gray + "Email not sent" + Resend button
+- Action buttons (Mark Paid / Release): after success, show toast "Customer notified by email" (emerald) or "Action saved — email notification failed" (amber) based on backend echo
+- Resend: success → updates email timestamp in state; error → amber toast with message
+
+#### Backend Endpoints Required
+```
+POST /api/v1/admin/orders/{id}/payments/resend-milestone-email
+  body: { stage: "deposit_requested" | "deposit_paid" | "balance_due" | "balance_paid" | "shipment_released" }
+  ← Returns updated order fields including email_sent_at timestamps
+```
+Mark-paid / release-shipment endpoints should echo back `*_email_sent_at` fields in their response so the frontend can update email status without a refetch.
+
+---
+
+### DOC-9 — Admin Order Workflow Command Center (Frontend)
+
+**Goal:** Add a persistent Workflow Command Center panel to admin order detail showing current state, color-coded next action, and reorganize all content into six tabs with attention badges.
+
+**Commits:** `89f4cb5`
+**TypeScript: 0 errors | Build: clean**
+
+#### Files Changed
+
+| File | Change |
+|---|---|
+| `components/admin/order-detail.tsx` | Full structural rewrite — added Command Center panel, 6-tab navigation, `getNextAction()` function, tab badge logic; all existing state/handlers/modals preserved |
+
+#### Command Center Panel
+- Always visible at top of order detail
+- Header: order ref pill + status badge + payment status badge + (if set) payment stage badge + acceptance badge + financial lock badge + declaration badge
+- Next Action block: color-coded left border (red/amber/blue/green), priority icon, label, sublabel, "Go to [tab] →" shortcut button (hidden when already on target tab)
+
+#### `getNextAction()` — 12-Rule Priority Chain
+| Priority | Rule |
+|---|---|
+| 🔴 Red | Cancelled, customer rejected, financial revision pending |
+| 🟡 Amber | Acceptance pending, deposit awaited, balance awaited, bank transfer awaited, order needs confirming, EU declaration pending |
+| 🔵 Blue | Generate commercial invoice (post deposit), release shipment (post balance paid), upload shipment docs (post release) |
+| 🟢 Green | All clear — order fully complete |
+
+#### Six-Tab Navigation
+| Tab | Content |
+|---|---|
+| Overview | Status editor, customer/order info grid, order items table, order actions |
+| Payments | Financial lock banner, revision card, acceptance card, PaymentMilestonesCard, mark-paid shortcut |
+| Documents | TradeDocumentsCard |
+| Logistics | ShipmentEventManager |
+| Compliance | EU entry certificate panel (empty state when `declaration_required === null`) |
+| Activity | ActivityLog |
+
+#### Tab Badges (amber dot)
+- **Payments**: financial lock active, revision required, acceptance pending, or pending payment stage
+- **Documents**: any non-superseded/non-void trade doc in draft/issued status
+- **Logistics**: no shipment events yet and order is confirmed/shipped
+- **Compliance**: declaration required but not acknowledged
+
+---
+
 ## Completed in Latest Session — DOC-1: Order Confirmation Stage (2026-05-19)
 
 ---
