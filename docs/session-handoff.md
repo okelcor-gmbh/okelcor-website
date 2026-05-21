@@ -2,6 +2,131 @@
 
 ---
 
+## Completed in Latest Session — SEC-3A: Public API Abuse Protection (2026-05-22)
+
+---
+
+### SEC-3A — In-Memory Rate Limiting + Admin Safeguards
+
+**Goal:** Protect all public-facing API endpoints from abuse — credential stuffing on auth routes, spam on email routes, brute-force on catalogue, and destructive-action accidents in admin.
+
+**Commits:** `213502c`
+**TypeScript: 0 errors | Build: clean**
+
+#### New: `lib/rate-limit.ts`
+Shared token-bucket rate-limiting utility. All route handlers import from here.
+
+| Export | Purpose |
+|---|---|
+| `rateLimit(key, limit, windowMs)` | Returns `true` (allowed) or `false` (blocked); lazily evicts expired buckets |
+| `retryAfter(key)` | Returns seconds remaining in current window |
+| `getClientIp(request)` | Extracts real IP: `cf-connecting-ip` → `x-real-ip` → `x-forwarded-for` |
+| `rateLimitResponse(seconds)` | Returns `NextResponse` 429 JSON with `{ message, retry_after }` + `Retry-After` header |
+| `warnRateLimit(route, method, ip, ua)` | Structured `console.warn` for server logs |
+
+State is per-process (per Vercel instance). Effective against casual/automated abuse at current scale.
+
+#### Phase 1 — Auth & Comms Endpoints (7 routes)
+
+| Route | Limit | Key |
+|---|---|---|
+| `POST /api/contact` | 5 req/hr/IP | `contact:${ip}` |
+| `POST /api/quote` | 5 req/hr/IP | `quote:${ip}` |
+| `POST /api/chat` | 30 req/15min/IP | `chat:${ip}` |
+| `POST /api/auth/customer/login` | 10 req/15min/IP | `login:${ip}` |
+| `POST /api/auth/customer/forgot-password` | 5 req/hr/IP | `forgot-password:${ip}` |
+| `POST /api/auth/customer/register` | 5 req/hr/IP | `register:${ip}` |
+| `POST /api/auth/customer/resend-verification` | 3 req/hr/IP | `resend-verification:${ip}` |
+
+#### Phase 2 — Catalog & Tool Endpoints (3 routes)
+
+| Route | Limit | Key |
+|---|---|---|
+| `POST /api/vat/validate` | 20 req/hr/IP | `vat-validate:${ip}` |
+| `GET /api/tracking/[container]` | 30 req/hr/IP | `tracking:${ip}` |
+| `GET /api/shop/products` | 300 req/15min/IP | `shop-products:${ip}` |
+
+Note: tracking route had `_req` renamed to `req` to enable IP extraction.
+
+#### Phase 3 — Admin Safeguards
+
+**Upload size cap (413):**
+- `POST /api/admin/hero-slides-upload` — rejects `Content-Length > 50 MB`
+- `POST /api/admin/promotions-upload` — rejects `Content-Length > 50 MB`
+- Check inserted after admin token auth, before body is consumed
+
+**`deleteAllProducts` confirmation token:**
+- `app/admin/products/actions.ts` — `deleteAllProducts(confirm?: string)` now guards on `confirm !== "delete-all-products"` → returns `{ error: "Confirmation token required." }`
+- `components/admin/csv-actions.tsx` — `handleDeleteAll` passes `"delete-all-products"` as the confirm argument
+- The existing modal UI already required typing "DELETE ALL" — this is the server-side enforcement layer
+
+**Mollie webhook — env-gated secret check:**
+- `app/api/payments/mollie/webhook/route.ts` — if `MOLLIE_WEBHOOK_SECRET` is set, the request URL must include `?secret=<value>` matching the env var
+- Silent 200 return on mismatch (prevents Mollie retries, logs a `console.warn`)
+- Backward-compatible: if `MOLLIE_WEBHOOK_SECRET` is unset, existing behaviour is preserved
+- Usage: set the webhook URL in Mollie dashboard as `https://okelcor.com/api/payments/mollie/webhook?secret=YOUR_SECRET`
+
+#### Frontend 429 UX (4 pages)
+
+| Page | Error state | Change |
+|---|---|---|
+| `app/login/page.tsx` | `authError` | Reads `retry_after` from thrown error; formats "Too many attempts. Please wait X seconds and try again." |
+| `app/register/page.tsx` | `apiError` | Same pattern |
+| `app/forgot-password/page.tsx` | `error` | Same pattern |
+| `app/verify-email/page.tsx` | `error` | Same pattern |
+
+The `apiFetch` helper in `lib/customer-auth.ts` throws the raw JSON body `{ message, retry_after }` on non-ok responses — so `retry_after` is available in all catch blocks.
+
+#### Constraints Honoured
+- **NOT rate-limited:** `/api/auth/customer/me`, all admin read/dashboard routes, Stripe webhook, eBay OAuth callback
+- No backend contracts changed — purely additive
+- All changes pass TypeScript strict check and `npm run build`
+
+---
+
+## Completed in Latest Session — BUGFIX: Customer Order Detail 404 (2026-05-22)
+
+---
+
+### Customer Order Detail Page — 404 Fix
+
+**Problem:** `/account/orders/OKL-XXXX` showed the global 404 page ("The page you're looking for doesn't exist").
+
+**Commits:** `90721f7`
+**TypeScript: 0 errors | Build: clean**
+
+#### Root Causes (2 bugs)
+
+| # | Bug | Fix |
+|---|---|---|
+| 1 | `fetchOrder` tried `/auth/orders/${ref}` (new auth endpoint); on any failure it returned `null` immediately instead of falling back | Added try/catch with fallback to `/orders/${ref}` on any failure |
+| 2 | Fallback fetch to `/orders/${ref}` was missing the Bearer token; backend uses the token to verify ownership and returns 404/401 without it | Added `Authorization: Bearer ${token}` to fallback fetch headers |
+
+#### File Changed: `app/account/orders/[ref]/page.tsx`
+
+**`fetchOrder` — two-stage strategy:**
+1. Try `GET /auth/orders/${ref}` with Bearer token → returns trade docs + full detail (new backend endpoint)
+2. On any failure: try `GET /orders/${ref}` WITH same Bearer token → returns basic order detail
+
+**Inline error replaces `notFound()`:**
+- Before: `if (!order) notFound()` → triggered `app/not-found.tsx` global 404 page
+- After: renders an inline "Order not found" card inside the page's own layout (Navbar + Footer preserved, user stays in context)
+
+```tsx
+// Order not found — friendly inline card, not global 404
+<div className="rounded-[18px] bg-[#efefef] p-6 ...">
+  <p ...>Order not found</p>
+  <p ...>
+    We couldn't load order <span className="font-mono">{ref}</span>.
+    It may not exist or you may not have access to it.
+  </p>
+</div>
+```
+
+All existing features preserved: trade documents tab, payment milestones, acceptance banners, shipment details, order_confirmation visibility.
+
+---
+
 ## Completed in Latest Session — ART-1: Article Editor Bugfixes (2026-05-21)
 
 ---
