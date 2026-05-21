@@ -40,26 +40,33 @@ async function fetchOrder(ref: string, token?: string): Promise<Order | null> {
     process.env.NEXT_PUBLIC_API_URL ??
     "http://localhost:8000/api/v1";
 
-  // Use the authenticated endpoint (/auth/orders/{ref}) so the backend can
+  // When a token is present, prefer the auth endpoint so the backend can
   // include customer-visible trade documents (order_confirmation, proforma, etc.).
-  const url = token
-    ? `${API_URL}/auth/orders/${ref}`
-    : `${API_URL}/orders/${ref}`;
+  // If the auth endpoint is unavailable or returns any error (including 404 from
+  // a not-yet-deployed route), fall back to the public endpoint so the page
+  // still renders — the trade-documents fallback fetch below will retry.
+  if (token) {
+    try {
+      const res = await fetch(`${API_URL}/auth/orders/${ref}`, {
+        cache: "no-store",
+        headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
+      });
+      const json = await res.json().catch(() => ({}));
+      if (res.ok) return json.data ?? null;
+      // Auth endpoint failed — fall through to public endpoint below
+    } catch {
+      // Network error — fall through
+    }
+  }
 
+  // Public fallback (also the sole path when no token is present)
   try {
-    const res = await fetch(url, {
+    const res = await fetch(`${API_URL}/orders/${ref}`, {
       cache: "no-store",
-      headers: {
-        Accept: "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
+      headers: { Accept: "application/json" },
     });
-
-    const json = await res.json();
-
-    if (res.status === 404) return null;
+    const json = await res.json().catch(() => ({}));
     if (!res.ok) return null;
-
     return json.data ?? null;
   } catch {
     return null;
