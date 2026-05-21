@@ -2,6 +2,68 @@
 
 ---
 
+## Completed in Latest Session — TRK-1: Shipment Tracking Page (2026-05-21)
+
+---
+
+### TRK-1 — Customer Shipment Tracking Page
+
+**Goal:** Dedicated tracking page at `/account/orders/[ref]/track` that fetches the public tracking API and renders an events timeline.
+
+**TypeScript: 0 errors | Build: clean**
+
+#### New: `app/account/orders/[ref]/track/page.tsx`
+
+Server component. Auth-gated (redirects to `/login?redirect=…` if no `customer_token` cookie).
+
+**Flow:**
+1. Fetch `GET /auth/orders/{ref}` (authenticated) → get `tracking_number` or `container_number`
+2. If neither → show "Tracking available once your order ships" (static)
+3. Otherwise → fetch `GET /tracking/{identifier}` (no auth required)
+4. Render events timeline
+
+**Edge cases:**
+| HTTP status | State shown |
+|---|---|
+| No identifier on order | "Tracking available once your order ships" |
+| 404 from tracking API | "Carrier tracking not yet active" + reference |
+| 429 from tracking API | "Too many requests — wait and refresh" (amber card) |
+| Other error / network failure | "Temporarily unavailable" (neutral) |
+| `order.status === "delivered"` | Green "Your order has been delivered" banner (always shown above timeline) |
+
+**Tracking API response shape expected:**
+```json
+{
+  "data": {
+    "status": "In Transit",
+    "estimated_delivery": "2026-06-01",
+    "events": [
+      { "id": 1, "event_date": "2026-05-20T10:00:00Z", "status_label": "Departed Hamburg", "location": "Hamburg, Germany", "description": "..." }
+    ]
+  }
+}
+```
+Events sorted ascending by `event_date`; latest event dot coloured `var(--primary)`.
+
+**Layout:**
+- Breadcrumb: Home / My Orders / {ref} / Track
+- "← Order Details" back button → `/account/orders/{ref}`
+- Header card: order ref + tracking reference number
+- Delivered banner (conditional)
+- Timeline card
+
+#### Updated: `app/account/orders/page.tsx`
+Desktop "Track Order" button href changed:
+```
+Before: /account/orders/${order.ref}
+After:  /account/orders/${order.ref}/track
+```
+
+#### Backend requirement
+`GET /api/v1/tracking/{identifier}` — public endpoint (no auth). Returns tracking events for a given container number or waybill. 404 = not found / not active. 429 = rate limit (30 req/min per IP).
+
+---
+
 ## Completed in Latest Session — ART-1: Article Editor Bugfixes (2026-05-21)
 
 ---
