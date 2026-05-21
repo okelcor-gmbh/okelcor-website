@@ -253,7 +253,7 @@ export default async function OrdersPage() {
                             </a>
                           ) : (
                             <Link
-                              href={`/account/orders/${order.ref}/track`}
+                              href={`/account/orders/${order.ref}`}
                               className="inline-flex h-[34px] items-center gap-1.5 rounded-full bg-[var(--primary)] px-4 text-[0.8rem] font-semibold text-white transition hover:bg-[var(--primary-hover)]"
                             >
                               Track Order <ChevronRight size={13} strokeWidth={2.2} />
