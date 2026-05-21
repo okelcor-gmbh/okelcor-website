@@ -53,6 +53,12 @@ export type Order = {
   // DOC-6 customer acceptance
   customer_acceptance_status?: "pending" | "accepted" | "rejected" | null;
   customer_accepted_at?: string | null;
+  // DOC-7 payment milestones (customer-visible subset)
+  payment_stage?: "pending_proforma" | "deposit_requested" | "deposit_paid" | "balance_due" | "balance_paid" | "shipment_released" | null;
+  deposit_amount?: number | null;
+  balance_amount?: number | null;
+  deposit_paid_at?: string | null;
+  balance_paid_at?: string | null;
 };
 
 // ─── Status badge config ──────────────────────────────────────────────────────

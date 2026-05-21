@@ -77,8 +77,9 @@ const PERMISSION_ROLES: Record<string, string[]> = {
   "orders.approve_financial_revision":    ["super_admin", "admin"],
 
   // Payments
-  "payments.mark_paid":    ["super_admin", "admin", "order_manager"],
-  "payments.refund":       ["super_admin", "admin"],
+  "payments.mark_paid":        ["super_admin", "admin", "order_manager"],
+  "payments.release_shipment": ["super_admin", "admin", "order_manager"],
+  "payments.refund":           ["super_admin", "admin"],
 
   // Products
   "products.view":         ["super_admin", "admin", "editor", "order_manager"],

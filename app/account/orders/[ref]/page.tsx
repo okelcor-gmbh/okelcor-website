@@ -10,6 +10,7 @@ import EntryCertificateCard from "@/components/account/entry-certificate-card";
 import DeliveryConfirmationCard from "@/components/account/delivery-confirmation-card";
 import TradeDocumentsCard from "@/components/account/trade-documents-card";
 import OrderConfirmationAcceptance from "@/components/account/order-confirmation-acceptance";
+import PaymentMilestoneProgress from "@/components/account/payment-milestone-progress";
 import { getCustomerFromCookie } from "@/lib/get-customer";
 import { StatusBadge, formatDate, type Order, type OrderStatus } from "../page";
 
@@ -300,6 +301,20 @@ export default async function OrderDetailPage({ params }: Props) {
               orderRef={order.ref}
               paymentMethod={order.payment_method}
               paymentStatus={order.payment_status}
+              paymentStage={order.payment_stage ?? undefined}
+              depositAmount={order.deposit_amount ?? undefined}
+              balanceAmount={order.balance_amount ?? undefined}
+            />
+          )}
+
+          {/* ── Payment milestones progress (DOC-7) ── */}
+          {order.payment_stage && order.payment_stage !== "pending_proforma" && (
+            <PaymentMilestoneProgress
+              paymentStage={order.payment_stage}
+              depositAmount={order.deposit_amount}
+              balanceAmount={order.balance_amount}
+              depositPaidAt={order.deposit_paid_at}
+              balancePaidAt={order.balance_paid_at}
             />
           )}
 

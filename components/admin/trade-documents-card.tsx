@@ -104,6 +104,11 @@ type SendModal = {
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
+// Stages at which the deposit has been confirmed paid (or later)
+const DEPOSIT_PAID_STAGES = new Set(["deposit_paid", "balance_due", "balance_paid", "shipment_released"]);
+// Stage at which shipment has been released (delivery note can be generated)
+const SHIPMENT_RELEASED_STAGES = new Set(["shipment_released"]);
+
 export default function TradeDocumentsCard({
   orderId,
   initialDocuments,
@@ -111,6 +116,8 @@ export default function TradeDocumentsCard({
   customerEmail,
   financialsRevisionPending,
   customerAcceptancePending,
+  paymentStage,
+  orderStatus,
 }: {
   orderId: number;
   initialDocuments: TradeDocument[];
@@ -122,6 +129,10 @@ export default function TradeDocumentsCard({
   financialsRevisionPending?: boolean;
   /** When true, Proforma generation is blocked until customer accepts the order confirmation. */
   customerAcceptancePending?: boolean;
+  /** DOC-7: current payment milestone stage; null = no milestone tracking (old orders). */
+  paymentStage?: string | null;
+  /** DOC-7: used to unlock delivery note when order is delivered regardless of stage. */
+  orderStatus?: string | null;
 }) {
   // Use the server-provided role prop for an immediate synchronous check.
   // Fall back to the hook (async cookie read) only when the prop is absent.
@@ -181,6 +192,15 @@ export default function TradeDocumentsCard({
   const hasDeliveryNote  = documents.some((d) => d.type === "delivery_note");
   const generatedDocs    = documents.filter((d) => d.type !== "shipment_document");
   const shipmentDocs     = documents.filter((d) => d.type === "shipment_document");
+
+  // DOC-7: payment stage gates (only active when paymentStage is non-null)
+  const isDelivered         = orderStatus === "delivered";
+  const commercialGated     = !!paymentStage && !DEPOSIT_PAID_STAGES.has(paymentStage);
+  const packingGated        = !!paymentStage && !DEPOSIT_PAID_STAGES.has(paymentStage);
+  const deliveryGated       = !!paymentStage && !SHIPMENT_RELEASED_STAGES.has(paymentStage) && !isDelivered;
+  const commercialGateReason = "Deposit must be confirmed paid before generating the commercial invoice.";
+  const packingGateReason    = "Deposit must be confirmed paid before generating the packing list.";
+  const deliveryGateReason   = "Delivery note can only be generated once shipment is released.";
 
   // ── Handlers ────────────────────────────────────────────────────────────────
 
@@ -440,31 +460,61 @@ export default function TradeDocumentsCard({
                 )
               )}
               {!hasCommercialInv && (
-                <button type="button" disabled={commercial.loading}
-                  onClick={() => generateDoc(`/api/admin/orders/${orderId}/trade-documents/commercial-invoice`, setCommercial, "commercial invoice")}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-purple-200 bg-purple-50 px-3 py-1.5 text-[0.75rem] font-semibold text-purple-700 transition hover:bg-purple-100 disabled:opacity-60"
-                >
-                  {commercial.loading ? <Loader2 size={13} strokeWidth={2} className="animate-spin" /> : <FilePlus2 size={13} strokeWidth={2} />}
-                  {commercial.loading ? "Generating…" : "Generate Commercial Invoice"}
-                </button>
+                commercialGated ? (
+                  <span
+                    title={commercialGateReason}
+                    className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-full border border-purple-200 bg-purple-50 px-3 py-1.5 text-[0.75rem] font-semibold text-purple-700 opacity-40"
+                  >
+                    <FilePlus2 size={13} strokeWidth={2} />
+                    Generate Commercial Invoice
+                  </span>
+                ) : (
+                  <button type="button" disabled={commercial.loading}
+                    onClick={() => generateDoc(`/api/admin/orders/${orderId}/trade-documents/commercial-invoice`, setCommercial, "commercial invoice")}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-purple-200 bg-purple-50 px-3 py-1.5 text-[0.75rem] font-semibold text-purple-700 transition hover:bg-purple-100 disabled:opacity-60"
+                  >
+                    {commercial.loading ? <Loader2 size={13} strokeWidth={2} className="animate-spin" /> : <FilePlus2 size={13} strokeWidth={2} />}
+                    {commercial.loading ? "Generating…" : "Generate Commercial Invoice"}
+                  </button>
+                )
               )}
               {!hasPacking && (
-                <button type="button" disabled={packing.loading}
-                  onClick={() => generateDoc(`/api/admin/orders/${orderId}/trade-documents/packing-list`, setPacking, "packing list")}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[0.75rem] font-semibold text-blue-700 transition hover:bg-blue-100 disabled:opacity-60"
-                >
-                  {packing.loading ? <Loader2 size={13} strokeWidth={2} className="animate-spin" /> : <FilePlus2 size={13} strokeWidth={2} />}
-                  {packing.loading ? "Generating…" : "Generate Packing List"}
-                </button>
+                packingGated ? (
+                  <span
+                    title={packingGateReason}
+                    className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[0.75rem] font-semibold text-blue-700 opacity-40"
+                  >
+                    <FilePlus2 size={13} strokeWidth={2} />
+                    Generate Packing List
+                  </span>
+                ) : (
+                  <button type="button" disabled={packing.loading}
+                    onClick={() => generateDoc(`/api/admin/orders/${orderId}/trade-documents/packing-list`, setPacking, "packing list")}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[0.75rem] font-semibold text-blue-700 transition hover:bg-blue-100 disabled:opacity-60"
+                  >
+                    {packing.loading ? <Loader2 size={13} strokeWidth={2} className="animate-spin" /> : <FilePlus2 size={13} strokeWidth={2} />}
+                    {packing.loading ? "Generating…" : "Generate Packing List"}
+                  </button>
+                )
               )}
               {!hasDeliveryNote && (
-                <button type="button" disabled={delivery.loading}
-                  onClick={() => generateDoc(`/api/admin/orders/${orderId}/trade-documents/delivery-note`, setDelivery, "delivery note")}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-3 py-1.5 text-[0.75rem] font-semibold text-teal-700 transition hover:bg-teal-100 disabled:opacity-60"
-                >
-                  {delivery.loading ? <Loader2 size={13} strokeWidth={2} className="animate-spin" /> : <FilePlus2 size={13} strokeWidth={2} />}
-                  {delivery.loading ? "Generating…" : "Generate Delivery Note"}
-                </button>
+                deliveryGated ? (
+                  <span
+                    title={deliveryGateReason}
+                    className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-3 py-1.5 text-[0.75rem] font-semibold text-teal-700 opacity-40"
+                  >
+                    <FilePlus2 size={13} strokeWidth={2} />
+                    Generate Delivery Note
+                  </span>
+                ) : (
+                  <button type="button" disabled={delivery.loading}
+                    onClick={() => generateDoc(`/api/admin/orders/${orderId}/trade-documents/delivery-note`, setDelivery, "delivery note")}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-3 py-1.5 text-[0.75rem] font-semibold text-teal-700 transition hover:bg-teal-100 disabled:opacity-60"
+                  >
+                    {delivery.loading ? <Loader2 size={13} strokeWidth={2} className="animate-spin" /> : <FilePlus2 size={13} strokeWidth={2} />}
+                    {delivery.loading ? "Generating…" : "Generate Delivery Note"}
+                  </button>
+                )
               )}
               <button type="button"
                 onClick={() => { setShowUpload((v) => !v); setUploadError(null); }}

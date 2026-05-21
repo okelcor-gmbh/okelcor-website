@@ -10,6 +10,7 @@ import { updateOrderStatus, cancelOrder, deleteOrder, addShipmentEvent, updateSh
 import type { AdminOrderFull, AdminOrderLog, ShipmentEvent } from "@/lib/admin-api";
 import { canDo } from "@/lib/admin-permissions";
 import TradeDocumentsCard from "@/components/admin/trade-documents-card";
+import PaymentMilestonesCard from "@/components/admin/payment-milestones-card";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -880,6 +881,22 @@ export default function OrderDetail({
         </div>
       )}
 
+      {/* ── Payment Milestones Card (DOC-7) ── */}
+      {order.payment_stage != null && (
+        <PaymentMilestonesCard
+          orderId={order.id}
+          adminRole={adminRole}
+          initialStage={order.payment_stage}
+          depositPercent={order.deposit_percent ?? null}
+          depositAmount={order.deposit_amount ?? null}
+          balanceAmount={order.balance_amount ?? null}
+          depositPaidAt={order.deposit_paid_at ?? null}
+          balancePaidAt={order.balance_paid_at ?? null}
+          shipmentReleasedAt={order.shipment_released_at ?? null}
+          shipmentReleaseNote={order.shipment_release_note ?? null}
+        />
+      )}
+
       {/* ── Two-column: customer info + order summary ── */}
       <div className="grid gap-6 lg:grid-cols-2">
 
@@ -936,6 +953,8 @@ export default function OrderDetail({
         customerEmail={order.customer_email}
         financialsRevisionPending={revisionRequired}
         customerAcceptancePending={customerAcceptancePending}
+        paymentStage={order.payment_stage ?? null}
+        orderStatus={order.status}
       />
 
       {/* ── EU Entry Certificate (Gelangensbestätigung) ── */}

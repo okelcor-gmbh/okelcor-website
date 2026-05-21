@@ -8,9 +8,15 @@ type Props = {
   orderRef: string;
   paymentMethod?: string;
   paymentStatus?: string;
+  /** DOC-7: current payment milestone stage */
+  paymentStage?: string;
+  /** DOC-7: deposit amount due when stage is deposit_requested */
+  depositAmount?: number;
+  /** DOC-7: balance amount due when stage is balance_due */
+  balanceAmount?: number;
 };
 
-export default function OrderPaymentCard({ orderRef, paymentMethod, paymentStatus }: Props) {
+export default function OrderPaymentCard({ orderRef, paymentMethod, paymentStatus, paymentStage, depositAmount, balanceAmount }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -124,6 +130,14 @@ export default function OrderPaymentCard({ orderRef, paymentMethod, paymentStatu
 
   // ── Bank transfer pending ─────────────────────────────────────────────────────
   if (paymentStatus === "pending" && paymentMethod === "bank_transfer") {
+    // Determine the staged amount label
+    const stagedAmount =
+      paymentStage === "deposit_requested" && depositAmount != null
+        ? { label: "Deposit Due", value: `€${Number(depositAmount).toLocaleString("en-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` }
+        : paymentStage === "balance_due" && balanceAmount != null
+        ? { label: "Balance Due", value: `€${Number(balanceAmount).toLocaleString("en-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` }
+        : null;
+
     return (
       <div className="rounded-[18px] bg-[#efefef] p-4 sm:rounded-[22px] sm:p-6 lg:p-8">
         <div className="mb-3 flex items-center gap-2 sm:mb-4">
@@ -133,10 +147,22 @@ export default function OrderPaymentCard({ orderRef, paymentMethod, paymentStatu
             Bank Transfer Instructions
           </p>
         </div>
-        <p className="mb-4 text-[0.85rem] leading-relaxed text-[var(--muted)] sm:text-[0.88rem]">
-          Please transfer the order amount to the account below. Quote your order reference in the
-          payment description. Your order will be processed once the transfer is received.
-        </p>
+        {stagedAmount ? (
+          <div className="mb-4 flex items-center justify-between rounded-[12px] border border-[var(--primary)]/20 bg-white px-4 py-3">
+            <p className="text-[0.83rem] font-semibold text-[var(--foreground)]">{stagedAmount.label}</p>
+            <p className="text-[1rem] font-extrabold text-[var(--primary)]">{stagedAmount.value}</p>
+          </div>
+        ) : (
+          <p className="mb-4 text-[0.85rem] leading-relaxed text-[var(--muted)] sm:text-[0.88rem]">
+            Please transfer the order amount to the account below. Quote your order reference in the
+            payment description. Your order will be processed once the transfer is received.
+          </p>
+        )}
+        {stagedAmount && (
+          <p className="mb-4 text-[0.83rem] leading-relaxed text-[var(--muted)]">
+            Please transfer the amount shown above to the account below. Include your order reference in the payment description.
+          </p>
+        )}
         <BankTransferDetails orderRef={orderRef} />
       </div>
     );
