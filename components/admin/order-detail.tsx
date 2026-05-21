@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   Activity, AlertCircle, AlertOctagon, AlertTriangle, ArrowRight,
   CheckCircle2, ChevronDown, ChevronRight, FileWarning,
-  Landmark, Lock, Loader2, MapPin, Plus, Pencil, RotateCcw, Trash2, UserCheck,
+  Landmark, Lock, Loader2, MapPin, Plus, Pencil, RotateCcw, ShoppingBag, Trash2, UserCheck,
 } from "lucide-react";
 import { updateOrderStatus, cancelOrder, deleteOrder, addShipmentEvent, updateShipmentEvent, deleteShipmentEvent } from "@/app/admin/orders/actions";
 import type { AdminOrderFull, AdminOrderLog, ShipmentEvent } from "@/lib/admin-api";
@@ -1056,6 +1056,56 @@ export default function OrderDetail({
               </div>
             </div>
           </div>
+
+          {/* eBay source panel — only for eBay-sourced orders */}
+          {order.source === "ebay" && (
+            <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+              <div className="flex items-center gap-3 border-b border-black/[0.06] border-l-4 border-l-green-500 px-6 py-4">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-green-100">
+                  <ShoppingBag size={15} strokeWidth={2} className="text-green-700" />
+                </div>
+                <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-green-700">
+                  eBay Order
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-4 px-6 py-5 sm:grid-cols-3">
+                {order.ebay_order_id && (
+                  <div>
+                    <p className="text-[0.68rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">eBay Order ID</p>
+                    <p className="mt-0.5 font-mono text-[0.83rem] text-[#1a1a1a]">{order.ebay_order_id}</p>
+                  </div>
+                )}
+                {order.ebay_buyer_username && (
+                  <div>
+                    <p className="text-[0.68rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Buyer</p>
+                    <p className="mt-0.5 text-[0.83rem] text-[#1a1a1a]">{order.ebay_buyer_username}</p>
+                  </div>
+                )}
+                {order.ebay_payment_status && (
+                  <div>
+                    <p className="text-[0.68rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">eBay Payment</p>
+                    <span className={`mt-0.5 inline-flex items-center rounded-full px-2 py-0.5 text-[0.68rem] font-bold ${order.ebay_payment_status === "PAID" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
+                      {order.ebay_payment_status}
+                    </span>
+                  </div>
+                )}
+                {order.ebay_fulfillment_status && (
+                  <div>
+                    <p className="text-[0.68rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Fulfillment</p>
+                    <span className={`mt-0.5 inline-flex items-center rounded-full px-2 py-0.5 text-[0.68rem] font-bold ${order.ebay_fulfillment_status === "FULFILLED" ? "bg-emerald-100 text-emerald-700" : order.ebay_fulfillment_status === "CANCELLED" ? "bg-red-100 text-red-600" : "bg-blue-100 text-blue-700"}`}>
+                      {order.ebay_fulfillment_status.replace(/_/g, " ")}
+                    </span>
+                  </div>
+                )}
+                {order.ebay_last_synced_at && (
+                  <div>
+                    <p className="text-[0.68rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Last Synced</p>
+                    <p className="mt-0.5 text-[0.83rem] text-[#5c5e62]">{shortDate(order.ebay_last_synced_at)}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Order items */}
           <div className="overflow-hidden rounded-2xl bg-white shadow-sm">

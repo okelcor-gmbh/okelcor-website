@@ -154,6 +154,8 @@ export type AdminOrder = {
   payment_method?: string;
   payment_status?: "paid" | "unpaid" | "refunded" | string;
   created_at: string;
+  /** "website" (default) or "ebay" */
+  source?: string | null;
 };
 
 export type AdminOrderItem = {
@@ -203,6 +205,34 @@ export type TradeDocument = {
   mime_type?: string | null;
 };
 
+export type EbayOrder = {
+  /** eBay's native order ID, e.g. "12-34567-89012" */
+  ebay_order_id: string;
+  /** Okelcor order ref if already imported, e.g. "OKL-00042" */
+  order_ref?: string | null;
+  /** Internal Okelcor order id if imported */
+  order_id?: number | null;
+  buyer_username?: string | null;
+  buyer_email?: string | null;
+  /** eBay orderPaymentStatus: PAID | PENDING | FAILED | … */
+  ebay_payment_status?: string | null;
+  /** eBay orderFulfillmentStatus: NOT_STARTED | IN_PROGRESS | FULFILLED | CANCELLED */
+  ebay_fulfillment_status?: string | null;
+  /** Mapped Okelcor order status */
+  status?: string | null;
+  total?: number | null;
+  currency?: string | null;
+  ebay_last_synced_at?: string | null;
+  created_at?: string | null;
+};
+
+export type EbaySyncResult = {
+  imported_count: number;
+  updated_count: number;
+  failed_count: number;
+  errors?: string[];
+};
+
 export type AdminOrderFull = AdminOrder & {
   phone?: string;
   company_name?: string;
@@ -242,6 +272,13 @@ export type AdminOrderFull = AdminOrder & {
   balance_due_email_sent_at?: string | null;
   balance_paid_email_sent_at?: string | null;
   shipment_released_email_sent_at?: string | null;
+  // EB-5 eBay order fields (source = "ebay" orders only)
+  ebay_order_id?: string | null;
+  ebay_order_status?: string | null;
+  ebay_payment_status?: string | null;
+  ebay_fulfillment_status?: string | null;
+  ebay_buyer_username?: string | null;
+  ebay_last_synced_at?: string | null;
   // DOC-5 financial lock
   financials_locked?: boolean | null;
   financials_locked_at?: string | null;

@@ -24,7 +24,10 @@ import {
   ChevronDown,
   Copy,
   ClipboardCheck,
+  Eye,
+  PackageSearch,
 } from "lucide-react";
+import Link from "next/link";
 import { useAdminPermissions } from "@/hooks/use-admin-permissions";
 import EbayLogsPanel from "@/components/admin/ebay-logs-panel";
 
@@ -627,10 +630,349 @@ function ConnectionCard({
   );
 }
 
+// ── eBay Orders Panel ─────────────────────────────────────────────────────────
+
+type EbayOrder = {
+  ebay_order_id: string;
+  order_ref?: string | null;
+  order_id?: number | null;
+  buyer_username?: string | null;
+  buyer_email?: string | null;
+  ebay_payment_status?: string | null;
+  ebay_fulfillment_status?: string | null;
+  status?: string | null;
+  total?: number | null;
+  currency?: string | null;
+  ebay_last_synced_at?: string | null;
+  created_at?: string | null;
+};
+
+type EbaySyncResult = {
+  imported_count: number;
+  updated_count: number;
+  failed_count: number;
+  errors?: string[];
+};
+
+const EBAY_PAYMENT_STYLES: Record<string, string> = {
+  PAID:    "bg-emerald-100 text-emerald-700",
+  PENDING: "bg-amber-100 text-amber-700",
+  FAILED:  "bg-red-100 text-red-700",
+};
+
+const EBAY_FULFILLMENT_STYLES: Record<string, string> = {
+  FULFILLED:   "bg-emerald-100 text-emerald-700",
+  IN_PROGRESS: "bg-blue-100 text-blue-700",
+  NOT_STARTED: "bg-gray-100 text-gray-600",
+  CANCELLED:   "bg-red-100 text-red-600",
+};
+
+function fmtEbayDate(iso?: string | null): string {
+  if (!iso) return "—";
+  try {
+    return new Date(iso).toLocaleString(undefined, {
+      day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
+    });
+  } catch { return iso; }
+}
+
+function EbayOrdersPanel({ canManage }: { canManage: boolean }) {
+  const [orders, setOrders]               = useState<EbayOrder[]>([]);
+  const [loading, setLoading]             = useState(true);
+  const [error, setError]                 = useState<string | null>(null);
+  const [syncLoading, setSyncLoading]     = useState(false);
+  const [syncResult, setSyncResult]       = useState<EbaySyncResult | null>(null);
+  const [rowSyncing, setRowSyncing]       = useState<Set<string>>(new Set());
+  const [payFilter, setPayFilter]         = useState("");
+  const [fulfillFilter, setFulfillFilter] = useState("");
+  const [page, setPage]                   = useState(1);
+  const [lastPage, setLastPage]           = useState(1);
+  const [total, setTotal]                 = useState<number | null>(null);
+
+  const fetchOrders = useCallback(async (opts?: { pay?: string; fulfill?: string; pg?: number }) => {
+    setLoading(true);
+    setError(null);
+    const params = new URLSearchParams();
+    const payVal     = opts?.pay     !== undefined ? opts.pay     : payFilter;
+    const fulfillVal = opts?.fulfill !== undefined ? opts.fulfill : fulfillFilter;
+    const pgVal      = opts?.pg      !== undefined ? opts.pg      : page;
+    if (payVal)     params.set("payment_status",     payVal);
+    if (fulfillVal) params.set("fulfillment_status", fulfillVal);
+    params.set("page", String(pgVal));
+    try {
+      const res  = await fetch(`/api/admin/ebay/orders?${params}`);
+      if (res.status === 401) { setError("Session expired."); return; }
+      const json = await res.json() as { data?: EbayOrder[]; meta?: { last_page?: number; total?: number } };
+      setOrders(Array.isArray(json.data) ? json.data : []);
+      setLastPage(json.meta?.last_page ?? 1);
+      setTotal(json.meta?.total ?? null);
+    } catch {
+      setError("Could not load eBay orders.");
+    } finally {
+      setLoading(false);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => { void fetchOrders(); }, [fetchOrders]);
+
+  const handleSync = async () => {
+    if (!canManage) return;
+    setSyncLoading(true);
+    setSyncResult(null);
+    setError(null);
+    try {
+      const res  = await fetch("/api/admin/ebay/orders/sync", { method: "POST" });
+      const json = await res.json().catch(() => ({} as Record<string, unknown>));
+      if (!res.ok) {
+        const msg = typeof json.message === "string" ? json.message : "Sync failed.";
+        setError(msg);
+      } else {
+        const d = (json as { data?: EbaySyncResult }).data ?? (json as EbaySyncResult);
+        setSyncResult(d);
+        void fetchOrders();
+      }
+    } catch {
+      setError("Network error — sync failed.");
+    } finally {
+      setSyncLoading(false);
+    }
+  };
+
+  const handleRowSync = async (ebayOrderId: string) => {
+    if (!canManage) return;
+    setRowSyncing((prev) => new Set(prev).add(ebayOrderId));
+    try {
+      const res  = await fetch(`/api/admin/ebay/orders/${encodeURIComponent(ebayOrderId)}/sync`, { method: "POST" });
+      const json = await res.json().catch(() => ({} as Record<string, unknown>));
+      if (res.ok) {
+        const updated = (json as { data?: EbayOrder }).data ?? (json as EbayOrder);
+        setOrders((prev) =>
+          prev.map((o) =>
+            o.ebay_order_id === ebayOrderId ? { ...o, ...updated } : o
+          )
+        );
+      }
+    } catch { /* silent — row stays stale */ } finally {
+      setRowSyncing((prev) => { const n = new Set(prev); n.delete(ebayOrderId); return n; });
+    }
+  };
+
+  const applyPayFilter = (val: string) => {
+    setPayFilter(val); setPage(1); void fetchOrders({ pay: val, pg: 1 });
+  };
+  const applyFulfillFilter = (val: string) => {
+    setFulfillFilter(val); setPage(1); void fetchOrders({ fulfill: val, pg: 1 });
+  };
+
+  return (
+    <div>
+      {/* ── Header ── */}
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#E85C1A]">eBay Orders</p>
+          <p className="mt-1 text-[0.875rem] text-[#5c5e62]">
+            Buyer orders synced from eBay Sell Fulfillment API.
+            {typeof total === "number" && ` · ${total} orders`}
+          </p>
+        </div>
+        {canManage && (
+          <button
+            type="button"
+            onClick={() => void handleSync()}
+            disabled={syncLoading}
+            className="flex shrink-0 items-center gap-2 rounded-xl bg-[#E85C1A] px-4 py-2.5 text-[0.83rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-50"
+          >
+            {syncLoading
+              ? <Loader2 size={14} className="animate-spin" />
+              : <RefreshCw size={14} strokeWidth={2} />}
+            {syncLoading ? "Syncing…" : "Sync eBay Orders"}
+          </button>
+        )}
+      </div>
+
+      {/* ── Sync result ── */}
+      {syncResult && (
+        <div className={`mb-4 flex items-start justify-between gap-3 rounded-xl border px-4 py-3 text-[0.83rem] ${syncResult.failed_count > 0 ? "border-amber-200 bg-amber-50 text-amber-800" : "border-emerald-200 bg-emerald-50 text-emerald-800"}`}>
+          <div>
+            <p className="font-semibold">
+              Sync complete — {syncResult.imported_count} imported, {syncResult.updated_count} updated
+              {syncResult.failed_count > 0 && `, ${syncResult.failed_count} failed`}.
+            </p>
+            {syncResult.errors?.slice(0, 3).map((e, i) => (
+              <p key={i} className="mt-0.5 text-[0.78rem] opacity-80">{e}</p>
+            ))}
+          </div>
+          <button type="button" onClick={() => setSyncResult(null)} className="shrink-0"><X size={14} /></button>
+        </div>
+      )}
+
+      {/* ── Error ── */}
+      {error && (
+        <div className="mb-4 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[0.83rem] text-red-700">
+          <AlertCircle size={14} className="shrink-0" />
+          {error}
+          <button type="button" onClick={() => setError(null)} className="ml-auto shrink-0"><X size={13} /></button>
+        </div>
+      )}
+
+      {/* ── Filters ── */}
+      <div className="mb-4 flex flex-wrap gap-3">
+        <select
+          value={payFilter}
+          onChange={(e) => applyPayFilter(e.target.value)}
+          className="h-9 rounded-xl border border-black/[0.09] bg-white px-3 text-[0.83rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10 cursor-pointer"
+        >
+          <option value="">All payments</option>
+          <option value="PAID">Paid</option>
+          <option value="PENDING">Pending</option>
+          <option value="FAILED">Failed</option>
+        </select>
+        <select
+          value={fulfillFilter}
+          onChange={(e) => applyFulfillFilter(e.target.value)}
+          className="h-9 rounded-xl border border-black/[0.09] bg-white px-3 text-[0.83rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10 cursor-pointer"
+        >
+          <option value="">All fulfillment</option>
+          <option value="NOT_STARTED">Not Started</option>
+          <option value="IN_PROGRESS">In Progress</option>
+          <option value="FULFILLED">Fulfilled</option>
+          <option value="CANCELLED">Cancelled</option>
+        </select>
+        <button
+          type="button"
+          onClick={() => void fetchOrders()}
+          title="Refresh"
+          className="flex h-9 w-9 items-center justify-center rounded-xl border border-black/[0.09] bg-white text-[#5c5e62] transition hover:text-[#1a1a1a]"
+        >
+          <RefreshCw size={13} strokeWidth={2} className={loading ? "animate-spin" : ""} />
+        </button>
+      </div>
+
+      {/* ── Table ── */}
+      <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[900px] text-left">
+            <thead>
+              <tr className="border-b border-black/[0.06] bg-[#fafafa]">
+                {["eBay Order ID", "Okelcor Ref", "Buyer", "eBay Payment", "Fulfillment", "Status", "Last Synced", "Actions"].map((h) => (
+                  <th key={h} className="px-4 py-3 text-[0.7rem] font-bold uppercase tracking-[0.12em] text-[#5c5e62]">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-black/[0.04]">
+              {loading ? (
+                <tr><td colSpan={8} className="px-4 py-12 text-center"><Loader2 size={20} className="mx-auto animate-spin text-[#5c5e62]" /></td></tr>
+              ) : orders.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="px-4 py-14 text-center">
+                    <PackageSearch size={32} strokeWidth={1.4} className="mx-auto mb-3 text-[#ccc]" />
+                    <p className="text-[0.875rem] text-[#5c5e62]">No eBay orders found. Click &ldquo;Sync eBay Orders&rdquo; to import.</p>
+                  </td>
+                </tr>
+              ) : orders.map((o) => (
+                <tr key={o.ebay_order_id} className="group transition hover:bg-[#fafafa]">
+                  <td className="px-4 py-3 font-mono text-[0.78rem] font-semibold text-[#1a1a1a]">
+                    {o.ebay_order_id}
+                  </td>
+                  <td className="px-4 py-3">
+                    {o.order_ref ? (
+                      <span className="font-mono text-[0.78rem] font-semibold text-[#1a1a1a]">{o.order_ref}</span>
+                    ) : (
+                      <span className="text-[0.75rem] text-[#aaa]">Not imported</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    <p className="text-[0.83rem] text-[#1a1a1a]">{o.buyer_username ?? "—"}</p>
+                    {o.buyer_email && <p className="text-[0.72rem] text-[#5c5e62]">{o.buyer_email}</p>}
+                  </td>
+                  <td className="px-4 py-3">
+                    {o.ebay_payment_status ? (
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[0.68rem] font-bold ${EBAY_PAYMENT_STYLES[o.ebay_payment_status] ?? "bg-gray-100 text-gray-500"}`}>
+                        {o.ebay_payment_status}
+                      </span>
+                    ) : <span className="text-[0.75rem] text-[#aaa]">—</span>}
+                  </td>
+                  <td className="px-4 py-3">
+                    {o.ebay_fulfillment_status ? (
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[0.68rem] font-bold ${EBAY_FULFILLMENT_STYLES[o.ebay_fulfillment_status] ?? "bg-gray-100 text-gray-500"}`}>
+                        {o.ebay_fulfillment_status.replace(/_/g, " ")}
+                      </span>
+                    ) : <span className="text-[0.75rem] text-[#aaa]">—</span>}
+                  </td>
+                  <td className="px-4 py-3">
+                    {o.status ? (
+                      <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[0.68rem] font-semibold capitalize text-gray-600">
+                        {o.status.replace(/_/g, " ")}
+                      </span>
+                    ) : <span className="text-[0.75rem] text-[#aaa]">—</span>}
+                  </td>
+                  <td className="px-4 py-3 text-[0.73rem] text-[#5c5e62] whitespace-nowrap">
+                    {fmtEbayDate(o.ebay_last_synced_at)}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-1.5">
+                      {canManage && (
+                        <button
+                          type="button"
+                          onClick={() => void handleRowSync(o.ebay_order_id)}
+                          disabled={rowSyncing.has(o.ebay_order_id)}
+                          title="Sync this order"
+                          className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] bg-white text-[#5c5e62] transition hover:border-[#E85C1A] hover:text-[#E85C1A] disabled:opacity-40"
+                        >
+                          {rowSyncing.has(o.ebay_order_id)
+                            ? <Loader2   size={13} className="animate-spin" />
+                            : <RotateCcw size={13} strokeWidth={2} />}
+                        </button>
+                      )}
+                      {o.order_id && (
+                        <Link
+                          href={`/admin/orders/${o.order_id}`}
+                          className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] bg-white text-[#5c5e62] transition hover:border-blue-300 hover:text-blue-600"
+                          title="View Okelcor order"
+                        >
+                          <Eye size={13} strokeWidth={2} />
+                        </Link>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        {lastPage > 1 && (
+          <div className="flex items-center justify-between border-t border-black/[0.06] px-5 py-3">
+            <p className="text-[0.78rem] text-[#5c5e62]">Page {page} of {lastPage}</p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                disabled={page <= 1}
+                onClick={() => { setPage(page - 1); void fetchOrders({ pg: page - 1 }); }}
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] bg-white text-[#1a1a1a] transition hover:border-[#E85C1A] hover:text-[#E85C1A] disabled:pointer-events-none disabled:bg-[#f5f5f5] disabled:text-[#ccc]"
+              >‹</button>
+              <button
+                type="button"
+                disabled={page >= lastPage}
+                onClick={() => { setPage(page + 1); void fetchOrders({ pg: page + 1 }); }}
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] bg-white text-[#1a1a1a] transition hover:border-[#E85C1A] hover:text-[#E85C1A] disabled:pointer-events-none disabled:bg-[#f5f5f5] disabled:text-[#ccc]"
+              >›</button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function EbayPage() {
   const { can, loading: permLoading } = useAdminPermissions();
+
+  const [pageTab, setPageTab] = useState<"products" | "orders">("products");
 
   const [products, setProducts]       = useState<Product[]>([]);
   const [meta, setMeta]               = useState<Meta>({});
@@ -1235,38 +1577,46 @@ export default function EbayPage() {
       )}
 
       {/* Header */}
-      <div className="mb-7 flex items-start justify-between">
+      <div className="mb-6 flex items-start justify-between gap-4">
         <div>
-          <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#E85C1A]">Sales Channels</p>
-          <p className="mt-1 text-[0.875rem] text-[#5c5e62]">Manage which products are listed on eBay.</p>
+          <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#E85C1A]">Sales Channels · eBay</p>
+          <p className="mt-1 text-[0.875rem] text-[#5c5e62]">Manage product listings and sync buyer orders from eBay.</p>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => void handleSync()}
-            disabled={syncing || !isConnected || !isReady || !canManage}
-            title={
-              !isConnected ? "Connect eBay account first"
-              : !isReady   ? "Complete eBay setup before syncing"
-              : !canManage ? "Insufficient permissions"
-              : "Sync listing status from eBay"
-            }
-            className="flex items-center gap-1.5 rounded-xl border border-black/[0.09] bg-white px-3.5 py-2 text-[0.8rem] font-semibold text-[#1a1a1a] transition hover:bg-[#f0f2f5] disabled:opacity-50"
-          >
-            <RefreshCw size={13} strokeWidth={2} className={syncing ? "animate-spin" : ""} />
-            {syncing ? "Syncing…" : "Sync from eBay"}
-          </button>
-          <a
-            href="https://www.ebay.de/sh/ovw"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 rounded-xl border border-black/[0.09] bg-white px-3.5 py-2 text-[0.8rem] font-semibold text-[#1a1a1a] transition hover:bg-[#f0f2f5]"
-          >
-            <ExternalLink size={13} strokeWidth={2} />
-            Seller Hub
-          </a>
-        </div>
+        <a
+          href="https://www.ebay.de/sh/ovw"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex shrink-0 items-center gap-1.5 rounded-xl border border-black/[0.09] bg-white px-3.5 py-2 text-[0.8rem] font-semibold text-[#1a1a1a] transition hover:bg-[#f0f2f5]"
+        >
+          <ExternalLink size={13} strokeWidth={2} />
+          Seller Hub
+        </a>
       </div>
+
+      {/* Page-level tab switcher */}
+      <div className="mb-6 flex gap-1.5">
+        {(["products", "orders"] as const).map((tab) => (
+          <button
+            key={tab}
+            type="button"
+            onClick={() => setPageTab(tab)}
+            className={[
+              "h-9 rounded-xl px-4 text-[0.83rem] font-semibold capitalize transition",
+              pageTab === tab
+                ? "bg-[#1a1a1a] text-white"
+                : "border border-black/[0.09] bg-white text-[#5c5e62] hover:text-[#1a1a1a]",
+            ].join(" ")}
+          >
+            {tab === "products" ? "Product Listings" : "eBay Orders"}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Orders tab ── */}
+      {pageTab === "orders" && <EbayOrdersPanel canManage={canManage} />}
+
+      {/* ── Products tab ── */}
+      {pageTab === "products" && <>
 
       {/* Notification banner */}
       {notification && (
@@ -1772,6 +2122,8 @@ export default function EbayPage() {
 
       {/* eBay Logs Panel */}
       <EbayLogsPanel canManage={canManage} />
+
+      </> /* end products tab */}
     </div>
   );
 }

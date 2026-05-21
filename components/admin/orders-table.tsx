@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  Search, Eye, ChevronLeft, ChevronRight, X,
+  Search, Eye, ChevronLeft, ChevronRight, X, ShoppingBag,
 } from "lucide-react";
 import type { AdminOrder } from "@/lib/admin-api";
 
@@ -62,6 +62,18 @@ function PaymentStatusBadge({ status }: { status: string }) {
       {status}
     </span>
   );
+}
+
+function SourceBadge({ source }: { source?: string | null }) {
+  if (source === "ebay") {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-[0.65rem] font-bold text-green-700">
+        <ShoppingBag size={9} strokeWidth={2.5} />
+        eBay
+      </span>
+    );
+  }
+  return null;
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -201,6 +213,11 @@ export default function OrdersTable({
                       <span className="font-mono text-[0.82rem] font-semibold text-[#1a1a1a]">
                         {order.order_ref}
                       </span>
+                      {order.source === "ebay" && (
+                        <div className="mt-0.5">
+                          <SourceBadge source={order.source} />
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <p className="text-[0.875rem] font-semibold text-[#1a1a1a]">{order.customer_name}</p>
