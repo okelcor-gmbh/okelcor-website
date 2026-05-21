@@ -24,11 +24,14 @@ export type ArticleLocale = {
   summary: string;
   /** HTML string — backend sanitizes before storing */
   body: string;
+  cover_alt?: string | null;
+  meta_title?: string | null;
+  meta_description?: string | null;
 };
 
 export type ArticleInput = {
   slug: string;
-  date: string;
+  published_at: string;
   is_published: boolean;
   sort_order: number;
   translations: {
@@ -209,6 +212,33 @@ export async function uploadArticleImage(
   revalidatePath(`/admin/articles/${articleId}`);
   revalidatePath("/news", "page");
   revalidatePath("/news/[slug]", "page");
+  return {};
+}
+
+/** Upload or replace the article's OG / social-share image. */
+export async function uploadOgImage(
+  articleId: number,
+  formData: FormData
+): Promise<{ error?: string }> {
+  const token = await getToken();
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}/admin/articles/${articleId}/og-image`, {
+      method: "POST",
+      headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
+      body: formData,
+      cache: "no-store",
+    });
+  } catch {
+    return { error: "Network error. Could not upload OG image." };
+  }
+
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    return { error: json.message || "Failed to upload OG image." };
+  }
+
+  revalidatePath(`/admin/articles/${articleId}`);
   return {};
 }
 

@@ -108,6 +108,9 @@ export type ArticleTranslation = {
   summary: string;
   /** HTML string (new articles) or legacy plain-text paragraph array */
   body: string | string[];
+  cover_alt?: string | null;
+  meta_title?: string | null;
+  meta_description?: string | null;
 };
 
 /** Shape returned by GET /admin/articles (list). Text fields are flat top-level strings. */
@@ -132,6 +135,7 @@ export type AdminArticleFull = {
   id: number;
   slug: string;
   image: string;
+  og_image?: string | null;
   /** ISO date string — field name is published_at on the API */
   published_at: string;
   is_published: boolean;

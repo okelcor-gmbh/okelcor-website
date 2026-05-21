@@ -8,7 +8,7 @@ import Image from "@tiptap/extension-image";
 import { Table, TableRow, TableHeader, TableCell } from "@tiptap/extension-table";
 import Placeholder from "@tiptap/extension-placeholder";
 import TextAlign from "@tiptap/extension-text-align";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import {
   Bold, Italic, UnderlineIcon, Strikethrough,
   Heading1, Heading2, Heading3,
@@ -123,28 +123,72 @@ function LinkDialog({
   );
 }
 
-// ── Image URL dialog ──────────────────────────────────────────────────────────
+// ── Image dialog (URL + optional file upload) ─────────────────────────────────
 
 function ImageDialog({
-  onConfirm,
+  onConfirmUrl,
+  onUploadFile,
   onCancel,
 }: {
-  onConfirm: (url: string, alt: string) => void;
+  onConfirmUrl: (url: string, alt: string) => void;
+  onUploadFile?: (file: File, alt: string) => void;
   onCancel: () => void;
 }) {
+  const [tab, setTab] = useState<"url" | "upload">(onUploadFile ? "upload" : "url");
   const [url, setUrl] = useState("");
   const [alt, setAlt] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
   return (
     <div className="absolute left-0 top-full z-50 mt-1 w-80 rounded-xl border border-black/[0.1] bg-white p-3 shadow-xl">
       <p className="mb-2 text-[0.72rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Insert Image</p>
-      <input
-        autoFocus
-        type="url"
-        value={url}
-        onChange={(e) => setUrl(e.target.value)}
-        placeholder="Image URL (https://…)"
-        className="mb-2 h-8 w-full rounded-lg border border-black/[0.09] px-2.5 text-[0.83rem] text-[#1a1a1a] outline-none focus:border-[#E85C1A]"
-      />
+
+      {/* Tab selector */}
+      {onUploadFile && (
+        <div className="mb-2 flex rounded-lg border border-black/[0.08] bg-[#f5f5f5] p-0.5">
+          {(["upload", "url"] as const).map((t) => (
+            <button
+              key={t}
+              type="button"
+              onClick={() => setTab(t)}
+              className={`flex-1 rounded-md py-1 text-[0.75rem] font-semibold transition ${
+                tab === t ? "bg-white shadow-sm text-[#1a1a1a]" : "text-[#5c5e62]"
+              }`}
+            >
+              {t === "upload" ? "Upload file" : "Paste URL"}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {tab === "upload" && onUploadFile ? (
+        <>
+          <div
+            onClick={() => fileRef.current?.click()}
+            className="mb-2 flex h-16 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-black/[0.1] bg-[#fafafa] text-[0.78rem] font-semibold text-[#aaa] transition hover:border-[#E85C1A] hover:text-[#E85C1A]"
+          >
+            {file ? file.name : "Click to pick a file"}
+          </div>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          />
+        </>
+      ) : (
+        <input
+          autoFocus
+          type="url"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          placeholder="Image URL (https://…)"
+          className="mb-2 h-8 w-full rounded-lg border border-black/[0.09] px-2.5 text-[0.83rem] text-[#1a1a1a] outline-none focus:border-[#E85C1A]"
+        />
+      )}
+
       <input
         type="text"
         value={alt}
@@ -152,10 +196,20 @@ function ImageDialog({
         placeholder="Alt text (for SEO and accessibility)"
         className="mb-2 h-8 w-full rounded-lg border border-black/[0.09] px-2.5 text-[0.83rem] text-[#1a1a1a] outline-none focus:border-[#E85C1A]"
       />
+
       <div className="flex gap-2">
-        <button type="button" onClick={() => { if (url.trim()) onConfirm(url.trim(), alt.trim()); }}
-          disabled={!url.trim()}
-          className="h-7 flex-1 rounded-lg bg-[#E85C1A] text-[0.78rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-50">
+        <button
+          type="button"
+          onClick={() => {
+            if (tab === "upload" && file && onUploadFile) {
+              onUploadFile(file, alt.trim());
+            } else if (tab === "url" && url.trim()) {
+              onConfirmUrl(url.trim(), alt.trim());
+            }
+          }}
+          disabled={tab === "upload" ? !file : !url.trim()}
+          className="h-7 flex-1 rounded-lg bg-[#E85C1A] text-[0.78rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-50"
+        >
           Insert
         </button>
         <button type="button" onClick={onCancel}
@@ -169,7 +223,15 @@ function ImageDialog({
 
 // ── Toolbar ───────────────────────────────────────────────────────────────────
 
-function Toolbar({ editor, onToggleHtml }: { editor: Editor | null; onToggleHtml: () => void }) {
+function Toolbar({
+  editor,
+  onToggleHtml,
+  uploadBodyImage,
+}: {
+  editor: Editor | null;
+  onToggleHtml: () => void;
+  uploadBodyImage?: (file: File) => Promise<string | null>;
+}) {
   const [showLink,  setShowLink]  = useState(false);
   const [showImage, setShowImage] = useState(false);
 
@@ -181,8 +243,15 @@ function Toolbar({ editor, onToggleHtml }: { editor: Editor | null; onToggleHtml
     setShowLink(false);
   };
 
-  const handleImageConfirm = (url: string, alt: string) => {
+  const handleImageConfirmUrl = (url: string, alt: string) => {
     editor.chain().focus().setImage({ src: url, alt }).run();
+    setShowImage(false);
+  };
+
+  const handleImageUploadFile = async (file: File, alt: string) => {
+    if (!uploadBodyImage) return;
+    const url = await uploadBodyImage(file);
+    if (url) editor.chain().focus().setImage({ src: url, alt }).run();
     setShowImage(false);
   };
 
@@ -301,7 +370,8 @@ function Toolbar({ editor, onToggleHtml }: { editor: Editor | null; onToggleHtml
         </ToolBtn>
         {showImage && (
           <ImageDialog
-            onConfirm={handleImageConfirm}
+            onConfirmUrl={handleImageConfirmUrl}
+            onUploadFile={uploadBodyImage ? handleImageUploadFile : undefined}
             onCancel={() => setShowImage(false)}
           />
         )}
@@ -331,11 +401,41 @@ type Props = {
   onChange: (html: string) => void;
   placeholder?: string;
   minHeight?: number;
+  /** When provided, enables inline image upload via drag/drop, paste, and toolbar file picker. */
+  articleId?: number;
 };
 
-export default function ArticleRichEditor({ value, onChange, placeholder = "Write the article body…", minHeight = 320 }: Props) {
+export default function ArticleRichEditor({
+  value,
+  onChange,
+  placeholder = "Write the article body…",
+  minHeight = 320,
+  articleId,
+}: Props) {
   const [mode, setMode] = useState<EditorMode>("editor");
   const [htmlSource, setHtmlSource] = useState(value);
+
+  // Stable ref so ProseMirror handlers can always reach the latest upload fn
+  const articleIdRef = useRef(articleId);
+  articleIdRef.current = articleId;
+
+  const uploadBodyImage = useCallback(async (file: File): Promise<string | null> => {
+    const id = articleIdRef.current;
+    if (!id) return null;
+    const fd = new FormData();
+    fd.append("image", file);
+    try {
+      const res = await fetch(`/api/admin/articles/${id}/body-image`, {
+        method: "POST",
+        body: fd,
+      });
+      if (!res.ok) return null;
+      const json = await res.json();
+      return (json.data?.url as string) ?? null;
+    } catch {
+      return null;
+    }
+  }, []);
 
   const editor = useEditor({
     extensions: [
@@ -362,6 +462,36 @@ export default function ArticleRichEditor({ value, onChange, placeholder = "Writ
       attributes: {
         class: "article-editor-content outline-none",
         style: `min-height:${minHeight}px`,
+      },
+      handleDrop(view, event, _slice, moved) {
+        if (moved || !event.dataTransfer?.files?.length) return false;
+        const file = event.dataTransfer.files[0];
+        if (!file.type.startsWith("image/") || !articleIdRef.current) return false;
+        event.preventDefault();
+        const posInfo = view.posAtCoords({ left: event.clientX, top: event.clientY });
+        const insertPos = posInfo?.pos ?? view.state.selection.from;
+        uploadBodyImage(file).then((url) => {
+          if (!url) return;
+          const imageNode = view.state.schema.nodes.image?.create({ src: url, alt: "" });
+          if (!imageNode) return;
+          view.dispatch(view.state.tr.insert(insertPos, imageNode));
+        });
+        return true;
+      },
+      handlePaste(view, event) {
+        const items = Array.from(event.clipboardData?.items ?? []);
+        const imageItem = items.find((i) => i.type.startsWith("image/"));
+        if (!imageItem || !articleIdRef.current) return false;
+        const file = imageItem.getAsFile();
+        if (!file) return false;
+        const pos = view.state.selection.from;
+        uploadBodyImage(file).then((url) => {
+          if (!url) return;
+          const imageNode = view.state.schema.nodes.image?.create({ src: url, alt: "" });
+          if (!imageNode) return;
+          view.dispatch(view.state.tr.insert(pos, imageNode));
+        });
+        return true;
       },
     },
     immediatelyRender: false,
@@ -433,7 +563,13 @@ export default function ArticleRichEditor({ value, onChange, placeholder = "Writ
       </div>
 
       {/* ── Toolbar (editor mode only) ── */}
-      {mode === "editor" && <Toolbar editor={editor} onToggleHtml={handleToggleHtml} />}
+      {mode === "editor" && (
+        <Toolbar
+          editor={editor}
+          onToggleHtml={handleToggleHtml}
+          uploadBodyImage={articleId ? uploadBodyImage : undefined}
+        />
+      )}
 
       {/* ── Editor ── */}
       {mode === "editor" && (
