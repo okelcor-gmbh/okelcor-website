@@ -22,8 +22,8 @@ export type ArticleLocale = {
   title: string;
   read_time: string;
   summary: string;
-  /** Array of paragraph strings — sent as JSON array */
-  body: string[];
+  /** HTML string — backend sanitizes before storing */
+  body: string;
 };
 
 export type ArticleInput = {

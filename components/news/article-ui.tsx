@@ -6,6 +6,16 @@ import NewsCard from "@/components/news/news-card";
 import { useLanguage } from "@/context/language-context";
 import { getLocalizedArticle, getLocalizedRelatedArticles, type Article } from "./data";
 
+function renderBody(body: string | string[] | undefined | null): { isHtml: boolean; html: string; paragraphs: string[] } {
+  if (!body) return { isHtml: false, html: "", paragraphs: [] };
+  if (typeof body === "string") {
+    const trimmed = body.trim();
+    const isHtml = trimmed.startsWith("<");
+    return { isHtml, html: trimmed, paragraphs: [] };
+  }
+  return { isHtml: false, html: "", paragraphs: body };
+}
+
 type Props = {
   slug: string;
   article?: Article;
@@ -80,14 +90,43 @@ export default function ArticleUI({ slug, article: articleProp, related: related
               </p>
             </div>
 
-            {/* Body paragraphs */}
-            <div className="flex flex-col gap-6">
-              {(article.body ?? []).map((paragraph, i) => (
-                <p key={i} className="text-[1rem] leading-8 text-[var(--muted)]">
-                  {paragraph}
-                </p>
-              ))}
-            </div>
+            {/* Body */}
+            {(() => {
+              const { isHtml, html, paragraphs } = renderBody(article.body);
+              if (isHtml) {
+                return (
+                  <div
+                    className="article-body text-[1rem] leading-8 text-[var(--muted)]
+                      [&_h1]:mt-6 [&_h1]:mb-3 [&_h1]:text-[1.6rem] [&_h1]:font-extrabold [&_h1]:text-[var(--foreground)]
+                      [&_h2]:mt-5 [&_h2]:mb-2 [&_h2]:text-[1.3rem] [&_h2]:font-bold [&_h2]:text-[var(--foreground)]
+                      [&_h3]:mt-4 [&_h3]:mb-2 [&_h3]:text-[1.1rem] [&_h3]:font-bold [&_h3]:text-[var(--foreground)]
+                      [&_p]:mb-5
+                      [&_ul]:mb-5 [&_ul]:ml-5 [&_ul]:list-disc [&_ul]:space-y-1.5
+                      [&_ol]:mb-5 [&_ol]:ml-5 [&_ol]:list-decimal [&_ol]:space-y-1.5
+                      [&_blockquote]:border-l-4 [&_blockquote]:border-[var(--primary)] [&_blockquote]:pl-5 [&_blockquote]:italic [&_blockquote]:text-[var(--muted)] [&_blockquote]:mb-5
+                      [&_hr]:my-6 [&_hr]:border-black/[0.1]
+                      [&_code]:rounded [&_code]:bg-[#f0f2f5] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[0.85rem]
+                      [&_pre]:rounded-[16px] [&_pre]:bg-[#1a1a1a] [&_pre]:p-5 [&_pre]:font-mono [&_pre]:text-[0.85rem] [&_pre]:text-[#e0e0e0] [&_pre]:mb-5 [&_pre]:overflow-x-auto
+                      [&_a]:text-[var(--primary)] [&_a]:underline [&_a]:underline-offset-2
+                      [&_img]:max-w-full [&_img]:rounded-[16px] [&_img]:my-5
+                      [&_strong]:font-bold [&_strong]:text-[var(--foreground)]
+                      [&_table]:w-full [&_table]:border-collapse [&_table]:mb-5
+                      [&_th]:border [&_th]:border-black/[0.1] [&_th]:bg-[#f5f5f5] [&_th]:px-4 [&_th]:py-2.5 [&_th]:text-left [&_th]:text-[0.875rem] [&_th]:font-bold [&_th]:text-[var(--foreground)]
+                      [&_td]:border [&_td]:border-black/[0.07] [&_td]:px-4 [&_td]:py-2.5 [&_td]:text-[0.9rem]"
+                    dangerouslySetInnerHTML={{ __html: html }}
+                  />
+                );
+              }
+              return (
+                <div className="flex flex-col gap-6">
+                  {paragraphs.map((paragraph, i) => (
+                    <p key={i} className="text-[1rem] leading-8 text-[var(--muted)]">
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
+              );
+            })()}
 
             {/* Back link */}
             <div className="mt-12 border-t border-black/[0.07] pt-8">

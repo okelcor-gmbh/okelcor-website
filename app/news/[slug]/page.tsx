@@ -35,7 +35,7 @@ function toArticle(a: ApiArticle): Article {
     date:     a.published_at ?? a.date ?? "",
     readTime: a.read_time ?? "",
     summary:  a.summary ?? "",
-    body:     Array.isArray(a.body) ? a.body : [],
+    body:     a.body ?? [],
   };
 }
 

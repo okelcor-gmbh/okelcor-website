@@ -108,8 +108,8 @@ export type ApiArticle = {
   date?: string | null;
   read_time?: string | null;
   summary?: string | null;
-  /** Body paragraphs — may be null if translations aren't resolved */
-  body?: string[] | null;
+  /** HTML string (new articles) or legacy paragraph array — may be null if translations aren't resolved */
+  body?: string | string[] | null;
 };
 
 /** Raw product entry from GET /api/v1/search */

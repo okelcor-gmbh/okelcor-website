@@ -6,7 +6,8 @@ export type ArticleContent = {
   date: string;
   readTime: string;
   summary: string;
-  body: string[];
+  /** HTML string (new articles) or legacy paragraph array */
+  body: string | string[];
 };
 
 export type Article = ArticleContent & {

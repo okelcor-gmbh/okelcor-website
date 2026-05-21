@@ -2,9 +2,10 @@
 
 import { useState, useTransition, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2, ArrowUp, ArrowDown, Upload, X } from "lucide-react";
+import { Upload, X } from "lucide-react";
 import { createArticle, updateArticle, uploadArticleImage } from "@/app/admin/articles/actions";
 import type { AdminArticleFull, ArticleTranslation } from "@/lib/admin-api";
+import ArticleRichEditor from "@/components/admin/article-rich-editor";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -15,7 +16,8 @@ type LocaleData = {
   title: string;
   readTime: string;
   summary: string;
-  body: string[];
+  /** HTML string */
+  body: string;
 };
 
 type Props =
@@ -40,8 +42,15 @@ const EMPTY_LOCALE: LocaleData = {
   title: "",
   readTime: "",
   summary: "",
-  body: [""],
+  body: "",
 };
+
+function bodyToHtml(body: string | string[] | undefined | null): string {
+  if (!body) return "";
+  if (typeof body === "string") return body;
+  // Legacy plain-text array → wrap each paragraph in <p>
+  return body.filter((p) => p.trim()).map((p) => `<p>${p}</p>`).join("\n");
+}
 
 function fromTranslation(t?: ArticleTranslation): LocaleData {
   if (!t) return EMPTY_LOCALE;
@@ -50,105 +59,13 @@ function fromTranslation(t?: ArticleTranslation): LocaleData {
     title: t.title ?? "",
     readTime: t.read_time ?? "",
     summary: t.summary ?? "",
-    body: t.body?.length ? t.body : [""],
+    body: bodyToHtml(t.body),
   };
 }
 
 function hasContent(ld: LocaleData): boolean {
-  return ld.title.trim() !== "" || ld.summary.trim() !== "" || ld.body.some((p) => p.trim() !== "");
-}
-
-// ── Paragraph builder ─────────────────────────────────────────────────────────
-
-function ParagraphBuilder({
-  paragraphs,
-  onChange,
-}: {
-  paragraphs: string[];
-  onChange: (next: string[]) => void;
-}) {
-  const update = (idx: number, val: string) => {
-    const next = [...paragraphs];
-    next[idx] = val;
-    onChange(next);
-  };
-
-  const add = () => onChange([...paragraphs, ""]);
-
-  const remove = (idx: number) => {
-    if (paragraphs.length === 1) {
-      onChange([""]);
-    } else {
-      onChange(paragraphs.filter((_, i) => i !== idx));
-    }
-  };
-
-  const moveUp = (idx: number) => {
-    if (idx === 0) return;
-    const next = [...paragraphs];
-    [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
-    onChange(next);
-  };
-
-  const moveDown = (idx: number) => {
-    if (idx === paragraphs.length - 1) return;
-    const next = [...paragraphs];
-    [next[idx], next[idx + 1]] = [next[idx + 1], next[idx]];
-    onChange(next);
-  };
-
-  return (
-    <div className="space-y-3">
-      {paragraphs.map((para, idx) => (
-        <div key={idx} className="flex gap-2">
-          <textarea
-            value={para}
-            onChange={(e) => update(idx, e.target.value)}
-            rows={3}
-            placeholder={`Paragraph ${idx + 1}`}
-            className="flex-1 resize-y rounded-xl border border-black/[0.09] bg-white px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
-          />
-          <div className="flex flex-col gap-1 pt-0.5">
-            <button
-              type="button"
-              onClick={() => moveUp(idx)}
-              disabled={idx === 0}
-              title="Move up"
-              className="flex h-7 w-7 items-center justify-center rounded-lg border border-black/[0.09] bg-white text-[#5c5e62] transition hover:border-[#E85C1A] hover:text-[#E85C1A] disabled:pointer-events-none disabled:opacity-30"
-            >
-              <ArrowUp size={12} />
-            </button>
-            <button
-              type="button"
-              onClick={() => moveDown(idx)}
-              disabled={idx === paragraphs.length - 1}
-              title="Move down"
-              className="flex h-7 w-7 items-center justify-center rounded-lg border border-black/[0.09] bg-white text-[#5c5e62] transition hover:border-[#E85C1A] hover:text-[#E85C1A] disabled:pointer-events-none disabled:opacity-30"
-            >
-              <ArrowDown size={12} />
-            </button>
-            <button
-              type="button"
-              onClick={() => remove(idx)}
-              title="Remove"
-              className="flex h-7 w-7 items-center justify-center rounded-lg border border-red-100 bg-white text-red-400 transition hover:border-red-300 hover:bg-red-50 hover:text-red-600"
-            >
-              <X size={12} />
-            </button>
-          </div>
-        </div>
-      ))}
-
-      <button
-        type="button"
-        onClick={add}
-        className="flex items-center gap-1.5 rounded-xl border border-dashed border-black/[0.15] px-3.5 py-2 text-[0.8rem] font-semibold text-[#5c5e62] transition hover:border-[#E85C1A] hover:text-[#E85C1A]"
-      >
-        <Plus size={13} />
-        Add paragraph
-      </button>
-    </div>
-  );
+  const stripped = ld.body.replace(/<[^>]*>/g, "").trim();
+  return ld.title.trim() !== "" || ld.summary.trim() !== "" || stripped !== "";
 }
 
 // ── Field helpers ─────────────────────────────────────────────────────────────
@@ -254,7 +171,8 @@ export default function ArticleForm(props: Props) {
     if (!slug.trim()) errors.slug = "Slug is required.";
     if (!localeData.en.title.trim()) errors.en_title = "EN title is required.";
     if (!localeData.en.summary.trim()) errors.en_summary = "EN summary is required.";
-    if (!localeData.en.body.some((p) => p.trim())) errors.en_body = "EN body must have at least one paragraph.";
+    const enBodyText = localeData.en.body.replace(/<[^>]*>/g, "").trim();
+    if (!enBodyText) errors.en_body = "EN body is required.";
     if (!isEdit && !imageFile) errors.image = "Cover image is required.";
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
@@ -275,7 +193,7 @@ export default function ArticleForm(props: Props) {
         title: ld.title.trim(),
         read_time: ld.readTime.trim(),
         summary: ld.summary.trim(),
-        body: ld.body.filter((p) => p.trim() !== ""),
+        body: ld.body,
       });
 
       const payload = {
@@ -542,15 +460,17 @@ export default function ArticleForm(props: Props) {
             </div>
           </div>
 
-          {/* Paragraph builder */}
+          {/* Rich text editor */}
           <div>
-            <p className="mb-3 text-[0.78rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">
-              Body Paragraphs
+            <p className="mb-2 text-[0.78rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">
+              Article Body
               {activeTab === "en" && <span className="ml-0.5 text-red-500">*</span>}
             </p>
-            <ParagraphBuilder
-              paragraphs={cur.body}
-              onChange={(next) => setLocale(activeTab, { body: next })}
+            <ArticleRichEditor
+              value={cur.body}
+              onChange={(html) => setLocale(activeTab, { body: html })}
+              placeholder={`Write the ${activeTab.toUpperCase()} article body…`}
+              minHeight={340}
             />
             {activeTab === "en" && fieldErrors.en_body && (
               <p className="mt-2 text-[0.78rem] text-red-500">{fieldErrors.en_body}</p>

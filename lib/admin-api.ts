@@ -106,7 +106,8 @@ export type ArticleTranslation = {
   title: string;
   read_time: string;
   summary: string;
-  body: string[];
+  /** HTML string (new articles) or legacy plain-text paragraph array */
+  body: string | string[];
 };
 
 /** Shape returned by GET /admin/articles (list). Text fields are flat top-level strings. */
