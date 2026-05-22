@@ -333,58 +333,72 @@ export default async function OrderDetailPage({ params }: Props) {
             />
           )}
 
-          {/* ── Payment ── */}
-          {order.payment_status && (
-            <OrderPaymentCard
-              orderRef={order.ref}
-              paymentMethod={order.payment_method}
-              paymentStatus={order.payment_status}
-              paymentStage={order.payment_stage ?? undefined}
-              depositAmount={order.deposit_amount ?? undefined}
-              balanceAmount={order.balance_amount ?? undefined}
-            />
-          )}
+          {(() => {
+            // Before acceptance, suppress all payment blocks and the proforma document.
+            // Exception: if payment is already paid (edge-case / legacy), always show confirmation.
+            const acceptancePending = order.customer_acceptance_status === "pending";
+            const paymentIsPaid     = order.payment_status === "paid";
 
-          {/* ── Payment milestones progress (DOC-7) ── */}
-          {order.payment_stage && order.payment_stage !== "pending_proforma" && (
-            <PaymentMilestoneProgress
-              paymentStage={order.payment_stage}
-              depositAmount={order.deposit_amount}
-              balanceAmount={order.balance_amount}
-              depositPaidAt={order.deposit_paid_at}
-              balancePaidAt={order.balance_paid_at}
-            />
-          )}
+            return (
+              <>
+                {/* ── Payment ── */}
+                {order.payment_status && (paymentIsPaid || !acceptancePending) && (
+                  <OrderPaymentCard
+                    orderRef={order.ref}
+                    paymentMethod={order.payment_method}
+                    paymentStatus={order.payment_status}
+                    paymentStage={order.payment_stage ?? undefined}
+                    depositAmount={order.deposit_amount ?? undefined}
+                    balanceAmount={order.balance_amount ?? undefined}
+                  />
+                )}
 
-          {/* ── Delivery Confirmation ── */}
-          {order.status === "delivered" && (
-            <DeliveryConfirmationCard
-              declarationRequired={order.declaration_required}
-              declarationStatus={order.declaration_status}
-            />
-          )}
+                {/* ── Payment milestones progress (DOC-7) ── */}
+                {!acceptancePending &&
+                  order.payment_stage &&
+                  order.payment_stage !== "pending_proforma" && (
+                  <PaymentMilestoneProgress
+                    paymentStage={order.payment_stage}
+                    depositAmount={order.deposit_amount}
+                    balanceAmount={order.balance_amount}
+                    depositPaidAt={order.deposit_paid_at}
+                    balancePaidAt={order.balance_paid_at}
+                  />
+                )}
 
-          {/* ── EU Entry Certificate ── */}
-          {order.declaration_required === true && (
-            <EntryCertificateCard
-              orderRef={order.ref}
-              orderCountry={order.country}
-              status={order.declaration_status}
-              signedAt={order.declaration_signed_at}
-              signedName={order.declaration_signed_name}
-              paymentStatus={order.payment_status}
-              orderStatus={order.status}
-            />
-          )}
+                {/* ── Delivery Confirmation ── */}
+                {order.status === "delivered" && (
+                  <DeliveryConfirmationCard
+                    declarationRequired={order.declaration_required}
+                    declarationStatus={order.declaration_status}
+                  />
+                )}
 
-          {/* ── Trade Documents ── */}
-          {order.trade_documents !== undefined && (
-            <TradeDocumentsCard
-              documents={order.trade_documents}
-              declarationRequired={order.declaration_required}
-              declarationStatus={order.declaration_status}
-            />
-          )}
+                {/* ── EU Entry Certificate ── */}
+                {order.declaration_required === true && (
+                  <EntryCertificateCard
+                    orderRef={order.ref}
+                    orderCountry={order.country}
+                    status={order.declaration_status}
+                    signedAt={order.declaration_signed_at}
+                    signedName={order.declaration_signed_name}
+                    paymentStatus={order.payment_status}
+                    orderStatus={order.status}
+                  />
+                )}
+
+                {/* ── Trade Documents ── */}
+                {order.trade_documents !== undefined && (
+                  <TradeDocumentsCard
+                    documents={order.trade_documents}
+                    declarationRequired={order.declaration_required}
+                    declarationStatus={order.declaration_status}
+                    acceptancePending={acceptancePending}
+                  />
+                )}
+              </>
+            );
+          })()}
 
           {/* ── Status timeline ── */}
           <div className="rounded-[18px] bg-[#efefef] p-4 sm:rounded-[22px] sm:p-6 lg:p-8">

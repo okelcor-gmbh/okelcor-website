@@ -58,10 +58,13 @@ export default function TradeDocumentsCard({
   documents,
   declarationRequired,
   declarationStatus,
+  acceptancePending,
 }: {
   documents: TradeDocument[];
   declarationRequired?: boolean | null;
   declarationStatus?: "pending" | "signed" | "acknowledged" | null;
+  /** When true, hides any proforma_invoice — customer must accept AB first. */
+  acceptancePending?: boolean;
 }) {
   const [downloading, setDownloading] = useState<number | null>(null);
 
@@ -97,7 +100,11 @@ export default function TradeDocumentsCard({
   const HIDDEN_STATUSES = new Set(["draft", "superseded", "void"]);
 
   const tradeDocs    = documents.filter(
-    (d) => d.type !== "shipment_document" && !HIDDEN_STATUSES.has(d.status),
+    (d) =>
+      d.type !== "shipment_document" &&
+      !HIDDEN_STATUSES.has(d.status) &&
+      // Hide proforma until customer has accepted the order confirmation
+      !(acceptancePending && d.type === "proforma_invoice"),
   );
   const shipmentDocs = documents.filter(
     (d) => d.type === "shipment_document" && !HIDDEN_STATUSES.has(d.status),
