@@ -325,10 +325,11 @@ export default async function OrderDetailPage({ params }: Props) {
           </div>
 
           {/* ── Acceptance banner (DOC-6) ── */}
-          {order.customer_acceptance_status === "pending" && (
+          {(order.customer_acceptance_status === "pending" ||
+            order.customer_acceptance_status === "rejected") && (
             <OrderConfirmationAcceptance
               orderRef={order.ref}
-              initialStatus={order.customer_accepted_at ? "accepted" : "pending"}
+              initialStatus={order.customer_acceptance_status}
             />
           )}
 

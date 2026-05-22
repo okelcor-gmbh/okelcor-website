@@ -4,9 +4,10 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   Activity, AlertCircle, AlertOctagon, AlertTriangle, ArrowRight,
-  CheckCircle2, ChevronDown, ChevronRight, FileWarning,
-  Landmark, Lock, Loader2, MapPin, Plus, Pencil, RotateCcw, ShoppingBag, Trash2, UserCheck,
+  CheckCircle2, ChevronDown, ChevronRight, Copy, FileWarning,
+  Landmark, Lock, Loader2, Mail, MapPin, Plus, Pencil, RotateCcw, ShoppingBag, Trash2, UserCheck,
 } from "lucide-react";
+import { SITE_URL } from "@/lib/constants";
 import { updateOrderStatus, cancelOrder, deleteOrder, addShipmentEvent, updateShipmentEvent, deleteShipmentEvent } from "@/app/admin/orders/actions";
 import type { AdminOrderFull, AdminOrderLog, ShipmentEvent } from "@/lib/admin-api";
 import { canDo } from "@/lib/admin-permissions";
@@ -530,6 +531,11 @@ export default function OrderDetail({
   const [rejectError,     setRejectError]     = useState<string | null>(null);
   const [rejectSuccess,   setRejectSuccess]   = useState(false);
 
+  const [sendAcceptLoading,  setSendAcceptLoading]  = useState(false);
+  const [sendAcceptSuccess,  setSendAcceptSuccess]  = useState(false);
+  const [sendAcceptError,    setSendAcceptError]    = useState<string | null>(null);
+  const [copiedAcceptLink,   setCopiedAcceptLink]   = useState(false);
+
   const [revisionRequired, setRevisionRequired] = useState(order.financials_revision_required ?? false);
 
   // Derived
@@ -659,6 +665,35 @@ export default function OrderDetail({
     } finally {
       setRejectLoading(false);
     }
+  };
+
+  const handleSendAcceptance = async () => {
+    setSendAcceptLoading(true);
+    setSendAcceptError(null);
+    setSendAcceptSuccess(false);
+    try {
+      const res = await fetch(`/api/admin/orders/${order.id}/acceptance/send`, { method: "POST" });
+      const json = await res.json().catch(() => ({})) as Record<string, unknown>;
+      if (!res.ok) {
+        setSendAcceptError((json.message as string) ?? "Failed to send. Please try again.");
+        return;
+      }
+      setSendAcceptSuccess(true);
+      setTimeout(() => setSendAcceptSuccess(false), 5000);
+    } catch {
+      setSendAcceptError("Network error. Please try again.");
+    } finally {
+      setSendAcceptLoading(false);
+    }
+  };
+
+  const handleCopyAcceptLink = () => {
+    if (!order.acceptance_token) return;
+    const link = `${SITE_URL}/documents/accept/${order.acceptance_token}`;
+    navigator.clipboard.writeText(link).then(() => {
+      setCopiedAcceptLink(true);
+      setTimeout(() => setCopiedAcceptLink(false), 2500);
+    });
   };
 
   const isDirty =
@@ -1328,16 +1363,55 @@ export default function OrderDetail({
                   Customer Acceptance
                 </p>
               </div>
+
               {order.customer_acceptance_status === "pending" && (
-                <div className="flex items-start gap-3">
-                  <span className="mt-0.5 inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-[0.72rem] font-bold text-amber-700">
-                    Pending
-                  </span>
-                  <p className="text-[0.83rem] text-[#5c5e62]">
-                    Awaiting customer review and acceptance of the document.
-                  </p>
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-start gap-3">
+                    <span className="mt-0.5 inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-[0.72rem] font-bold text-amber-700">
+                      Pending
+                    </span>
+                    <p className="text-[0.83rem] text-[#5c5e62]">
+                      Awaiting customer review and acceptance of the order confirmation.
+                    </p>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={handleSendAcceptance}
+                      disabled={sendAcceptLoading}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3.5 py-1.5 text-[0.75rem] font-semibold text-amber-800 transition hover:bg-amber-100 disabled:opacity-60"
+                    >
+                      {sendAcceptLoading
+                        ? <><Loader2 size={12} className="animate-spin" /> Sending…</>
+                        : <><Mail size={12} strokeWidth={2} /> Send Acceptance Email</>
+                      }
+                    </button>
+
+                    {order.acceptance_token && (
+                      <button
+                        type="button"
+                        onClick={handleCopyAcceptLink}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-black/[0.1] bg-[#fafafa] px-3.5 py-1.5 text-[0.75rem] font-semibold text-[#5c5e62] transition hover:bg-[#f0f0f0]"
+                      >
+                        <Copy size={12} strokeWidth={2} />
+                        {copiedAcceptLink ? "Copied!" : "Copy Acceptance Link"}
+                      </button>
+                    )}
+                  </div>
+
+                  {sendAcceptSuccess && (
+                    <p className="text-[0.75rem] text-emerald-700">
+                      Acceptance email sent to customer.
+                    </p>
+                  )}
+                  {sendAcceptError && (
+                    <p className="text-[0.75rem] text-red-600">{sendAcceptError}</p>
+                  )}
                 </div>
               )}
+
               {order.customer_acceptance_status === "accepted" && (
                 <div className="flex items-start gap-3">
                   <span className="mt-0.5 inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-[0.72rem] font-bold text-emerald-700">
@@ -1349,6 +1423,7 @@ export default function OrderDetail({
                   </p>
                 </div>
               )}
+
               {order.customer_acceptance_status === "rejected" && (
                 <div className="flex flex-col gap-1.5">
                   <div className="flex items-start gap-3">

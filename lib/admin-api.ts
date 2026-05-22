@@ -294,6 +294,7 @@ export type AdminOrderFull = AdminOrder & {
   customer_acceptance_status?: "pending" | "accepted" | "rejected" | null;
   customer_accepted_at?: string | null;
   customer_rejection_reason?: string | null;
+  acceptance_token?: string | null;
 };
 
 export type AdminQuote = {

@@ -2,6 +2,136 @@
 
 ---
 
+## Completed in Latest Session — DOC-6: Customer Order Confirmation Acceptance Flow (2026-05-22)
+
+---
+
+### DOC-6 — Full Acceptance Flow Audit + Gap Fixes
+
+**Goal:** Verify and complete the customer-side Order Confirmation acceptance flow end-to-end.
+
+**TypeScript: 0 errors | Build: clean**
+
+#### What Already Existed (verified correct)
+
+| Component | Status |
+|---|---|
+| `components/account/order-confirmation-acceptance.tsx` | Existed — upgraded |
+| `app/api/account/orders/[ref]/accept-order-confirmation/route.ts` | ✅ Complete |
+| `app/documents/accept/[token]/page.tsx` | ✅ Complete |
+| `components/documents/token-acceptance-actions.tsx` | ✅ Complete (Accept + Decline with reason) |
+| `app/api/documents/acceptance/[token]/route.ts` (GET) | ✅ Complete |
+| `app/api/documents/acceptance/[token]/accept/route.ts` (POST) | ✅ Complete |
+| `app/api/documents/acceptance/[token]/reject/route.ts` (POST) | ✅ Complete |
+
+#### What Was Missing (now fixed)
+
+**1. `app/api/account/orders/[ref]/reject-order-confirmation/route.ts`** — **New**
+- POST proxy → `POST /api/v1/auth/orders/{ref}/reject-order-confirmation` with Bearer token
+- Forwards body (optional `{ reason }`) to backend
+- Mirrors the accept route pattern
+
+**2. `app/api/admin/orders/[id]/acceptance/send/route.ts`** — **New**
+- POST proxy → `POST /api/v1/admin/orders/{id}/acceptance/send` with admin Bearer token
+- Triggers backend to email the customer with the acceptance link
+
+**3. `lib/admin-api.ts`** — Added `acceptance_token?: string | null` to `AdminOrderFull`
+- Backend should return this token on order detail so admin can copy the direct link
+
+**4. `components/account/order-confirmation-acceptance.tsx`** — **Upgraded**
+
+Before: only `"pending" → "accepted"`, no decline option.
+
+After:
+- Status type extended to `"pending" | "accepted" | "rejected"`
+- Pending state: shows both **Accept Order Confirmation** (orange) + **Decline** (ghost) buttons
+- Decline flow: shows optional reason textarea → **Confirm Decline** / **Cancel** buttons
+- Calls `POST /api/account/orders/${ref}/reject-order-confirmation` with reason body
+- Rejected state: shows "You declined this order confirmation" info card with contact prompt
+- Loading state per action (`"accept"` | `"decline"` | `null`)
+
+**5. `app/account/orders/[ref]/page.tsx`** — Guard extended
+
+Before:
+```tsx
+{order.customer_acceptance_status === "pending" && (
+  <OrderConfirmationAcceptance initialStatus={order.customer_accepted_at ? "accepted" : "pending"} />
+)}
+```
+
+After:
+```tsx
+{(order.customer_acceptance_status === "pending" ||
+  order.customer_acceptance_status === "rejected") && (
+  <OrderConfirmationAcceptance initialStatus={order.customer_acceptance_status} />
+)}
+```
+- Rejected orders now show the declined state card instead of blank page
+- `initialStatus` passes the actual DB value directly (no redundant `customer_accepted_at` check)
+
+**6. `components/admin/order-detail.tsx`** — Acceptance card upgraded (Payments tab)
+
+Before: Customer Acceptance card showed status badge + text only (no actions).
+
+After — when `status === "pending"`:
+- **Send Acceptance Email** button → POST `/api/admin/orders/${order.id}/acceptance/send`
+  - Loading spinner, success message ("Acceptance email sent to customer."), error display
+- **Copy Acceptance Link** button (shown only when `order.acceptance_token` is set)
+  - Copies `https://okelcor.com/documents/accept/${acceptance_token}` to clipboard
+  - Changes to "Copied!" for 2.5 seconds on success
+
+#### Backend Endpoints Required (frontend is ready)
+
+```
+POST /api/v1/admin/orders/{id}/acceptance/send
+  ← Auth: admin Bearer token
+  ← Permission: order_manager / admin / super_admin
+  ← Sends email to customer with acceptance link: /documents/accept/{acceptance_token}
+  ← Returns { message: "Acceptance email sent." }
+
+POST /api/v1/auth/orders/{ref}/reject-order-confirmation
+  ← Auth: customer Bearer token
+  ← Body: { reason?: string }
+  ← Sets customer_acceptance_status = rejected
+  ← Sets customer_rejection_reason, IP, user agent
+  ← Logs order_confirmation_rejected
+  ← Returns { message: "..." }
+
+GET /api/v1/admin/orders/{id}  (existing endpoint)
+  ← Should include acceptance_token in response when customer_acceptance_status is pending
+  ← acceptance_token is the token used in /documents/accept/{token} URL
+```
+
+#### Complete Customer Flow (now working)
+
+```
+Admin generates AB (Order Confirmation)
+  → Sets customer_acceptance_status = pending
+  → Backend generates acceptance_token for the order
+
+Admin sends acceptance email (new "Send Acceptance Email" button in Payments tab)
+  OR copies link (new "Copy Acceptance Link" button)
+
+Customer receives email with link → /documents/accept/{token}  (public, no login)
+  OR customer logs in → /account/orders/{ref}  (authenticated)
+
+Both surfaces show:
+  - Document type, order ref, issued date, "Respond By" date
+  - Accept button + Decline button (with optional reason)
+
+Customer accepts:
+  → customer_acceptance_status = accepted
+  → Admin command center: "Acceptance Pending" badge → "Accepted" badge
+  → Proforma Invoice generate button unlocks (existing PI gating logic unchanged)
+
+Customer declines:
+  → customer_acceptance_status = rejected
+  → Admin sees "Rejected" badge + rejection reason
+  → Customer account shows "You declined this order confirmation" card
+```
+
+---
+
 ## Completed in Latest Session — SEC-3A: Public API Abuse Protection (2026-05-22)
 
 ---
