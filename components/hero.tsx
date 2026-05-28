@@ -13,12 +13,7 @@ type HeroProps = {
   slides?: HeroSlide[];
 };
 
-const FET_SLIDE = {
-  label:    "Also Available",
-  title:    "Fuel Echo Tech",
-  subtitle: "Save fuel, improve performance and reduce emissions for any vehicle or fleet.",
-  videoSrc: "/videos/video with fx desktop.mp4",
-} as const;
+const FET_VIDEO_SRC = "/videos/video with fx desktop.mp4";
 
 type DisplaySlot = { type: "fet" } | { type: "api"; apiIndex: number };
 
@@ -235,7 +230,7 @@ export default function Hero({ slides: apiSlides }: HeroProps) {
     : -1;
 
   const slideText = isFetSlide
-    ? { label: FET_SLIDE.label, title: FET_SLIDE.title, subtitle: FET_SLIDE.subtitle }
+    ? { label: t.fetTeaser.eyebrow, title: t.fetTeaser.title, subtitle: t.fetTeaser.heroSubtitle }
     : {
         label:    apiSlides?.[currentApiIndex]?.label    ?? "",
         title:    apiSlides?.[currentApiIndex]?.title    ?? "",
@@ -246,7 +241,7 @@ export default function Hero({ slides: apiSlides }: HeroProps) {
     i: number
   ): { type: "image" | "video" | "none"; src: string } => {
     const slot = displaySlots[i];
-    if (!slot || slot.type === "fet") return { type: "video", src: FET_SLIDE.videoSrc };
+    if (!slot || slot.type === "fet") return { type: "video", src: FET_VIDEO_SRC };
     const { apiIndex } = slot;
     const slide = apiSlides?.[apiIndex];
     if (!slide) return { type: "none", src: "" };
@@ -381,12 +376,12 @@ export default function Hero({ slides: apiSlides }: HeroProps) {
                       <>
                         <MagneticButton>
                           <Link href="/fet" className="tesla-hero-btn-fet">
-                            Learn More
+                            {t.fetTeaser.cta}
                           </Link>
                         </MagneticButton>
                         <MagneticButton>
                           <Link href="/tyre-supply-quotation" className="tesla-hero-btn-primary">
-                            Request a Quote
+                            {t.hero.ctaPrimary}
                           </Link>
                         </MagneticButton>
                       </>

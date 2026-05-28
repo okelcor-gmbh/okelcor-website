@@ -6,7 +6,7 @@ export type Translations = {
   nav: {
     home: string; shop: string; news: string; about: string;
     contact: string; quote: string; help: string; account: string;
-    language: string; back: string;
+    language: string; back: string; fet: string;
   };
   lang: { panelTitle: string; en: string; de: string; fr: string; es: string };
   hero: {
@@ -43,9 +43,10 @@ export type Translations = {
   brands: {
     eyebrow: string; title: string; body: string;
     viewCatalogue: string; exploreSupply: string; learnMore: string;
+    photoLabel: string; photoTitle: string;
   };
   footer: {
-    tagline: string; copyright: string;
+    motto: string; tagline: string; copyright: string;
     privacy: string; terms: string; imprint: string;
     col: { products: string; company: string; support: string };
     links: {
@@ -254,6 +255,17 @@ export type Translations = {
     business: { label: string; title: string; body: string; cta: string };
     driver: { label: string; title: string; body: string; cta: string };
   };
+  fetTeaser: {
+    eyebrow: string; title: string; highlight: string;
+    body: string; heroSubtitle: string; cta: string;
+  };
+  fetMega: {
+    badge: string; heading: string;
+    benefits: [string, string, string];
+    learnMore: string;
+    labelFuelSavings: string; labelAnnualSavings: string; labelPayback: string;
+    requestQuote: string;
+  };
 };
 
 // ─── English ──────────────────────────────────────────────────────────────────
@@ -262,7 +274,7 @@ const en: Translations = {
   nav: {
     home: "Home", shop: "Shop", news: "News", about: "About",
     contact: "Contact", quote: "Quote", help: "Help",
-    account: "Account", language: "English", back: "Back",
+    account: "Account", language: "English", back: "Back", fet: "FET",
   },
   lang: { panelTitle: "Select Language", en: "English", de: "Deutsch", fr: "Français", es: "Español" },
   hero: {
@@ -333,8 +345,11 @@ const en: Translations = {
     viewCatalogue: "View Catalogue",
     exploreSupply: "Explore Supply",
     learnMore: "Learn More",
+    photoLabel: "Premium sourcing",
+    photoTitle: "Built for global tyre distribution.",
   },
   footer: {
+    motto: "Growing Together",
     tagline: "Munich-based global tyre supplier delivering PCR, TBR, and used tyres to wholesalers and distributors worldwide.",
     copyright: "© 2026 Okelcor GmbH. All rights reserved.",
     privacy: "Privacy Policy",
@@ -670,6 +685,24 @@ const en: Translations = {
     related: { eyebrow: "You May Also Like", heading: "Related products" },
     productDetails: "Product Details",
   },
+  fetTeaser: {
+    eyebrow: "Also Available",
+    title: "Fuel Echo Tech",
+    highlight: "Save Fuel. Improve Performance.",
+    body: "The fuel efficiency device trusted by fleet operators across Europe. Up to 15% fuel savings.",
+    heroSubtitle: "Save fuel, improve performance and reduce emissions for any vehicle or fleet.",
+    cta: "Learn More",
+  },
+  fetMega: {
+    badge: "Fuel Echo Tech",
+    heading: "Save Fuel. Protect Your Engine.",
+    benefits: ["Up to 13.9% fuel reduction", "ISO 9001:2015 certified", "Payback in 3–5 months"],
+    learnMore: "Learn More",
+    labelFuelSavings: "Fuel Savings",
+    labelAnnualSavings: "Annual Savings",
+    labelPayback: "Payback Period",
+    requestQuote: "Request a Quote",
+  },
 };
 
 // ─── German ───────────────────────────────────────────────────────────────────
@@ -678,7 +711,7 @@ const de: Translations = {
   nav: {
     home: "Startseite", shop: "Shop", news: "Neuigkeiten", about: "Über uns",
     contact: "Kontakt", quote: "Angebot", help: "Hilfe",
-    account: "Konto", language: "Deutsch", back: "Zurück",
+    account: "Konto", language: "Deutsch", back: "Zurück", fet: "FET",
   },
   lang: { panelTitle: "Sprache wählen", en: "English", de: "Deutsch", fr: "Français", es: "Español" },
   hero: {
@@ -749,8 +782,11 @@ const de: Translations = {
     viewCatalogue: "Katalog ansehen",
     exploreSupply: "Versorgung erkunden",
     learnMore: "Mehr erfahren",
+    photoLabel: "Premium-Beschaffung",
+    photoTitle: "Entwickelt für den globalen Reifenhandel.",
   },
   footer: {
+    motto: "Gemeinsam wachsen",
     tagline: "Münchner globaler Reifenlieferant für PKW-, LKW- und Gebrauchtreifen an Großhändler und Händler weltweit.",
     copyright: "© 2026 Okelcor GmbH. Alle Rechte vorbehalten.",
     privacy: "Datenschutz",
@@ -1086,6 +1122,24 @@ const de: Translations = {
     related: { eyebrow: "Das könnte Ihnen auch gefallen", heading: "Ähnliche Produkte" },
     productDetails: "Produktdetails",
   },
+  fetTeaser: {
+    eyebrow: "Auch verfügbar",
+    title: "Fuel Echo Tech",
+    highlight: "Kraftstoff sparen. Leistung steigern.",
+    body: "Das Kraftstoffeffizienzgerät, dem Flottenbetreiber in ganz Europa vertrauen. Bis zu 15% Kraftstoffeinsparung.",
+    heroSubtitle: "Kraftstoff sparen, Leistung steigern und Emissionen reduzieren – für alle Fahrzeuge und Flotten.",
+    cta: "Mehr erfahren",
+  },
+  fetMega: {
+    badge: "Fuel Echo Tech",
+    heading: "Kraftstoff sparen. Motor schützen.",
+    benefits: ["Bis zu 13,9% Kraftstoffreduktion", "ISO 9001:2015 zertifiziert", "Amortisation in 3–5 Monaten"],
+    learnMore: "Mehr erfahren",
+    labelFuelSavings: "Kraftstoffeinsparung",
+    labelAnnualSavings: "Jährliche Einsparung",
+    labelPayback: "Amortisationszeit",
+    requestQuote: "Angebot anfordern",
+  },
 };
 
 // ─── French ───────────────────────────────────────────────────────────────────
@@ -1094,7 +1148,7 @@ const fr: Translations = {
   nav: {
     home: "Accueil", shop: "Boutique", news: "Actualités", about: "À propos",
     contact: "Contact", quote: "Devis", help: "Aide",
-    account: "Compte", language: "Français", back: "Retour",
+    account: "Compte", language: "Français", back: "Retour", fet: "FET",
   },
   lang: { panelTitle: "Choisir la langue", en: "English", de: "Deutsch", fr: "Français", es: "Español" },
   hero: {
@@ -1165,8 +1219,11 @@ const fr: Translations = {
     viewCatalogue: "Voir le catalogue",
     exploreSupply: "Explorer l'offre",
     learnMore: "En savoir plus",
+    photoLabel: "Sourcing premium",
+    photoTitle: "Conçu pour la distribution mondiale de pneus.",
   },
   footer: {
+    motto: "Grandir ensemble",
     tagline: "Fournisseur mondial de pneus basé à Munich pour PCR, PL et pneus usagés aux grossistes et distributeurs du monde entier.",
     copyright: "© 2026 Okelcor GmbH. Tous droits réservés.",
     privacy: "Politique de confidentialité",
@@ -1502,6 +1559,24 @@ const fr: Translations = {
     related: { eyebrow: "Vous pourriez aussi aimer", heading: "Produits similaires" },
     productDetails: "Détails du produit",
   },
+  fetTeaser: {
+    eyebrow: "Aussi disponible",
+    title: "Fuel Echo Tech",
+    highlight: "Économisez du carburant. Améliorez les performances.",
+    body: "Le dispositif d'efficacité énergétique approuvé par les gestionnaires de flotte à travers l'Europe. Jusqu'à 15% d'économie de carburant.",
+    heroSubtitle: "Économisez du carburant, améliorez les performances et réduisez les émissions pour tout véhicule ou flotte.",
+    cta: "En savoir plus",
+  },
+  fetMega: {
+    badge: "Fuel Echo Tech",
+    heading: "Économisez du carburant. Protégez votre moteur.",
+    benefits: ["Jusqu'à 13,9% de réduction de carburant", "Certifié ISO 9001:2015", "Remboursement en 3–5 mois"],
+    learnMore: "En savoir plus",
+    labelFuelSavings: "Économies de carburant",
+    labelAnnualSavings: "Économies annuelles",
+    labelPayback: "Période de remboursement",
+    requestQuote: "Demander un devis",
+  },
 };
 
 // ─── Spanish ──────────────────────────────────────────────────────────────────
@@ -1510,7 +1585,7 @@ const es: Translations = {
   nav: {
     home: "Inicio", shop: "Tienda", news: "Noticias", about: "Nosotros",
     contact: "Contacto", quote: "Cotización", help: "Ayuda",
-    account: "Cuenta", language: "Español", back: "Volver",
+    account: "Cuenta", language: "Español", back: "Volver", fet: "FET",
   },
   lang: { panelTitle: "Seleccionar idioma", en: "English", de: "Deutsch", fr: "Français", es: "Español" },
   hero: {
@@ -1581,8 +1656,11 @@ const es: Translations = {
     viewCatalogue: "Ver Catálogo",
     exploreSupply: "Explorar Suministro",
     learnMore: "Más Información",
+    photoLabel: "Abastecimiento premium",
+    photoTitle: "Diseñado para la distribución global de neumáticos.",
   },
   footer: {
+    motto: "Creciendo juntos",
     tagline: "Proveedor global de neumáticos premium para distribuidores, mayoristas y operadores de flotas.",
     copyright: "© 2025 Okelcor. Todos los derechos reservados.",
     privacy: "Privacidad",
@@ -1887,6 +1965,24 @@ const es: Translations = {
     },
     related: { eyebrow: "También le puede interesar", heading: "Productos similares" },
     productDetails: "Detalles del producto",
+  },
+  fetTeaser: {
+    eyebrow: "También disponible",
+    title: "Fuel Echo Tech",
+    highlight: "Ahorra combustible. Mejora el rendimiento.",
+    body: "El dispositivo de eficiencia de combustible de confianza para operadores de flotas en toda Europa. Hasta un 15% de ahorro en combustible.",
+    heroSubtitle: "Ahorra combustible, mejora el rendimiento y reduce las emisiones para cualquier vehículo o flota.",
+    cta: "Más información",
+  },
+  fetMega: {
+    badge: "Fuel Echo Tech",
+    heading: "Ahorra combustible. Protege tu motor.",
+    benefits: ["Hasta 13,9% de reducción de combustible", "Certificado ISO 9001:2015", "Amortización en 3–5 meses"],
+    learnMore: "Más información",
+    labelFuelSavings: "Ahorro de combustible",
+    labelAnnualSavings: "Ahorro anual",
+    labelPayback: "Período de amortización",
+    requestQuote: "Solicitar presupuesto",
   },
 };
 

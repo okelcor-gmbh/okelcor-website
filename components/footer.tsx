@@ -67,7 +67,7 @@ export default function Footer() {
                 className="block object-contain"
               />
               <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.22em] text-[var(--primary)]">
-                Growing Together
+                {t.footer.motto}
               </p>
               <p className="mt-4 max-w-[260px] text-[0.85rem] leading-6 text-[var(--muted)]">
                 {t.footer.tagline}

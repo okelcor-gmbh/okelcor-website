@@ -76,7 +76,7 @@ export default function Navbar() {
   const navItems: NavItem[] = [
     { label: t.nav.home,    href: "/" },
     { label: t.nav.shop,    href: "/shop" },
-    { label: "FET",         href: "/fet" },
+    { label: t.nav.fet,     href: "/fet" },
     { label: t.nav.news,    href: "/news" },
     { label: t.nav.about,   href: "/wholesale-tire-distributors-europe" },
     { label: t.nav.contact, href: "/contact" },
@@ -754,17 +754,13 @@ export default function Navbar() {
               <div>
                 <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-[#dcfce7] px-3 py-1">
                   <span className="h-1.5 w-1.5 rounded-full bg-[#22c55e]" aria-hidden="true" />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#166534]">Fuel Eco Tech</span>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#166534]">{t.fetMega.badge}</span>
                 </div>
                 <h3 className="mb-3 text-[1.1rem] font-extrabold leading-snug text-[#111111]">
-                  Save Fuel. Protect Your Engine.
+                  {t.fetMega.heading}
                 </h3>
                 <ul className="mb-5 flex flex-col gap-2">
-                  {[
-                    "Up to 13.9% fuel reduction",
-                    "ISO 9001:2015 certified",
-                    "Payback in 3–5 months",
-                  ].map((point) => (
+                  {t.fetMega.benefits.map((point) => (
                     <li key={point} className="flex items-center gap-2 text-[0.85rem] text-[#5c5e62]">
                       <CheckCircle2 size={14} strokeWidth={2} className="shrink-0 text-[#22c55e]" />
                       {point}
@@ -776,7 +772,7 @@ export default function Navbar() {
                   onClick={() => setOpenFetMega(false)}
                   className="inline-flex items-center gap-2 rounded-full bg-[#22c55e] px-5 py-2.5 text-[0.85rem] font-semibold text-white transition hover:bg-[#16a34a]"
                 >
-                  Learn More <ChevronRight size={13} strokeWidth={2.5} />
+                  {t.fetMega.learnMore} <ChevronRight size={13} strokeWidth={2.5} />
                 </Link>
               </div>
 
@@ -784,11 +780,11 @@ export default function Navbar() {
               <div>
                 <div className="mb-4 flex flex-col gap-2">
                   {([
-                    { stat: "13.9%",       label: "Fuel Savings"   },
-                    { stat: "€900–€1,300", label: "Annual Savings" },
-                    { stat: "3–5 months",  label: "Payback Period" },
+                    { stat: "13.9%",       label: t.fetMega.labelFuelSavings   },
+                    { stat: "€900–€1,300", label: t.fetMega.labelAnnualSavings },
+                    { stat: "3–5 months",  label: t.fetMega.labelPayback       },
                   ] as const).map(({ stat, label }) => (
-                    <div key={label} className="flex items-center gap-3 rounded-xl bg-[#f0f4f0] px-4 py-3">
+                    <div key={stat} className="flex items-center gap-3 rounded-xl bg-[#f0f4f0] px-4 py-3">
                       <Zap size={15} strokeWidth={2} className="shrink-0 text-[#22c55e]" />
                       <span className="text-[0.93rem] font-extrabold text-[#111111]">{stat}</span>
                       <span className="text-[0.8rem] text-[#5c5e62]">{label}</span>
@@ -800,7 +796,7 @@ export default function Navbar() {
                   onClick={() => setOpenFetMega(false)}
                   className="flex w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-5 py-2.5 text-[0.85rem] font-semibold text-white transition hover:bg-[#d44519]"
                 >
-                  Request a Quote <ChevronRight size={13} strokeWidth={2.5} />
+                  {t.fetMega.requestQuote} <ChevronRight size={13} strokeWidth={2.5} />
                 </Link>
               </div>
 

@@ -95,10 +95,10 @@ export default function Brands({ brands: apiBrands }: BrandsProps) {
 
             <div className="absolute bottom-0 left-0 right-0 z-10 p-8 md:p-10">
               <p className="text-lg font-medium text-white/90">
-                Premium sourcing
+                {t.brands.photoLabel}
               </p>
               <h3 className="mt-2 text-3xl font-extrabold tracking-tight text-white sm:text-4xl md:text-5xl">
-                Built for global tyre distribution.
+                {t.brands.photoTitle}
               </h3>
 
               <div className="mt-4 flex flex-wrap gap-3">
