@@ -12,6 +12,7 @@ import { SITE_URL as SITE_URL_FALLBACK } from "@/lib/constants";
 import { CustomerAuthProvider } from "@/context/CustomerAuthContext";
 import { SiteSettingsProvider } from "@/context/site-settings-context";
 import { getSiteSettings } from "@/lib/site-settings";
+import { getServerLocale } from "@/lib/locale";
 import CrispChat from "@/components/crisp-chat";
 import AnnouncementBar from "@/components/announcement-bar";
 import PostHogProvider from "@/components/posthog-provider";
@@ -64,10 +65,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const settings = await getSiteSettings();
+  const [settings, locale] = await Promise.all([getSiteSettings(), getServerLocale()]);
 
   return (
-    <html lang="en" className="w-full">
+    <html lang={locale} className="w-full">
       <body className="m-0 w-full p-0">
         {/* ── Site-wide structured data ── */}
         <script

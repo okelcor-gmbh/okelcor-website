@@ -67,7 +67,20 @@
       "Bash(del \"components\\\\shop\\\\specials-section.tsx\")",
       "Bash(dir \"public\\\\images\")",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\user\\\\Desktop\\\\Projects\\\\okelcor-website\" -Recurse -Name -Filter \"*.ts\" -o \"*.tsx\" -o \"*.js\" -o \"*.jsx\")",
-      "Bash(Select-Object -First 50)"
+      "Bash(Select-Object -First 50)",
+      "Bash(New-Item -ItemType Directory -Force \"C:\\\\Users\\\\user\\\\Desktop\\\\Projects\\\\okelcor-website\\\\app\\\\api\\\\admin\\\\2fa\\\\setup\\\\confirm\")",
+      "Bash(Out-Null)",
+      "Bash(Write-Output \"done\")",
+      "PowerShell(New-Item *)",
+      "Bash(Get-Content package.json)",
+      "Bash(Select-String -Pattern \"tiptap|quill|slate|lexical|prosemirror|editor\")",
+      "Bash(Select-Object -First 5)",
+      "Bash(Get-ChildItem -Path app -Filter \"*actions.ts\" -Recurse)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Get-ChildItem -Recurse -Filter \"*translation*\" -File)",
+      "Bash(Select-Object FullName)",
+      "Bash(grep -r \"lang=\\\\|locale=\\\\|\\\\\\\\[lang\\\\\\\\]\\\\|\\\\\\\\[locale\\\\\\\\]\" app --include=\"*.tsx\" --include=\"*.ts\")",
+      "Bash(grep -r \"locale\\\\|Locale\\\\|t\\\\\\\\.nav\\\\|useLanguage\" app/shop --include=\"*.tsx\")"
     ]
   }
 }

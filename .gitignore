@@ -48,3 +48,5 @@ next-env.d.ts
 public/videos/fet-before.mp4
 public/videos/fet-after.MP4
 public/videos/fet-after.mp4
+
+.vercel
