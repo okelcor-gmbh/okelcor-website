@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { getServerLocale } from "@/lib/locale";
+import { getPageMeta } from "@/lib/metadata-i18n";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import QuoteHero from "@/components/quote/quote-hero";
@@ -6,26 +8,25 @@ import QuoteForm from "@/components/quote/quote-form";
 import QuoteSummary from "@/components/quote/quote-summary";
 import QuoteTrust from "@/components/quote/quote-trust";
 
-export const metadata: Metadata = {
-  title: "Get Instant Tyre Supply Quotation With Competitive Prices",
-  description:
-    "Get a competitive bulk tyre supply quotation from Okelcor. We supply PCR, TBR, and used tyres at wholesale prices with international logistics to over 30 countries.",
-  alternates: {
-    canonical: "https://www.okelcor.com/tyre-supply-quotation",
-  },
-  openGraph: {
-    title: "Get Instant Tyre Supply Quotation With Competitive Prices | Okelcor",
-    description:
-      "Competitive bulk tyre supply pricing for PCR, TBR, and used tyres. Okelcor delivers globally with trusted international logistics. Response within 1 business day.",
-    url: "https://www.okelcor.com/tyre-supply-quotation",
-    type: "website",
-  },
-  twitter: {
-    title: "Get Instant Tyre Supply Quotation — Okelcor",
-    description:
-      "Bulk PCR, TBR, and used tyre supplies at competitive prices. International logistics. Response within 1 business day.",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getServerLocale();
+  const m = getPageMeta("quote", locale);
+  return {
+    title: m.title,
+    description: m.description,
+    alternates: { canonical: "https://www.okelcor.com/tyre-supply-quotation" },
+    openGraph: {
+      title: m.ogTitle,
+      description: m.ogDescription,
+      url: "https://www.okelcor.com/tyre-supply-quotation",
+      type: "website",
+    },
+    twitter: {
+      title: m.twitterTitle,
+      description: m.twitterDescription,
+    },
+  };
+}
 
 const breadcrumb = {
   "@context": "https://schema.org",

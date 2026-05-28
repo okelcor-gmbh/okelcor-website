@@ -1,4 +1,6 @@
 ﻿import type { Metadata } from "next";
+import { getServerLocale } from "@/lib/locale";
+import { getPageMeta } from "@/lib/metadata-i18n";
 import Link from "next/link";
 import {
   Zap, BarChart3, Leaf, Wrench, CheckCircle2,
@@ -11,18 +13,24 @@ import Footer from "@/components/footer";
 import AmortizationCalculator from "@/components/fet/amortization-calculator";
 import FadeUp from "@/components/motion/fade-up";
 
-export const metadata: Metadata = {
-  title: "FET Engine Fuel Efficiency for Fleets",
-  description:
-    "FET Engine Fuel Efficiency — the fuel efficiency device trusted by fleet operators across Europe. Up to 15% fuel savings, reduced emissions, improved engine performance.",
-  openGraph: {
-    title: "FET Engine Fuel Efficiency – Engine Treatment for Fleets | Okelcor Tires",
-    description:
-      "FET Engine Fuel Efficiency — up to 15% fuel savings, reduced emissions, improved engine performance. Trusted by fleet operators across Europe.",
-    url: "https://www.okelcor.com/fet",
-    type: "website",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getServerLocale();
+  const m = getPageMeta("fet", locale);
+  return {
+    title: m.title,
+    description: m.description,
+    openGraph: {
+      title: m.ogTitle,
+      description: m.ogDescription,
+      url: "https://www.okelcor.com/fet",
+      type: "website",
+    },
+    twitter: {
+      title: m.twitterTitle,
+      description: m.twitterDescription,
+    },
+  };
+}
 
 // ─── Section wrapper ──────────────────────────────────────────────────────────
 

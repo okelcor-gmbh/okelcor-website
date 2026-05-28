@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getPageMeta } from "@/lib/metadata-i18n";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import NewsPageUI from "@/components/news/news-page-ui";
@@ -7,23 +8,24 @@ import { getLocalizedArticles, type Article } from "@/components/news/data";
 import { getServerLocale } from "@/lib/locale";
 import type { Locale } from "@/lib/translations";
 
-export const metadata: Metadata = {
-  title: "Tyre Industry News & Insights",
-  description:
-    "Insights, updates, and tyre supply knowledge for distributors, partners, and international buyers.",
-  openGraph: {
-    title: "Tyre Industry News & Insights | Okelcor Tires",
-    description:
-      "Tyre supply updates, market insights, and logistics knowledge for global distributors and buyers.",
-    url: "https://www.okelcor.com/news",
-    type: "website",
-  },
-  twitter: {
-    title: "News & Insights – Okelcor",
-    description:
-      "Tyre supply updates and market insights for global distributors and buyers.",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getServerLocale();
+  const m = getPageMeta("news", locale);
+  return {
+    title: m.title,
+    description: m.description,
+    openGraph: {
+      title: m.ogTitle,
+      description: m.ogDescription,
+      url: "https://www.okelcor.com/news",
+      type: "website",
+    },
+    twitter: {
+      title: m.twitterTitle,
+      description: m.twitterDescription,
+    },
+  };
+}
 
 /** Map API article shape → local Article shape used by NewsCard / ArticleUI. */
 function toArticle(a: ApiArticle): Article {

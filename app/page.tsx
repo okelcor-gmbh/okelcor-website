@@ -1,5 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import { getServerLocale } from "@/lib/locale";
+import { getPageMeta } from "@/lib/metadata-i18n";
 import Navbar from "@/components/navbar";
 import WhyOkelcor from "@/components/why-okelcor";
 import FadeUp from "@/components/motion/fade-up";
@@ -22,25 +24,24 @@ import {
   BrandsSkeleton,
 } from "@/components/ui/skeleton";
 
-export const metadata: Metadata = {
-  title: {
-    absolute: "OKELCOR TIRES - The Cheapest Tyres on the Internet",
-  },
-  description:
-    "Munich-based global tyre supplier. Premium PCR, TBR, and used tyres for businesses, fleets, and individual drivers in over 30 countries.",
-  openGraph: {
-    title: "OKELCOR TIRES - The Cheapest Tyres on the Internet",
-    description:
-      "Munich-based global tyre supplier. Premium PCR, TBR, and used tyres for businesses, fleets, and individual drivers in over 30 countries.",
-    url: "https://www.okelcor.com",
-    type: "website",
-  },
-  twitter: {
-    title: "OKELCOR TIRES - The Cheapest Tyres on the Internet",
-    description:
-      "Munich-based global tyre supplier. PCR, TBR, and used tyres for distributors worldwide.",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getServerLocale();
+  const m = getPageMeta("home", locale);
+  return {
+    title: { absolute: m.title },
+    description: m.description,
+    openGraph: {
+      title: m.ogTitle,
+      description: m.ogDescription,
+      url: "https://www.okelcor.com",
+      type: "website",
+    },
+    twitter: {
+      title: m.twitterTitle,
+      description: m.twitterDescription,
+    },
+  };
+}
 
 export default function Home() {
   return (

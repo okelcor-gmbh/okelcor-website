@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { getServerLocale } from "@/lib/locale";
+import { getPageMeta } from "@/lib/metadata-i18n";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import ShopPageClient from "@/components/shop/shop-page-client";
@@ -9,26 +11,25 @@ import { SHOP_REQUIRES_LOGIN } from "@/lib/flags";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export const metadata: Metadata = {
-  title: "Buy Tyres Online – PCR, TBR & Used Tyres",
-  description:
-    "Browse premium PCR, TBR, OTR, and used tyres from leading global brands. Filter by brand, season, and tyre type.",
-  alternates: {
-    canonical: "https://www.okelcor.com/shop",
-  },
-  openGraph: {
-    title: "Buy Tyres Online – PCR, TBR & Used Tyres | Okelcor Tires",
-    description:
-      "PCR, TBR, OTR, and used tyres from Michelin, Bridgestone, Goodyear, Continental, Pirelli, and Dunlop. Global wholesale supply.",
-    url: "https://www.okelcor.com/shop",
-    type: "website",
-  },
-  twitter: {
-    title: "Buy Tyres Online – PCR, TBR & Used Tyres | Okelcor Tires",
-    description:
-      "PCR, TBR, OTR, and used tyres from top global brands. Wholesale supply worldwide.",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getServerLocale();
+  const m = getPageMeta("shop", locale);
+  return {
+    title: m.title,
+    description: m.description,
+    alternates: { canonical: "https://www.okelcor.com/shop" },
+    openGraph: {
+      title: m.ogTitle,
+      description: m.ogDescription,
+      url: "https://www.okelcor.com/shop",
+      type: "website",
+    },
+    twitter: {
+      title: m.twitterTitle,
+      description: m.twitterDescription,
+    },
+  };
+}
 
 const SUPPORTED_PARAMS = ["q", "type", "brand", "size", "season", "speed", "load_index", "price_min", "price_max"];
 

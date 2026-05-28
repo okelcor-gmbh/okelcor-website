@@ -14,6 +14,7 @@ import { SITE_URL } from "@/lib/constants";
 import ProductViewTracker from "@/components/shop/product-view-tracker";
 import { apiFetch, type ApiProduct } from "@/lib/api";
 import { getServerLocale } from "@/lib/locale";
+import { getProductMetaSuffix } from "@/lib/metadata-i18n";
 import { getProductImageUrl } from "@/lib/utils";
 
 type Props = { params: Promise<{ id: string }> };
@@ -97,7 +98,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!product) return { title: "Product Not Found" };
 
   const title = `${product.brand} ${product.name} ${product.size}`;
-  const description = `${product.description} Available for wholesale order. Global delivery from Okelcor.`;
+  const description = `${product.description} ${getProductMetaSuffix(locale)}`;
 
   return {
     title,
