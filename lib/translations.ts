@@ -266,6 +266,25 @@ export type Translations = {
     labelFuelSavings: string; labelAnnualSavings: string; labelPayback: string;
     requestQuote: string;
   };
+  fetCalc: {
+    heading: string; body: string; seeDetails: string;
+    labelVehicleType: string;
+    vehicles: [string, string, string, string];
+    labelAnnualKm: string; labelFuelPrice: string; labelDeviceCost: string;
+    labelSavingsPct: string; hintConservative: string; hintOptimistic: string;
+    labelAnnualSavings: string; perYearWithFet: string;
+    labelPayback: string; timeToBreakEven: string;
+    unitMo: string; unitYr: string;
+    requestQuote: string; disclaimer: string;
+  };
+  fetProof: {
+    badge: string; heading: string; body: string;
+    beforeLabel: string; afterLabel: string;
+    result: string; cta: string;
+  };
+  fetVerified: {
+    copy: string; fieldTested: string;
+  };
 };
 
 // ─── English ──────────────────────────────────────────────────────────────────
@@ -702,6 +721,40 @@ const en: Translations = {
     labelAnnualSavings: "Annual Savings",
     labelPayback: "Payback Period",
     requestQuote: "Request a Quote",
+  },
+  fetCalc: {
+    heading: "How much could you save?",
+    body: "Enter your vehicle details and see your estimated annual fuel savings in seconds.",
+    seeDetails: "See full details",
+    labelVehicleType: "Vehicle Type",
+    vehicles: ["Passenger Car", "Van / SUV", "Truck up to 18t", "Truck up to 40t"],
+    labelAnnualKm: "Annual km",
+    labelFuelPrice: "Fuel price (€/L)",
+    labelDeviceCost: "FET device cost",
+    labelSavingsPct: "Expected fuel savings",
+    hintConservative: "Conservative 8%",
+    hintOptimistic: "Optimistic 15%",
+    labelAnnualSavings: "Annual Savings",
+    perYearWithFet: "Per year with FET",
+    labelPayback: "Payback Period",
+    timeToBreakEven: "Time to break even",
+    unitMo: "mo",
+    unitYr: "yr",
+    requestQuote: "Request a Quote",
+    disclaimer: "Estimates based on field and lab test data. Actual savings vary by vehicle condition and driving pattern.",
+  },
+  fetProof: {
+    badge: "Field Test Proof",
+    heading: "See the difference for yourself",
+    body: "Real field test on a Unimog. Same vehicle, same conditions. Before and after FET installation.",
+    beforeLabel: "Before FET",
+    afterLabel: "After FET",
+    result: "Field test result: approximately 10.9% fuel reduction per operating hour",
+    cta: "Explore Fuel Echo Tech",
+  },
+  fetVerified: {
+    copy: "Independently verified — 13.9% fuel reduction on a German state authority vehicle",
+    fieldTested: "Field Tested",
   },
 };
 
@@ -1140,6 +1193,40 @@ const de: Translations = {
     labelPayback: "Amortisationszeit",
     requestQuote: "Angebot anfordern",
   },
+  fetCalc: {
+    heading: "Wie viel könnten Sie sparen?",
+    body: "Geben Sie Ihre Fahrzeugdaten ein und sehen Sie in Sekunden Ihre geschätzten jährlichen Kraftstoffeinsparungen.",
+    seeDetails: "Details anzeigen",
+    labelVehicleType: "Fahrzeugtyp",
+    vehicles: ["PKW", "Van / SUV", "LKW bis 18t", "LKW bis 40t"],
+    labelAnnualKm: "Jährliche km",
+    labelFuelPrice: "Kraftstoffpreis (€/L)",
+    labelDeviceCost: "FET-Gerätekosten",
+    labelSavingsPct: "Erwartete Kraftstoffeinsparung",
+    hintConservative: "Konservativ 8 %",
+    hintOptimistic: "Optimistisch 15 %",
+    labelAnnualSavings: "Jährliche Einsparung",
+    perYearWithFet: "Pro Jahr mit FET",
+    labelPayback: "Amortisationsdauer",
+    timeToBreakEven: "Zeit bis zur Amortisation",
+    unitMo: "Mo.",
+    unitYr: "J.",
+    requestQuote: "Angebot anfordern",
+    disclaimer: "Schätzungen basieren auf Feld- und Labortestdaten. Tatsächliche Einsparungen hängen vom Fahrzeugzustand und Fahrverhalten ab.",
+  },
+  fetProof: {
+    badge: "Feldbeweis",
+    heading: "Überzeugen Sie sich selbst",
+    body: "Echter Feldtest mit einem Unimog. Gleiches Fahrzeug, gleiche Bedingungen. Vor und nach der FET-Installation.",
+    beforeLabel: "Vor FET",
+    afterLabel: "Nach FET",
+    result: "Feldergebnis: ca. 10,9 % Kraftstoffreduktion pro Betriebsstunde",
+    cta: "Fuel Echo Tech entdecken",
+  },
+  fetVerified: {
+    copy: "Unabhängig verifiziert — 13,9 % Kraftstoffreduktion an einem Fahrzeug einer deutschen Landesbehörde",
+    fieldTested: "Feldgetestet",
+  },
 };
 
 // ─── French ───────────────────────────────────────────────────────────────────
@@ -1577,6 +1664,40 @@ const fr: Translations = {
     labelPayback: "Période de remboursement",
     requestQuote: "Demander un devis",
   },
+  fetCalc: {
+    heading: "Combien pourriez-vous économiser ?",
+    body: "Entrez les données de votre véhicule et obtenez en quelques secondes vos économies annuelles de carburant estimées.",
+    seeDetails: "Voir les détails",
+    labelVehicleType: "Type de véhicule",
+    vehicles: ["Voiture particulière", "Fourgon / SUV", "Camion jusqu'à 18t", "Camion jusqu'à 40t"],
+    labelAnnualKm: "km annuels",
+    labelFuelPrice: "Prix du carburant (€/L)",
+    labelDeviceCost: "Coût de l'appareil FET",
+    labelSavingsPct: "Économies de carburant attendues",
+    hintConservative: "Conservateur 8 %",
+    hintOptimistic: "Optimiste 15 %",
+    labelAnnualSavings: "Économies annuelles",
+    perYearWithFet: "Par an avec FET",
+    labelPayback: "Période de remboursement",
+    timeToBreakEven: "Délai d'amortissement",
+    unitMo: "mois",
+    unitYr: "an",
+    requestQuote: "Demander un devis",
+    disclaimer: "Estimations basées sur des données de tests terrain et laboratoire. Les économies réelles varient selon l'état du véhicule et le mode de conduite.",
+  },
+  fetProof: {
+    badge: "Preuve terrain",
+    heading: "Constatez la différence par vous-même",
+    body: "Vrai test terrain sur un Unimog. Même véhicule, mêmes conditions. Avant et après l'installation du FET.",
+    beforeLabel: "Avant FET",
+    afterLabel: "Après FET",
+    result: "Résultat terrain : environ 10,9 % de réduction de carburant par heure de fonctionnement",
+    cta: "Explorer Fuel Echo Tech",
+  },
+  fetVerified: {
+    copy: "Vérifié indépendamment — 13,9 % de réduction de carburant sur un véhicule d'une autorité publique allemande",
+    fieldTested: "Testé sur le terrain",
+  },
 };
 
 // ─── Spanish ──────────────────────────────────────────────────────────────────
@@ -1983,6 +2104,40 @@ const es: Translations = {
     labelAnnualSavings: "Ahorro anual",
     labelPayback: "Período de amortización",
     requestQuote: "Solicitar presupuesto",
+  },
+  fetCalc: {
+    heading: "¿Cuánto podría ahorrar?",
+    body: "Introduzca los datos de su vehículo y vea en segundos sus ahorros anuales estimados de combustible.",
+    seeDetails: "Ver detalles",
+    labelVehicleType: "Tipo de vehículo",
+    vehicles: ["Turismo", "Furgoneta / SUV", "Camión hasta 18t", "Camión hasta 40t"],
+    labelAnnualKm: "km anuales",
+    labelFuelPrice: "Precio del combustible (€/L)",
+    labelDeviceCost: "Coste del dispositivo FET",
+    labelSavingsPct: "Ahorro de combustible esperado",
+    hintConservative: "Conservador 8 %",
+    hintOptimistic: "Optimista 15 %",
+    labelAnnualSavings: "Ahorro anual",
+    perYearWithFet: "Al año con FET",
+    labelPayback: "Período de amortización",
+    timeToBreakEven: "Tiempo hasta el punto de equilibrio",
+    unitMo: "mes",
+    unitYr: "año",
+    requestQuote: "Solicitar presupuesto",
+    disclaimer: "Estimaciones basadas en datos de pruebas de campo y laboratorio. Los ahorros reales varían según el estado del vehículo y el patrón de conducción.",
+  },
+  fetProof: {
+    badge: "Prueba de campo",
+    heading: "Compruebe la diferencia usted mismo",
+    body: "Prueba de campo real en un Unimog. Mismo vehículo, mismas condiciones. Antes y después de la instalación del FET.",
+    beforeLabel: "Antes del FET",
+    afterLabel: "Después del FET",
+    result: "Resultado de campo: aproximadamente un 10,9 % de reducción de combustible por hora de funcionamiento",
+    cta: "Explorar Fuel Echo Tech",
+  },
+  fetVerified: {
+    copy: "Verificado de forma independiente — 13,9 % de reducción de combustible en un vehículo de una autoridad estatal alemana",
+    fieldTested: "Probado en campo",
   },
 };
 
