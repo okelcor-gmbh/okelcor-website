@@ -297,6 +297,50 @@ export type AdminOrderFull = AdminOrder & {
   acceptance_token?: string | null;
 };
 
+// CRM-6 communications
+export type CommunicationType = "email" | "call" | "whatsapp" | "note" | "system";
+export type CommunicationDirection = "inbound" | "outbound" | "internal";
+export type CommunicationStatus = "planned" | "sent" | "failed" | "completed" | "skipped";
+
+export type Communication = {
+  id: number;
+  customer_id?: number | null;
+  quote_request_id?: number | null;
+  order_id?: number | null;
+  admin_user_id?: number | null;
+  admin_user_name?: string | null;
+  type: CommunicationType | string;
+  direction: CommunicationDirection | string;
+  subject?: string | null;
+  body?: string | null;
+  status: CommunicationStatus | string;
+  scheduled_at?: string | null;
+  completed_at?: string | null;
+  created_at: string;
+};
+
+export type EmailTemplate = {
+  key: string;
+  label: string;
+  subject: string;
+  body?: string | null;
+};
+
+export type FollowUpItem = {
+  id: number;               // quote_request.id
+  ref_number: string;
+  full_name: string;
+  company_name?: string | null;
+  email: string;
+  country?: string | null;
+  follow_up_at?: string | null;
+  lead_priority?: string | null;
+  qualification_status?: string | null;
+  assigned_to_name?: string | null;
+  last_communication_at?: string | null;
+  last_communication_type?: string | null;
+};
+
 // CRM-5 data quality
 export type DataQualityReviewStatus =
   | "clean" | "needs_review" | "duplicate_suspected" | "merged" | "ignored";

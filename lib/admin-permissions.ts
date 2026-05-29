@@ -17,10 +17,10 @@ export type AdminRole = (typeof ALL_ROLES)[number];
 // Mirrors backend ROLE_ACCESS table.
 
 export const ROLE_ACCESS: Record<string, string[]> = {
-  super_admin:     ["dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "analytics", "chats", "security", "eu_declarations", "logistics", "system_health"],
-  admin:           ["dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "analytics", "chats", "security", "eu_declarations", "logistics", "system_health"],
-  order_manager:   ["dashboard", "orders", "quotes", "supplier", "eu_declarations", "logistics"],
-  sales_manager:   ["dashboard", "orders", "quotes", "customers", "analytics", "logistics"],
+  super_admin:     ["dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "analytics", "chats", "security", "eu_declarations", "logistics", "system_health", "crm"],
+  admin:           ["dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "analytics", "chats", "security", "eu_declarations", "logistics", "system_health", "crm"],
+  order_manager:   ["dashboard", "orders", "quotes", "supplier", "eu_declarations", "logistics", "crm"],
+  sales_manager:   ["dashboard", "orders", "quotes", "customers", "analytics", "logistics", "crm"],
   content_manager: ["dashboard", "articles", "hero_slides", "promotions", "fet", "brands"],
   support:         ["dashboard", "orders", "quotes", "customers", "chats", "logistics"],
   editor:          ["dashboard", "articles", "hero_slides", "promotions", "fet"],
@@ -53,6 +53,7 @@ export const PATH_SECTION: Record<string, string> = {
   "/admin/eu-declarations": "eu_declarations",
   "/admin/logistics":       "logistics",
   "/admin/system-health":   "system_health",
+  "/admin/crm":             "crm",
 };
 
 // ── Permission map ─────────────────────────────────────────────────────────────

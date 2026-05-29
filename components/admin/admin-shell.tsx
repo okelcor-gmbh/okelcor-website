@@ -33,6 +33,7 @@ import {
   Truck,
   Activity,
   ScanLine,
+  BellRing,
 } from "lucide-react";
 import { logoutAdmin } from "@/app/admin/actions";
 import { canAccess, PATH_SECTION, ROLE_LABELS, ROLE_BADGE_COLORS } from "@/lib/admin-permissions";
@@ -48,6 +49,7 @@ const NAV = [
   { label: "Articles",       href: "/admin/articles",    icon: FileText,        section: "articles" },
   { label: "Orders",         href: "/admin/orders",      icon: ShoppingCart,    section: "orders" },
   { label: "Quote Requests", href: "/admin/quotes",          icon: ClipboardList,   section: "quotes" },
+  { label: "Follow-ups",    href: "/admin/crm/follow-ups",  icon: BellRing,        section: "crm" },
   { label: "EU Declarations", href: "/admin/eu-declarations", icon: FileCheck,      section: "eu_declarations" },
   { label: "Logistics",       href: "/admin/logistics",    icon: Truck,        section: "logistics" },
   { label: "Hero Slides",    href: "/admin/hero-slides",  icon: Layers,      section: "hero_slides" },

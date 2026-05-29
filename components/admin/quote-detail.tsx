@@ -8,7 +8,10 @@ import {
   Download, ShoppingCart, ExternalLink, Loader2,
   CheckCircle, XCircle, AlertOctagon,
   UserPlus, User, Calendar, Flag, Tag, Save, X,
+  Mail,
 } from "lucide-react";
+import CommunicationTimeline from "@/components/admin/communication-timeline";
+import FollowUpEmailModal from "@/components/admin/follow-up-email-modal";
 import { updateQuoteStatus } from "@/app/admin/quotes/actions";
 import type { ConvertToOrderResult } from "@/app/admin/quotes/actions";
 import type { AdminQuoteFull } from "@/lib/admin-api";
@@ -207,6 +210,8 @@ export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
     message: string;
     customer_id?: number;
   } | null>(null);
+
+  const [showEmailModal, setShowEmailModal] = useState(false);
 
   const loadAdminUsers = async () => {
     if (adminUsersLoaded) return;
@@ -554,6 +559,10 @@ export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
                   <UserPlus size={12} /> Convert to Customer
                 </button>
               )}
+              <button type="button" onClick={() => setShowEmailModal(true)}
+                className="flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-3 py-1.5 text-[0.75rem] font-semibold text-blue-700 transition hover:bg-blue-100">
+                <Mail size={12} /> Send Follow-up Email
+              </button>
             </div>
           </div>
 
@@ -1167,7 +1176,25 @@ export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
           )}
         </SectionCard>
 
+        {/* ── CRM-6: Communication Timeline ── */}
+        <SectionCard title="Communications">
+          <div className="p-5">
+            <CommunicationTimeline context="quote" entityId={quote.id} compact />
+          </div>
+        </SectionCard>
+
       </div>
+
+      {/* ── CRM-6: Follow-up email modal ── */}
+      {showEmailModal && (
+        <FollowUpEmailModal
+          quoteId={quote.id}
+          recipientName={quote.full_name}
+          recipientEmail={quote.email}
+          onClose={() => setShowEmailModal(false)}
+          onSent={() => setShowEmailModal(false)}
+        />
+      )}
 
       {/* ── Conversion modal ── */}
       {showConvertModal && (

@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, lazy, Suspense } from "react";
+const CommunicationTimeline = lazy(() => import("@/components/admin/communication-timeline"));
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -903,6 +904,17 @@ export default function CustomerProfilePage() {
               </div>
             </div>
           </SectionCard>
+
+          {/* CRM-6: Communication Timeline */}
+          {customer && (
+            <SectionCard title="Communications" icon={Activity}>
+              <div className="p-5">
+                <Suspense fallback={<div className="py-6 text-center text-[0.83rem] text-[#9ca3af]">Loading…</div>}>
+                  <CommunicationTimeline context="customer" entityId={customer.id} compact />
+                </Suspense>
+              </div>
+            </SectionCard>
+          )}
 
           {/* Quote history */}
           <SectionCard title="Quote Requests" icon={FileText}>
