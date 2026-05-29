@@ -3,15 +3,27 @@ import { cookies } from "next/headers";
 export const dynamic = "force-dynamic";
 const BASE = `${process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1"}/admin`;
 
-// Client-side fallback templates — used when backend endpoint not yet deployed
+// Fallback templates used when backend endpoint is unavailable
 const FALLBACK_TEMPLATES = [
-  { key: "follow_up_quote",          label: "Follow-up: Quote",              subject: "Following up on your tyre inquiry" },
-  { key: "request_more_information", label: "Request More Information",       subject: "We need a few more details for your quote" },
-  { key: "invite_to_register",       label: "Invite to Register",             subject: "Your Okelcor account is ready" },
-  { key: "quote_ready",              label: "Quote Ready",                    subject: "Your Okelcor quote is ready" },
-  { key: "payment_reminder",         label: "Payment Reminder",               subject: "Reminder: payment due for your order" },
-  { key: "document_available",       label: "Document Available",             subject: "Your trade document is now available" },
+  { key: "follow_up_quote",          label: "Follow up on quote",             subject: "Following up on your tyre inquiry — {ref}",                body: "" },
+  { key: "request_more_information", label: "Request more information",        subject: "More information needed for your tyre request — {ref}",    body: "" },
+  { key: "quote_ready",              label: "Quote ready",                     subject: "Your tyre quote is ready — {ref}",                         body: "" },
+  { key: "invite_to_register",       label: "Invite to register",              subject: "Your Okelcor account is ready",                            body: "" },
+  { key: "payment_reminder",         label: "Payment reminder",                subject: "Reminder: payment due for your order — {ref}",             body: "" },
+  { key: "document_available",       label: "Document available",              subject: "Your trade document is now available — {ref}",             body: "" },
 ];
+
+type RawTemplate = Record<string, unknown>;
+
+// Normalise any backend shape → { key, label, subject, body }
+function normalizeTemplate(raw: RawTemplate) {
+  return {
+    key:     String(raw.key     ?? raw.slug  ?? raw.name  ?? ""),
+    label:   String(raw.label   ?? raw.title ?? raw.name  ?? raw.key ?? ""),
+    subject: String(raw.subject ?? raw.email_subject ?? raw.subject_line ?? ""),
+    body:    String(raw.body    ?? raw.content ?? raw.email_body ?? raw.template_body ?? ""),
+  };
+}
 
 export async function GET() {
   const tk = (await cookies()).get("admin_token")?.value;
@@ -23,6 +35,8 @@ export async function GET() {
     });
     if (!res.ok) return NextResponse.json({ data: FALLBACK_TEMPLATES });
     const json = await res.json().catch(() => ({}));
-    return NextResponse.json({ data: json.data ?? json ?? FALLBACK_TEMPLATES });
+    const raw: RawTemplate[] = Array.isArray(json.data) ? json.data : Array.isArray(json) ? json : [];
+    if (raw.length === 0) return NextResponse.json({ data: FALLBACK_TEMPLATES });
+    return NextResponse.json({ data: raw.map(normalizeTemplate) });
   } catch { return NextResponse.json({ data: FALLBACK_TEMPLATES }); }
 }

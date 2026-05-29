@@ -2,6 +2,70 @@
 
 ---
 
+## Completed in Latest Session — CRM-6 FIX: Follow-up Email Templates + 500 Error (2026-05-29)
+
+---
+
+### CRM-6 Fix — Follow-up Email Modal: Blank Templates + 500 Error Handling
+
+**Goal:** Fix blank dropdown options in Follow-up Email modal and replace bare "Error 500" with friendly error messages.
+
+**TypeScript: 0 errors | Build: clean**
+
+#### Root Causes
+
+| # | Bug | Root Cause |
+|---|---|---|
+| 1 | Dropdown shows blank options | Backend may return templates with `name`/`title` instead of `label`; route passed items through without normalisation; `t.label` → `undefined` → blank text |
+| 2 | 500 shows "Error 500" | Modal read `json.error` first, but Laravel returns `json.message`; when `json.error` was `undefined`, fallback was the literal `"Error ${res.status}"` string |
+| 3 | No empty-state guard | When backend returns empty array, dropdown rendered nothing and Send stayed enabled with no `selectedTemplate` |
+| 4 | No incomplete-template guard | If a template object had no `subject`, Send stayed enabled but email would be incomplete |
+
+#### Files Changed
+
+| File | Change |
+|---|---|
+| `app/api/admin/crm/email-templates/route.ts` | Added `normalizeTemplate()` — maps any backend field shape (`name`, `title`, `slug`, `email_subject`, `content`, etc.) to `{key, label, subject, body}`; fallback used when backend returns empty array; fallback templates updated to match spec (`follow_up_quote`, `request_more_information`, `quote_ready` as first three) |
+| `components/admin/follow-up-email-modal.tsx` | Added `templateIncomplete` + `canSend` derived values; empty-state amber box "No email templates available."; incomplete-template amber warning "Selected template is incomplete — subject is missing."; fixed error parsing to read `json.message ?? json.error` and map `invalid_email_template` / `email_send_failed` / 500+ to user-friendly strings; option label fallback `t.label \|\| t.key`; Send button uses `canSend` |
+
+#### Normalisation Map (`normalizeTemplate`)
+
+```typescript
+key:     raw.key     ?? raw.slug  ?? raw.name
+label:   raw.label   ?? raw.title ?? raw.name  ?? raw.key
+subject: raw.subject ?? raw.email_subject ?? raw.subject_line
+body:    raw.body    ?? raw.content ?? raw.email_body ?? raw.template_body
+```
+
+#### Error Message Map (frontend)
+
+| Condition | Message shown |
+|---|---|
+| `code === "invalid_email_template"` | "Please select a valid email template." |
+| `code === "email_send_failed"` | Backend `message` or "Email could not be sent. The communication was logged." |
+| `res.status >= 500` | "A server error occurred. Please try again, or contact support if this persists." |
+| Other non-2xx | Backend `message ?? error` or `"Request failed (${status})."` |
+
+#### Follow-ups Dashboard Behaviour (confirmed expected)
+
+`/admin/crm/follow-ups` is intentionally empty unless `follow_up_at` is set on a quote. The dashboard queries backend for quotes with a scheduled follow-up date — quotes without `follow_up_at` never appear in this view. Set `follow_up_at` via the Pipeline card in Quote Detail to make a quote appear here.
+
+#### Backend Tasks (not frontend — shared with backend team)
+
+```
+GET  /api/v1/admin/crm/email-templates
+  ← Must return { data: [{ key, label, subject, body }] }
+  ← Frontend normalises field aliases but canonical shape is preferred
+
+POST /api/v1/admin/quote-requests/{id}/send-follow-up-email
+  ← Validate template key; return 422 { message, code: "invalid_email_template" } if missing/invalid
+  ← Return 422 { message, code: "email_send_failed" } on mail failure (do not 500)
+  ← Replace {name} {company} {ref} {admin_name} {message} placeholders
+  ← Log communication row on both send and failure
+```
+
+---
+
 ## Completed in Latest Session — DOC-6: Customer Order Confirmation Acceptance Flow (2026-05-22)
 
 ---

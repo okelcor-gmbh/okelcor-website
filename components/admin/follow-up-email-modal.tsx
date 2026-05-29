@@ -33,6 +33,8 @@ export default function FollowUpEmailModal({ quoteId, recipientName, recipientEm
   }, []);
 
   const selectedTpl = templates.find((t) => t.key === selectedTemplate);
+  const templateIncomplete = !!selectedTpl && !selectedTpl.subject;
+  const canSend = !!selectedTemplate && !templatesLoading && templates.length > 0 && !templateIncomplete;
 
   const handleSend = async () => {
     setSending(true);
@@ -43,9 +45,23 @@ export default function FollowUpEmailModal({ quoteId, recipientName, recipientEm
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ template: selectedTemplate, message: message.trim() || undefined }),
       });
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error((json as Record<string, unknown>).error as string ?? `Error ${res.status}`);
-      setResult({ type: "ok", text: (json as Record<string, unknown>).message as string ?? "Email sent successfully." });
+      const json = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+      if (!res.ok) {
+        const code = json.code as string | undefined;
+        const backendMsg = (json.message ?? json.error) as string | undefined;
+        let msg: string;
+        if (code === "invalid_email_template") {
+          msg = "Please select a valid email template.";
+        } else if (code === "email_send_failed") {
+          msg = backendMsg ?? "Email could not be sent. The communication was logged.";
+        } else if (res.status >= 500) {
+          msg = "A server error occurred. Please try again, or contact support if this persists.";
+        } else {
+          msg = backendMsg ?? `Request failed (${res.status}).`;
+        }
+        throw new Error(msg);
+      }
+      setResult({ type: "ok", text: (json.message as string) ?? "Email sent successfully." });
       onSent?.();
     } catch (err) {
       setResult({ type: "err", text: err instanceof Error ? err.message : "Failed to send email." });
@@ -80,17 +96,26 @@ export default function FollowUpEmailModal({ quoteId, recipientName, recipientEm
             <div className="flex items-center gap-2 text-[0.83rem] text-[#9ca3af]">
               <Loader2 size={14} className="animate-spin" /> Loading templates…
             </div>
+          ) : templates.length === 0 ? (
+            <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-[0.83rem] text-amber-700">
+              <AlertCircle size={14} className="shrink-0" /> No email templates available.
+            </div>
           ) : (
             <select value={selectedTemplate} onChange={(e) => setSelectedTemplate(e.target.value)}
               className="w-full rounded-xl border border-black/[0.09] bg-white px-3 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10">
               {templates.map((t) => (
-                <option key={t.key} value={t.key}>{t.label}</option>
+                <option key={t.key} value={t.key}>{t.label || t.key}</option>
               ))}
             </select>
           )}
           {selectedTpl?.subject && (
             <p className="mt-1.5 text-[0.73rem] text-[#9ca3af]">
               Subject: <span className="text-[#5c5e62]">{selectedTpl.subject}</span>
+            </p>
+          )}
+          {templateIncomplete && (
+            <p className="mt-1.5 flex items-center gap-1.5 text-[0.73rem] text-amber-600">
+              <AlertCircle size={11} className="shrink-0" /> Selected template is incomplete — subject is missing.
             </p>
           )}
         </div>
@@ -125,7 +150,7 @@ export default function FollowUpEmailModal({ quoteId, recipientName, recipientEm
               className="flex-1 h-11 rounded-full border border-black/[0.1] text-[0.875rem] font-semibold text-[#5c5e62] transition hover:bg-[#f5f5f5] disabled:opacity-50">
               Cancel
             </button>
-            <button type="button" disabled={sending || !selectedTemplate || templatesLoading}
+            <button type="button" disabled={sending || !canSend}
               onClick={handleSend}
               className="flex flex-1 h-11 items-center justify-center gap-2 rounded-full bg-[#1a1a1a] text-[0.875rem] font-semibold text-white transition hover:bg-[#333] disabled:opacity-50">
               {sending ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
