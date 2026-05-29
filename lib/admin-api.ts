@@ -304,6 +304,16 @@ export type QuoteReviewStatus =
   | "rejected"
   | "spam";
 
+// CRM-3 pipeline types
+export type LeadPriority = "low" | "normal" | "high" | "urgent";
+export type LeadCustomerType =
+  | "private_buyer" | "dealer" | "workshop" | "fleet" | "exporter" | "unknown";
+export type QualificationStatus =
+  | "new" | "needs_review" | "qualified" | "proposal_sent"
+  | "customer_invited" | "converted" | "rejected" | "spam" | "closed";
+export type LeadSource =
+  | "website_quote" | "contact_form" | "ebay" | "phone" | "email" | "referral";
+
 export type AdminQuote = {
   id: number;
   ref_number: string;
@@ -314,10 +324,18 @@ export type AdminQuote = {
   country: string;
   quantity?: string;
   status: "new" | "reviewed" | "quoted" | "closed" | string;
-  // CRM-2 quality fields (backend may not return yet — all optional)
+  // CRM-2 quality fields
   quality_score?: number | null;
   quality_flags?: string[] | null;
   review_status?: QuoteReviewStatus | string;
+  // CRM-3 pipeline fields (all optional — backend may not return yet)
+  assigned_to?: number | null;
+  assigned_to_name?: string | null;
+  follow_up_at?: string | null;
+  lead_priority?: LeadPriority | string;
+  lead_source?: LeadSource | string | null;
+  lead_customer_type?: LeadCustomerType | string;
+  qualification_status?: QualificationStatus | string;
   created_at: string;
   order_id?: number | null;
   order_ref?: string | null;
@@ -361,6 +379,10 @@ export type AdminQuoteFull = AdminQuote & {
   reviewed_by?: number | null;
   reviewed_at?: string | null;
   rejection_reason?: string | null;
+  // CRM-3 lead qualification fields
+  qualification_reason?: string | null;
+  internal_notes?: string | null;
+  assigned_at?: string | null;
 };
 
 export type AdminHeroSlideTranslation = {

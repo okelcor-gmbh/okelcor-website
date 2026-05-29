@@ -7,6 +7,7 @@ import {
   CheckCircle2, AlertCircle, ChevronDown, Paperclip,
   Download, ShoppingCart, ExternalLink, Loader2,
   CheckCircle, XCircle, AlertOctagon,
+  UserPlus, User, Calendar, Flag, Tag, Save, X,
 } from "lucide-react";
 import { updateQuoteStatus } from "@/app/admin/quotes/actions";
 import type { ConvertToOrderResult } from "@/app/admin/quotes/actions";
@@ -174,6 +175,124 @@ export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
       setReviewPending(null);
     }
   }
+
+  // CRM-3 pipeline state
+  const q = quote as Record<string, unknown>;
+  const [pipeline, setPipeline] = useState({
+    assigned_to:          (q.assigned_to         as number | null)  ?? null,
+    assigned_to_name:     (q.assigned_to_name     as string)        ?? "",
+    follow_up_at:         (q.follow_up_at         as string)        ?? "",
+    lead_priority:        (q.lead_priority        as string)        ?? "normal",
+    lead_customer_type:   (q.lead_customer_type   as string)        ?? "unknown",
+    qualification_status: (q.qualification_status as string)        ?? "new",
+    qualification_reason: (q.qualification_reason as string)        ?? "",
+    internal_notes:       (q.internal_notes       as string)        ?? "",
+  });
+  const [pipelineSaving, setPipelineSaving] = useState(false);
+  const [pipelineMsg, setPipelineMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+
+  // Admin users for assign dropdown
+  const [adminUsers, setAdminUsers] = useState<Array<{ id: number; name: string; email: string }>>([]);
+  const [adminUsersLoaded, setAdminUsersLoaded] = useState(false);
+
+  // Convert to customer modal
+  const [showConvertToCustomer, setShowConvertToCustomer] = useState(false);
+  const [convertPending, setConvertPending] = useState(false);
+  const [convertAction, setConvertAction] = useState<"invite" | "approve" | "pending_review">("invite");
+  const [convertResult, setConvertResult] = useState<{ customer_id?: number; customer_exists?: boolean; message?: string } | null>(null);
+  const [convertError, setConvertError] = useState<string | null>(null);
+
+  const loadAdminUsers = async () => {
+    if (adminUsersLoaded) return;
+    try {
+      const res = await fetch("/api/admin/users", { cache: "no-store" });
+      const json = await res.json().catch(() => ({ data: [] }));
+      setAdminUsers(Array.isArray(json.data) ? json.data : []);
+    } catch { /* graceful */ }
+    finally { setAdminUsersLoaded(true); }
+  };
+
+  const savePipeline = async () => {
+    setPipelineSaving(true);
+    setPipelineMsg(null);
+    try {
+      // Save qualification fields
+      const qualRes = await fetch(`/api/admin/quotes/${quote.id}/qualification`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          qualification_status: pipeline.qualification_status || undefined,
+          lead_priority:        pipeline.lead_priority        || undefined,
+          lead_customer_type:   pipeline.lead_customer_type   || undefined,
+          qualification_reason: pipeline.qualification_reason || undefined,
+          internal_notes:       pipeline.internal_notes       || undefined,
+          follow_up_at:         pipeline.follow_up_at         || undefined,
+        }),
+      });
+      const qualJson = await qualRes.json().catch(() => ({}));
+      if (!qualRes.ok) throw new Error((qualJson as Record<string, unknown>).error as string ?? `Error ${qualRes.status}`);
+
+      // Save assign if changed
+      if (pipeline.assigned_to !== (q.assigned_to as number | null)) {
+        await fetch(`/api/admin/quotes/${quote.id}/assign`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ assigned_to: pipeline.assigned_to }),
+        });
+      }
+
+      setPipelineMsg({ type: "ok", text: "Pipeline updated successfully." });
+    } catch (err) {
+      setPipelineMsg({ type: "err", text: err instanceof Error ? err.message : "Save failed." });
+    } finally {
+      setPipelineSaving(false);
+    }
+  };
+
+  const assignToMe = async () => {
+    setPipelineSaving(true);
+    try {
+      const meRes = await fetch("/api/admin/me", { cache: "no-store" });
+      const me = await meRes.json().catch(() => ({}));
+      const meData = (me as Record<string, unknown>).data as Record<string, unknown> ?? me as Record<string, unknown>;
+      const meId   = meData.id   as number  | undefined;
+      const meName = meData.name as string  | undefined;
+
+      if (!meId) { setPipelineMsg({ type: "err", text: "Could not identify current admin." }); return; }
+
+      await fetch(`/api/admin/quotes/${quote.id}/assign`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assigned_to: meId }),
+      });
+      setPipeline((prev) => ({ ...prev, assigned_to: meId, assigned_to_name: meName ?? "Me" }));
+      setPipelineMsg({ type: "ok", text: "Assigned to you." });
+    } catch {
+      setPipelineMsg({ type: "err", text: "Assignment failed." });
+    } finally {
+      setPipelineSaving(false);
+    }
+  };
+
+  const doConvertToCustomer = async () => {
+    setConvertPending(true);
+    setConvertError(null);
+    try {
+      const res = await fetch(`/api/admin/quotes/${quote.id}/convert-to-customer`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ onboarding_action: convertAction }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error((json as Record<string, unknown>).error as string ?? `Error ${res.status}`);
+      setConvertResult(json.data ?? json);
+      setPipeline((prev) => ({ ...prev, qualification_status: "customer_invited" }));
+    } catch (err) {
+      setConvertError(err instanceof Error ? err.message : "Conversion failed.");
+    } finally {
+      setConvertPending(false);
+    }
+  };
 
   // Attachment
   const attachmentUrl  = quote.attachment_url ?? quote.attachment_path ?? null;
@@ -370,6 +489,296 @@ export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
             </div>
           );
         })()}
+
+        {/* ── CRM-3: Lead Qualification card ── */}
+        <div className="rounded-2xl bg-white p-6 shadow-sm">
+          <div className="mb-4 flex items-center justify-between gap-4">
+            <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+              Lead Qualification
+            </p>
+            {/* Quick actions */}
+            <div className="flex flex-wrap items-center gap-2">
+              <button type="button" disabled={pipelineSaving} onClick={assignToMe}
+                className="flex items-center gap-1.5 rounded-xl border border-black/[0.1] px-3 py-1.5 text-[0.75rem] font-semibold text-[#1a1a1a] transition hover:bg-[#f5f5f5] disabled:opacity-50">
+                <User size={12} /> Assign to me
+              </button>
+              {pipeline.qualification_status !== "qualified" && (
+                <button type="button" disabled={pipelineSaving}
+                  onClick={() => { setPipeline((p) => ({ ...p, qualification_status: "qualified" })); }}
+                  className="flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[0.75rem] font-semibold text-emerald-700 transition hover:bg-emerald-100 disabled:opacity-50">
+                  <CheckCircle size={12} /> Mark Qualified
+                </button>
+              )}
+              {pipeline.qualification_status !== "rejected" && (
+                <button type="button" disabled={pipelineSaving}
+                  onClick={() => { setPipeline((p) => ({ ...p, qualification_status: "rejected" })); }}
+                  className="flex items-center gap-1.5 rounded-xl border border-red-200 bg-red-50 px-3 py-1.5 text-[0.75rem] font-semibold text-red-700 transition hover:bg-red-100 disabled:opacity-50">
+                  <XCircle size={12} /> Reject
+                </button>
+              )}
+              {pipeline.qualification_status !== "spam" && (
+                <button type="button" disabled={pipelineSaving}
+                  onClick={() => { setPipeline((p) => ({ ...p, qualification_status: "spam" })); }}
+                  className="flex items-center gap-1.5 rounded-xl border border-purple-200 bg-purple-50 px-3 py-1.5 text-[0.75rem] font-semibold text-purple-700 transition hover:bg-purple-100 disabled:opacity-50">
+                  <AlertOctagon size={12} /> Mark Spam
+                </button>
+              )}
+              {(pipeline.qualification_status === "qualified" || pipeline.qualification_status === "proposal_sent") && (
+                <button type="button" onClick={() => setShowConvertToCustomer(true)}
+                  className="flex items-center gap-1.5 rounded-xl bg-[#1a1a1a] px-3 py-1.5 text-[0.75rem] font-semibold text-white transition hover:bg-[#333]">
+                  <UserPlus size={12} /> Convert to Customer
+                </button>
+              )}
+            </div>
+          </div>
+
+          {pipelineMsg && (
+            <div className={`mb-4 flex items-center gap-2.5 rounded-xl border px-4 py-3 text-[0.83rem] ${pipelineMsg.type === "ok" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-red-200 bg-red-50 text-red-700"}`}>
+              {pipelineMsg.type === "ok" ? <CheckCircle2 size={14} /> : <AlertCircle size={14} />}
+              {pipelineMsg.text}
+              <button type="button" onClick={() => setPipelineMsg(null)} className="ml-auto">
+                <X size={13} />
+              </button>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+            {/* Assign owner */}
+            <div>
+              <label className="mb-1.5 block text-[0.75rem] font-semibold text-[#5c5e62] uppercase tracking-[0.08em]">
+                <User size={11} className="mb-0.5 mr-1 inline-block" />
+                Assigned Owner
+              </label>
+              <select
+                value={pipeline.assigned_to ?? ""}
+                onFocus={loadAdminUsers}
+                onChange={(e) => {
+                  const id = e.target.value ? Number(e.target.value) : null;
+                  const name = adminUsers.find((u) => u.id === id)?.name ?? "";
+                  setPipeline((p) => ({ ...p, assigned_to: id, assigned_to_name: name }));
+                }}
+                className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+              >
+                <option value="">— Unassigned —</option>
+                {adminUsers.map((u) => (
+                  <option key={u.id} value={u.id}>{u.name}</option>
+                ))}
+                {!adminUsersLoaded && pipeline.assigned_to_name && (
+                  <option value={pipeline.assigned_to ?? ""}>{pipeline.assigned_to_name}</option>
+                )}
+              </select>
+            </div>
+
+            {/* Follow-up date */}
+            <div>
+              <label className="mb-1.5 block text-[0.75rem] font-semibold text-[#5c5e62] uppercase tracking-[0.08em]">
+                <Calendar size={11} className="mb-0.5 mr-1 inline-block" />
+                Follow-up Date
+              </label>
+              <input
+                type="datetime-local"
+                value={pipeline.follow_up_at ? pipeline.follow_up_at.slice(0, 16) : ""}
+                onChange={(e) => setPipeline((p) => ({ ...p, follow_up_at: e.target.value ? `${e.target.value}:00Z` : "" }))}
+                className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+              />
+            </div>
+
+            {/* Priority */}
+            <div>
+              <label className="mb-1.5 block text-[0.75rem] font-semibold text-[#5c5e62] uppercase tracking-[0.08em]">
+                <Flag size={11} className="mb-0.5 mr-1 inline-block" />
+                Priority
+              </label>
+              <select
+                value={pipeline.lead_priority}
+                onChange={(e) => setPipeline((p) => ({ ...p, lead_priority: e.target.value }))}
+                className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+              >
+                <option value="low">Low</option>
+                <option value="normal">Normal</option>
+                <option value="high">High</option>
+                <option value="urgent">Urgent</option>
+              </select>
+            </div>
+
+            {/* Customer type */}
+            <div>
+              <label className="mb-1.5 block text-[0.75rem] font-semibold text-[#5c5e62] uppercase tracking-[0.08em]">
+                <Tag size={11} className="mb-0.5 mr-1 inline-block" />
+                Customer Type
+              </label>
+              <select
+                value={pipeline.lead_customer_type}
+                onChange={(e) => setPipeline((p) => ({ ...p, lead_customer_type: e.target.value }))}
+                className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+              >
+                <option value="unknown">Unknown</option>
+                <option value="private_buyer">Private Buyer</option>
+                <option value="dealer">Dealer</option>
+                <option value="workshop">Workshop</option>
+                <option value="fleet">Fleet Operator</option>
+                <option value="exporter">Exporter</option>
+              </select>
+            </div>
+
+            {/* Qualification status */}
+            <div>
+              <label className="mb-1.5 block text-[0.75rem] font-semibold text-[#5c5e62] uppercase tracking-[0.08em]">
+                Pipeline Status
+              </label>
+              <select
+                value={pipeline.qualification_status}
+                onChange={(e) => setPipeline((p) => ({ ...p, qualification_status: e.target.value }))}
+                className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+              >
+                <option value="new">New</option>
+                <option value="needs_review">Needs Review</option>
+                <option value="qualified">Qualified</option>
+                <option value="proposal_sent">Proposal Sent</option>
+                <option value="customer_invited">Customer Invited</option>
+                <option value="converted">Converted</option>
+                <option value="rejected">Rejected</option>
+                <option value="spam">Spam</option>
+                <option value="closed">Closed</option>
+              </select>
+            </div>
+
+            {/* Qualification reason */}
+            <div>
+              <label className="mb-1.5 block text-[0.75rem] font-semibold text-[#5c5e62] uppercase tracking-[0.08em]">
+                Qualification Reason
+              </label>
+              <input
+                type="text"
+                placeholder="Brief reason for status change…"
+                value={pipeline.qualification_reason}
+                onChange={(e) => setPipeline((p) => ({ ...p, qualification_reason: e.target.value }))}
+                className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3 text-[0.875rem] text-[#1a1a1a] outline-none transition placeholder:text-[#aaa] focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+              />
+            </div>
+
+            {/* Internal notes — full width */}
+            <div className="sm:col-span-2 lg:col-span-3">
+              <label className="mb-1.5 block text-[0.75rem] font-semibold text-[#5c5e62] uppercase tracking-[0.08em]">
+                Internal Notes
+              </label>
+              <textarea
+                rows={3}
+                placeholder="Internal notes — not visible to the customer…"
+                value={pipeline.internal_notes}
+                onChange={(e) => setPipeline((p) => ({ ...p, internal_notes: e.target.value }))}
+                className="w-full resize-none rounded-xl border border-black/[0.09] bg-white px-3 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition placeholder:text-[#aaa] focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+              />
+            </div>
+          </div>
+
+          {/* Save button */}
+          <div className="mt-5 flex justify-end">
+            <button type="button" disabled={pipelineSaving} onClick={savePipeline}
+              className="flex h-10 items-center gap-2 rounded-full bg-[#1a1a1a] px-6 text-[0.875rem] font-semibold text-white transition hover:bg-[#333] disabled:opacity-50">
+              {pipelineSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+              {pipelineSaving ? "Saving…" : "Save Pipeline"}
+            </button>
+          </div>
+        </div>
+
+        {/* ── Convert to Customer modal ── */}
+        {showConvertToCustomer && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+            <div className="w-full max-w-md rounded-2xl bg-white p-7 shadow-2xl">
+              <div className="mb-5 flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-[1rem] font-extrabold text-[#1a1a1a]">Convert Lead to Customer</p>
+                  <p className="mt-1 text-[0.83rem] text-[#5c5e62]">
+                    Create a customer account from this lead&apos;s information.
+                  </p>
+                </div>
+                {!convertPending && (
+                  <button type="button" onClick={() => { setShowConvertToCustomer(false); setConvertResult(null); setConvertError(null); }}
+                    className="shrink-0 text-[#9ca3af] hover:text-[#1a1a1a]">
+                    <X size={18} />
+                  </button>
+                )}
+              </div>
+
+              {/* Lead summary */}
+              <div className="mb-5 rounded-xl border border-black/[0.07] bg-[#fafafa] px-4 py-3.5 text-[0.83rem]">
+                <p className="font-semibold text-[#1a1a1a]">{quote.full_name}</p>
+                <p className="text-[#5c5e62]">{quote.email}</p>
+                {quote.company_name && <p className="text-[#5c5e62]">{quote.company_name}</p>}
+                <p className="text-[#5c5e62]">{quote.country}</p>
+              </div>
+
+              {convertError && (
+                <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[0.83rem] text-red-700">
+                  {convertError}
+                </div>
+              )}
+
+              {convertResult ? (
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-[0.83rem] text-emerald-800">
+                    <CheckCircle2 size={15} className="shrink-0" />
+                    {convertResult.message ?? (convertResult.customer_exists ? "Linked to existing customer." : "Customer account created.")}
+                  </div>
+                  {convertResult.customer_id && (
+                    <Link href={`/admin/customers/${convertResult.customer_id}`}
+                      className="flex items-center justify-center gap-2 rounded-full bg-[#E85C1A] px-6 py-2.5 text-[0.875rem] font-semibold text-white transition hover:bg-[#d14f14]"
+                      onClick={() => setShowConvertToCustomer(false)}>
+                      <ExternalLink size={14} />
+                      View Customer Profile
+                    </Link>
+                  )}
+                  <button type="button" onClick={() => { setShowConvertToCustomer(false); setConvertResult(null); }}
+                    className="rounded-full border border-black/[0.1] px-6 py-2.5 text-[0.875rem] font-semibold text-[#5c5e62] transition hover:bg-[#f5f5f5]">
+                    Close
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="mb-5">
+                    <p className="mb-2 text-[0.75rem] font-bold uppercase tracking-[0.08em] text-[#5c5e62]">Onboarding Action</p>
+                    <div className="flex flex-col gap-2">
+                      {(["invite", "approve", "pending_review"] as const).map((action) => (
+                        <label key={action} className="flex cursor-pointer items-start gap-3 rounded-xl border border-black/[0.08] px-4 py-3 transition hover:border-[#E85C1A]/40 has-[:checked]:border-[#E85C1A] has-[:checked]:bg-orange-50/40">
+                          <input type="radio" name="convertAction" value={action} checked={convertAction === action}
+                            onChange={() => setConvertAction(action)}
+                            className="mt-0.5 accent-[#E85C1A]" />
+                          <div>
+                            <p className="text-[0.875rem] font-semibold text-[#1a1a1a]">
+                              {action === "invite" ? "Create & Send Invitation" : action === "approve" ? "Create & Approve" : "Create (Pending Review)"}
+                            </p>
+                            <p className="text-[0.78rem] text-[#5c5e62]">
+                              {action === "invite"
+                                ? "Customer receives an invitation email to set their password."
+                                : action === "approve"
+                                ? "Account is created in approved state — customer can log in after setting a password."
+                                : "Account created in pending_review state. Admin approval required before access."}
+                            </p>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button type="button" disabled={convertPending}
+                      onClick={() => { setShowConvertToCustomer(false); setConvertError(null); }}
+                      className="flex-1 h-11 rounded-full border border-black/[0.1] text-[0.875rem] font-semibold text-[#5c5e62] transition hover:bg-[#f5f5f5] disabled:opacity-50">
+                      Cancel
+                    </button>
+                    <button type="button" disabled={convertPending} onClick={doConvertToCustomer}
+                      className="flex flex-1 h-11 items-center justify-center gap-2 rounded-full bg-[#1a1a1a] text-[0.875rem] font-semibold text-white transition hover:bg-[#333] disabled:opacity-50">
+                      {convertPending ? <Loader2 size={14} className="animate-spin" /> : <UserPlus size={14} />}
+                      {convertPending ? "Converting…" : "Convert"}
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* ── Order Conversion card ── */}
         <div className="rounded-2xl bg-white p-6 shadow-sm">
