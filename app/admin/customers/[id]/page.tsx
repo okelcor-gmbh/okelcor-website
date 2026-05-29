@@ -23,6 +23,14 @@ type CustomerFull = {
   last_login_at?: string; last_login_ip?: string; last_login_location?: string;
   admin_notes?: string; created_at: string;
   failed_login_count?: number; is_locked?: boolean;
+  // CRM-4 segmentation & access
+  customer_segment?: string;
+  access_level?: string;
+  market_region?: string;
+  approved_for_checkout?: boolean;
+  approved_for_quotes?: boolean;
+  approved_for_wholesale_pricing?: boolean;
+  approved_for_documents?: boolean;
 };
 
 type LoginEvent = {
@@ -314,6 +322,54 @@ export default function CustomerProfilePage() {
     setSavingNotes(false);
   }
 
+  // ── CRM-4: Access Control state ──────────────────────────────────────────
+
+  const [access, setAccess] = useState({
+    customer_segment:               "unknown",
+    access_level:                   "approved_buyer",
+    market_region:                  "unknown",
+    approved_for_checkout:          true,
+    approved_for_quotes:            true,
+    approved_for_wholesale_pricing: false,
+    approved_for_documents:         true,
+  });
+
+  // Sync access state once customer data is loaded
+  useEffect(() => {
+    if (!customer) return;
+    setAccess({
+      customer_segment:               customer.customer_segment               ?? "unknown",
+      access_level:                   customer.access_level                   ?? "approved_buyer",
+      market_region:                  customer.market_region                  ?? "unknown",
+      approved_for_checkout:          customer.approved_for_checkout          ?? true,
+      approved_for_quotes:            customer.approved_for_quotes            ?? true,
+      approved_for_wholesale_pricing: customer.approved_for_wholesale_pricing ?? false,
+      approved_for_documents:         customer.approved_for_documents         ?? true,
+    });
+  }, [customer]);
+  const [accessSaving, setAccessSaving] = useState(false);
+  const [accessMsg, setAccessMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+
+  async function saveAccess() {
+    setAccessSaving(true);
+    setAccessMsg(null);
+    try {
+      const res = await fetch(`/api/admin/customers/${id}/access`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(access),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error((json as Record<string, unknown>).error as string ?? `Error ${res.status}`);
+      setCustomer((prev) => prev ? { ...prev, ...access } : prev);
+      setAccessMsg({ type: "ok", text: "Access settings saved." });
+    } catch (err) {
+      setAccessMsg({ type: "err", text: err instanceof Error ? err.message : "Save failed." });
+    } finally {
+      setAccessSaving(false);
+    }
+  }
+
   // ── Render ────────────────────────────────────────────────────────────────
 
   if (loading) {
@@ -471,6 +527,84 @@ export default function CustomerProfilePage() {
                   </div>
                 </>
               )}
+            </div>
+          </SectionCard>
+
+          {/* CRM-4: Access Control */}
+          <SectionCard title="Access Control" icon={Shield}>
+            <div className="p-5 space-y-4">
+              {accessMsg && (
+                <div className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-[0.8rem] ${accessMsg.type === "ok" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-red-200 bg-red-50 text-red-700"}`}>
+                  {accessMsg.type === "ok" ? <CheckCircle2 size={13} /> : <AlertCircle size={13} />}
+                  {accessMsg.text}
+                </div>
+              )}
+
+              {/* Segment */}
+              <div>
+                <p className="mb-1 text-[0.7rem] font-semibold uppercase tracking-wide text-[#9ca3af]">Segment</p>
+                <select value={access.customer_segment}
+                  onChange={(e) => setAccess((p) => ({ ...p, customer_segment: e.target.value }))}
+                  className="w-full rounded-xl border border-black/[0.09] bg-white px-3 py-2 text-[0.83rem] text-[#1a1a1a] outline-none focus:border-[#E85C1A]">
+                  {["unknown","private_buyer","dealer","workshop","fleet","exporter","distributor","partner"].map((s) => (
+                    <option key={s} value={s}>{s.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Access level */}
+              <div>
+                <p className="mb-1 text-[0.7rem] font-semibold uppercase tracking-wide text-[#9ca3af]">Access Level</p>
+                <select value={access.access_level}
+                  onChange={(e) => setAccess((p) => ({ ...p, access_level: e.target.value }))}
+                  className="w-full rounded-xl border border-black/[0.09] bg-white px-3 py-2 text-[0.83rem] text-[#1a1a1a] outline-none focus:border-[#E85C1A]">
+                  {[
+                    ["inquiry_only",    "Inquiry Only"],
+                    ["quote_only",      "Quote Only"],
+                    ["approved_buyer",  "Approved Buyer"],
+                    ["wholesale_buyer", "Wholesale Buyer"],
+                    ["restricted",      "Restricted"],
+                    ["blocked",         "Blocked"],
+                  ].map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                </select>
+              </div>
+
+              {/* Market region */}
+              <div>
+                <p className="mb-1 text-[0.7rem] font-semibold uppercase tracking-wide text-[#9ca3af]">Market Region</p>
+                <select value={access.market_region}
+                  onChange={(e) => setAccess((p) => ({ ...p, market_region: e.target.value }))}
+                  className="w-full rounded-xl border border-black/[0.09] bg-white px-3 py-2 text-[0.83rem] text-[#1a1a1a] outline-none focus:border-[#E85C1A]">
+                  {[["unknown","Unknown"],["eu","EU"],["africa","Africa"],["middle_east","Middle East"],["global","Global"]].map(([v, l]) => (
+                    <option key={v} value={v}>{l}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Permission toggles */}
+              <div>
+                <p className="mb-2 text-[0.7rem] font-semibold uppercase tracking-wide text-[#9ca3af]">Permissions</p>
+                <div className="space-y-2">
+                  {([
+                    ["approved_for_checkout",          "Checkout"],
+                    ["approved_for_quotes",            "Quote Requests"],
+                    ["approved_for_wholesale_pricing", "Wholesale Pricing"],
+                    ["approved_for_documents",         "Trade Documents"],
+                  ] as const).map(([key, label]) => (
+                    <label key={key} className="flex cursor-pointer items-center justify-between gap-2">
+                      <span className="text-[0.82rem] text-[#1a1a1a]">{label}</span>
+                      <input type="checkbox" checked={access[key]}
+                        onChange={(e) => setAccess((p) => ({ ...p, [key]: e.target.checked }))}
+                        className="h-4 w-4 rounded accent-[#E85C1A]" />
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <button type="button" disabled={accessSaving} onClick={saveAccess}
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-[#E85C1A] py-2.5 text-[0.83rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:opacity-50">
+                {accessSaving ? <><Loader2 size={13} className="animate-spin" /> Saving…</> : "Save Access Settings"}
+              </button>
             </div>
           </SectionCard>
 

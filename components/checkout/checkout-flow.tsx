@@ -348,6 +348,29 @@ export default function CheckoutFlow() {
 
   if (items.length === 0) return <EmptyCartState />;
 
+  // CRM-4: Block checkout if explicitly disabled for this customer.
+  // Only triggers when approved_for_checkout is explicitly false — never blocks
+  // existing customers where the field is undefined (pre-CRM-4 accounts).
+  if (customer && customer.approved_for_checkout === false) {
+    return (
+      <div className="rounded-[22px] bg-[#efefef] px-8 py-14 text-center">
+        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-amber-100">
+          <Lock size={24} strokeWidth={1.6} className="text-amber-600" />
+        </div>
+        <h2 className="text-[1.15rem] font-extrabold text-[var(--foreground)]">
+          Checkout access pending
+        </h2>
+        <p className="mx-auto mt-2 max-w-sm text-[0.9rem] leading-6 text-[var(--muted)]">
+          Checkout access is pending approval. Please{" "}
+          <Link href="/contact" className="font-semibold text-[var(--primary)] hover:underline">
+            contact Okelcor
+          </Link>{" "}
+          to activate your buying access.
+        </p>
+      </div>
+    );
+  }
+
   // ── Validation ──────────────────────────────────────────────────────────────
 
   const validateDelivery = (): boolean => {

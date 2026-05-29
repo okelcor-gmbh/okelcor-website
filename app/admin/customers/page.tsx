@@ -12,6 +12,7 @@ import {
 
 type CustomerStatus = "active" | "suspended" | "banned" | "locked";
 type OnboardingStatus = "pending_review" | "approved" | "invited" | "active" | "rejected" | "blocked";
+type CustomerAccessLevel = "inquiry_only" | "quote_only" | "approved_buyer" | "wholesale_buyer" | "restricted" | "blocked";
 
 type Customer = {
   id: number;
@@ -27,6 +28,11 @@ type Customer = {
   // extended fields (backend may not return yet)
   status?: CustomerStatus;
   onboarding_status?: OnboardingStatus;
+  // CRM-4 segmentation
+  customer_segment?: string;
+  access_level?: CustomerAccessLevel | string;
+  approved_for_checkout?: boolean;
+  approved_for_documents?: boolean;
   last_login_at?: string | null;
   last_login_location?: string | null;
   failed_login_count?: number;
@@ -106,6 +112,57 @@ function OnboardingBadge({ status }: { status: OnboardingStatus }) {
     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[0.67rem] font-bold ${map[status]}`}>
       {label[status]}
     </span>
+  );
+}
+
+const ACCESS_LEVEL_STYLES: Record<string, string> = {
+  inquiry_only:     "bg-gray-100 text-gray-500",
+  quote_only:       "bg-blue-100 text-blue-600",
+  approved_buyer:   "bg-emerald-100 text-emerald-700",
+  wholesale_buyer:  "bg-teal-100 text-teal-700",
+  restricted:       "bg-amber-100 text-amber-700",
+  blocked:          "bg-red-100 text-red-700",
+};
+const ACCESS_LEVEL_LABELS: Record<string, string> = {
+  inquiry_only:    "Inquiry Only",
+  quote_only:      "Quote Only",
+  approved_buyer:  "Approved Buyer",
+  wholesale_buyer: "Wholesale",
+  restricted:      "Restricted",
+  blocked:         "Blocked",
+};
+
+function AccessLevelBadge({ level }: { level?: string | null }) {
+  if (!level) return null;
+  return (
+    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[0.63rem] font-bold ${ACCESS_LEVEL_STYLES[level] ?? "bg-gray-100 text-gray-500"}`}>
+      {ACCESS_LEVEL_LABELS[level] ?? level.replace(/_/g, " ")}
+    </span>
+  );
+}
+
+function SegmentBadge({ segment }: { segment?: string | null }) {
+  if (!segment || segment === "unknown") return null;
+  return (
+    <span className="inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[0.63rem] font-bold capitalize text-indigo-600">
+      {segment.replace(/_/g, " ")}
+    </span>
+  );
+}
+
+function PermissionDots({ checkout, documents }: { checkout?: boolean; documents?: boolean }) {
+  if (checkout === undefined && documents === undefined) return null;
+  return (
+    <div className="flex items-center gap-1 mt-0.5">
+      {checkout !== undefined && (
+        <span title={`Checkout: ${checkout ? "allowed" : "blocked"}`}
+          className={`h-2 w-2 rounded-full ${checkout ? "bg-emerald-400" : "bg-red-400"}`} />
+      )}
+      {documents !== undefined && (
+        <span title={`Documents: ${documents ? "allowed" : "blocked"}`}
+          className={`h-2 w-2 rounded-full ${documents ? "bg-emerald-400" : "bg-red-400"}`} />
+      )}
+    </div>
   );
 }
 
@@ -519,6 +576,13 @@ export default function CustomersPage() {
                             <OnboardingBadge status={c.onboarding_status} />
                           </div>
                         )}
+                        {c.access_level && (
+                          <div className="mt-0.5 flex flex-wrap items-center gap-1">
+                            <AccessLevelBadge level={c.access_level} />
+                            <SegmentBadge segment={c.customer_segment} />
+                          </div>
+                        )}
+                        <PermissionDots checkout={c.approved_for_checkout} documents={c.approved_for_documents} />
                         {(c.failed_login_count ?? 0) >= 5 && (
                           <p className="mt-0.5 text-[0.67rem] text-red-500">{c.failed_login_count} failed attempts</p>
                         )}

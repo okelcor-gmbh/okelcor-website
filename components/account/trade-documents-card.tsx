@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Download, ExternalLink, FileText, Loader2, Lock, Paperclip } from "lucide-react";
 import type { TradeDocument } from "@/lib/admin-api";
+import { useCustomerAuth } from "@/context/CustomerAuthContext";
 
 const TYPE_LABEL: Record<string, string> = {
   order_confirmation: "Order Confirmation",
@@ -66,7 +67,28 @@ export default function TradeDocumentsCard({
   /** When true, hides any proforma_invoice — customer must accept AB first. */
   acceptancePending?: boolean;
 }) {
+  const { customer } = useCustomerAuth();
   const [downloading, setDownloading] = useState<number | null>(null);
+
+  // CRM-4: If documents access is explicitly disabled, show blocked message.
+  // Guard only activates when the field is explicitly false — never for
+  // existing customers where approved_for_documents is undefined.
+  if (customer && customer.approved_for_documents === false) {
+    return (
+      <div className="rounded-[18px] bg-[#efefef] p-6 text-center">
+        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-amber-100">
+          <Lock size={20} strokeWidth={1.6} className="text-amber-600" />
+        </div>
+        <p className="text-[0.9rem] font-semibold text-[var(--foreground)]">
+          Document access pending
+        </p>
+        <p className="mt-1 text-[0.82rem] leading-5 text-[var(--muted)]">
+          Trade document access has not yet been enabled for your account.
+          Please contact Okelcor to request access.
+        </p>
+      </div>
+    );
+  }
 
   function isLocked(doc: TradeDocument): boolean {
     if (!declarationRequired) return false;

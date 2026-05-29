@@ -1,5 +1,16 @@
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+// CRM-4 segmentation types
+export type CustomerSegment =
+  | "private_buyer" | "dealer" | "workshop" | "fleet"
+  | "exporter" | "distributor" | "partner" | "unknown";
+
+export type CustomerAccessLevel =
+  | "inquiry_only" | "quote_only" | "approved_buyer"
+  | "wholesale_buyer" | "restricted" | "blocked";
+
+export type MarketRegion = "eu" | "africa" | "middle_east" | "global" | "unknown";
+
 export type Customer = {
   id: number;
   email: string;
@@ -12,6 +23,14 @@ export type Customer = {
   company_name?: string;
   vat_number?: string;
   industry?: string;
+  // CRM-4 segmentation & access fields (undefined = not yet set by backend)
+  customer_segment?: CustomerSegment | string;
+  access_level?: CustomerAccessLevel | string;
+  market_region?: MarketRegion | string;
+  approved_for_checkout?: boolean;
+  approved_for_quotes?: boolean;
+  approved_for_wholesale_pricing?: boolean;
+  approved_for_documents?: boolean;
 };
 
 export type RegisterData = {
