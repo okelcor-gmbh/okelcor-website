@@ -297,6 +297,13 @@ export type AdminOrderFull = AdminOrder & {
   acceptance_token?: string | null;
 };
 
+export type QuoteReviewStatus =
+  | "new"
+  | "needs_review"
+  | "qualified"
+  | "rejected"
+  | "spam";
+
 export type AdminQuote = {
   id: number;
   ref_number: string;
@@ -307,6 +314,10 @@ export type AdminQuote = {
   country: string;
   quantity?: string;
   status: "new" | "reviewed" | "quoted" | "closed" | string;
+  // CRM-2 quality fields (backend may not return yet — all optional)
+  quality_score?: number | null;
+  quality_flags?: string[] | null;
+  review_status?: QuoteReviewStatus | string;
   created_at: string;
   order_id?: number | null;
   order_ref?: string | null;
@@ -346,6 +357,10 @@ export type AdminQuoteFull = AdminQuote & {
   budget_range?: string;
   incoterm?: string;
   incoterm_type?: string;
+  // CRM-2 review audit fields
+  reviewed_by?: number | null;
+  reviewed_at?: string | null;
+  rejection_reason?: string | null;
 };
 
 export type AdminHeroSlideTranslation = {

@@ -6,6 +6,7 @@ import Link from "next/link";
 import {
   CheckCircle2, AlertCircle, ChevronDown, Paperclip,
   Download, ShoppingCart, ExternalLink, Loader2,
+  CheckCircle, XCircle, AlertOctagon,
 } from "lucide-react";
 import { updateQuoteStatus } from "@/app/admin/quotes/actions";
 import type { ConvertToOrderResult } from "@/app/admin/quotes/actions";
@@ -87,6 +88,21 @@ function SectionCard({ title, children }: { title: string; children: ReactNode }
 
 // ── Main component ────────────────────────────────────────────────────────────
 
+const REVIEW_STATUS_STYLES: Record<string, string> = {
+  new:          "bg-gray-100 text-gray-500",
+  needs_review: "bg-amber-100 text-amber-700",
+  qualified:    "bg-emerald-100 text-emerald-700",
+  rejected:     "bg-red-100 text-red-700",
+  spam:         "bg-purple-100 text-purple-700",
+};
+const REVIEW_STATUS_LABELS: Record<string, string> = {
+  new:          "New",
+  needs_review: "Needs Review",
+  qualified:    "Qualified",
+  rejected:     "Rejected",
+  spam:         "Spam",
+};
+
 export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
   const router = useRouter();
   const [status, setStatus] = useState<QuoteStatus>(
@@ -97,6 +113,13 @@ export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [isPending, startTransition] = useTransition();
+
+  // CRM-2 review state
+  const [reviewStatus, setReviewStatus] = useState<string | undefined>(
+    (quote as Record<string, unknown>).review_status as string | undefined
+  );
+  const [reviewPending, setReviewPending] = useState<string | null>(null);
+  const [reviewMsg, setReviewMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
 
   const [showConvertModal, setShowConvertModal] = useState(false);
   const [convertedOrder, setConvertedOrder] = useState<ConvertToOrderResult | null>(null);
@@ -126,6 +149,30 @@ export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
   function handleConvertSuccess(result: ConvertToOrderResult) {
     setConvertedOrder(result);
     setShowConvertModal(false);
+  }
+
+  async function doReview(action: "qualify" | "reject" | "spam") {
+    setReviewPending(action);
+    setReviewMsg(null);
+    try {
+      const res = await fetch(`/api/admin/quotes/${quote.id}/review`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setReviewMsg({ type: "err", text: (json as Record<string, unknown>).error as string ?? `Action failed (HTTP ${res.status})` });
+      } else {
+        const next = action === "qualify" ? "qualified" : action === "reject" ? "rejected" : "spam";
+        setReviewStatus(next);
+        setReviewMsg({ type: "ok", text: (json as Record<string, unknown>).message as string ?? "Review status updated." });
+      }
+    } catch {
+      setReviewMsg({ type: "err", text: "Network error — could not complete review action." });
+    } finally {
+      setReviewPending(null);
+    }
   }
 
   // Attachment
@@ -231,6 +278,98 @@ export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
             </button>
           </div>
         </div>
+
+        {/* ── CRM-2: Quality Review card ── */}
+        {(() => {
+          const score = (quote as Record<string, unknown>).quality_score as number | null | undefined;
+          const flags = (quote as Record<string, unknown>).quality_flags as string[] | null | undefined;
+          const rejectionReason = (quote as Record<string, unknown>).rejection_reason as string | null | undefined;
+          const hasQualityData = score != null || (flags && flags.length > 0) || reviewStatus;
+          if (!hasQualityData) return null;
+          return (
+            <div className="rounded-2xl bg-white p-6 shadow-sm">
+              <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+                Quality Review
+              </p>
+
+              {reviewMsg && (
+                <div className={`mb-4 flex items-center gap-2.5 rounded-xl border px-4 py-3 text-[0.83rem] ${reviewMsg.type === "ok" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-red-200 bg-red-50 text-red-700"}`}>
+                  {reviewMsg.type === "ok" ? <CheckCircle size={14} /> : <AlertCircle size={14} />}
+                  {reviewMsg.text}
+                </div>
+              )}
+
+              <div className="flex flex-wrap items-start gap-6">
+                {/* Score */}
+                {score != null && (
+                  <div>
+                    <p className="mb-1 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Quality Score</p>
+                    <div className={`inline-flex items-center rounded-full px-3 py-1 text-[0.9rem] font-extrabold ${score >= 80 ? "bg-emerald-100 text-emerald-700" : score >= 50 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"}`}>
+                      {score}<span className="ml-0.5 text-[0.7rem] font-normal">/100</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Review status */}
+                {reviewStatus && (
+                  <div>
+                    <p className="mb-1 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Review Status</p>
+                    <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[0.78rem] font-bold ${REVIEW_STATUS_STYLES[reviewStatus] ?? "bg-gray-100 text-gray-500"}`}>
+                      {REVIEW_STATUS_LABELS[reviewStatus] ?? reviewStatus}
+                    </span>
+                  </div>
+                )}
+
+                {/* Flags */}
+                {flags && flags.length > 0 && (
+                  <div>
+                    <p className="mb-1 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Quality Flags</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {flags.map((f) => (
+                        <span key={f} className="rounded-md bg-red-50 px-2 py-0.5 font-mono text-[0.7rem] text-red-700">
+                          {f}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Rejection reason */}
+                {rejectionReason && (
+                  <div className="w-full">
+                    <p className="mb-1 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Rejection Reason</p>
+                    <p className="text-[0.875rem] text-[#1a1a1a]">{rejectionReason}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Review actions */}
+              {reviewStatus !== "qualified" && reviewStatus !== "spam" && (
+                <div className="mt-5 flex flex-wrap gap-2 border-t border-black/[0.06] pt-5">
+                  <p className="mr-2 self-center text-[0.78rem] text-[#5c5e62]">Review actions:</p>
+                  <button type="button" disabled={reviewPending !== null || reviewStatus === "qualified"}
+                    onClick={() => doReview("qualify")}
+                    className="flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2 text-[0.8rem] font-semibold text-emerald-700 transition hover:bg-emerald-100 disabled:opacity-50">
+                    {reviewPending === "qualify" ? <Loader2 size={13} className="animate-spin" /> : <CheckCircle size={13} />}
+                    Qualify
+                  </button>
+                  <button type="button" disabled={reviewPending !== null || reviewStatus === "rejected"}
+                    onClick={() => doReview("reject")}
+                    className="flex items-center gap-1.5 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2 text-[0.8rem] font-semibold text-red-700 transition hover:bg-red-100 disabled:opacity-50">
+                    {reviewPending === "reject" ? <Loader2 size={13} className="animate-spin" /> : <XCircle size={13} />}
+                    Reject
+                  </button>
+                  <button type="button" disabled={reviewPending !== null}
+                    onClick={() => doReview("spam")}
+                    className="flex items-center gap-1.5 rounded-xl border border-purple-200 bg-purple-50 px-3.5 py-2 text-[0.8rem] font-semibold text-purple-700 transition hover:bg-purple-100 disabled:opacity-50">
+                    {reviewPending === "spam" ? <Loader2 size={13} className="animate-spin" /> : <AlertOctagon size={13} />}
+                    Mark Spam
+                  </button>
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* ── Order Conversion card ── */}
         <div className="rounded-2xl bg-white p-6 shadow-sm">

@@ -11,14 +11,14 @@ import QuotesTable from "@/components/admin/quotes-table";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Quote Requests" };
 
-type SearchParams = Promise<{ status?: string; q?: string; page?: string }>;
+type SearchParams = Promise<{ status?: string; review_status?: string; q?: string; page?: string }>;
 
 export default async function AdminQuotesPage({
   searchParams,
 }: {
   searchParams: SearchParams;
 }) {
-  const { status, q, page } = await searchParams;
+  const { status, review_status, q, page } = await searchParams;
 
   try {
     await adminApiFetch<AdminQuote[]>("/quote-requests", {
@@ -31,6 +31,7 @@ export default async function AdminQuotesPage({
 
   const params: Record<string, string | number> = { per_page: 20 };
   if (status && status !== "all") params.status = status;
+  if (review_status && review_status !== "all") params.review_status = review_status;
   if (q?.trim()) params.q = q.trim();
   if (page) params.page = page;
 
@@ -59,6 +60,7 @@ export default async function AdminQuotesPage({
         quotes={quotes}
         meta={meta}
         currentStatus={status ?? "all"}
+        currentReviewStatus={review_status ?? "all"}
         currentQ={q ?? ""}
         currentPage={Number(page ?? 1)}
       />

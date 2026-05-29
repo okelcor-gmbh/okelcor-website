@@ -7,6 +7,7 @@ import { trackQuoteSubmit } from "@/lib/analytics";
 import VatField from "@/components/vat-field";
 import { useCustomerAuth } from "@/context/CustomerAuthContext";
 import { shouldShowVatField, isVatRequired, isNonEuB2B, EU_COUNTRIES } from "@/lib/eu-vat";
+import { checkInquiryQuality } from "@/lib/inquiry-quality";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -212,7 +213,7 @@ export default function QuoteForm() {
     }));
   };
 
-  const validate = (): FormErrors => {
+  const validate = (validItems: { size: string; quantity: string }[]): FormErrors => {
     const errs: FormErrors = {};
     if (!form.fullName.trim())   errs.fullName = t.quote.form.errFullName;
     if (!form.email.trim())      errs.email    = t.quote.form.errEmail;
@@ -221,6 +222,13 @@ export default function QuoteForm() {
     if (!form.tyreCategory)      errs.tyreCategory  = t.quote.form.errCategory;
     if (!form.deliveryLocation.trim()) errs.deliveryLocation = t.quote.form.errDelivery;
     if (!form.notes.trim())      errs.notes    = t.quote.form.errNotes;
+    else {
+      // CRM-2: client-side rubbish detection
+      const quality = checkInquiryQuality(form.notes, validItems);
+      if (quality.blocked) {
+        errs.notes = quality.reason ?? "Please provide a clear quote request so our team can assist you.";
+      }
+    }
     return errs;
   };
 
@@ -255,17 +263,18 @@ export default function QuoteForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const errs = validate();
+    const validItems = tyreItems.filter((i) => i.size.trim());
+
+    const errs = validate(validItems);
     if (Object.keys(errs).length > 0) {
       setErrors(errs);
-      const firstErrKey = REQUIRED.find((k) => errs[k]);
+      const firstErrKey = (["notes", ...REQUIRED] as (keyof FormData)[]).find((k) => errs[k]);
       if (firstErrKey) {
         document.getElementById(`field-${firstErrKey}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
       }
       return;
     }
 
-    const validItems = tyreItems.filter((i) => i.size.trim());
     if (validItems.length === 0) {
       setTyreItemsError("Please enter at least one tyre size.");
       document.getElementById("field-tyreItems")?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -373,7 +382,17 @@ export default function QuoteForm() {
       }
 
       const json = await res.json();
-      if (!res.ok) throw new Error(json.message || "Something went wrong. Please try again.");
+      if (!res.ok) {
+        // CRM-2: backend returned low_quality_inquiry — highlight the notes field
+        if ((json as Record<string, unknown>).code === "low_quality_inquiry") {
+          const reason = (json as Record<string, unknown>).message as string
+            ?? "Please provide a clear business inquiry with tyre size, quantity, country, and contact details.";
+          setErrors((prev) => ({ ...prev, notes: reason }));
+          document.getElementById("field-notes")?.scrollIntoView({ behavior: "smooth", block: "center" });
+          return;
+        }
+        throw new Error((json as Record<string, unknown>).message as string || "Something went wrong. Please try again.");
+      }
 
       setRefNumber(json.data?.ref_number ?? `OKL-QR-${Date.now().toString().slice(-6)}`);
       trackQuoteSubmit({ tyreCategory: form.tyreCategory, country: form.country });
@@ -744,6 +763,11 @@ export default function QuoteForm() {
                   aria-invalid={!!errors.notes}
                   aria-describedby={errors.notes ? "quote-notes-error" : undefined}
                   className={`${ic("notes")} resize-none`} />
+                <p className="mt-1.5 flex items-start gap-1.5 text-[0.75rem] leading-relaxed text-[var(--muted)]">
+                  <Info size={13} strokeWidth={2} className="mt-0.5 shrink-0" />
+                  Include tyre size, quantity, destination country, and preferred brand if known.
+                  e.g. &ldquo;200 × Michelin 205/55R16 to Lagos, Nigeria&rdquo;
+                </p>
               </Field>
             </div>
           </div>
