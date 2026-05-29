@@ -43,7 +43,15 @@ export default function SummerTiresPage() {
           eyebrow: "Season",
           h1: "Summer Tires for Sale – See Available Tyres At Competitive Prices",
           intro: [
-            "Shop high-performance summer tires at OKELCOR GmbH for optimal grip, braking, and fuel efficiency in warm weather conditions. We supply premium summer tyres for passenger cars, SUVs, and light trucks, available for both individual drivers and wholesale buyers including tire dealers, workshops, and fleet operators. Browse the catalog below or use the filters to quickly find the right tire size, brand, performance level, and price range for your needs.",
+            [
+              "Shop high-performance summer tires at ",
+              { text: "OKELCOR GmbH", href: "/" },
+              " for optimal grip, braking, and fuel efficiency in warm weather conditions. We supply premium summer tyres for ",
+              { text: "passenger cars", href: "/passenger-tires" },
+              ", SUVs, and ",
+              { text: "light trucks", href: "/light-truck-tires" },
+              ", available for both individual drivers and wholesale buyers including tire dealers, workshops, and fleet operators. Browse the catalog below or use the filters to quickly find the right tire size, brand, performance level, and price range for your needs.",
+            ],
           ],
           filters: { season: "Summer" },
           breadcrumbSchema: breadcrumb,

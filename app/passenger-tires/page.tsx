@@ -43,7 +43,13 @@ export default function PassengerTiresPage() {
           eyebrow: "Tyre Category",
           h1: "Passenger Tires for Sale – Browse Available PCR Tyres",
           intro: [
-            "Shop premium passenger tires at OKELCOR GmbH for private drivers, tire dealers, workshops, and fleet buyers. Explore high-quality passenger car tires, SUV tires, all-season tires, summer tires, and winter tires from trusted brands at competitive prices. Browse the catalog below or use the filters to quickly find the right tires for your vehicle or business needs.",
+            [
+              "Shop premium passenger tires at ",
+              { text: "OKELCOR GmbH", href: "/wholesale-tire-distributors-europe" },
+              " for private drivers, tire dealers, workshops, and fleet buyers. Explore high-quality passenger car tires, SUV tires, all-season tires, ",
+              { text: "summer tires", href: "/summer-tires" },
+              ", and winter tires from trusted brands at competitive prices. Browse the catalog below or use the filters to quickly find the right tires for your vehicle or business needs.",
+            ],
           ],
           filters: { type: "PCR" },
           breadcrumbSchema: breadcrumb,

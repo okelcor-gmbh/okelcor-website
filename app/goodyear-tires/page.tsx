@@ -43,7 +43,15 @@ export default function GoodyearTiresPage() {
           eyebrow: "Brand",
           h1: "Goodyear Tires for Sale – Premium Passenger, SUV & Wholesale Tires",
           intro: [
-            "Shop premium Goodyear tires for your car, SUV, van, or fleet vehicles. Whether you are looking for summer, winter, or all-season tires as a retail or wholesale customer, we have you covered. Browse the catalog below or use the filters to quickly find the right Goodyear tire by size, vehicle type, season, or performance needs.",
+            [
+              "Shop premium Goodyear tires for your car, SUV, van, or fleet vehicles. Whether you are looking for ",
+              { text: "summer", href: "/summer-tires" },
+              ", ",
+              { text: "winter", href: "/winter-tires" },
+              ", or ",
+              { text: "all-season", href: "/all-season-tires" },
+              " tires as a retail or wholesale customer, we have you covered. Browse the catalog below or use the filters to quickly find the right Goodyear tire by size, vehicle type, season, or performance needs.",
+            ],
           ],
           filters: { brand: "Goodyear" },
           breadcrumbSchema: breadcrumb,

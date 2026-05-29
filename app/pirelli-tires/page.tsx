@@ -43,7 +43,17 @@ export default function PirelliTiresPage() {
           eyebrow: "Brand",
           h1: "Pirelli Tires for Sale – Premium Performance for Passenger Cars, SUVs & Fleets",
           intro: [
-            "Shop premium Pirelli tires at OKELCOR for passenger cars, SUVs, luxury vehicles, and fleet operations. Pirelli is globally recognized for high-performance tire technology, sporty handling, safety, and premium driving comfort across all-season, summer, and winter conditions. We supply genuine Pirelli tyres for both retail customers and wholesale buyers. Browse the catalog below or use the filters to quickly find the right tire by size, vehicle type, season, or performance category.",
+            [
+              "Shop premium Pirelli tires at ",
+              { text: "OKELCOR", href: "/" },
+              " for passenger cars, SUVs, luxury vehicles, and fleet operations. Pirelli is globally recognized for high-performance tire technology, sporty handling, safety, and premium driving comfort across ",
+              { text: "all-season", href: "/all-season-tires" },
+              ", ",
+              { text: "summer", href: "/summer-tires" },
+              ", and ",
+              { text: "winter", href: "/winter-tires" },
+              " conditions. We supply genuine Pirelli tyres for both retail customers and wholesale buyers. Browse the catalog below or use the filters to quickly find the right tire by size, vehicle type, season, or performance category.",
+            ],
           ],
           filters: { brand: "Pirelli" },
           breadcrumbSchema: breadcrumb,

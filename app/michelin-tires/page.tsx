@@ -43,7 +43,17 @@ export default function MichelinTiresPage() {
           eyebrow: "Brand",
           h1: "Michelin Tires for Sale – Passenger and SUV Tires - Best Prices",
           intro: [
-            "Find premium Michelin tires at OKELCOR for passenger cars, SUVs, vans, and fleet vehicles. We supply a wide range of Michelin passenger, all-season, summer, and winter tires for both retail customers and wholesale buyers, including tire dealers, workshops, and fleet operators. Browse the catalog below or use the filters to quickly find the right tire by size, season, or performance needs.",
+            [
+              "Find premium Michelin tires at ",
+              { text: "OKELCOR", href: "/" },
+              " for passenger cars, SUVs, vans, and fleet vehicles. We supply a wide range of Michelin passenger, ",
+              { text: "all-season", href: "/all-season-tires" },
+              ", ",
+              { text: "summer", href: "/summer-tires" },
+              ", and ",
+              { text: "winter tires", href: "/winter-tires" },
+              " for both retail customers and wholesale buyers, including tire dealers, workshops, and fleet operators. Browse the catalog below or use the filters to quickly find the right tire by size, season, or performance needs.",
+            ],
           ],
           filters: { brand: "Michelin" },
           breadcrumbSchema: breadcrumb,

@@ -43,7 +43,17 @@ export default function ContinentalTiresPage() {
           eyebrow: "Brand",
           h1: "Continental Tires for Sale – Premium Tyres For Passenger cars, SUV & Fleets",
           intro: [
-            "Find premium Continental tires at OKELCOR GmbH for passenger cars, SUVs, vans, and fleet vehicles. We offer a full range of Continental tyres available in all-season, summer, and winter conditions for both retail customers and wholesale buyers, including tire dealers, workshops, and export businesses. Browse the catalog below or use the filters to quickly find the right tire by size, season, performance, or vehicle type.",
+            [
+              "Find premium Continental tires at ",
+              { text: "OKELCOR GmbH", href: "/" },
+              " for passenger cars, SUVs, vans, and fleet vehicles. We offer a full range of Continental tyres available in ",
+              { text: "all-season", href: "/all-season-tires" },
+              ", ",
+              { text: "summer", href: "/summer-tires" },
+              ", and ",
+              { text: "winter", href: "/winter-tires" },
+              " conditions for both retail customers and wholesale buyers, including tire dealers, workshops, and export businesses. Browse the catalog below or use the filters to quickly find the right tire by size, season, performance, or vehicle type.",
+            ],
           ],
           filters: { brand: "Continental" },
           breadcrumbSchema: breadcrumb,

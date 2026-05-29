@@ -43,7 +43,13 @@ export default function DunlopTiresPage() {
           eyebrow: "Brand",
           h1: "Dunlop Tires for Sale – Performance Passenger cars, SUVs & Light Trucks",
           intro: [
-            "Shop high-quality Dunlop tires for passenger cars, SUVs, vans, light trucks, and fleet vehicles now available at an attractive rate. We supply a full range of Dunlop tires for both retail customers and wholesale buyers, including tire dealers, workshops, and export partners. Browse the catalog below or use the filters to quickly find the right tire by size, season, performance, or vehicle type.",
+            [
+              "Shop high-quality Dunlop tires for ",
+              { text: "passenger cars", href: "/passenger-tires" },
+              ", SUVs, vans, ",
+              { text: "light trucks", href: "/light-truck-tires" },
+              ", and fleet vehicles now available at an attractive rate. We supply a full range of Dunlop tires for both retail customers and wholesale buyers, including tire dealers, workshops, and export partners. Browse the catalog below or use the filters to quickly find the right tire by size, season, performance, or vehicle type.",
+            ],
           ],
           filters: { brand: "Dunlop" },
           breadcrumbSchema: breadcrumb,

@@ -43,7 +43,13 @@ export default function FalkenTiresPage() {
           eyebrow: "Brand",
           h1: "Falken Tires for Sale – Performance Passenger Cars, SUVs & Light Truck Tyres",
           intro: [
-            "Shop top-performance Falken tires for passenger cars, SUVs, vans, and fleet vehicles now available at unbeatable prices. The tires below are available for both retail and B2B customers like; tire dealers, workshops, exporters, and fleet operators. Browse the catalog below or use the filters to quickly find the right Falken tyre by size, season, vehicle type, or performance category.",
+            [
+              "Shop top-performance Falken tires for ",
+              { text: "passenger cars", href: "/passenger-tires" },
+              ", SUVs, vans, and fleet vehicles now available at unbeatable prices. The tires below are available for both retail and ",
+              { text: "B2B customers", href: "/tyre-supply-quotation" },
+              " like; tire dealers, workshops, exporters, and fleet operators. Browse the catalog below or use the filters to quickly find the right Falken tyre by size, season, vehicle type, or performance category.",
+            ],
           ],
           filters: { brand: "Falken" },
           breadcrumbSchema: breadcrumb,

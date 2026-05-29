@@ -43,7 +43,15 @@ export default function AllSeasonTiresPage() {
           eyebrow: "Season",
           h1: "All-Season Tires for Sale – Year-Round Tyres Available",
           intro: [
-            "Shop versatile all-season tires at OKELCOR GmbH for year-round performance in changing weather conditions. We supply high-quality all-season passenger tires, SUV tires, and light truck tires for private drivers, workshops, tire dealers, and fleet operators. Browse our catalog below or use the filters to quickly find the right tire size, brand, load rating, and performance level for your needs.",
+            [
+              "Shop versatile all-season tires at ",
+              { text: "OKELCOR GmbH", href: "/" },
+              " for year-round performance in changing weather conditions. We supply high-quality all-season ",
+              { text: "passenger tires", href: "/passenger-tires" },
+              ", SUV tires, and ",
+              { text: "light truck tires", href: "/light-truck-tires" },
+              " for private drivers, workshops, tire dealers, and fleet operators. Browse our catalog below or use the filters to quickly find the right tire size, brand, load rating, and performance level for your needs.",
+            ],
           ],
           filters: { season: "All Season" },
           breadcrumbSchema: breadcrumb,

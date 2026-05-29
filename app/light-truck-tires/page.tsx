@@ -43,7 +43,13 @@ export default function LightTruckTiresPage() {
           eyebrow: "Tyre Category",
           h1: "Light Truck Tires for Sale – Browse our complete TBR Tyres",
           intro: [
-            "Shop durable light truck tires at OKELCOR GmbH for vans, pickups, commercial vehicles, and fleet operations. We supply high-performance light truck tires, van tires, all-season tires, summer tires, and winter tires for both retail and wholesale buyers. Browse the catalog below or use the filters to quickly find the right tire size, load rating, brand, or seasonal option for your vehicle or business needs.",
+            [
+              "Shop durable light truck tires at ",
+              { text: "OKELCOR GmbH", href: "/wholesale-tire-distributors-europe" },
+              " for vans, pickups, commercial vehicles, and fleet operations. We supply high-performance light truck tires, van tires, ",
+              { text: "all-season tires", href: "/all-season-tires" },
+              ", summer tires, and winter tires for both retail and wholesale buyers. Browse the catalog below or use the filters to quickly find the right tire size, load rating, brand, or seasonal option for your vehicle or business needs.",
+            ],
           ],
           filters: { type: "TBR" },
           breadcrumbSchema: breadcrumb,

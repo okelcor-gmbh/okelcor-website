@@ -43,7 +43,15 @@ export default function WinterTiresPage() {
           eyebrow: "Season",
           h1: "Winter Tires for Sale – Safe & High-Performance Snow, Ice & Cold Weather Tyres",
           intro: [
-            "Shop high-performance winter tires at OKELCOR GmbH for maximum safety, traction, and control in snow, ice, and cold weather conditions. We supply premium winter tires for passenger cars, SUVs, and light trucks, available for both retail customers and wholesale buyers including tire dealers, workshops, and fleet operators. Browse the catalog below or use the filters to quickly find the right tyre size, brand, load rating, and winter performance specifications for your needs.",
+            [
+              "Shop high-performance winter tires at ",
+              { text: "OKELCOR GmbH", href: "/" },
+              " for maximum safety, traction, and control in snow, ice, and cold weather conditions. We supply premium winter tires for ",
+              { text: "passenger cars", href: "/passenger-tires" },
+              ", SUVs, and ",
+              { text: "light trucks", href: "/light-truck-tires" },
+              ", available for both retail customers and wholesale buyers including tire dealers, workshops, and fleet operators. Browse the catalog below or use the filters to quickly find the right tyre size, brand, load rating, and winter performance specifications for your needs.",
+            ],
           ],
           filters: { season: "Winter" },
           breadcrumbSchema: breadcrumb,

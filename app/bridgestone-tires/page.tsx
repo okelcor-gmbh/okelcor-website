@@ -43,7 +43,15 @@ export default function BridgestoneTiresPage() {
           eyebrow: "Brand",
           h1: "Bridgestone Tires for Sale – Passenger, SUV & Light Truck Tyres",
           intro: [
-            "Find premium Bridgestone tires for passenger cars, SUVs, vans, light trucks and fleet vehicles at exclusive affordable prices. Go through our available all-season, summer, winter, and fuel-efficient tires, designed for safety, comfort, and durability. We supply Bridgestone tires for both retail customers and wholesale buyers such as tire dealers, workshops, and export businesses. Browse the catalog below or use the filters to quickly find the right tire size, model, and performance category for your needs.",
+            [
+              "Find premium Bridgestone tires for ",
+              { text: "passenger cars", href: "/passenger-tires" },
+              ", SUVs, vans, light trucks and fleet vehicles at exclusive affordable prices. Go through our available ",
+              { text: "all-season", href: "/all-season-tires" },
+              ", ",
+              { text: "summer", href: "/summer-tires" },
+              ", winter, and fuel-efficient tires, designed for safety, comfort, and durability. We supply Bridgestone tires for both retail customers and wholesale buyers such as tire dealers, workshops, and export businesses. Browse the catalog below or use the filters to quickly find the right tire size, model, and performance category for your needs.",
+            ],
           ],
           filters: { brand: "Bridgestone" },
           breadcrumbSchema: breadcrumb,

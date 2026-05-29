@@ -3,11 +3,19 @@ import ShopPageClient from "./shop-page-client";
 
 export type RelatedLink = { label: string; href: string };
 
+/** An inline text segment — either plain text or a clickable internal link. */
+export type IntroSegment = string | { text: string; href: string };
+
 export type CatalogueLandingConfig = {
   eyebrow?: string;
   h1: string;
-  /** One string or an array of paragraph strings for longer intros. */
-  intro: string | string[];
+  /**
+   * Intro content. Accepts:
+   *   - A plain string (single paragraph)
+   *   - An array where each element is either a plain string paragraph
+   *     or an array of IntroSegments (text + optional link) for a rich paragraph.
+   */
+  intro: string | (string | IntroSegment[])[];
   filters: Record<string, string>;
   breadcrumbSchema: object;
   popularSizes?: { label: string; href: string }[];
@@ -27,7 +35,8 @@ export default function CatalogueLanding({ config }: { config: CatalogueLandingC
   const popularSizesLabel = uiLabels?.popularSizesHeading ?? "Popular Sizes";
   const exploreMoreLabel  = uiLabels?.exploreMore         ?? "Explore more";
 
-  const introParas = Array.isArray(intro) ? intro : [intro];
+  const introParas: (string | IntroSegment[])[] =
+    typeof intro === "string" ? [intro] : intro;
 
   const faqSchema =
     faq && faq.length > 0
@@ -70,11 +79,29 @@ export default function CatalogueLanding({ config }: { config: CatalogueLandingC
             {h1}
           </h1>
           <div className="mt-3 max-w-2xl space-y-3">
-            {introParas.map((para, i) => (
-              <p key={i} className="text-[0.92rem] leading-relaxed text-[var(--muted)]">
-                {para}
-              </p>
-            ))}
+            {introParas.map((para, i) =>
+              typeof para === "string" ? (
+                <p key={i} className="text-[0.92rem] leading-relaxed text-[var(--muted)]">
+                  {para}
+                </p>
+              ) : (
+                <p key={i} className="text-[0.92rem] leading-relaxed text-[var(--muted)]">
+                  {para.map((seg, j) =>
+                    typeof seg === "string" ? (
+                      seg
+                    ) : (
+                      <Link
+                        key={j}
+                        href={seg.href}
+                        className="font-medium text-[var(--foreground)] underline decoration-black/[0.15] underline-offset-2 transition-colors hover:text-[var(--primary)]"
+                      >
+                        {seg.text}
+                      </Link>
+                    )
+                  )}
+                </p>
+              )
+            )}
           </div>
         </div>
       </section>
