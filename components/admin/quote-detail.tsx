@@ -201,6 +201,12 @@ export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
   const [convertAction, setConvertAction] = useState<"invite" | "approve" | "pending_review">("invite");
   const [convertResult, setConvertResult] = useState<{ customer_id?: number; customer_exists?: boolean; message?: string } | null>(null);
   const [convertError, setConvertError] = useState<string | null>(null);
+  // Structured conflict — backend returned a 409 or known conflict code
+  const [convertConflict, setConvertConflict] = useState<{
+    code: string;
+    message: string;
+    customer_id?: number;
+  } | null>(null);
 
   const loadAdminUsers = async () => {
     if (adminUsersLoaded) return;
@@ -274,21 +280,40 @@ export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
     }
   };
 
-  const doConvertToCustomer = async () => {
+  const KNOWN_CONFLICT_CODES = new Set(["customer_exists", "already_converted", "invalid_status"]);
+
+  const doConvertToCustomer = async (extraBody?: Record<string, unknown>) => {
     setConvertPending(true);
     setConvertError(null);
+    setConvertConflict(null);
     try {
       const res = await fetch(`/api/admin/quotes/${quote.id}/convert-to-customer`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ onboarding_action: convertAction }),
+        body: JSON.stringify({ onboarding_action: convertAction, ...extraBody }),
       });
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error((json as Record<string, unknown>).error as string ?? `Error ${res.status}`);
-      setConvertResult(json.data ?? json);
+      const json = await res.json().catch(() => ({})) as Record<string, unknown>;
+
+      if (!res.ok) {
+        // Parse the backend's message (may use "message" or "error" key)
+        const backendMsg = (json.message ?? json.error ?? `Request failed (HTTP ${res.status})`) as string;
+        const code       = json.code as string | undefined;
+        const customerId = (json.customer_id ?? (json.data as Record<string, unknown> | undefined)?.customer_id) as number | undefined;
+
+        // 409 Conflict or a known conflict code → structured conflict state, not a generic error
+        if (res.status === 409 || (code && KNOWN_CONFLICT_CODES.has(code))) {
+          setConvertConflict({ code: code ?? "conflict", message: backendMsg, customer_id: customerId });
+          return;
+        }
+
+        throw new Error(backendMsg);
+      }
+
+      const result = (json.data ?? json) as { customer_id?: number; customer_exists?: boolean; message?: string };
+      setConvertResult(result);
       setPipeline((prev) => ({ ...prev, qualification_status: "customer_invited" }));
     } catch (err) {
-      setConvertError(err instanceof Error ? err.message : "Conversion failed.");
+      setConvertError(err instanceof Error ? err.message : "Conversion failed. Please try again.");
     } finally {
       setConvertPending(false);
     }
@@ -695,7 +720,7 @@ export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
                   </p>
                 </div>
                 {!convertPending && (
-                  <button type="button" onClick={() => { setShowConvertToCustomer(false); setConvertResult(null); setConvertError(null); }}
+                  <button type="button" onClick={() => { setShowConvertToCustomer(false); setConvertResult(null); setConvertError(null); setConvertConflict(null); }}
                     className="shrink-0 text-[#9ca3af] hover:text-[#1a1a1a]">
                     <X size={18} />
                   </button>
@@ -710,13 +735,88 @@ export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
                 <p className="text-[#5c5e62]">{quote.country}</p>
               </div>
 
-              {convertError && (
-                <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[0.83rem] text-red-700">
-                  {convertError}
+              {/* ── Conflict state (409 / known conflict code) ── */}
+              {convertConflict ? (
+                <div className="flex flex-col gap-3">
+                  {convertConflict.code === "customer_exists" ? (
+                    <>
+                      <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3.5 text-[0.83rem] text-amber-800">
+                        <AlertCircle size={15} className="mt-0.5 shrink-0" />
+                        <div>
+                          <p className="font-semibold">This email already belongs to a customer account.</p>
+                          <p className="mt-0.5 text-amber-700">{convertConflict.message}</p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        {convertConflict.customer_id && (
+                          <Link
+                            href={`/admin/customers/${convertConflict.customer_id}`}
+                            className="flex items-center justify-center gap-2 rounded-full bg-[#E85C1A] px-6 py-2.5 text-[0.875rem] font-semibold text-white transition hover:bg-[#d14f14]"
+                            onClick={() => setShowConvertToCustomer(false)}
+                          >
+                            <ExternalLink size={14} />
+                            View Customer
+                          </Link>
+                        )}
+                        <button
+                          type="button"
+                          disabled={convertPending}
+                          onClick={() => doConvertToCustomer({ force_link: true })}
+                          className="flex items-center justify-center gap-2 rounded-full border border-[#1a1a1a] px-6 py-2.5 text-[0.875rem] font-semibold text-[#1a1a1a] transition hover:bg-[#1a1a1a] hover:text-white disabled:opacity-50"
+                        >
+                          {convertPending ? <Loader2 size={14} className="animate-spin" /> : <UserPlus size={14} />}
+                          Link Existing Customer
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setConvertConflict(null)}
+                          className="rounded-full border border-black/[0.1] px-6 py-2 text-[0.83rem] font-semibold text-[#5c5e62] transition hover:bg-[#f5f5f5]"
+                        >
+                          Back
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3.5 text-[0.83rem] text-red-700">
+                        <AlertCircle size={15} className="mt-0.5 shrink-0" />
+                        <div>
+                          <p className="font-semibold capitalize">{convertConflict.code.replace(/_/g, " ")}</p>
+                          <p className="mt-0.5">{convertConflict.message}</p>
+                        </div>
+                      </div>
+                      {convertConflict.customer_id && (
+                        <Link
+                          href={`/admin/customers/${convertConflict.customer_id}`}
+                          className="flex items-center justify-center gap-2 rounded-full bg-[#E85C1A] px-6 py-2.5 text-[0.875rem] font-semibold text-white transition hover:bg-[#d14f14]"
+                          onClick={() => setShowConvertToCustomer(false)}
+                        >
+                          <ExternalLink size={14} />
+                          View Customer
+                        </Link>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => { setShowConvertToCustomer(false); setConvertConflict(null); }}
+                        className="rounded-full border border-black/[0.1] px-6 py-2.5 text-[0.875rem] font-semibold text-[#5c5e62] transition hover:bg-[#f5f5f5]"
+                      >
+                        Close
+                      </button>
+                    </>
+                  )}
                 </div>
-              )}
-
-              {convertResult ? (
+              ) : convertError ? (
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[0.83rem] text-red-700">
+                    <AlertCircle size={15} className="mt-0.5 shrink-0" />
+                    {convertError}
+                  </div>
+                  <button type="button" onClick={() => setConvertError(null)}
+                    className="rounded-full border border-black/[0.1] px-6 py-2.5 text-[0.875rem] font-semibold text-[#5c5e62] transition hover:bg-[#f5f5f5]">
+                    Try Again
+                  </button>
+                </div>
+              ) : convertResult ? (
                 <div className="flex flex-col gap-3">
                   <div className="flex items-center gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-[0.83rem] text-emerald-800">
                     <CheckCircle2 size={15} className="shrink-0" />
@@ -768,7 +868,7 @@ export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
                       className="flex-1 h-11 rounded-full border border-black/[0.1] text-[0.875rem] font-semibold text-[#5c5e62] transition hover:bg-[#f5f5f5] disabled:opacity-50">
                       Cancel
                     </button>
-                    <button type="button" disabled={convertPending} onClick={doConvertToCustomer}
+                    <button type="button" disabled={convertPending} onClick={() => doConvertToCustomer()}
                       className="flex flex-1 h-11 items-center justify-center gap-2 rounded-full bg-[#1a1a1a] text-[0.875rem] font-semibold text-white transition hover:bg-[#333] disabled:opacity-50">
                       {convertPending ? <Loader2 size={14} className="animate-spin" /> : <UserPlus size={14} />}
                       {convertPending ? "Converting…" : "Convert"}
