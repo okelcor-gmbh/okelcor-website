@@ -297,6 +297,15 @@ export type AdminOrderFull = AdminOrder & {
   acceptance_token?: string | null;
 };
 
+// CRM-5 data quality
+export type DataQualityReviewStatus =
+  | "clean" | "needs_review" | "duplicate_suspected" | "merged" | "ignored";
+
+export type DataQualityFlag =
+  | "duplicate_email" | "duplicate_phone" | "duplicate_company_country"
+  | "missing_phone" | "missing_country" | "missing_company" | "missing_address"
+  | "weak_company_name" | "personal_email_for_b2b" | "incomplete_profile";
+
 export type QuoteReviewStatus =
   | "new"
   | "needs_review"
@@ -383,6 +392,10 @@ export type AdminQuoteFull = AdminQuote & {
   qualification_reason?: string | null;
   internal_notes?: string | null;
   assigned_at?: string | null;
+  // CRM-5 existing-customer link
+  possible_customer_id?: number | null;
+  possible_customer_name?: string | null;
+  lead_existing_customer?: boolean | null;
 };
 
 export type AdminHeroSlideTranslation = {
@@ -465,6 +478,14 @@ export type AdminUser = {
   role_label?: string;
   last_login_at: string | null;
   created_at?: string;
+  // CRM-5 data quality fields (returned by customer detail/list endpoints)
+  data_quality_score?: number | null;
+  data_quality_flags?: DataQualityFlag[] | string[] | null;
+  data_review_status?: DataQualityReviewStatus | string;
+  normalized_email?: string | null;
+  normalized_company_name?: string | null;
+  possible_duplicate_of?: number | null;
+  possible_duplicate_name?: string | null;
 };
 
 export type AdminProfile = {

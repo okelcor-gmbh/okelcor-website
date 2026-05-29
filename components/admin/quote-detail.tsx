@@ -936,6 +936,40 @@ export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
           )}
         </div>
 
+        {/* ── CRM-5: Existing customer notice ── */}
+        {(() => {
+          const qr = quote as Record<string, unknown>;
+          const customerId = qr.possible_customer_id as number | undefined;
+          const customerName = qr.possible_customer_name as string | undefined;
+          const isExisting = qr.lead_existing_customer as boolean | undefined;
+          if (!customerId && !isExisting) return null;
+          return (
+            <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+              <AlertCircle size={16} className="mt-0.5 shrink-0 text-amber-600" />
+              <div className="flex-1 min-w-0">
+                <p className="text-[0.875rem] font-semibold text-amber-800">
+                  This inquiry may belong to an existing customer.
+                </p>
+                {customerName && (
+                  <p className="mt-0.5 text-[0.83rem] text-amber-700">{customerName}</p>
+                )}
+                <p className="mt-0.5 text-[0.78rem] text-amber-600">
+                  Email match detected against the existing customer database.
+                </p>
+              </div>
+              {customerId && (
+                <Link
+                  href={`/admin/customers/${customerId}`}
+                  className="flex shrink-0 items-center gap-1.5 rounded-xl border border-amber-300 bg-white px-3 py-2 text-[0.8rem] font-semibold text-amber-800 transition hover:bg-amber-100"
+                >
+                  <ExternalLink size={13} />
+                  View Customer
+                </Link>
+              )}
+            </div>
+          );
+        })()}
+
         {/* ── 1. Customer & Company ── */}
         <SectionCard title="Customer & Company">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

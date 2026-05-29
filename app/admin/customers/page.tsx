@@ -6,6 +6,7 @@ import {
   Upload, Search, ChevronLeft, ChevronRight, Download,
   FileText, AlertCircle, CheckCircle2, Loader2, Mail, Send,
   Eye, Ban, Trash2, ShieldOff, ShieldCheck, UserCheck, UserX, UserPlus, MoreHorizontal,
+  Copy,
 } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -33,6 +34,9 @@ type Customer = {
   access_level?: CustomerAccessLevel | string;
   approved_for_checkout?: boolean;
   approved_for_documents?: boolean;
+  // CRM-5 data quality
+  data_quality_score?: number | null;
+  data_review_status?: string;
   last_login_at?: string | null;
   last_login_location?: string | null;
   failed_login_count?: number;
@@ -43,7 +47,7 @@ type ImportResult = {
   b2b: number; b2c: number; errors?: { row: number; message: string }[];
 };
 type EmailResult  = { sent: number; failed: number; total: number; test_mode: boolean };
-type StatusFilter = "all" | "active" | "suspended" | "banned" | "locked" | "new_this_week" | "pending_review";
+type StatusFilter = "all" | "active" | "suspended" | "banned" | "locked" | "new_this_week" | "pending_review" | "duplicate_suspected";
 type TypeFilter   = "all" | "b2b" | "b2c" | "wix";
 
 const PER_PAGE = 50;
@@ -166,6 +170,30 @@ function PermissionDots({ checkout, documents }: { checkout?: boolean; documents
   );
 }
 
+function DataQualityBadge({ score, reviewStatus }: { score?: number | null; reviewStatus?: string }) {
+  if (score == null && !reviewStatus) return null;
+  const isDuplicate = reviewStatus === "duplicate_suspected";
+  const scoreColor =
+    score == null ? "" :
+    score >= 80 ? "text-emerald-700 bg-emerald-50 border-emerald-200" :
+    score >= 50 ? "text-amber-700 bg-amber-50 border-amber-200" :
+    "text-red-700 bg-red-50 border-red-200";
+  return (
+    <div className="mt-0.5 flex items-center gap-1">
+      {score != null && (
+        <span className={`inline-flex items-center rounded border px-1.5 py-0.5 font-mono text-[0.62rem] font-bold ${scoreColor}`}>
+          Q{score}
+        </span>
+      )}
+      {isDuplicate && (
+        <span title="Possible duplicate" className="inline-flex items-center rounded border border-amber-200 bg-amber-50 px-1 py-0.5 text-amber-600">
+          <Copy size={9} strokeWidth={2.5} />
+        </span>
+      )}
+    </div>
+  );
+}
+
 // ── Action modal ──────────────────────────────────────────────────────────────
 
 function ConfirmModal({
@@ -249,7 +277,8 @@ export default function CustomersPage() {
     if (typeTab === "b2b")                  p.set("customer_type", "b2b");
     if (typeTab === "b2c")                  p.set("customer_type", "b2c");
     if (typeTab === "wix")                  p.set("source", "wix");
-    if (statusTab === "pending_review")     p.set("onboarding_status", "pending_review");
+    if (statusTab === "pending_review")       p.set("onboarding_status", "pending_review");
+    else if (statusTab === "duplicate_suspected") p.set("data_review_status", "duplicate_suspected");
     else if (statusTab !== "all")           p.set("status", statusTab);
 
     try {
@@ -367,6 +396,7 @@ export default function CustomersPage() {
     { key: "banned",         label: "Banned" },
     { key: "locked",         label: "Locked" },
     { key: "new_this_week",  label: "New This Week" },
+    { key: "duplicate_suspected" as StatusFilter, label: "Duplicates" },
   ];
 
   const TYPE_TABS: { key: TypeFilter; label: string }[] = [
@@ -583,6 +613,7 @@ export default function CustomersPage() {
                           </div>
                         )}
                         <PermissionDots checkout={c.approved_for_checkout} documents={c.approved_for_documents} />
+                        <DataQualityBadge score={c.data_quality_score} reviewStatus={c.data_review_status} />
                         {(c.failed_login_count ?? 0) >= 5 && (
                           <p className="mt-0.5 text-[0.67rem] text-red-500">{c.failed_login_count} failed attempts</p>
                         )}

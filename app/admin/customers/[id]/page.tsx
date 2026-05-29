@@ -9,6 +9,7 @@ import {
   Lock, Loader2, AlertCircle, CheckCircle2, Clock, Monitor,
   ShoppingCart, FileText, Activity, Edit3, Save, X,
   UserCheck, UserX, UserPlus, Send,
+  Gauge, RefreshCw, Copy, ExternalLink,
 } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -31,6 +32,14 @@ type CustomerFull = {
   approved_for_quotes?: boolean;
   approved_for_wholesale_pricing?: boolean;
   approved_for_documents?: boolean;
+  // CRM-5 data quality
+  data_quality_score?: number | null;
+  data_quality_flags?: string[] | null;
+  data_review_status?: string;
+  normalized_email?: string | null;
+  normalized_company_name?: string | null;
+  possible_duplicate_of?: number | null;
+  possible_duplicate_name?: string | null;
 };
 
 type LoginEvent = {
@@ -349,6 +358,62 @@ export default function CustomerProfilePage() {
   }, [customer]);
   const [accessSaving, setAccessSaving] = useState(false);
   const [accessMsg, setAccessMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+
+  // ── CRM-5: Data Quality actions ──────────────────────────────────────────
+
+  const [dqAction, setDqAction] = useState<string | null>(null);
+  const [dqMsg, setDqMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const [dqData, setDqData] = useState<{
+    score?: number | null;
+    flags?: string[] | null;
+    review_status?: string;
+    normalized_email?: string | null;
+    normalized_company_name?: string | null;
+    possible_duplicate_of?: number | null;
+    possible_duplicate_name?: string | null;
+  }>({
+    score:                   customer?.data_quality_score,
+    flags:                   customer?.data_quality_flags,
+    review_status:           customer?.data_review_status,
+    normalized_email:        customer?.normalized_email,
+    normalized_company_name: customer?.normalized_company_name,
+    possible_duplicate_of:   customer?.possible_duplicate_of,
+    possible_duplicate_name: customer?.possible_duplicate_name,
+  });
+
+  useEffect(() => {
+    if (!customer) return;
+    setDqData({
+      score:                   customer.data_quality_score,
+      flags:                   customer.data_quality_flags,
+      review_status:           customer.data_review_status,
+      normalized_email:        customer.normalized_email,
+      normalized_company_name: customer.normalized_company_name,
+      possible_duplicate_of:   customer.possible_duplicate_of,
+      possible_duplicate_name: customer.possible_duplicate_name,
+    });
+  }, [customer]);
+
+  async function dqPost(action: string, body?: Record<string, unknown>) {
+    setDqAction(action);
+    setDqMsg(null);
+    try {
+      const res = await fetch(`/api/admin/customers/${id}/data-quality/${action}`, {
+        method: "POST",
+        headers: body ? { "Content-Type": "application/json" } : {},
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error((json as Record<string, unknown>).error as string ?? `Error ${res.status}`);
+      const updated = (json.data ?? json) as typeof dqData;
+      if (updated.score !== undefined || updated.flags !== undefined) {
+        setDqData((prev) => ({ ...prev, ...updated }));
+      }
+      setDqMsg({ type: "ok", text: (json as Record<string, unknown>).message as string ?? "Done." });
+    } catch (err) {
+      setDqMsg({ type: "err", text: err instanceof Error ? err.message : "Action failed." });
+    } finally { setDqAction(null); }
+  }
 
   async function saveAccess() {
     setAccessSaving(true);
@@ -741,6 +806,102 @@ export default function CustomerProfilePage() {
                 </table>
               </div>
             )}
+          </SectionCard>
+
+          {/* CRM-5: Data Quality card */}
+          <SectionCard title="Data Quality" icon={Gauge}>
+            <div className="p-5">
+              {dqMsg && (
+                <div className={`mb-4 flex items-center gap-2.5 rounded-xl border px-4 py-2.5 text-[0.8rem] ${dqMsg.type === "ok" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-red-200 bg-red-50 text-red-700"}`}>
+                  {dqMsg.type === "ok" ? <CheckCircle2 size={13} /> : <AlertCircle size={13} />}
+                  {dqMsg.text}
+                </div>
+              )}
+
+              {/* Score */}
+              {dqData.score != null && (
+                <div className="mb-4 flex items-center gap-3">
+                  <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-[1rem] font-extrabold ${dqData.score >= 80 ? "bg-emerald-100 text-emerald-700" : dqData.score >= 50 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"}`}>
+                    {dqData.score}
+                  </div>
+                  <div>
+                    <p className="text-[0.83rem] font-semibold text-[#1a1a1a]">Quality Score</p>
+                    <p className="text-[0.72rem] text-[#9ca3af]">
+                      {dqData.score >= 80 ? "Good — complete profile" : dqData.score >= 50 ? "Needs attention" : "Poor — significant gaps"}
+                    </p>
+                    {dqData.review_status && (
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[0.63rem] font-bold ${dqData.review_status === "clean" ? "bg-emerald-100 text-emerald-700" : dqData.review_status === "duplicate_suspected" ? "bg-amber-100 text-amber-700" : dqData.review_status === "merged" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"}`}>
+                        {dqData.review_status.replace(/_/g, " ")}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Flags */}
+              {dqData.flags && dqData.flags.length > 0 && (
+                <div className="mb-4">
+                  <p className="mb-1.5 text-[0.7rem] font-semibold uppercase tracking-wide text-[#9ca3af]">Quality Flags</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {dqData.flags.map((f) => (
+                      <span key={f} className={`rounded-md px-2 py-0.5 text-[0.7rem] font-semibold ${f.startsWith("duplicate") ? "bg-amber-50 text-amber-700" : "bg-red-50 text-red-600"}`}>
+                        {f.replace(/_/g, " ")}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Normalised values */}
+              {(dqData.normalized_email || dqData.normalized_company_name) && (
+                <div className="mb-4 rounded-xl border border-black/[0.07] bg-[#fafafa] px-3 py-2.5 text-[0.78rem]">
+                  {dqData.normalized_email && (
+                    <p className="text-[#5c5e62]"><span className="font-semibold text-[#9ca3af]">Normalised email:</span> {dqData.normalized_email}</p>
+                  )}
+                  {dqData.normalized_company_name && (
+                    <p className="mt-0.5 text-[#5c5e62]"><span className="font-semibold text-[#9ca3af]">Normalised company:</span> {dqData.normalized_company_name}</p>
+                  )}
+                </div>
+              )}
+
+              {/* Possible duplicate link */}
+              {dqData.possible_duplicate_of && (
+                <div className="mb-4 flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5">
+                  <Copy size={14} className="shrink-0 text-amber-600" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[0.78rem] font-semibold text-amber-800">Possible duplicate of</p>
+                    <p className="text-[0.75rem] text-amber-700">{dqData.possible_duplicate_name ?? `Customer #${dqData.possible_duplicate_of}`}</p>
+                  </div>
+                  <Link href={`/admin/customers/${dqData.possible_duplicate_of}`}
+                    className="flex shrink-0 items-center gap-1 text-[0.75rem] font-semibold text-amber-700 hover:underline">
+                    <ExternalLink size={11} /> View
+                  </Link>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex flex-wrap gap-2">
+                <button type="button" disabled={dqAction !== null} onClick={() => dqPost("recalculate")}
+                  className="flex items-center gap-1.5 rounded-xl border border-black/[0.09] bg-white px-3 py-2 text-[0.78rem] font-semibold text-[#5c5e62] transition hover:bg-[#f5f5f5] disabled:opacity-50">
+                  {dqAction === "recalculate" ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
+                  Recalculate
+                </button>
+                {dqData.review_status !== "clean" && (
+                  <button type="button" disabled={dqAction !== null} onClick={() => dqPost("mark-clean")}
+                    className="flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-[0.78rem] font-semibold text-emerald-700 transition hover:bg-emerald-100 disabled:opacity-50">
+                    {dqAction === "mark-clean" ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle2 size={12} />}
+                    Mark Clean
+                  </button>
+                )}
+                {dqData.possible_duplicate_of && dqData.review_status !== "ignored" && (
+                  <button type="button" disabled={dqAction !== null} onClick={() => dqPost("ignore-duplicate")}
+                    className="flex items-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-[0.78rem] font-semibold text-gray-600 transition hover:bg-gray-100 disabled:opacity-50">
+                    {dqAction === "ignore-duplicate" ? <Loader2 size={12} className="animate-spin" /> : <AlertCircle size={12} />}
+                    Ignore Duplicate
+                  </button>
+                )}
+              </div>
+            </div>
           </SectionCard>
 
           {/* Quote history */}
