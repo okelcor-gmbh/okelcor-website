@@ -305,23 +305,27 @@ export async function POST(req: NextRequest) {
 
   const refNumber = generateRef();
 
+  console.log(`[/api/quote] Sending quote ${refNumber} from ${data.email} to sales: ${QUOTE_EMAIL} (from: ${FROM_EMAIL})`);
+
   try {
     // Send internal notification to sales team
-    await resend.emails.send({
+    const internalResult = await resend.emails.send({
       from: FROM_EMAIL,
       to: [QUOTE_EMAIL],
       replyTo: data.email,
       subject: `Quote Request ${refNumber}: ${data.tyreCategory} — ${data.fullName}, ${data.country}`,
       html: buildInternalHtml(data, refNumber),
     });
+    console.log(`[/api/quote] Internal email sent — id: ${(internalResult as { id?: string })?.id ?? "unknown"}`);
 
     // Send confirmation to the requester
-    await resend.emails.send({
+    const confirmResult = await resend.emails.send({
       from: FROM_EMAIL,
       to: [data.email],
       subject: `Quote Request Received — ${refNumber}`,
       html: buildConfirmationHtml(data, refNumber),
     });
+    console.log(`[/api/quote] Confirmation email sent to requester — id: ${(confirmResult as { id?: string })?.id ?? "unknown"}`);
 
     return NextResponse.json({ success: true, refNumber });
   } catch (err) {

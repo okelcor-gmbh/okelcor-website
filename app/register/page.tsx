@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Eye, EyeOff, CheckCircle2, XCircle, AlertTriangle, Loader2 } from "lucide-react";
+import { Eye, EyeOff, CheckCircle2, XCircle, AlertTriangle, Loader2, Clock, Building2 } from "lucide-react";
 import Navbar from "@/components/navbar";
 import { registerCustomer } from "@/lib/customer-auth";
 
@@ -124,8 +123,7 @@ type FormState = {
 type FormErrors = Partial<Record<keyof FormState, string>>;
 
 export default function RegisterPage() {
-  const router = useRouter();
-  const [customerType, setCustomerType] = useState<CustomerType>("b2c");
+  const [customerType, setCustomerType] = useState<CustomerType>("b2b");
   const [form, setForm] = useState<FormState>({
     first_name: "", last_name: "", email: "", password: "", confirm_password: "",
     phone: "", country: "", company_name: "", vat_number: "", industry: "", terms: false,
@@ -134,6 +132,7 @@ export default function RegisterPage() {
   const [apiError, setApiError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [pendingReview, setPendingReview] = useState(false);
   const [vatStatus, setVatStatus] = useState<"idle" | "loading" | "valid" | "invalid" | "unavailable">("idle");
 
   const set = (key: keyof FormState) =>
@@ -157,7 +156,11 @@ export default function RegisterPage() {
     else if (form.password.length < 8) errs.password = "Password must be at least 8 characters";
     if (!form.confirm_password) errs.confirm_password = "Please confirm your password";
     else if (form.password !== form.confirm_password) errs.confirm_password = "Passwords do not match";
-    if (customerType === "b2b" && !form.company_name.trim()) errs.company_name = "Company name is required";
+    if (customerType === "b2b") {
+      if (!form.company_name.trim()) errs.company_name = "Company name is required";
+      if (!form.country.trim()) errs.country = "Country is required for business accounts";
+      if (!form.phone.trim()) errs.phone = "Phone is required for business accounts";
+    }
     if (!form.terms) errs.terms = "You must accept the terms & conditions";
     return errs;
   };
@@ -191,13 +194,7 @@ export default function RegisterPage() {
     setApiError(null);
 
     try {
-      console.log("Registration payload:", {
-        customer_type: customerType,
-        first_name: form.first_name,
-        last_name: form.last_name,
-        email: form.email,
-      });
-      await registerCustomer({
+      const result = await registerCustomer({
         first_name: form.first_name,
         last_name: form.last_name,
         email: form.email,
@@ -210,6 +207,14 @@ export default function RegisterPage() {
         vat_number: customerType === "b2b" && form.vat_number ? form.vat_number : undefined,
         industry: customerType === "b2b" && form.industry ? form.industry : undefined,
       });
+
+      // Detect if backend put this account into pending_review
+      const status =
+        (result as Record<string, unknown>)?.onboarding_status ??
+        ((result as Record<string, unknown>)?.data as Record<string, unknown>)?.onboarding_status;
+      if (status === "pending_review") {
+        setPendingReview(true);
+      }
       setSubmitted(true);
     } catch (err: unknown) {
       const e = err as Record<string, unknown>;
@@ -224,7 +229,44 @@ export default function RegisterPage() {
     }
   };
 
-  // ── Success screen ────────────────────────────────────────────────────────
+  // ── Pending review screen ─────────────────────────────────────────────────
+  if (submitted && pendingReview) {
+    return (
+      <main className="min-h-screen bg-[#f5f5f5]">
+        <Navbar />
+        <div className="flex min-h-screen items-center justify-center px-5 pt-[76px] lg:pt-20">
+          <div className="w-full max-w-[460px] rounded-[22px] bg-white p-10 text-center shadow-[0_12px_40px_rgba(0,0,0,0.07)]">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-100">
+              <Clock size={26} strokeWidth={1.6} className="text-amber-600" />
+            </div>
+            <h2 className="mt-5 text-xl font-extrabold text-[var(--foreground)]">
+              Request received
+            </h2>
+            <p className="mt-2 text-[0.9rem] leading-6 text-[var(--muted)]">
+              Your access request has been submitted. Our team reviews all B2B account applications and will contact you at{" "}
+              <strong className="text-[var(--foreground)]">{form.email}</strong> once your account is approved.
+            </p>
+            <div className="mt-6 rounded-[14px] border border-amber-200 bg-amber-50 px-4 py-3 text-left">
+              <p className="text-[0.82rem] font-semibold text-amber-800">What happens next?</p>
+              <ul className="mt-2 space-y-1.5 text-[0.8rem] text-amber-700">
+                <li>1. Our team reviews your business information</li>
+                <li>2. You receive an approval email (typically within 1 business day)</li>
+                <li>3. You set your password and gain full access</li>
+              </ul>
+            </div>
+            <p className="mt-5 text-[0.82rem] text-[var(--muted)]">
+              Have questions?{" "}
+              <Link href="/contact" className="font-semibold text-[var(--foreground)] hover:text-[var(--primary)]">
+                Contact our team
+              </Link>
+            </p>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // ── Account created (direct activation) screen ────────────────────────────
   if (submitted) {
     return (
       <main className="min-h-screen bg-[#f5f5f5]">
@@ -274,16 +316,28 @@ export default function RegisterPage() {
 
           <div className="mb-7">
             <h1 className="text-2xl font-extrabold tracking-tight text-[var(--foreground)] md:text-3xl">
-              Create your account
+              Request Access to Okelcor
             </h1>
             <p className="mt-1.5 text-[0.88rem] text-[var(--muted)]">
-              Join Okelcor for access to our tyre catalogue and wholesale pricing.
+              B2B wholesale and export platform for tyre distributors, fleet operators, and dealers.
             </p>
+          </div>
+
+          {/* B2B platform notice */}
+          <div className="mb-6 flex items-start gap-3 rounded-[14px] border border-blue-200 bg-blue-50 px-4 py-3.5">
+            <Building2 size={16} strokeWidth={1.8} className="mt-0.5 shrink-0 text-blue-600" />
+            <div>
+              <p className="text-[0.82rem] font-semibold text-blue-800">B2B access only</p>
+              <p className="mt-0.5 text-[0.8rem] leading-5 text-blue-700">
+                Okelcor serves wholesale buyers, exporters, tyre dealers, and fleet operators.
+                Business accounts are reviewed before activation. Approved customers gain access to wholesale pricing and the full catalogue.
+              </p>
+            </div>
           </div>
 
           {/* Account type toggle */}
           <div className="mb-7 flex rounded-[14px] bg-[#efefef] p-1">
-            {(["b2c", "b2b"] as CustomerType[]).map((type) => (
+            {(["b2b", "b2c"] as CustomerType[]).map((type) => (
               <button
                 key={type}
                 type="button"
@@ -294,7 +348,7 @@ export default function RegisterPage() {
                     : "text-[var(--muted)] hover:text-[var(--foreground)]"
                 }`}
               >
-                {type === "b2c" ? "Individual" : "Business"}
+                {type === "b2b" ? "Business" : "Individual"}
               </button>
             ))}
           </div>
@@ -338,13 +392,13 @@ export default function RegisterPage() {
               />
             </Field>
 
-            <Field label="Phone" error={errors.phone}>
-              <input type="tel" placeholder="+49 123 456 789" value={form.phone} onChange={set("phone")} className={inputCls} />
+            <Field label={customerType === "b2b" ? "Phone" : "Phone"} required={customerType === "b2b"} error={errors.phone}>
+              <input type="tel" placeholder="+49 123 456 789" value={form.phone} onChange={set("phone")} className={errors.phone ? inputErrCls : inputCls} />
             </Field>
 
-            <Field label="Country" error={errors.country}>
+            <Field label="Country" required={customerType === "b2b"} error={errors.country}>
               <div className="relative">
-                <select value={form.country} onChange={set("country")} className={selectCls}>
+                <select value={form.country} onChange={set("country")} className={errors.country ? `${inputErrCls} appearance-none` : selectCls}>
                   <option value="">Select country…</option>
                   {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
                 </select>
@@ -360,7 +414,7 @@ export default function RegisterPage() {
                 </div>
 
                 <Field label="Company Name" required error={errors.company_name}>
-                  <input type="text" placeholder="Okelcor GmbH" value={form.company_name} onChange={set("company_name")} className={errors.company_name ? inputErrCls : inputCls} />
+                  <input type="text" placeholder="Your Company Ltd." value={form.company_name} onChange={set("company_name")} className={errors.company_name ? inputErrCls : inputCls} />
                 </Field>
 
                 <Field label="VAT Number" error={errors.vat_number}>
@@ -443,9 +497,9 @@ export default function RegisterPage() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                   </svg>
-                  Creating account…
+                  Submitting…
                 </span>
-              ) : "Create Account"}
+              ) : "Request Access"}
             </button>
           </form>
 

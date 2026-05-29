@@ -150,16 +150,31 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(data, { status: res.status });
   }
 
-  // 2xx or 5xx — account was created; always send Resend email since Laravel's
-  // mail service is unreliable (broken queue returns 2xx with no email sent)
-  await sendWelcomeEmail(
-    (body.email as string) ?? "",
-    (body.first_name as string) ?? "",
-    (body.last_name as string) ?? ""
-  );
+  // Detect pending_review — skip the "account created" welcome email for
+  // these accounts since the backend will send its own "request received" email,
+  // and the welcome email copy would be misleading ("verify to activate").
+  const onboardingStatus =
+    (data.onboarding_status as string) ??
+    ((data.data as Record<string, unknown>)?.onboarding_status as string) ??
+    null;
 
+  const isPendingReview = onboardingStatus === "pending_review";
+
+  if (!isPendingReview) {
+    // 2xx or 5xx — account was created; always send Resend email since Laravel's
+    // mail service is unreliable (broken queue returns 2xx with no email sent)
+    await sendWelcomeEmail(
+      (body.email as string) ?? "",
+      (body.first_name as string) ?? "",
+      (body.last_name as string) ?? ""
+    );
+  }
+
+  if (res.ok) {
+    return NextResponse.json(data, { status: res.status });
+  }
   return NextResponse.json(
-    res.ok ? data : { message: "Account created. Check your email to activate your account." },
-    { status: res.ok ? res.status : 201 }
+    { message: "Account created. Check your email to activate your account." },
+    { status: 201 }
   );
 }

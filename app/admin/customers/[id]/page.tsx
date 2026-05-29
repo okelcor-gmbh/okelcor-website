@@ -8,17 +8,19 @@ import {
   ShieldOff, ShieldCheck, Ban, Trash2, KeyRound, LogOut,
   Lock, Loader2, AlertCircle, CheckCircle2, Clock, Monitor,
   ShoppingCart, FileText, Activity, Edit3, Save, X,
+  UserCheck, UserX, UserPlus, Send,
 } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 type Status = "active" | "suspended" | "banned" | "locked";
+type OnboardingStatus = "pending_review" | "approved" | "invited" | "active" | "rejected" | "blocked";
 
 type CustomerFull = {
   id: number; first_name: string; last_name: string; email: string;
   phone?: string; customer_type: "b2b" | "b2c"; company_name?: string;
-  country?: string; status?: Status; last_login_at?: string;
-  last_login_ip?: string; last_login_location?: string;
+  country?: string; status?: Status; onboarding_status?: OnboardingStatus;
+  last_login_at?: string; last_login_ip?: string; last_login_location?: string;
   admin_notes?: string; created_at: string;
   failed_login_count?: number; is_locked?: boolean;
 };
@@ -62,6 +64,30 @@ function StatusBadge({ status }: { status: Status }) {
     locked:    "bg-gray-200 text-gray-600",
   };
   return <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[0.72rem] font-bold capitalize ${map[status]}`}>{status}</span>;
+}
+
+function OnboardingBadge({ status }: { status: OnboardingStatus }) {
+  const map: Record<OnboardingStatus, string> = {
+    pending_review: "bg-amber-100 text-amber-700",
+    approved:       "bg-blue-100 text-blue-700",
+    invited:        "bg-purple-100 text-purple-700",
+    active:         "bg-emerald-100 text-emerald-700",
+    rejected:       "bg-red-100 text-red-700",
+    blocked:        "bg-gray-200 text-gray-600",
+  };
+  const label: Record<OnboardingStatus, string> = {
+    pending_review: "Pending Review",
+    approved:       "Approved",
+    invited:        "Invited",
+    active:         "Active",
+    rejected:       "Rejected",
+    blocked:        "Blocked",
+  };
+  return (
+    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[0.72rem] font-bold ${map[status]}`}>
+      {label[status]}
+    </span>
+  );
 }
 
 function OrderStatusBadge({ status, paymentStatus }: { status: string; paymentStatus?: string }) {
@@ -249,11 +275,22 @@ export default function CustomerProfilePage() {
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setActionMsg({ type: "err", text: json.error ?? `Action failed (HTTP ${res.status})` });
+        setActionMsg({ type: "err", text: json.error ?? json.message ?? `Action failed (HTTP ${res.status})` });
       } else {
         setActionMsg({ type: "ok", text: json.message ?? "Action completed successfully." });
         if (action === "delete") { router.push("/admin/customers"); return; }
-        // Refresh customer status
+        // Optimistically update onboarding_status for CRM-1 actions
+        const onboardingUpdate: Record<string, OnboardingStatus> = {
+          approve: "approved",
+          reject:  "rejected",
+          invite:  "invited",
+          block:   "blocked",
+        };
+        if (onboardingUpdate[action]) {
+          setCustomer(prev => prev ? { ...prev, onboarding_status: onboardingUpdate[action] } : prev);
+          return;
+        }
+        // Refresh customer status for other actions
         const refreshed = await fetch(`/api/admin/customers/${id}`, { cache: "no-store" })
           .then(r => r.ok ? r.json() : null).catch(() => null);
         if (refreshed) setCustomer(refreshed.data ?? refreshed);
@@ -322,16 +359,34 @@ export default function CustomerProfilePage() {
       {/* Confirm modal */}
       {confirm && (
         <ConfirmModal
-          title={confirm === "delete" ? "Delete this account?" : confirm === "ban" ? "Ban this account?" : confirm === "suspend" ? "Suspend this account?" : confirm === "logout_all" ? "Log out all devices?" : "Force password reset?"}
+          title={
+            confirm === "delete"               ? "Delete this account?"
+            : confirm === "ban"                ? "Ban this account?"
+            : confirm === "suspend"            ? "Suspend this account?"
+            : confirm === "logout_all"         ? "Log out all devices?"
+            : confirm === "reject"             ? "Reject this account application?"
+            : confirm === "block"              ? "Block this account?"
+            : "Force password reset?"
+          }
           body={
-            confirm === "delete" ? "This permanently deletes the customer and all associated data. Cannot be undone."
-            : confirm === "ban" ? "The account will be permanently banned and all active sessions invalidated."
-            : confirm === "suspend" ? "The account will be suspended. The customer will see a suspension notice when logging in."
+            confirm === "delete"       ? "This permanently deletes the customer and all associated data. Cannot be undone."
+            : confirm === "ban"        ? "The account will be permanently banned and all active sessions invalidated."
+            : confirm === "suspend"    ? "The account will be suspended. The customer will see a suspension notice when logging in."
             : confirm === "logout_all" ? "This will immediately invalidate all active sessions for this customer."
+            : confirm === "reject"     ? "The account application will be rejected. The customer will be notified by email."
+            : confirm === "block"      ? "The account will be blocked from all access. Sessions invalidated immediately."
             : "A password reset email will be sent and the current session will be invalidated."
           }
-          confirmLabel={confirm === "delete" ? "Delete Account" : confirm === "ban" ? "Ban Account" : confirm === "suspend" ? "Suspend" : confirm === "logout_all" ? "Log Out All" : "Send Reset"}
-          danger={confirm === "delete" || confirm === "ban"}
+          confirmLabel={
+            confirm === "delete"    ? "Delete Account"
+            : confirm === "ban"     ? "Ban Account"
+            : confirm === "suspend" ? "Suspend"
+            : confirm === "logout_all" ? "Log Out All"
+            : confirm === "reject"  ? "Reject Application"
+            : confirm === "block"   ? "Block Account"
+            : "Send Reset"
+          }
+          danger={confirm === "delete" || confirm === "ban" || confirm === "reject" || confirm === "block"}
           onCancel={() => setConfirm(null)}
           onConfirm={() => doAction(confirm)}
         />
@@ -370,6 +425,12 @@ export default function CustomerProfilePage() {
               <span className="text-[0.72rem] font-semibold uppercase tracking-wide text-[#9ca3af]">Status</span>
               <StatusBadge status={status} />
             </div>
+            {customer.onboarding_status && (
+              <div className="flex items-center justify-between border-t border-black/[0.06] px-5 py-3">
+                <span className="text-[0.72rem] font-semibold uppercase tracking-wide text-[#9ca3af]">Onboarding</span>
+                <OnboardingBadge status={customer.onboarding_status} />
+              </div>
+            )}
             {(customer.failed_login_count ?? 0) >= 3 && (
               <div className="flex items-center gap-2 border-t border-red-100 bg-red-50 px-5 py-2.5">
                 <Lock size={12} className="shrink-0 text-red-500" />
@@ -416,6 +477,23 @@ export default function CustomerProfilePage() {
           {/* Actions */}
           <SectionCard title="Admin Actions" icon={Shield}>
             <div className="flex flex-wrap gap-2 p-5">
+              {/* CRM-1 onboarding actions */}
+              {customer.onboarding_status === "pending_review" && (
+                <>
+                  <ActionButton label="Approve" icon={UserCheck} variant="success" loading={actionPending === "approve"} onClick={() => doAction("approve")} />
+                  <ActionButton label="Reject" icon={UserX} variant="danger" loading={actionPending === "reject"} onClick={() => setConfirm("reject")} />
+                </>
+              )}
+              {(customer.onboarding_status === "approved" || customer.onboarding_status === "rejected") && (
+                <ActionButton label="Send Invitation" icon={UserPlus} variant="success" loading={actionPending === "invite"} onClick={() => doAction("invite")} />
+              )}
+              {customer.onboarding_status === "invited" && (
+                <ActionButton label="Resend Invite" icon={Send} loading={actionPending === "resend_invite"} onClick={() => doAction("resend_invite")} />
+              )}
+              {customer.onboarding_status && !["rejected", "blocked"].includes(customer.onboarding_status) && customer.onboarding_status !== "pending_review" && (
+                <ActionButton label="Block Account" icon={UserX} variant="danger" loading={actionPending === "block"} onClick={() => setConfirm("block")} />
+              )}
+              {/* Session / account actions */}
               {status === "active" || status === "locked" ? (
                 <ActionButton label="Suspend Account" icon={ShieldOff} variant="warning" loading={actionPending === "suspend"} onClick={() => setConfirm("suspend")} />
               ) : status === "suspended" ? (

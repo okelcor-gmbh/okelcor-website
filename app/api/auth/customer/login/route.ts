@@ -144,6 +144,7 @@ export async function POST(request: NextRequest) {
           : undefined) ??
       "Login failed. Please check your credentials.";
 
+    // Pass onboarding_status so the login page can show the correct blocked/pending screen
     return NextResponse.json({ ...data, message }, { status: res.status });
   }
 

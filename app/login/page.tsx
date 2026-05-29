@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Eye, EyeOff, CheckCircle2, Check, MailWarning, RefreshCcw } from "lucide-react";
+import { Eye, EyeOff, CheckCircle2, Check, MailWarning, RefreshCcw, Clock, XCircle, ShieldOff } from "lucide-react";
 import Navbar from "@/components/navbar";
 import { useCustomerAuth } from "@/context/CustomerAuthContext";
 import { forgotPassword, resendVerification } from "@/lib/customer-auth";
@@ -101,6 +101,9 @@ export default function LoginPage() {
   const [resendingVerify, setResendingVerify] = useState(false);
   const [resendVerifyDone, setResendVerifyDone] = useState(false);
 
+  // Onboarding gate states
+  const [onboardingStatus, setOnboardingStatus] = useState<"pending_review" | "rejected" | "blocked" | null>(null);
+
   // Resend state for ?verified=false banner
   const [reVerifyEmail, setReVerifyEmail] = useState("");
   const [reVerifySending, setReVerifySending] = useState(false);
@@ -158,6 +161,17 @@ export default function LoginPage() {
         router.push(`/forgot-password?email=${encodeURIComponent(email)}`);
         return;
       }
+      // Onboarding gate — backend signals via onboarding_status field
+      const os = e?.onboarding_status as string | undefined;
+      if (os === "pending_review") { setOnboardingStatus("pending_review"); return; }
+      if (os === "rejected")       { setOnboardingStatus("rejected"); return; }
+      if (os === "blocked")        { setOnboardingStatus("blocked"); return; }
+      // Fallback: detect common pending/blocked messages from backend text
+      const msg = ((e?.message as string) ?? "").toLowerCase();
+      if (msg.includes("pending") || msg.includes("under review")) { setOnboardingStatus("pending_review"); return; }
+      if (msg.includes("rejected") || msg.includes("not approved")) { setOnboardingStatus("rejected"); return; }
+      if (msg.includes("blocked") || msg.includes("suspended") || msg.includes("banned")) { setOnboardingStatus("blocked"); return; }
+
       const retryAfter = typeof e?.retry_after === "number" ? (e.retry_after as number) : null;
       setAuthError(
         retryAfter
@@ -234,6 +248,111 @@ export default function LoginPage() {
             >
               Back to login
             </Link>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // ── Pending review screen ─────────────────────────────────────────────────
+  if (onboardingStatus === "pending_review") {
+    return (
+      <main className="min-h-screen bg-[#f5f5f5]">
+        <Navbar />
+        <div className="flex min-h-screen items-center justify-center px-5 pt-[76px] lg:pt-20">
+          <div className="w-full max-w-[420px] rounded-[22px] bg-white p-8 text-center shadow-[0_12px_40px_rgba(0,0,0,0.07)]">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-100">
+              <Clock size={26} strokeWidth={1.6} className="text-amber-600" />
+            </div>
+            <h2 className="mt-5 text-xl font-extrabold text-[var(--foreground)]">
+              Access request under review
+            </h2>
+            <p className="mt-2 text-[0.88rem] leading-6 text-[var(--muted)]">
+              Your account application is being reviewed. You will receive an email once your access has been approved.
+            </p>
+            <p className="mt-4 text-[0.82rem] text-[var(--muted)]">
+              Questions?{" "}
+              <a href="/contact" className="font-semibold text-[var(--foreground)] hover:text-[var(--primary)]">
+                Contact our team
+              </a>
+            </p>
+            <button
+              type="button"
+              onClick={() => setOnboardingStatus(null)}
+              className="mt-5 block text-[0.82rem] text-[var(--muted)] hover:text-[var(--foreground)]"
+            >
+              Back to login
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // ── Rejected screen ───────────────────────────────────────────────────────
+  if (onboardingStatus === "rejected") {
+    return (
+      <main className="min-h-screen bg-[#f5f5f5]">
+        <Navbar />
+        <div className="flex min-h-screen items-center justify-center px-5 pt-[76px] lg:pt-20">
+          <div className="w-full max-w-[420px] rounded-[22px] bg-white p-8 text-center shadow-[0_12px_40px_rgba(0,0,0,0.07)]">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-100">
+              <XCircle size={26} strokeWidth={1.6} className="text-red-500" />
+            </div>
+            <h2 className="mt-5 text-xl font-extrabold text-[var(--foreground)]">
+              Account application not approved
+            </h2>
+            <p className="mt-2 text-[0.88rem] leading-6 text-[var(--muted)]">
+              Your account application was not approved. If you believe this is an error or would like to discuss further, please contact our team.
+            </p>
+            <a
+              href="/contact"
+              className="mt-6 flex h-[46px] w-full items-center justify-center rounded-full bg-[var(--primary)] text-[0.93rem] font-semibold text-white transition hover:bg-[var(--primary-hover)]"
+            >
+              Contact our team
+            </a>
+            <button
+              type="button"
+              onClick={() => setOnboardingStatus(null)}
+              className="mt-4 block w-full text-[0.82rem] text-[var(--muted)] hover:text-[var(--foreground)]"
+            >
+              Back to login
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // ── Blocked screen ────────────────────────────────────────────────────────
+  if (onboardingStatus === "blocked") {
+    return (
+      <main className="min-h-screen bg-[#f5f5f5]">
+        <Navbar />
+        <div className="flex min-h-screen items-center justify-center px-5 pt-[76px] lg:pt-20">
+          <div className="w-full max-w-[420px] rounded-[22px] bg-white p-8 text-center shadow-[0_12px_40px_rgba(0,0,0,0.07)]">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
+              <ShieldOff size={26} strokeWidth={1.6} className="text-gray-500" />
+            </div>
+            <h2 className="mt-5 text-xl font-extrabold text-[var(--foreground)]">
+              Account access restricted
+            </h2>
+            <p className="mt-2 text-[0.88rem] leading-6 text-[var(--muted)]">
+              Access to this account has been restricted. Please contact our team if you need assistance.
+            </p>
+            <a
+              href="/contact"
+              className="mt-6 flex h-[46px] w-full items-center justify-center rounded-full bg-[var(--primary)] text-[0.93rem] font-semibold text-white transition hover:bg-[var(--primary-hover)]"
+            >
+              Contact our team
+            </a>
+            <button
+              type="button"
+              onClick={() => setOnboardingStatus(null)}
+              className="mt-4 block w-full text-[0.82rem] text-[var(--muted)] hover:text-[var(--foreground)]"
+            >
+              Back to login
+            </button>
           </div>
         </div>
       </main>

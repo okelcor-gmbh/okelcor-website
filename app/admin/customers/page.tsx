@@ -5,12 +5,13 @@ import { useRouter } from "next/navigation";
 import {
   Upload, Search, ChevronLeft, ChevronRight, Download,
   FileText, AlertCircle, CheckCircle2, Loader2, Mail, Send,
-  Eye, Ban, Trash2, ShieldOff, ShieldCheck, MoreHorizontal,
+  Eye, Ban, Trash2, ShieldOff, ShieldCheck, UserCheck, UserX, UserPlus, MoreHorizontal,
 } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 type CustomerStatus = "active" | "suspended" | "banned" | "locked";
+type OnboardingStatus = "pending_review" | "approved" | "invited" | "active" | "rejected" | "blocked";
 
 type Customer = {
   id: number;
@@ -25,6 +26,7 @@ type Customer = {
   source?: string;
   // extended fields (backend may not return yet)
   status?: CustomerStatus;
+  onboarding_status?: OnboardingStatus;
   last_login_at?: string | null;
   last_login_location?: string | null;
   failed_login_count?: number;
@@ -35,7 +37,7 @@ type ImportResult = {
   b2b: number; b2c: number; errors?: { row: number; message: string }[];
 };
 type EmailResult  = { sent: number; failed: number; total: number; test_mode: boolean };
-type StatusFilter = "all" | "active" | "suspended" | "banned" | "locked" | "new_this_week";
+type StatusFilter = "all" | "active" | "suspended" | "banned" | "locked" | "new_this_week" | "pending_review";
 type TypeFilter   = "all" | "b2b" | "b2c" | "wix";
 
 const PER_PAGE = 50;
@@ -80,6 +82,30 @@ function TypeBadge({ type }: { type: "b2b" | "b2c" }) {
     <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-[0.67rem] font-bold text-blue-700">B2B</span>
   ) : (
     <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[0.67rem] font-bold text-gray-500">B2C</span>
+  );
+}
+
+function OnboardingBadge({ status }: { status: OnboardingStatus }) {
+  const map: Record<OnboardingStatus, string> = {
+    pending_review: "bg-amber-100 text-amber-700",
+    approved:       "bg-blue-100 text-blue-700",
+    invited:        "bg-purple-100 text-purple-700",
+    active:         "bg-emerald-100 text-emerald-700",
+    rejected:       "bg-red-100 text-red-700",
+    blocked:        "bg-gray-200 text-gray-600",
+  };
+  const label: Record<OnboardingStatus, string> = {
+    pending_review: "Pending Review",
+    approved:       "Approved",
+    invited:        "Invited",
+    active:         "Active",
+    rejected:       "Rejected",
+    blocked:        "Blocked",
+  };
+  return (
+    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[0.67rem] font-bold ${map[status]}`}>
+      {label[status]}
+    </span>
   );
 }
 
@@ -162,11 +188,12 @@ export default function CustomersPage() {
     setLoading(true);
     setTableError(null);
     const p = new URLSearchParams({ per_page: String(PER_PAGE), page: String(page) });
-    if (debSearch)           p.set("search", debSearch);
-    if (typeTab === "b2b")   p.set("customer_type", "b2b");
-    if (typeTab === "b2c")   p.set("customer_type", "b2c");
-    if (typeTab === "wix")   p.set("source", "wix");
-    if (statusTab !== "all") p.set("status", statusTab);
+    if (debSearch)                          p.set("search", debSearch);
+    if (typeTab === "b2b")                  p.set("customer_type", "b2b");
+    if (typeTab === "b2c")                  p.set("customer_type", "b2c");
+    if (typeTab === "wix")                  p.set("source", "wix");
+    if (statusTab === "pending_review")     p.set("onboarding_status", "pending_review");
+    else if (statusTab !== "all")           p.set("status", statusTab);
 
     try {
       const res = await fetch(`/api/admin/customers?${p}`, { cache: "no-store" });
@@ -227,7 +254,7 @@ export default function CustomersPage() {
 
   // ── Inline actions ────────────────────────────────────────────────────────
 
-  async function doAction(customerId: number, action: "suspend" | "ban" | "activate" | "delete") {
+  async function doAction(customerId: number, action: "suspend" | "ban" | "activate" | "delete" | "approve" | "reject" | "invite" | "block" | "resend_invite") {
     setActionPending(customerId);
     try {
       if (action === "delete") {
@@ -243,8 +270,17 @@ export default function CustomersPage() {
           body: JSON.stringify({ action }),
         });
         if (res.ok) {
-          const newStatus: CustomerStatus = action === "suspend" ? "suspended" : action === "ban" ? "banned" : "active";
-          setCustomers(prev => prev.map(c => c.id === customerId ? { ...c, status: newStatus } : c));
+          // Update local row state based on action
+          setCustomers(prev => prev.map(c => {
+            if (c.id !== customerId) return c;
+            if (action === "suspend") return { ...c, status: "suspended" as CustomerStatus };
+            if (action === "ban" || action === "block") return { ...c, status: "banned" as CustomerStatus, onboarding_status: "blocked" as OnboardingStatus };
+            if (action === "activate") return { ...c, status: "active" as CustomerStatus };
+            if (action === "approve") return { ...c, onboarding_status: "approved" as OnboardingStatus };
+            if (action === "reject") return { ...c, onboarding_status: "rejected" as OnboardingStatus };
+            if (action === "invite") return { ...c, onboarding_status: "invited" as OnboardingStatus };
+            return c;
+          }));
         }
       }
     } catch { /* silent — row stays unchanged */ } finally {
@@ -267,12 +303,13 @@ export default function CustomersPage() {
   const totalPages = Math.ceil(total / PER_PAGE);
 
   const STATUS_TABS: { key: StatusFilter; label: string }[] = [
-    { key: "all",          label: "All" },
-    { key: "active",       label: "Active" },
-    { key: "suspended",    label: "Suspended" },
-    { key: "banned",       label: "Banned" },
-    { key: "locked",       label: "Locked" },
-    { key: "new_this_week", label: "New This Week" },
+    { key: "all",            label: "All" },
+    { key: "pending_review", label: "Pending Review" },
+    { key: "active",         label: "Active" },
+    { key: "suspended",      label: "Suspended" },
+    { key: "banned",         label: "Banned" },
+    { key: "locked",         label: "Locked" },
+    { key: "new_this_week",  label: "New This Week" },
   ];
 
   const TYPE_TABS: { key: TypeFilter; label: string }[] = [
@@ -477,6 +514,11 @@ export default function CustomersPage() {
                       {/* Status */}
                       <td className="px-5 py-3">
                         <StatusBadge status={status} />
+                        {c.onboarding_status && (
+                          <div className="mt-0.5">
+                            <OnboardingBadge status={c.onboarding_status} />
+                          </div>
+                        )}
                         {(c.failed_login_count ?? 0) >= 5 && (
                           <p className="mt-0.5 text-[0.67rem] text-red-500">{c.failed_login_count} failed attempts</p>
                         )}
@@ -510,6 +552,27 @@ export default function CustomersPage() {
                               className="flex h-7 w-7 items-center justify-center rounded-lg border border-black/[0.08] text-[#5c5e62] transition hover:bg-[#f0f2f5] hover:text-[#1a1a1a]">
                               <Eye size={13} />
                             </button>
+                            {/* Onboarding: Approve */}
+                            {c.onboarding_status === "pending_review" && (
+                              <button type="button" title="Approve account" onClick={() => doAction(c.id, "approve")}
+                                className="flex h-7 w-7 items-center justify-center rounded-lg border border-emerald-200 text-emerald-600 transition hover:bg-emerald-50">
+                                <UserCheck size={13} />
+                              </button>
+                            )}
+                            {/* Onboarding: Reject */}
+                            {c.onboarding_status === "pending_review" && (
+                              <button type="button" title="Reject account" onClick={() => doAction(c.id, "reject")}
+                                className="flex h-7 w-7 items-center justify-center rounded-lg border border-red-200 text-red-500 transition hover:bg-red-50">
+                                <UserX size={13} />
+                              </button>
+                            )}
+                            {/* Onboarding: Invite */}
+                            {(c.onboarding_status === "approved" || c.onboarding_status === "rejected") && (
+                              <button type="button" title="Send invitation" onClick={() => doAction(c.id, "invite")}
+                                className="flex h-7 w-7 items-center justify-center rounded-lg border border-purple-200 text-purple-600 transition hover:bg-purple-50">
+                                <UserPlus size={13} />
+                              </button>
+                            )}
                             {/* Suspend / Activate */}
                             {status === "active" || status === "locked" ? (
                               <button type="button" title="Suspend account" onClick={() => setPendingAction({ customerId: c.id, type: "suspend" })}

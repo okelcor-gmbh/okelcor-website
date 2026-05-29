@@ -27,6 +27,12 @@ const ACTION_PATH: Record<string, string> = {
   unlock:                "/unlock",
   logout_all:            "/logout-all",
   force_password_reset:  "/force-password-reset",
+  // CRM-1 onboarding actions
+  approve:               "/approve",
+  reject:                "/reject",
+  invite:                "/invite",
+  block:                 "/block",
+  resend_invite:         "/resend-invite",
 };
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
