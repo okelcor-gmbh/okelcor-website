@@ -13,10 +13,19 @@ export type CatalogueLandingConfig = {
   popularSizes?: { label: string; href: string }[];
   faq?: { q: string; a: string }[];
   relatedGroups?: { heading: string; links: RelatedLink[] }[];
+  /** Translatable UI labels — fall back to English defaults when omitted. */
+  uiLabels?: {
+    faqHeading?: string;
+    popularSizesHeading?: string;
+    exploreMore?: string;
+  };
 };
 
 export default function CatalogueLanding({ config }: { config: CatalogueLandingConfig }) {
-  const { eyebrow, h1, intro, filters, breadcrumbSchema, popularSizes, faq, relatedGroups } = config;
+  const { eyebrow, h1, intro, filters, breadcrumbSchema, popularSizes, faq, relatedGroups, uiLabels } = config;
+  const faqHeading        = uiLabels?.faqHeading         ?? "Frequently Asked Questions";
+  const popularSizesLabel = uiLabels?.popularSizesHeading ?? "Popular Sizes";
+  const exploreMoreLabel  = uiLabels?.exploreMore         ?? "Explore more";
 
   const introParas = Array.isArray(intro) ? intro : [intro];
 
@@ -78,7 +87,7 @@ export default function CatalogueLanding({ config }: { config: CatalogueLandingC
         <section className="w-full border-t border-black/[0.06] bg-white py-10 md:py-12">
           <div className="tesla-shell">
             <h2 className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
-              Popular Sizes
+              {popularSizesLabel}
             </h2>
             <div className="mt-4 flex flex-wrap gap-2">
               {popularSizes.map((size) => (
@@ -100,7 +109,7 @@ export default function CatalogueLanding({ config }: { config: CatalogueLandingC
         <section className="w-full border-t border-black/[0.07] bg-[#f5f5f5] py-10 md:py-14">
           <div className="tesla-shell max-w-3xl">
             <h2 className="mb-6 text-[1.2rem] font-bold text-[var(--foreground)] md:text-[1.4rem]">
-              Frequently Asked Questions
+              {faqHeading}
             </h2>
             <div className="divide-y divide-black/[0.07]">
               {faq.map((item) => (
@@ -124,7 +133,7 @@ export default function CatalogueLanding({ config }: { config: CatalogueLandingC
         <section className="w-full border-t border-black/[0.07] bg-white py-10 md:py-14">
           <div className="tesla-shell">
             <p className="mb-6 text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
-              Explore more
+              {exploreMoreLabel}
             </p>
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {relatedGroups.map((group) => (
