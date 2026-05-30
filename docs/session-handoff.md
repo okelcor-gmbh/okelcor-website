@@ -66,6 +66,458 @@ POST /api/v1/admin/quote-requests/{id}/send-follow-up-email
 
 ---
 
+## Completed in Latest Session — CRM-6: Customer Communication & Follow-up Automation (2026-05-29)
+
+---
+
+### CRM-6 — Communication Timeline, Follow-up Email Modal, Follow-ups Dashboard
+
+**Goal:** Give sales team a full communication log and automated follow-up workflow directly inside admin quote and customer detail pages.
+
+**Commits:** `6fd6f58`
+**TypeScript: 0 errors | Build: clean**
+
+#### New Types (`lib/admin-api.ts`)
+
+- `CommunicationType`: `"email" | "call" | "note" | "whatsapp" | "system"`
+- `CommunicationDirection`: `"inbound" | "outbound"`
+- `CommunicationStatus`: `"sent" | "delivered" | "failed" | "logged"`
+- `Communication`: `{ id, type, direction, subject?, body?, status, created_at, created_by_name }`
+- `EmailTemplate`: `{ key, label, subject, body? }`
+- `FollowUpItem`: `{ id, ref_number, full_name, company_name, email, country, follow_up_at, lead_priority, qualification_status, assigned_to_name, last_communication_at, last_communication_type }`
+
+#### Permissions (`lib/admin-permissions.ts`)
+
+- `crm` section added to `super_admin`, `admin`, `order_manager`, `sales_manager`
+- `/admin/crm` → `crm` section mapping
+
+#### New Proxy Routes (7)
+
+| Route | Backend |
+|---|---|
+| `GET /api/admin/crm/follow-ups` | `GET /admin/crm/follow-ups` (filters: `overdue`, `due`, `upcoming`) |
+| `POST /api/admin/crm/follow-ups/{id}/complete` | body: `{ note? }` |
+| `POST /api/admin/crm/follow-ups/{id}/reschedule` | body: `{ follow_up_at, note? }` |
+| `GET+POST /api/admin/customers/{id}/communications` | customer comm log + add entry |
+| `GET+POST /api/admin/quotes/{id}/communications` | quote comm log + add entry |
+| `GET /api/admin/crm/email-templates` | with client-side fallback (6 templates) |
+| `POST /api/admin/quotes/{id}/send-follow-up-email` | body: `{ template, message? }` |
+
+#### New Components
+
+**`components/admin/communication-timeline.tsx`**
+- Works for both `customer` and `quote` contexts via `context` prop
+- Reverse-chronological log: calls, emails, notes, WhatsApp, system entries
+- Type/direction/subject/body add-entry form
+- Compact scroll mode for embedding inside cards
+
+**`components/admin/follow-up-email-modal.tsx`**
+- Fetches templates from `/api/admin/crm/email-templates` (graceful client-side fallback)
+- Template select + optional note + send button
+- Shows inline success/error; communication row logged server-side
+
+**`components/admin/follow-ups-table.tsx`**
+- `getFollowUpStatus()` and `FollowUpBadge()` exported for reuse
+- Filter tabs: All / Overdue / Due Today / Upcoming
+- Overdue rows highlighted red
+- Complete modal (with note) + Reschedule modal (datetime + note)
+- Columns: Lead/Customer, Company, Owner, Follow-up Date, Priority, Status, Last Comm, Actions
+
+#### New Pages
+
+- **`app/admin/crm/follow-ups/page.tsx`** — server component with auth guard; renders `FollowUpsTable`
+
+#### Updated Components
+
+| Component | Change |
+|---|---|
+| `components/admin/quote-detail.tsx` | "Send Follow-up Email" button; CommunicationTimeline card at bottom; FollowUpEmailModal wired |
+| `app/admin/customers/[id]/page.tsx` | CommunicationTimeline card (lazy-loaded) in right column |
+| `components/admin/admin-shell.tsx` | "Follow-ups" nav item (BellRing icon) after Quote Requests |
+
+#### Backend Endpoints Required
+
+```
+GET  /api/v1/admin/crm/follow-ups?overdue=&due=&upcoming=&page=
+POST /api/v1/admin/crm/follow-ups/{id}/complete         body: { note? }
+POST /api/v1/admin/crm/follow-ups/{id}/reschedule       body: { follow_up_at, note? }
+GET  /api/v1/admin/customers/{id}/communications
+POST /api/v1/admin/customers/{id}/communications        body: { type, direction, subject?, body }
+GET  /api/v1/admin/quote-requests/{id}/communications
+POST /api/v1/admin/quote-requests/{id}/communications   body: { type, direction, subject?, body }
+GET  /api/v1/admin/crm/email-templates                  → { data: [{ key, label, subject, body }] }
+POST /api/v1/admin/quote-requests/{id}/send-follow-up-email  body: { template, message? }
+  ← Replace {name} {company} {ref} {admin_name} {message} placeholders
+  ← Log communication row on send and failure
+  ← Return 422 { code: "invalid_email_template" } if key invalid
+  ← Return 422 { code: "email_send_failed" } on mail failure (never 500)
+```
+
+---
+
+## Completed in Latest Session — CRM-5: Customer Data Quality & Deduplication (2026-05-29)
+
+---
+
+### CRM-5 — Data Quality Scoring, Duplicate Detection, Admin Review Tools
+
+**Goal:** Surface data quality issues and potential duplicates in admin, and give sales team tools to recalculate scores, mark records clean, link duplicates, or merge.
+
+**Commits:** `62850bc`
+**TypeScript: 0 errors | Build: clean**
+
+#### New Types (`lib/admin-api.ts`)
+
+- `DataQualityReviewStatus`: `"clean" | "needs_review" | "duplicate_suspected" | "merged" | "ignored"`
+- `DataQualityFlag`: 9 flag types (`duplicate_email`, `duplicate_phone`, `missing_phone`, `missing_company`, `personal_email_domain`, `invalid_vat`, `incomplete_address`, `suspicious_name`, `low_activity`)
+- `AdminUser` gains: `data_quality_score`, `data_review_status`, `data_quality_flags`, `duplicate_of_id`, `duplicate_of_name`, `normalised_email`, `normalised_company`
+- `AdminQuoteFull` gains: `possible_customer_id`, `possible_customer_name`, `lead_existing_customer`
+
+#### New Proxy Routes (7)
+
+| Route | Purpose |
+|---|---|
+| `GET /api/admin/customers/data-quality/summary` | KPI cards |
+| `GET /api/admin/customers/data-quality/issues` | Filterable issues list |
+| `POST /api/admin/customers/{id}/data-quality/recalculate` | Recompute score |
+| `POST /api/admin/customers/{id}/data-quality/mark-clean` | Mark as clean |
+| `POST /api/admin/customers/{id}/data-quality/ignore-duplicate` | Dismiss duplicate flag |
+| `POST /api/admin/customers/{id}/data-quality/link-duplicate` | Link to duplicate |
+| `POST /api/admin/customers/{id}/data-quality/merge-preview` | Preview merge (read-only) |
+
+#### New Components
+
+**`components/admin/data-quality-issues-table.tsx`**
+- Filter bar: flag type, review status, search
+- Columns: Customer, Email, Company, Score, Flags, Duplicate, Status, Actions
+- Per-row: Recalculate / Mark Clean / Ignore Duplicate actions with loading states
+- Pagination
+
+#### Admin Customers List Updates (`app/admin/customers/page.tsx`)
+
+- `DataQualityBadge`: `Q{score}` pill — green ≥80, amber ≥50, red <50
+- Copy icon on duplicate_suspected rows
+- "Duplicates" filter tab → `data_review_status=duplicate_suspected`
+- Customer type gains `data_quality_score`, `data_review_status`
+
+#### Admin Customer Detail Updates (`app/admin/customers/[id]/page.tsx`)
+
+- `CustomerFull` gains 7 data quality fields
+- **Data Quality card**: score gauge, flags list, normalised email/company, possible duplicate link, Recalculate / Mark Clean / Ignore Duplicate action buttons
+
+#### Admin Quote Detail Updates (`components/admin/quote-detail.tsx`)
+
+- Amber notice when `possible_customer_id` or `lead_existing_customer` is set: "This inquiry may belong to an existing customer." + View Customer link
+
+#### New Page
+
+- **`app/admin/customers/data-quality/page.tsx`** — summary cards (Total / Clean / Needs Review / Duplicates / Incomplete / Personal Email) + `DataQualityIssuesTable`; graceful "backend not yet deployed" state
+
+#### Admin Nav
+
+- "Data Quality" entry under Customers (`ScanLine` icon)
+
+#### Backend Endpoints Required
+
+```
+GET  /api/v1/admin/customers/data-quality/summary
+GET  /api/v1/admin/customers/data-quality/issues?flag=&review_status=&q=&page=
+POST /api/v1/admin/customers/{id}/data-quality/recalculate
+POST /api/v1/admin/customers/{id}/data-quality/mark-clean
+POST /api/v1/admin/customers/{id}/data-quality/ignore-duplicate
+POST /api/v1/admin/customers/{id}/data-quality/link-duplicate   body: { duplicate_of_id }
+POST /api/v1/admin/customers/{id}/data-quality/merge-preview    (preview only, no mutations)
+```
+
+---
+
+## Completed in Latest Session — CRM-4: Customer Segmentation & Access Control (2026-05-29)
+
+---
+
+### CRM-4 — Segments, Access Levels, Permission Toggles, Customer-Side Guards
+
+**Goal:** Allow admin to segment customers (Retail/Wholesale/Fleet/etc.), set access level (Inquiry Only → Wholesale), and toggle per-customer permissions (checkout, quotes, wholesale pricing, documents). Surface access blocks to customers where relevant.
+
+**Commits:** `cc2cab5`
+**TypeScript: 0 errors | Build: clean**
+
+#### New Types (`lib/customer-auth.ts`)
+
+```typescript
+type CustomerSegment    = "retail" | "wholesale" | "fleet" | "dealer" | "exporter" | "unknown";
+type CustomerAccessLevel = "inquiry_only" | "standard" | "verified" | "wholesale";
+type MarketRegion       = "eu" | "africa" | "middle_east" | "asia" | "americas" | "global" | "unknown";
+```
+
+`Customer` type gains (all optional — `undefined` = not yet set, never blocks):
+- `customer_segment`, `access_level`, `market_region`
+- `approved_for_checkout`, `approved_for_quotes`, `approved_for_wholesale_pricing`, `approved_for_documents`
+
+#### New Proxy Route
+
+- **`PATCH /api/admin/customers/{id}/access`** → `PATCH /admin/customers/{id}/access`
+
+#### Admin Customers List (`app/admin/customers/page.tsx`)
+
+- `AccessLevelBadge`: coloured pill per level (Inquiry Only → Wholesale)
+- `SegmentBadge`: indigo pill for non-unknown segments
+- `PermissionDots`: two coloured dots (green = allowed, red = blocked) for checkout and documents with title tooltips
+- All shown in Status cell beneath onboarding badge
+
+#### Admin Customer Detail (`app/admin/customers/[id]/page.tsx`)
+
+- **Access Control card**: segment select, access level select, market region select, 4 permission toggles (checkout / quotes / wholesale pricing / documents)
+- State syncs from customer on load; Save → PATCH with success/error toast
+
+#### Customer-Side Guards
+
+**`components/checkout/checkout-flow.tsx`**
+- If `customer.approved_for_checkout === false` (explicit false — never triggers on `undefined`): shows amber "Checkout access pending" screen with contact link
+
+**`components/account/trade-documents-card.tsx`**
+- If `customer.approved_for_documents === false`: shows amber "Document access pending" message
+- Reads from `CustomerAuthContext`; `undefined` = never blocked
+
+#### Backend Endpoints Required
+
+```
+PATCH /api/v1/admin/customers/{id}/access
+  body: { customer_segment?, access_level?, market_region?,
+          approved_for_checkout?, approved_for_quotes?,
+          approved_for_wholesale_pricing?, approved_for_documents? }
+```
+
+---
+
+## Completed in Latest Session — CRM-3: Lead Qualification & Sales Pipeline (2026-05-29)
+
+---
+
+### CRM-3 — Pipeline Tabs, Assignment, Qualification Form, Convert to Customer Modal
+
+**Goal:** Turn the admin quotes table into a full sales pipeline — qualification status tabs, priority/type filters, owner assignment, and a Convert to Customer modal with 3 onboarding modes.
+
+**Commits:** `d283e74` (feature) · `f6ce4e7` (fix: 409 conflict handling)
+**TypeScript: 0 errors | Build: clean**
+
+#### New Types (`lib/admin-api.ts`)
+
+```typescript
+type LeadPriority        = "urgent" | "high" | "normal" | "low";
+type LeadCustomerType    = "dealer" | "workshop" | "fleet" | "exporter" | "private";
+type QualificationStatus = "new" | "needs_review" | "qualified" | "proposal_sent"
+                         | "follow_up" | "converted" | "rejected" | "spam";
+type LeadSource          = "website" | "referral" | "ebay" | "trade_show" | "other";
+```
+
+`AdminQuote` gains: `assigned_to`, `assigned_to_name`, `follow_up_at`, `lead_priority`, `lead_source`, `lead_customer_type`, `qualification_status`
+
+`AdminQuoteFull` gains: `qualification_reason`, `internal_notes`, `assigned_at`
+
+#### New Proxy Routes (6)
+
+| Route | Purpose |
+|---|---|
+| `POST /api/admin/quotes/{id}/assign` | Assign owner + follow-up date |
+| `POST /api/admin/quotes/{id}/qualification` | Priority / status / type / reason / notes |
+| `POST /api/admin/quotes/{id}/notes` | Internal notes only |
+| `POST /api/admin/quotes/{id}/convert-to-customer` | `invite \| approve \| pending_review` |
+| `GET /api/admin/quotes/summary` | Pipeline counts (graceful 404 fallback) |
+| `GET /api/admin/users` | Admin users list for assign dropdown |
+
+#### Admin Quotes Page (`app/admin/quotes/page.tsx`)
+
+Pipeline summary cards: New / Needs Review / Qualified / Proposal Sent / Follow-up Due / Unassigned / High Priority / Spam — each links to filtered view via query param.
+
+#### Admin Quotes Table (`components/admin/quotes-table.tsx`) — Full rewrite
+
+- 9 `qualification_status` pipeline tabs (New → Converted → Spam)
+- Priority filter row (Urgent / High / Normal / Low)
+- Customer type filter row (Dealer / Workshop / Fleet / Exporter / Private)
+- Follow-up Due toggle with amber/red overdue indicator
+- New columns: Priority badge, Qual Status, Assigned owner, Follow-up date
+- `FollowUpIndicator`: red "Overdue" / amber "Due soon"
+- Inline Qualify / Reject / Spam quick actions with optimistic UI
+
+#### Admin Quote Detail (`components/admin/quote-detail.tsx`)
+
+**Lead Qualification card:**
+- Assigned owner dropdown (lazy-loads admin users list)
+- Follow-up datetime picker
+- Priority, Customer Type, Pipeline Status, Qualification Reason, Internal Notes
+- Quick action bar: Assign to me / Mark Qualified / Reject / Mark Spam / Convert to Customer
+- Save Pipeline → calls `/qualification` + `/assign` endpoints
+
+**Convert to Customer modal (3 modes):**
+- `invite` — sends account invite email
+- `approve` — immediately approves existing pending account
+- `pending_review` — creates account in pending state
+- Shows lead summary; links to customer profile on success
+
+#### Fix: 409 Conflict Handling (`f6ce4e7`)
+
+Before: backend 409 showed "Error 409" or "Error 500".
+
+After: structured `convertConflict` state:
+- `customer_exists`: amber warning + "View Customer" link + "Link Existing Customer" (retries with `force_link: true`)
+- `already_converted` / `invalid_status`: red card + backend message + optional View Customer link
+- Generic errors: red card + "Try Again" back button
+
+#### Backend Endpoints Required
+
+```
+POST /api/v1/admin/quote-requests/{id}/assign
+  body: { assigned_to_id?, follow_up_at? }
+
+POST /api/v1/admin/quote-requests/{id}/qualification
+  body: { lead_priority?, qualification_status?, lead_customer_type?,
+          qualification_reason?, internal_notes? }
+
+POST /api/v1/admin/quote-requests/{id}/notes
+  body: { internal_notes }
+
+POST /api/v1/admin/quote-requests/{id}/convert-to-customer
+  body: { mode: "invite"|"approve"|"pending_review", force_link?: boolean }
+  ← 409 { code: "customer_exists"|"already_converted"|"invalid_status", customer_id? }
+
+GET  /api/v1/admin/quote-requests/summary
+  ← { new, needs_review, qualified, proposal_sent, follow_up_due, unassigned, high_priority, spam }
+
+GET  /api/v1/admin/users
+  ← { data: [{ id, name, email, role }] }
+```
+
+---
+
+## Completed in Latest Session — CRM-2: Inquiry Quality Filtering (2026-05-29)
+
+---
+
+### CRM-2 — Client-Side Quality Checker, Admin Quality Review, Spam Filter
+
+**Goal:** Block obviously junk quote submissions on the frontend before they reach the backend, and give admins a Quality Review card with inline qualify/reject/spam actions on every quote.
+
+**Commits:** `61ddac4`
+**TypeScript: 0 errors | Build: clean**
+
+#### New: `lib/inquiry-quality.ts`
+
+Client-side quality checker. Returns `{ pass: boolean, reason?: string }`.
+
+Rules (in order):
+1. **Immediate pass** — tyre size pattern present (e.g. `205/55R16`) in items or notes
+2. **Hard blocks**: empty, <5 chars, all-same-char, 2+ URLs, pure number, keyboard smash (asdf/qwerty), single rubbish word
+3. **Intentionally lenient** — `"Need 200 Michelin to Ghana"` always passes
+
+#### Quote Form (`components/quote/quote-form.tsx`)
+
+- Runs `checkInquiryQuality()` before submit; shows inline error on notes field if blocked
+- Handles backend `422 { code: "low_quality_inquiry" }` — highlights notes field with backend message
+- Helper text: "Include tyre size, quantity, destination country, preferred brand"
+- Example hint: "200 × Michelin 205/55R16 to Lagos, Nigeria"
+
+#### New Types (`lib/admin-api.ts`)
+
+`AdminQuote` gains: `quality_score`, `quality_flags`, `review_status`
+
+`AdminQuoteFull` gains: `reviewed_by`, `reviewed_at`, `rejection_reason`
+
+#### New Proxy Route
+
+- **`POST /api/admin/quotes/{id}/review`** → `{ action: "qualify" | "reject" | "spam" }`
+
+#### Admin Quotes Table (`components/admin/quotes-table.tsx`)
+
+- Quality Score badge per row (green ≥80, amber ≥50, red <50)
+- Review Status badge: needs_review / qualified / rejected / spam
+- Second filter row: All Quality | Needs Review | Qualified | Rejected | Spam
+- Inline actions: Qualify (✓) / Reject (✗) / Spam (⚠) with optimistic UI
+
+#### Admin Quote Detail (`components/admin/quote-detail.tsx`)
+
+- **Quality Review card**: score gauge, review_status badge, quality flags, rejection reason
+- Action buttons: Qualify / Reject / Mark Spam with loading states
+
+#### Backend Endpoints Required
+
+```
+POST /api/v1/admin/quote-requests/{id}/review
+  body: { action: "qualify" | "reject" | "spam" }
+
+GET  /api/v1/admin/quote-requests/{id}
+  ← Must include: quality_score, quality_flags, review_status, reviewed_by, reviewed_at, rejection_reason
+```
+
+---
+
+## Completed in Latest Session — CRM-1: Controlled B2B Customer Onboarding (2026-05-29)
+
+---
+
+### CRM-1 — Request Access Flow, Pending Review States, Admin Onboarding Actions
+
+**Goal:** Replace open self-registration with a controlled B2B onboarding flow. New customers enter `pending_review` — admins must explicitly approve, reject, invite, or block before they can access the platform.
+
+**Commits:** `39fc8bc`
+**TypeScript: 0 errors | Build: clean**
+
+#### Register Page (`app/register/page.tsx`)
+
+- "Request Access" framing (not "Sign Up")
+- B2B tab default; phone + country required for B2B accounts
+- `pending_review` amber screen shown after successful registration
+- B2B platform notice banner: "Okelcor is a wholesale trade platform…"
+
+#### Register Route (`app/api/auth/customer/register/route.ts`)
+
+- Skips Resend welcome email when `onboarding_status === "pending_review"` (backend sends its own request-received notification)
+
+#### Login Page (`app/login/page.tsx`)
+
+Distinct screens per status:
+- `pending_review` → amber: "Your account is pending review. We'll notify you when approved."
+- `rejected` → red: "Your access request was not approved."
+- `blocked` → red: "Your account has been suspended."
+
+Reads `onboarding_status` from backend error + `message` text fallback.
+
+#### Admin Customers List (`app/admin/customers/page.tsx`)
+
+- `OnboardingBadge`: coloured pill (Pending Review / Approved / Rejected / Blocked)
+- "Pending Review" filter tab
+- Per-row inline actions: Approve / Reject / Invite (with loading states)
+
+#### Admin Customer Detail (`app/admin/customers/[id]/page.tsx`)
+
+- `onboarding_status` displayed in Account Info card
+- Full action set: Approve / Reject / Send Invitation / Resend Invite / Block
+
+#### Admin Actions Proxy (`app/api/admin/customers/{id}/actions/route.ts`)
+
+Added to `ACTION_PATH`:
+- `approve`, `reject`, `invite`, `block`, `resend_invite`
+
+#### Quote Route (`app/api/quote/route.ts`)
+
+- Verbose send logging: logs resolved recipient email, FROM address, and Resend message ID on every successful send
+
+#### Backend Endpoints Required
+
+```
+POST /api/v1/admin/customers/{id}/approve
+POST /api/v1/admin/customers/{id}/reject
+POST /api/v1/admin/customers/{id}/invite
+POST /api/v1/admin/customers/{id}/block
+POST /api/v1/admin/customers/{id}/resend_invite
+
+GET  /api/v1/auth/customer/login
+  ← On failure for pending/rejected/blocked accounts:
+    { message: "...", onboarding_status: "pending_review"|"rejected"|"blocked" }
+```
+
+---
+
 ## Completed in Latest Session — DOC-6: Customer Order Confirmation Acceptance Flow (2026-05-22)
 
 ---
