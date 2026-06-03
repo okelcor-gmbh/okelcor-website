@@ -87,6 +87,53 @@ interface Props {
   onStatusChange?: (status: ProposalStatus | string) => void;
 }
 
+// ── Item derivation ───────────────────────────────────────────────────────────
+
+function buildDraftBody(quote: AdminQuoteFull): Record<string, unknown> {
+  // Structured tyre_items (preferred path)
+  if (Array.isArray(quote.tyre_items) && quote.tyre_items.length > 0) {
+    return {
+      items: quote.tyre_items.map((item) => ({
+        description: item.size || "Tyre",
+        size: item.size || "",
+        quantity: item.quantity || "1",
+      })),
+    };
+  }
+  // Legacy single-row fallback
+  if (quote.tyre_size || quote.quantity) {
+    return {
+      items: [{
+        description: quote.tyre_size || "Tyre",
+        size: quote.tyre_size || "",
+        quantity: quote.quantity || "1",
+      }],
+    };
+  }
+  // No items available — send empty body; backend returns proposal_items_missing
+  return {};
+}
+
+// Map raw backend validation errors to friendly messages
+function mapDraftError(json: Record<string, unknown>, status: number): string {
+  const code = json.code as string | undefined;
+  const msg  = json.message as string | undefined;
+
+  if (code === "proposal_items_missing") {
+    return "This quote request has no items. Add tyre items to the quote before creating a proposal.";
+  }
+  // Laravel validation: { errors: { items: ["The items field is required."] } }
+  const errors = json.errors as Record<string, string[]> | undefined;
+  if (errors?.items?.length) {
+    return "This quote request has no items. Add tyre items to the quote before creating a proposal.";
+  }
+  // Generic "items field is required" in message text
+  if (msg?.toLowerCase().includes("items") && msg?.toLowerCase().includes("required")) {
+    return "This quote request has no items. Add tyre items to the quote before creating a proposal.";
+  }
+  return msg ?? (json.error as string | undefined) ?? `Action failed (HTTP ${status})`;
+}
+
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function ProposalCard({ quote, onStatusChange }: Props) {
@@ -139,7 +186,9 @@ export default function ProposalCard({ quote, onStatusChange }: Props) {
       );
       const json = await res.json().catch(() => ({})) as Record<string, unknown>;
       if (!res.ok) {
-        const errMsg = (json.message ?? json.error ?? `Action failed (HTTP ${res.status})`) as string;
+        const errMsg = action === "draft"
+          ? mapDraftError(json, res.status)
+          : (json.message ?? json.error ?? `Action failed (HTTP ${res.status})`) as string;
         setError(errMsg);
         return;
       }
@@ -183,7 +232,7 @@ export default function ProposalCard({ quote, onStatusChange }: Props) {
   // ── Re-draft (from rejected / expired) ────────────────────────────────────
 
   function handleRedraft() {
-    doAction("draft");
+    doAction("draft", buildDraftBody(quote));
   }
 
   // ── Render ─────────────────────────────────────────────────────────────────
@@ -231,7 +280,7 @@ export default function ProposalCard({ quote, onStatusChange }: Props) {
               <button
                 type="button"
                 disabled={loading !== null}
-                onClick={() => doAction("draft")}
+                onClick={() => doAction("draft", buildDraftBody(quote))}
                 className="flex items-center gap-2 rounded-full bg-[#1a1a1a] px-5 py-2.5 text-[0.875rem] font-semibold text-white transition hover:bg-[#333] disabled:opacity-50"
               >
                 {loading === "draft" ? <Loader2 size={14} className="animate-spin" /> : <FileText size={14} />}
