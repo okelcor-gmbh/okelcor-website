@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -27,6 +28,9 @@ export default async function QuoteDetailPage({ params }: Props) {
   const { id } = await params;
   const numId = Number(id);
   if (!numId) notFound();
+
+  const cookieStore = await cookies();
+  const adminRole = cookieStore.get("admin_role")?.value ?? undefined;
 
   let quote: AdminQuoteFull | null = null;
   try {
@@ -69,7 +73,7 @@ export default async function QuoteDetailPage({ params }: Props) {
         </p>
       </div>
 
-      <QuoteDetail quote={quote} />
+      <QuoteDetail quote={quote} adminRole={adminRole} />
     </div>
   );
 }

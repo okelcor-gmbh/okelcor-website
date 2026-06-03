@@ -367,6 +367,11 @@ export type QualificationStatus =
 export type LeadSource =
   | "website_quote" | "contact_form" | "ebay" | "phone" | "email" | "referral";
 
+// CRM-7 proposal lifecycle
+export type ProposalStatus =
+  | "none" | "draft" | "ready" | "sent" | "accepted"
+  | "rejected" | "expired" | "converted";
+
 export type AdminQuote = {
   id: number;
   ref_number: string;
@@ -389,6 +394,8 @@ export type AdminQuote = {
   lead_source?: LeadSource | string | null;
   lead_customer_type?: LeadCustomerType | string;
   qualification_status?: QualificationStatus | string;
+  // CRM-7 proposal fields (list-level — for table badge)
+  proposal_status?: ProposalStatus | string | null;
   created_at: string;
   order_id?: number | null;
   order_ref?: string | null;
@@ -440,6 +447,17 @@ export type AdminQuoteFull = AdminQuote & {
   possible_customer_id?: number | null;
   possible_customer_name?: string | null;
   lead_existing_customer?: boolean | null;
+  // CRM-7 proposal management
+  proposal_status?: ProposalStatus | string | null;
+  proposal_number?: string | null;
+  proposal_sent_at?: string | null;
+  proposal_accepted_at?: string | null;
+  proposal_rejected_at?: string | null;
+  proposal_expires_at?: string | null;
+  proposal_acceptance_token?: string | null;
+  proposal_rejection_reason?: string | null;
+  proposal_total?: number | null;
+  proposal_currency?: string | null;
 };
 
 export type AdminHeroSlideTranslation = {

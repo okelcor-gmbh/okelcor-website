@@ -46,6 +46,36 @@ const QUAL_TABS = [
   { key: "spam",             label: "Spam" },
 ] as const;
 
+// CRM-7 proposal status display
+const PROPOSAL_STYLES: Record<string, string> = {
+  draft:     "bg-amber-50 text-amber-700 border border-amber-200",
+  ready:     "bg-blue-50 text-blue-700 border border-blue-200",
+  sent:      "bg-indigo-50 text-indigo-700 border border-indigo-200",
+  accepted:  "bg-emerald-50 text-emerald-700 border border-emerald-200",
+  rejected:  "bg-red-50 text-red-600 border border-red-200",
+  expired:   "bg-gray-100 text-gray-500 border border-gray-200",
+  converted: "bg-teal-50 text-teal-700 border border-teal-200",
+};
+
+const PROPOSAL_LABELS: Record<string, string> = {
+  draft:     "P: Draft",
+  ready:     "P: Ready",
+  sent:      "P: Sent",
+  accepted:  "P: Accepted",
+  rejected:  "P: Rejected",
+  expired:   "P: Expired",
+  converted: "P: Converted",
+};
+
+function ProposalBadge({ status }: { status?: string | null }) {
+  if (!status || status === "none") return null;
+  return (
+    <span className={`inline-flex items-center rounded px-1.5 py-0.5 text-[0.62rem] font-bold ${PROPOSAL_STYLES[status] ?? "bg-gray-100 text-gray-500 border border-gray-200"}`}>
+      {PROPOSAL_LABELS[status] ?? `P: ${status}`}
+    </span>
+  );
+}
+
 const PRIORITY_TABS = [
   { key: "all",    label: "All Priority" },
   { key: "urgent", label: "Urgent" },
@@ -389,7 +419,10 @@ export default function QuotesTable({
                       </td>
                       {/* Pipeline Status + actions */}
                       <td className="px-4 py-3">
-                        <QualBadge status={effectiveQualStatus} />
+                        <div className="flex flex-col gap-1">
+                          <QualBadge status={effectiveQualStatus} />
+                          <ProposalBadge status={quote.proposal_status} />
+                        </div>
                         {isPending ? (
                           <Loader2 size={13} className="mt-1 animate-spin text-[#E85C1A]" />
                         ) : (

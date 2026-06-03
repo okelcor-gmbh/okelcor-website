@@ -2,6 +2,150 @@
 
 ---
 
+## Completed in Latest Session — CRM-7: Sales Pipeline & Proposal Management (2026-06-02)
+
+---
+
+### CRM-7 — Proposal Lifecycle, Public Acceptance Page, Convert-to-Order Gate
+
+**Goal:** Insert a controlled proposal workflow between qualified lead and order creation. Customer must accept the proposal before the order can be created.
+
+**TypeScript: 0 errors | Build: clean**
+
+#### New Type (`lib/admin-api.ts`)
+
+```typescript
+export type ProposalStatus =
+  | "none" | "draft" | "ready" | "sent" | "accepted"
+  | "rejected" | "expired" | "converted";
+```
+
+`AdminQuote` gains: `proposal_status?: ProposalStatus | string | null` (for table badge)
+
+`AdminQuoteFull` gains:
+- `proposal_status`, `proposal_number`, `proposal_sent_at`, `proposal_accepted_at`
+- `proposal_rejected_at`, `proposal_expires_at`, `proposal_acceptance_token`
+- `proposal_rejection_reason`, `proposal_total`, `proposal_currency`
+
+#### New Proxy Routes (7)
+
+| Route | Backend |
+|---|---|
+| `POST /api/admin/quotes/{id}/proposal/draft` | `POST /admin/quote-requests/{id}/proposal/draft` |
+| `POST /api/admin/quotes/{id}/proposal/mark-ready` | `POST /admin/quote-requests/{id}/proposal/mark-ready` |
+| `POST /api/admin/quotes/{id}/proposal/send` | `POST /admin/quote-requests/{id}/proposal/send` |
+| `POST /api/admin/quotes/{id}/proposal/void` | `POST /admin/quote-requests/{id}/proposal/void` |
+| `GET /api/proposals/{token}` | `GET /proposals/{token}` — public, no auth |
+| `POST /api/proposals/{token}/accept` | `POST /proposals/{token}/accept` — public |
+| `POST /api/proposals/{token}/reject` | `POST /proposals/{token}/reject` — public |
+
+#### New Components
+
+**`components/admin/proposal-card.tsx`**
+- Full state machine card for all 8 proposal statuses (none → draft → ready → sent → accepted / rejected / expired / converted)
+- Per-state: appropriate badge, timestamps, total, action buttons
+- Void modal with optional reason
+- "Copy Acceptance Link" → copies `/proposals/accept/{token}` to clipboard
+- Resend button for sent proposals
+- "Create New Proposal" from rejected/expired states re-calls the `draft` endpoint
+- Calls `onStatusChange(status)` to parent so Convert to Order gate updates live
+
+**`components/proposals/proposal-acceptance-actions.tsx`**
+- Public client component: Accept + Decline (with optional reason) buttons
+- Calls `/api/proposals/{token}/accept` and `/api/proposals/{token}/reject`
+- Success/declined terminal states
+
+#### New Pages
+
+**`app/proposals/accept/[token]/page.tsx`**
+- Public server component (no auth required), `robots: noindex`
+- Fetches proposal info via `/api/proposals/{token}` → renders proposal number, company, total, expiry
+- State banners: pending (blue) / accepted (emerald) / rejected (gray) / expired (amber) / invalid (gray)
+- Embeds `ProposalAcceptanceActions` client component when pending
+- Support block (email + phone) on invalid / rejected / expired
+- Pattern mirrors `/documents/accept/[token]`
+
+#### Updated Components
+
+| Component | Change |
+|---|---|
+| `components/admin/quote-detail.tsx` | Added `adminRole?: string` prop; `proposalStatus` state synced from `ProposalCard`; `ProposalCard` inserted above Order Conversion card; Convert to Order gated: amber warning + super_admin override confirmation when `proposalGated = true` |
+| `app/admin/quotes/[id]/page.tsx` | Reads `admin_role` cookie server-side; passes `adminRole` prop to `QuoteDetail` |
+| `components/admin/quotes-table.tsx` | `ProposalBadge` sub-component added; shown in Pipeline Status column below `QualBadge`; styles for all 7 proposal statuses |
+
+#### Proposal State Machine
+
+```
+null / "none"  →  "draft"   (Create Draft Proposal)
+"draft"        →  "ready"   (Mark Ready)
+"ready"        →  "sent"    (Send Proposal — emails customer with acceptance link)
+"sent"         →  "accepted" (customer POSTs /proposals/{token}/accept)
+"sent"         →  "rejected" (customer POSTs /proposals/{token}/reject)
+"sent"         →  "expired"  (backend sets when proposal_expires_at passes)
+"accepted"     →  "converted" (admin converts to order — triggered by Convert to Order flow)
+"rejected"     →  "draft"   (Create New Proposal — re-drafts)
+"expired"      →  "draft"   (Create New Proposal — re-drafts)
+Any non-terminal → void (POST .../proposal/void with optional reason)
+```
+
+#### Convert to Order Gate
+
+| Condition | Behavior |
+|---|---|
+| `proposal_status` is `null` / `"none"` | No gate — existing behavior (backward compat with old quotes) |
+| `proposal_status` is `"draft"` / `"ready"` / `"sent"` / `"rejected"` / `"expired"` | Amber warning: "Customer must accept the proposal before this lead can become an order." |
+| `proposal_status` is `"accepted"` / `"converted"` | Unlocked — orange "Convert to Order" button shown normally |
+| Super admin + gated | Extra "Force Convert (Super Admin Override)" button with 2-step confirmation |
+
+#### Backend Endpoints Required (frontend is ready)
+
+```
+POST /api/v1/admin/quote-requests/{id}/proposal/draft
+  ← Creates or updates proposal draft
+  ← Returns updated proposal fields: proposal_status, proposal_number, etc.
+
+POST /api/v1/admin/quote-requests/{id}/proposal/mark-ready
+  ← Sets proposal_status = "ready"
+  ← Returns updated proposal fields
+
+POST /api/v1/admin/quote-requests/{id}/proposal/send
+  ← Sets proposal_status = "sent", proposal_sent_at = now
+  ← Generates proposal_acceptance_token (UUID)
+  ← Sends email to customer: subject "Proposal from Okelcor — {proposal_number}"
+  ← Email includes: name/company, summary, expiry, accept/reject link, support contact
+  ← Returns updated proposal fields including proposal_acceptance_token
+
+POST /api/v1/admin/quote-requests/{id}/proposal/void
+  body: { reason? }
+  ← Clears proposal_status back to "none" (or sets "voided" if backend has that status)
+  ← Returns updated proposal fields
+
+GET /api/v1/proposals/{token}   (public — no auth)
+  ← Returns safe proposal info:
+    { proposal_number, quote_ref, company_name, full_name,
+      proposal_total, proposal_currency, proposal_expires_at,
+      proposal_sent_at, status, already_accepted, already_rejected,
+      already_expired, document_url? }
+
+POST /api/v1/proposals/{token}/accept   (public)
+  ← Sets proposal_status = "accepted", proposal_accepted_at = now
+  ← Logs: proposal_accepted
+  ← Returns { message: "..." }
+
+POST /api/v1/proposals/{token}/reject   (public)
+  body: { reason? }
+  ← Sets proposal_status = "rejected", proposal_rejected_at = now, proposal_rejection_reason
+  ← Logs: proposal_rejected
+  ← Returns { message: "..." }
+```
+
+#### Audit Logs (backend should emit)
+- `proposal_drafted`, `proposal_ready`, `proposal_sent`
+- `proposal_accepted`, `proposal_rejected`, `proposal_voided`
+- `proposal_converted_to_order`
+
+---
+
 ## Completed in Latest Session — CRM-6 FIX: Follow-up Email Templates + 500 Error (2026-05-29)
 
 ---

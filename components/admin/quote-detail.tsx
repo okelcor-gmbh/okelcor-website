@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import CommunicationTimeline from "@/components/admin/communication-timeline";
 import FollowUpEmailModal from "@/components/admin/follow-up-email-modal";
+import ProposalCard from "@/components/admin/proposal-card";
 import { updateQuoteStatus } from "@/app/admin/quotes/actions";
 import type { ConvertToOrderResult } from "@/app/admin/quotes/actions";
 import type { AdminQuoteFull } from "@/lib/admin-api";
@@ -107,7 +108,13 @@ const REVIEW_STATUS_LABELS: Record<string, string> = {
   spam:         "Spam",
 };
 
-export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
+export default function QuoteDetail({
+  quote,
+  adminRole,
+}: {
+  quote: AdminQuoteFull;
+  adminRole?: string;
+}) {
   const router = useRouter();
   const [status, setStatus] = useState<QuoteStatus>(
     QUOTE_STATUSES.includes(quote.status as QuoteStatus)
@@ -212,6 +219,21 @@ export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
   } | null>(null);
 
   const [showEmailModal, setShowEmailModal] = useState(false);
+
+  // CRM-7 proposal state (tracked here so Convert to Order can gate on it)
+  const [proposalStatus, setProposalStatus] = useState<string | null>(
+    (quote as Record<string, unknown>).proposal_status as string | null ?? null
+  );
+
+  // Convert to Order is gated if there is an active proposal that hasn't been accepted.
+  // null / "none" = no proposal in use → no gate (backward compat with old quotes).
+  const hasProposalGate = !!proposalStatus && proposalStatus !== "none";
+  const proposalAccepted = proposalStatus === "accepted" || proposalStatus === "converted";
+  const proposalGated = hasProposalGate && !proposalAccepted;
+  const isSuperAdmin = adminRole === "super_admin";
+
+  // Override confirmation state
+  const [showOverrideConfirm, setShowOverrideConfirm] = useState(false);
 
   const loadAdminUsers = async () => {
     if (adminUsersLoaded) return;
@@ -889,6 +911,12 @@ export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
           </div>
         )}
 
+        {/* ── CRM-7: Proposal Management card ── */}
+        <ProposalCard
+          quote={quote}
+          onStatusChange={(s) => setProposalStatus(s)}
+        />
+
         {/* ── Order Conversion card ── */}
         <div className="rounded-2xl bg-white p-6 shadow-sm">
           <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
@@ -924,18 +952,72 @@ export default function QuoteDetail({ quote }: { quote: AdminQuoteFull }) {
               )}
             </div>
           ) : quote.status === "quoted" ? (
-            <div className="flex flex-wrap items-center gap-4">
-              <p className="text-[0.83rem] text-[#5c5e62]">
-                This quote is ready to be converted into a confirmed order.
-              </p>
-              <button
-                type="button"
-                onClick={() => setShowConvertModal(true)}
-                className="flex items-center gap-2 rounded-full bg-[#E85C1A] px-6 py-2.5 text-[0.875rem] font-semibold text-white transition hover:bg-[#d14f14]"
-              >
-                <ShoppingCart size={15} />
-                Convert to Order
-              </button>
+            <div className="flex flex-col gap-4">
+              {proposalGated ? (
+                <>
+                  <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3.5">
+                    <AlertCircle size={15} className="mt-0.5 shrink-0 text-amber-600" />
+                    <div>
+                      <p className="text-[0.875rem] font-semibold text-amber-800">
+                        Customer must accept the proposal before this lead can become an order.
+                      </p>
+                      <p className="mt-0.5 text-[0.78rem] text-amber-700">
+                        Current proposal status:{" "}
+                        <span className="font-bold capitalize">{proposalStatus?.replace(/_/g, " ")}</span>
+                      </p>
+                    </div>
+                  </div>
+                  {isSuperAdmin && !showOverrideConfirm && (
+                    <button
+                      type="button"
+                      onClick={() => setShowOverrideConfirm(true)}
+                      className="self-start flex items-center gap-2 rounded-full border border-amber-300 bg-amber-50 px-5 py-2.5 text-[0.83rem] font-semibold text-amber-800 transition hover:bg-amber-100"
+                    >
+                      <AlertCircle size={14} />
+                      Force Convert (Super Admin Override)
+                    </button>
+                  )}
+                  {showOverrideConfirm && (
+                    <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-4">
+                      <p className="mb-3 text-[0.875rem] font-semibold text-red-700">
+                        Are you sure? This bypasses the proposal acceptance requirement.
+                      </p>
+                      <p className="mb-4 text-[0.8rem] text-red-600">
+                        Only proceed if you have explicit off-channel confirmation from the customer.
+                      </p>
+                      <div className="flex gap-3">
+                        <button type="button"
+                          onClick={() => setShowOverrideConfirm(false)}
+                          className="flex-1 rounded-full border border-black/[0.1] px-4 py-2.5 text-[0.875rem] font-semibold text-[#5c5e62] transition hover:bg-[#f5f5f5]">
+                          Cancel
+                        </button>
+                        <button type="button"
+                          onClick={() => { setShowOverrideConfirm(false); setShowConvertModal(true); }}
+                          className="flex flex-1 items-center justify-center gap-2 rounded-full bg-red-600 px-4 py-2.5 text-[0.875rem] font-semibold text-white transition hover:bg-red-700">
+                          <ShoppingCart size={14} />
+                          Override &amp; Convert
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="flex flex-wrap items-center gap-4">
+                  <p className="text-[0.83rem] text-[#5c5e62]">
+                    {proposalAccepted
+                      ? "The customer accepted the proposal. This quote can now be converted to an order."
+                      : "This quote is ready to be converted into a confirmed order."}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setShowConvertModal(true)}
+                    className="flex items-center gap-2 rounded-full bg-[#E85C1A] px-6 py-2.5 text-[0.875rem] font-semibold text-white transition hover:bg-[#d14f14]"
+                  >
+                    <ShoppingCart size={15} />
+                    Convert to Order
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <p className="text-[0.83rem] text-[#5c5e62]">
