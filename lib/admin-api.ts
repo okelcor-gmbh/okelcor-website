@@ -367,6 +367,26 @@ export type QualificationStatus =
 export type LeadSource =
   | "website_quote" | "contact_form" | "ebay" | "phone" | "email" | "referral";
 
+// CRM-7 quote request items (admin-structured line items for proposal)
+export type QuoteItem = {
+  id: number;
+  quote_request_id: number;
+  product_id?: number | null;
+  brand?: string | null;
+  model?: string | null;
+  size?: string | null;
+  season?: string | null;
+  load_index?: string | null;
+  speed_index?: string | null;
+  quantity: number;
+  unit_price?: number | null;
+  currency?: string | null;
+  notes?: string | null;
+  sort_order?: number;
+  created_at?: string;
+  updated_at?: string;
+};
+
 // CRM-7 proposal lifecycle
 export type ProposalStatus =
   | "none" | "draft" | "ready" | "sent" | "accepted"

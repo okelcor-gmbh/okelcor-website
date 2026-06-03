@@ -85,6 +85,8 @@ interface ProposalState {
 interface Props {
   quote: AdminQuoteFull;
   onStatusChange?: (status: ProposalStatus | string) => void;
+  /** Count of structured quote items; undefined = not yet loaded (no gate applied). */
+  itemCount?: number;
 }
 
 // ── Item derivation ───────────────────────────────────────────────────────────
@@ -136,7 +138,7 @@ function mapDraftError(json: Record<string, unknown>, status: number): string {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export default function ProposalCard({ quote, onStatusChange }: Props) {
+export default function ProposalCard({ quote, onStatusChange, itemCount }: Props) {
   const q = quote as Record<string, unknown>;
 
   const [proposal, setProposal] = useState<ProposalState>({
@@ -165,6 +167,8 @@ export default function ProposalCard({ quote, onStatusChange }: Props) {
 
   const ps = proposal.proposal_status;
   const expired = ps === "sent" && isExpired(proposal.proposal_expires_at);
+  // itemCount === 0 means backend confirmed no items; undefined = still loading or backend not deployed (no gate)
+  const noItems = itemCount === 0;
 
   // ── Action helper ──────────────────────────────────────────────────────────
 
@@ -273,13 +277,31 @@ export default function ProposalCard({ quote, onStatusChange }: Props) {
         {/* ── State: none / no proposal yet ── */}
         {(ps === "none" || !ps) && (
           <div className="flex flex-col gap-3">
-            <p className="text-[0.83rem] text-[#5c5e62]">
-              No proposal has been created for this quote yet. Create a draft to begin the proposal workflow.
-            </p>
+            {noItems ? (
+              <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3.5">
+                <AlertCircle size={15} className="mt-0.5 shrink-0 text-amber-600" />
+                <div>
+                  <p className="text-[0.875rem] font-semibold text-amber-800">
+                    No quote items added yet.
+                  </p>
+                  <p className="mt-0.5 text-[0.8rem] text-amber-700">
+                    Add at least one tyre line item in the{" "}
+                    <a href="#quote-items" className="font-semibold underline hover:no-underline">
+                      Quote Items
+                    </a>{" "}
+                    section above before creating a proposal.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <p className="text-[0.83rem] text-[#5c5e62]">
+                No proposal has been created for this quote yet. Create a draft to begin the proposal workflow.
+              </p>
+            )}
             <div>
               <button
                 type="button"
-                disabled={loading !== null}
+                disabled={loading !== null || noItems}
                 onClick={() => doAction("draft", buildDraftBody(quote))}
                 className="flex items-center gap-2 rounded-full bg-[#1a1a1a] px-5 py-2.5 text-[0.875rem] font-semibold text-white transition hover:bg-[#333] disabled:opacity-50"
               >
