@@ -277,10 +277,10 @@ export default function RegisterPage() {
               <CheckCircle2 size={28} strokeWidth={1.5} className="text-green-500" />
             </div>
             <h2 className="mt-5 text-xl font-extrabold text-[var(--foreground)]">
-              Account created!
+              Verify your email
             </h2>
             <p className="mt-2 text-[0.9rem] leading-6 text-[var(--muted)]">
-              Please check your email to verify your account. Once verified, you can sign in and start browsing.
+              We&apos;ve sent a verification link to <strong className="text-[var(--foreground)]">{form.email}</strong>. Verify your email first — then our team will review your business account before activating full access. We&apos;ll email you as soon as it&apos;s approved.
             </p>
             <button
               type="button"

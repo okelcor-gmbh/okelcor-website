@@ -14,7 +14,7 @@ import {
   VERIFICATION_STATUS_LABELS, VERIFICATION_STATUS_STYLES,
   RISK_LEVEL_LABELS, RISK_LEVEL_STYLES,
   RISK_LEVELS, BUYER_TIERS, APPROVAL_PROFILES,
-  healthScoreColor, riskFromHealth,
+  healthScoreColor, riskFromHealth, approvalSuccessMessage,
   type ApprovalProfileKey,
 } from "@/lib/crm8";
 
@@ -120,6 +120,7 @@ export default function CustomerApprovalsPage() {
   const [loading, setLoading] = useState(true);
   const [unavailable, setUA]  = useState(false);
   const [error, setError]     = useState<string | null>(null);
+  const [notice, setNotice]   = useState<string | null>(null);
 
   // Cards
   const [counts, setCounts] = useState<{ pending: number | null; verified: number | null; highRisk: number | null; requests: number | null }>({
@@ -191,7 +192,7 @@ export default function CustomerApprovalsPage() {
 
   async function applyProfile(profileKey: ApprovalProfileKey, notes: string) {
     if (!modalRow) return;
-    setBusy(true);
+    setBusy(true); setError(null); setNotice(null);
     const positive = profileKey === "approved_buyer" || profileKey === "wholesale_buyer";
     const path = positive ? "approve" : "approval-profile";
     const body = positive
@@ -203,11 +204,12 @@ export default function CustomerApprovalsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
+      const json = await res.json().catch(() => ({})) as Record<string, unknown>;
       if (res.ok) {
         setModalRow(null);
+        setNotice(approvalSuccessMessage(profileKey, (json.data ?? json) as Record<string, unknown>));
         await Promise.all([fetchRows(), loadCounts()]);
       } else {
-        const json = await res.json().catch(() => ({})) as Record<string, unknown>;
         setError((json.message as string) ?? "Could not apply the profile.");
       }
     } catch {
@@ -217,7 +219,7 @@ export default function CustomerApprovalsPage() {
 
   async function rejectRowNow(reason: string) {
     if (!rejectRow) return;
-    setBusy(true);
+    setBusy(true); setError(null); setNotice(null);
     try {
       const res = await fetch(`/api/admin/customers/${rejectRow.id}/reject`, {
         method: "POST",
@@ -226,6 +228,7 @@ export default function CustomerApprovalsPage() {
       });
       if (res.ok) {
         setRejectRow(null);
+        setNotice("Customer application rejected.");
         await Promise.all([fetchRows(), loadCounts()]);
       } else {
         const json = await res.json().catch(() => ({})) as Record<string, unknown>;
@@ -271,6 +274,12 @@ export default function CustomerApprovalsPage() {
         <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[0.83rem] text-red-700">
           <AlertCircle size={14} /><span className="flex-1">{error}</span>
           <button type="button" onClick={() => setError(null)}><X size={14} /></button>
+        </div>
+      )}
+      {notice && (
+        <div className="mb-4 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-[0.83rem] text-emerald-800">
+          <ShieldCheck size={14} /><span className="flex-1">{notice}</span>
+          <button type="button" onClick={() => setNotice(null)}><X size={14} /></button>
         </div>
       )}
 

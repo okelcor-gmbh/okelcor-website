@@ -3,11 +3,10 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Eye, EyeOff, CheckCircle2, Check, MailWarning, RefreshCcw, Clock, XCircle, ShieldOff } from "lucide-react";
+import { Eye, EyeOff, CheckCircle2, Check, MailWarning, RefreshCcw, Clock, XCircle, ShieldOff, Loader2 } from "lucide-react";
 import Navbar from "@/components/navbar";
 import { useCustomerAuth } from "@/context/CustomerAuthContext";
 import { forgotPassword, resendVerification } from "@/lib/customer-auth";
-import type { Metadata } from "next";
 
 // ─── Input styles ─────────────────────────────────────────────────────────────
 
@@ -103,6 +102,9 @@ export default function LoginPage() {
 
   // Onboarding gate states
   const [onboardingStatus, setOnboardingStatus] = useState<"pending_review" | "rejected" | "blocked" | null>(null);
+  // CRM-8: re-checking approval status from the pending screen (retries login)
+  const [checkingApproval, setCheckingApproval] = useState(false);
+  const [stillPending, setStillPending] = useState(false);
 
   // Resend state for ?verified=false banner
   const [reVerifyEmail, setReVerifyEmail] = useState("");
@@ -130,7 +132,7 @@ export default function LoginPage() {
       const data = await login(email, password);
 
       // Must reset password
-      if ((data as any)?.must_reset) {
+      if ((data as Record<string, unknown>)?.must_reset) {
         router.push(`/forgot-password?email=${encodeURIComponent(email)}`);
         return;
       }
@@ -178,6 +180,40 @@ export default function LoginPage() {
           ? `Too many attempts. Please wait ${retryAfter} seconds and try again.`
           : (e?.message as string) ?? "Invalid email or password. Please try again."
       );
+    }
+  };
+
+  // CRM-8: re-check whether the account has been approved since the gate was shown.
+  // pending_review returns a 4xx with no session token, so /me can't be polled —
+  // the reliable check is to retry the login through the same backend gate.
+  const checkApprovalStatus = async () => {
+    if (!email || !password) { setOnboardingStatus(null); return; }
+    setCheckingApproval(true);
+    setStillPending(false);
+    try {
+      const data = await login(email, password);
+      if ((data as Record<string, unknown>)?.must_reset) {
+        router.push(`/forgot-password?email=${encodeURIComponent(email)}`);
+        return;
+      }
+      if (data?.email_verified === false) {
+        setOnboardingStatus(null);
+        setShowVerifyMessage(true);
+        return;
+      }
+      // Approved — log in and go to the account dashboard.
+      await refreshCustomer();
+      window.location.href = callbackUrl || "/account";
+    } catch (err: unknown) {
+      const e = err as Record<string, unknown>;
+      const os = e?.onboarding_status as string | undefined;
+      const msg = ((e?.message as string) ?? "").toLowerCase();
+      if (os === "rejected" || msg.includes("rejected") || msg.includes("not approved")) { setOnboardingStatus("rejected"); return; }
+      if (os === "blocked" || msg.includes("blocked") || msg.includes("suspended") || msg.includes("banned")) { setOnboardingStatus("blocked"); return; }
+      // Still pending (or transient) — keep the screen, surface a gentle note.
+      setStillPending(true);
+    } finally {
+      setCheckingApproval(false);
     }
   };
 
@@ -270,6 +306,24 @@ export default function LoginPage() {
             <p className="mt-2 text-[0.88rem] leading-6 text-[var(--muted)]">
               Your account application is being reviewed. You will receive an email once your access has been approved.
             </p>
+
+            {stillPending && (
+              <div className="mt-4 flex items-center justify-center gap-2 rounded-[12px] border border-amber-200 bg-amber-50 px-4 py-2.5 text-[0.82rem] text-amber-700">
+                <Clock size={14} className="shrink-0" />
+                Still under review. We&apos;ll email you as soon as it&apos;s approved.
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={checkApprovalStatus}
+              disabled={checkingApproval}
+              className="mt-6 flex h-[46px] w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] text-[0.9rem] font-semibold text-white transition hover:bg-[var(--primary-hover)] disabled:opacity-60"
+            >
+              {checkingApproval ? <Loader2 size={16} className="animate-spin" /> : <RefreshCcw size={15} />}
+              {checkingApproval ? "Checking…" : "Check approval status"}
+            </button>
+
             <p className="mt-4 text-[0.82rem] text-[var(--muted)]">
               Questions?{" "}
               <a href="/contact" className="font-semibold text-[var(--foreground)] hover:text-[var(--primary)]">
@@ -278,8 +332,8 @@ export default function LoginPage() {
             </p>
             <button
               type="button"
-              onClick={() => setOnboardingStatus(null)}
-              className="mt-5 block text-[0.82rem] text-[var(--muted)] hover:text-[var(--foreground)]"
+              onClick={() => { setOnboardingStatus(null); setStillPending(false); }}
+              className="mt-4 block w-full text-[0.82rem] text-[var(--muted)] hover:text-[var(--foreground)]"
             >
               Back to login
             </button>

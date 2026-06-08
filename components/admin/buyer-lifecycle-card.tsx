@@ -10,7 +10,7 @@ import {
   BUYER_TIERS, BUYER_TIER_LABELS, BUYER_TIER_STYLES,
   VERIFICATION_STATUS_LABELS, VERIFICATION_STATUS_STYLES,
   RISK_LEVELS, RISK_LEVEL_LABELS, RISK_LEVEL_STYLES,
-  APPROVAL_PROFILES, healthScoreColor, riskFromHealth,
+  APPROVAL_PROFILES, healthScoreColor, riskFromHealth, approvalSuccessMessage,
   type ApprovalProfileKey, type BuyerLifecycle,
 } from "@/lib/crm8";
 
@@ -93,7 +93,7 @@ export default function BuyerLifecycleCard({ customerId, lifecycle, access, onPa
       const p = APPROVAL_PROFILES[key];
       const data = await post("approve", { profile: key, buyer_tier: p.tier, notes: "" });
       onPatch({ ...profileFields(key), verification_status: lifecycle.verification_status, ...data });
-      setMsg({ type: "ok", text: `${p.label} applied.` });
+      setMsg({ type: "ok", text: approvalSuccessMessage(key, data) });
     } catch (e) {
       setMsg({ type: "err", text: e instanceof Error ? e.message : "Action failed." });
     } finally { setBusy(null); }
@@ -106,7 +106,7 @@ export default function BuyerLifecycleCard({ customerId, lifecycle, access, onPa
       const data = await post("approval-profile", { profile: key, notes });
       onPatch({ ...profileFields(key), ...data });
       setModalProfile(null);
-      setMsg({ type: "ok", text: `${APPROVAL_PROFILES[key].label} applied.` });
+      setMsg({ type: "ok", text: approvalSuccessMessage(key, data) });
     } catch (e) {
       setMsg({ type: "err", text: e instanceof Error ? e.message : "Action failed." });
     } finally { setBusy(null); }

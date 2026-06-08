@@ -256,6 +256,41 @@ export function timelineTone(eventType: string): "positive" | "warning" | "dange
   return "neutral";
 }
 
+// ── Approval email status ───────────────────────────────────────────────────
+// The backend sends the approval email on approved_buyer / wholesale_buyer and
+// reports the outcome on the approve response. Shapes vary, so probe the common
+// keys. "unknown" = backend didn't report (don't claim an email was sent).
+
+export type EmailStatus = "sent" | "failed" | "unknown";
+
+export function approvalEmailStatus(data: Record<string, unknown> | null | undefined): EmailStatus {
+  const d = data ?? {};
+  const sent = (d.approval_email_sent ?? d.email_sent) as boolean | undefined;
+  if (sent === true) return "sent";
+  if (sent === false) return "failed";
+  const status = (d.approval_email_status ?? d.email_status) as string | undefined;
+  if (status === "sent" || status === "success") return "sent";
+  if (status === "failed" || status === "error") return "failed";
+  return "unknown";
+}
+
+/** Human success message after applying a profile, including email outcome. */
+export function approvalSuccessMessage(
+  key: ApprovalProfileKey,
+  data?: Record<string, unknown> | null,
+): string {
+  const label = APPROVAL_PROFILES[key].label;
+  if (key === "approved_buyer" || key === "wholesale_buyer") {
+    const email = approvalEmailStatus(data);
+    if (email === "sent")   return `Customer approved as ${label}. Approval email sent.`;
+    if (email === "failed") return `Customer approved as ${label}, but the approval email failed to send.`;
+    return `Customer approved as ${label}.`;
+  }
+  if (key === "blocked")    return "Customer blocked. Access revoked.";
+  if (key === "restricted") return "Restricted profile applied.";
+  return `${label} profile applied.`;
+}
+
 // ── Access requests ─────────────────────────────────────────────────────────
 
 export type RequestedAccess = "checkout" | "documents" | "wholesale_pricing" | "higher_tier";
