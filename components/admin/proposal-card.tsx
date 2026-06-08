@@ -5,7 +5,7 @@ import {
   FileText, Send, CheckCircle2, XCircle, Clock, AlertCircle,
   Copy, Loader2, AlertTriangle, RotateCcw, X, Check,
 } from "lucide-react";
-import type { AdminQuoteFull, ProposalStatus } from "@/lib/admin-api";
+import type { AdminQuoteFull, ProposalStatus, QuoteItem } from "@/lib/admin-api";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -85,14 +85,35 @@ interface ProposalState {
 interface Props {
   quote: AdminQuoteFull;
   onStatusChange?: (status: ProposalStatus | string) => void;
+  /** Persisted quote items (quote_request_items) — the SAME source the editor
+   *  writes to. The draft body is built from these, not quote.tyre_items. */
+  items?: QuoteItem[];
   /** Count of structured quote items; undefined = not yet loaded (no gate applied). */
   itemCount?: number;
 }
 
 // ── Item derivation ───────────────────────────────────────────────────────────
 
-function buildDraftBody(quote: AdminQuoteFull): Record<string, unknown> {
-  // Structured tyre_items (preferred path)
+function buildDraftBody(
+  quote: AdminQuoteFull,
+  items?: QuoteItem[],
+): Record<string, unknown> {
+  // Persisted quote items (quote_request_items) — preferred path. These are the
+  // priced line items the editor saves and the proposal total is derived from.
+  if (Array.isArray(items) && items.length > 0) {
+    return {
+      items: items.map((it) => ({
+        description: [it.brand, it.size].filter(Boolean).join(" ") || "Tyre",
+        brand:      it.brand ?? undefined,
+        size:       it.size ?? "",
+        quantity:   it.quantity || 1,
+        unit_price: it.unit_price ?? undefined,
+        currency:   it.currency ?? "EUR",
+        notes:      it.notes ?? undefined,
+      })),
+    };
+  }
+  // Fallback: structured tyre_items from the original inquiry (no pricing)
   if (Array.isArray(quote.tyre_items) && quote.tyre_items.length > 0) {
     return {
       items: quote.tyre_items.map((item) => ({
@@ -138,7 +159,7 @@ function mapDraftError(json: Record<string, unknown>, status: number): string {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export default function ProposalCard({ quote, onStatusChange, itemCount }: Props) {
+export default function ProposalCard({ quote, onStatusChange, items, itemCount }: Props) {
   const q = quote as Record<string, unknown>;
 
   const [proposal, setProposal] = useState<ProposalState>({
@@ -236,7 +257,7 @@ export default function ProposalCard({ quote, onStatusChange, itemCount }: Props
   // ── Re-draft (from rejected / expired) ────────────────────────────────────
 
   function handleRedraft() {
-    doAction("draft", buildDraftBody(quote));
+    doAction("draft", buildDraftBody(quote, items));
   }
 
   // ── Render ─────────────────────────────────────────────────────────────────
@@ -302,7 +323,7 @@ export default function ProposalCard({ quote, onStatusChange, itemCount }: Props
               <button
                 type="button"
                 disabled={loading !== null || noItems}
-                onClick={() => doAction("draft", buildDraftBody(quote))}
+                onClick={() => doAction("draft", buildDraftBody(quote, items))}
                 className="flex items-center gap-2 rounded-full bg-[#1a1a1a] px-5 py-2.5 text-[0.875rem] font-semibold text-white transition hover:bg-[#333] disabled:opacity-50"
               >
                 {loading === "draft" ? <Loader2 size={14} className="animate-spin" /> : <FileText size={14} />}

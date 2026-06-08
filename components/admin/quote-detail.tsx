@@ -16,7 +16,7 @@ import QuoteItemsCard from "@/components/admin/quote-items-card";
 import ProposalCard from "@/components/admin/proposal-card";
 import { updateQuoteStatus } from "@/app/admin/quotes/actions";
 import type { ConvertToOrderResult } from "@/app/admin/quotes/actions";
-import type { AdminQuoteFull } from "@/lib/admin-api";
+import type { AdminQuoteFull, QuoteItem } from "@/lib/admin-api";
 import { formatIncoterm } from "@/lib/utils";
 import QuoteConvertModal from "@/components/admin/quote-convert-modal";
 
@@ -225,8 +225,11 @@ export default function QuoteDetail({
   const [proposalStatus, setProposalStatus] = useState<string | null>(
     (quote as Record<string, unknown>).proposal_status as string | null ?? null
   );
-  // CRM-7 quote items count (from QuoteItemsCard; undefined = still loading)
-  const [quoteItemCount, setQuoteItemCount] = useState<number | undefined>(undefined);
+  // CRM-7 persisted quote items (from QuoteItemsCard; undefined = still loading).
+  // Held here so ProposalCard can build the draft body from the SAME persisted
+  // source the editor writes to (quote_request_items) — not quote.tyre_items.
+  const [quoteItems, setQuoteItems] = useState<QuoteItem[] | undefined>(undefined);
+  const quoteItemCount = quoteItems?.length;
 
   // Convert to Order is gated if there is an active proposal that hasn't been accepted.
   // null / "none" = no proposal in use → no gate (backward compat with old quotes).
@@ -917,13 +920,14 @@ export default function QuoteDetail({
         {/* ── CRM-7: Quote Items card ── */}
         <QuoteItemsCard
           quoteId={quote.id}
-          onItemCountChange={setQuoteItemCount}
+          onItemsChange={setQuoteItems}
         />
 
         {/* ── CRM-7: Proposal Management card ── */}
         <ProposalCard
           quote={quote}
           onStatusChange={(s) => setProposalStatus(s)}
+          items={quoteItems}
           itemCount={quoteItemCount}
         />
 

@@ -24,7 +24,10 @@ function fmtPrice(price?: number | null, currency?: string | null): string {
 
 interface Props {
   quoteId: number;
-  onItemCountChange?: (count: number) => void;
+  /** Emits the full persisted item list on every load/add/edit/delete.
+   *  Held by the parent so ProposalCard can build the draft body from the
+   *  same persisted source (quote_request_items) the editor writes to. */
+  onItemsChange?: (items: QuoteItem[]) => void;
 }
 
 type ItemDraft = {
@@ -180,7 +183,7 @@ function ItemFormRow({
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export default function QuoteItemsCard({ quoteId, onItemCountChange }: Props) {
+export default function QuoteItemsCard({ quoteId, onItemsChange }: Props) {
   const [items,   setItems]   = useState<QuoteItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState<string | null>(null);
@@ -217,7 +220,7 @@ export default function QuoteItemsCard({ quoteId, onItemCountChange }: Props) {
       if (res.status === 404 || res.status === 405) {
         setBackendReady(false);
         setItems([]);
-        onItemCountChange?.(0);
+        onItemsChange?.([]);
         return;
       }
       const json = await res.json().catch(() => ({})) as Record<string, unknown>;
@@ -225,15 +228,15 @@ export default function QuoteItemsCard({ quoteId, onItemCountChange }: Props) {
         setError((json.message as string | undefined) ?? "Failed to load items.");
         return;
       }
-      const raw = Array.isArray(json.data) ? json.data : Array.isArray(json) ? json : [];
-      setItems(raw as QuoteItem[]);
-      onItemCountChange?.(raw.length);
+      const raw = (Array.isArray(json.data) ? json.data : Array.isArray(json) ? json : []) as QuoteItem[];
+      setItems(raw);
+      onItemsChange?.(raw);
     } catch {
       setError("Network error — could not load quote items.");
     } finally {
       setLoading(false);
     }
-  }, [quoteId, onItemCountChange]);
+  }, [quoteId, onItemsChange]);
 
   useEffect(() => { fetchItems(); }, [fetchItems]);
 
@@ -257,7 +260,7 @@ export default function QuoteItemsCard({ quoteId, onItemCountChange }: Props) {
       const created = (json.data ?? json) as QuoteItem;
       const next = [...items, created];
       setItems(next);
-      onItemCountChange?.(next.length);
+      onItemsChange?.(next);
       setAddDraft(BLANK);
       setShowAdd(false);
     } catch {
@@ -291,7 +294,9 @@ export default function QuoteItemsCard({ quoteId, onItemCountChange }: Props) {
         return;
       }
       const updated = (json.data ?? json) as QuoteItem;
-      setItems((prev) => prev.map((it) => (it.id === editingId ? updated : it)));
+      const next = items.map((it) => (it.id === editingId ? updated : it));
+      setItems(next);
+      onItemsChange?.(next);
       setEditingId(null);
     } catch {
       setEditError("Network error.");
@@ -308,7 +313,7 @@ export default function QuoteItemsCard({ quoteId, onItemCountChange }: Props) {
       await fetch(`/api/admin/quotes/${quoteId}/items/${itemId}`, { method: "DELETE" });
       const next = items.filter((it) => it.id !== itemId);
       setItems(next);
-      onItemCountChange?.(next.length);
+      onItemsChange?.(next);
     } catch { /* silently ignore */ }
     finally { setDeletingId(null); }
   }
