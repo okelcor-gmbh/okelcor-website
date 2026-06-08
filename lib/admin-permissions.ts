@@ -45,6 +45,7 @@ export const PATH_SECTION: Record<string, string> = {
   "/admin/settings":        "settings",
   "/admin/users":           "users",
   "/admin/supplier":        "supplier",
+  "/admin/customer-approvals": "customers",
   "/admin/customers":       "customers",
   "/admin/security":        "security",
   "/admin/ebay":            "ebay",

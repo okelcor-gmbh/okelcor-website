@@ -7,11 +7,14 @@ import Link from "next/link";
 import {
   ChevronLeft, User, Mail, Phone, MapPin, Calendar, Shield,
   ShieldOff, ShieldCheck, Ban, Trash2, KeyRound, LogOut,
-  Lock, Loader2, AlertCircle, CheckCircle2, Clock, Monitor,
+  Lock, Loader2, AlertCircle, CheckCircle2, Monitor,
   ShoppingCart, FileText, Activity, Edit3, Save, X,
   UserCheck, UserX, UserPlus, Send,
   Gauge, RefreshCw, Copy, ExternalLink,
 } from "lucide-react";
+import BuyerLifecycleCard from "@/components/admin/buyer-lifecycle-card";
+import CustomerVerificationsCard from "@/components/admin/customer-verifications-card";
+import CustomerTimelineCard from "@/components/admin/customer-timeline-card";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -41,6 +44,16 @@ type CustomerFull = {
   normalized_company_name?: string | null;
   possible_duplicate_of?: number | null;
   possible_duplicate_name?: string | null;
+  // CRM-8 buyer lifecycle (undefined = not yet backfilled → treat as approved/low-risk)
+  buyer_tier?: string | null;
+  verification_status?: string | null;
+  health_score?: number | null;
+  risk_level?: string | null;
+  approved_by?: number | null;
+  approved_by_name?: string | null;
+  approved_at?: string | null;
+  approval_notes?: string | null;
+  rejection_reason?: string | null;
 };
 
 type LoginEvent = {
@@ -436,6 +449,15 @@ export default function CustomerProfilePage() {
     }
   }
 
+  // ── CRM-8: Buyer lifecycle ─────────────────────────────────────────────────
+  // Bumped after any lifecycle action so the timeline re-fetches its events.
+  const [timelineRefresh, setTimelineRefresh] = useState(0);
+
+  function patchCustomer(fields: Record<string, unknown>) {
+    setCustomer((prev) => (prev ? { ...prev, ...fields } : prev));
+    setTimelineRefresh((k) => k + 1);
+  }
+
   // ── Render ────────────────────────────────────────────────────────────────
 
   if (loading) {
@@ -674,6 +696,33 @@ export default function CustomerProfilePage() {
             </div>
           </SectionCard>
 
+          {/* CRM-8: Buyer Lifecycle */}
+          <BuyerLifecycleCard
+            customerId={customer.id}
+            lifecycle={{
+              buyer_tier:          customer.buyer_tier,
+              verification_status: customer.verification_status,
+              health_score:        customer.health_score,
+              risk_level:          customer.risk_level,
+              approved_by:         customer.approved_by,
+              approved_by_name:    customer.approved_by_name,
+              approved_at:         customer.approved_at,
+              approval_notes:      customer.approval_notes,
+              rejection_reason:    customer.rejection_reason,
+            }}
+            access={{
+              access_level:                   access.access_level,
+              approved_for_quotes:            access.approved_for_quotes,
+              approved_for_checkout:          access.approved_for_checkout,
+              approved_for_documents:         access.approved_for_documents,
+              approved_for_wholesale_pricing: access.approved_for_wholesale_pricing,
+            }}
+            onPatch={patchCustomer}
+          />
+
+          {/* CRM-8: Verification */}
+          <CustomerVerificationsCard customerId={customer.id} />
+
           {/* Actions */}
           <SectionCard title="Admin Actions" icon={Shield}>
             <div className="flex flex-wrap gap-2 p-5">
@@ -904,6 +953,9 @@ export default function CustomerProfilePage() {
               </div>
             </div>
           </SectionCard>
+
+          {/* CRM-8: Lifecycle Timeline */}
+          <CustomerTimelineCard customerId={customer.id} refreshKey={timelineRefresh} />
 
           {/* CRM-6: Communication Timeline */}
           {customer && (

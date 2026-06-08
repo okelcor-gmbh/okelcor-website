@@ -34,6 +34,7 @@ import {
   Activity,
   ScanLine,
   BellRing,
+  UserCheck,
 } from "lucide-react";
 import { logoutAdmin } from "@/app/admin/actions";
 import { canAccess, PATH_SECTION, ROLE_LABELS, ROLE_BADGE_COLORS } from "@/lib/admin-permissions";
@@ -57,6 +58,7 @@ const NAV = [
   { label: "FET Engines",    href: "/admin/fet",          icon: Zap,         section: "fet" },
   { label: "Brands",         href: "/admin/brands",       icon: Star,        section: "brands" },
   { label: "Customers",      href: "/admin/customers",   icon: ContactRound,    section: "customers" },
+  { label: "Customer Approvals", href: "/admin/customer-approvals", icon: UserCheck, section: "customers" },
   { label: "Data Quality",   href: "/admin/customers/data-quality", icon: ScanLine, section: "customers" },
   { label: "Security",       href: "/admin/security",    icon: ShieldAlert,     section: "security" },
   { label: "System Health",  href: "/admin/system-health", icon: Activity,      section: "system_health" },

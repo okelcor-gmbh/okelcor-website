@@ -8,8 +8,8 @@ import {
 } from "lucide-react";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
+import AccessRequestsPanel from "@/components/account/access-requests-panel";
 import { getCustomerFromCookie } from "@/lib/get-customer";
-import type { Customer } from "@/lib/customer-auth";
 
 export const metadata: Metadata = {
   title: "My Account",
@@ -207,6 +207,15 @@ export default async function AccountPage() {
         </div>
 
         {isB2B ? <B2BDashboard /> : <B2CDashboard />}
+
+        {/* CRM-8: Request access for withheld permissions (B2B only) */}
+        {isB2B && (
+          <AccessRequestsPanel
+            approvedForCheckout={customer.approved_for_checkout}
+            approvedForDocuments={customer.approved_for_documents}
+            approvedForWholesalePricing={customer.approved_for_wholesale_pricing}
+          />
+        )}
 
         {/* Quick links */}
         <div className="mt-10 rounded-[20px] border border-black/[0.06] bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)]">

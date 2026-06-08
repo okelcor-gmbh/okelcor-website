@@ -186,6 +186,23 @@
 | CRM-5 — Customer data quality & deduplication | `62850bc` | ✅ Complete |
 | CRM-6 — Communication timeline & follow-up automation | `6fd6f58` | ✅ Complete |
 | CRM-7 — Proposal management & customer acceptance | `224ab1c` | ✅ Frontend complete |
+| CRM-8 — Buyer approval & customer lifecycle | — | ✅ Frontend complete |
+
+#### CRM-8 Detail
+
+| Sub-feature | Status |
+|---|---|
+| `lib/crm8.ts` — tiers, verification, risk, approval-profile matrix, timeline labels | ✅ |
+| Admin nav + RBAC entry (`/admin/customer-approvals`, section `customers`) | ✅ |
+| Customer Approvals page — queues, summary cards, table, Access Requests tab | ✅ |
+| Buyer Lifecycle card (tier/risk/health, apply profile, approve, restrict, block) | ✅ |
+| Access Profile modal (before→after change preview) | ✅ |
+| Verification card (add / mark verified / reject) | ✅ |
+| Lifecycle Timeline card | ✅ |
+| Access Requests table (admin approve/reject) | ✅ |
+| Customer portal Request-Access panel (account dashboard, B2B) | ✅ |
+| 14 proxy routes (graceful 404/405 degradation) | ✅ |
+| Backend endpoints | ⏳ Backend team |
 
 #### CRM-7 Detail
 
@@ -230,6 +247,29 @@ POST   /api/v1/admin/quote-requests/{id}/items
 PATCH  /api/v1/admin/quote-requests/{id}/items/{itemId}
 DELETE /api/v1/admin/quote-requests/{id}/items/{itemId}
 POST   /api/v1/admin/quote-requests/{id}/items/import-from-inquiry
+```
+
+### CRM-8 Buyer Lifecycle
+
+```
+GET  /api/v1/admin/customer-approvals          filters: status, verification_status, risk_level, buyer_tier, market_region, q
+GET  /api/v1/admin/customers/{id}/timeline
+POST /api/v1/admin/customers/{id}/approval-profile   body: { profile, notes? }
+POST /api/v1/admin/customers/{id}/approve            body: { profile, buyer_tier?, notes? }
+POST /api/v1/admin/customers/{id}/reject             body: { reason? }
+POST /api/v1/admin/customers/{id}/set-tier           body: { buyer_tier, notes? }
+POST /api/v1/admin/customers/{id}/risk               body: { risk_level, notes? }
+GET  /api/v1/admin/customers/{id}/verifications
+POST /api/v1/admin/customers/{id}/verifications      body: { type, value?, notes? }
+PATCH /api/v1/admin/customers/{id}/verifications/{verificationId}   body: { status, notes? }
+POST /api/v1/admin/customers/{id}/health/recalculate
+
+GET  /api/v1/admin/customer-access-requests          filters: status, requested_access
+POST /api/v1/admin/customer-access-requests/{id}/approve
+POST /api/v1/admin/customer-access-requests/{id}/reject
+
+GET  /api/v1/auth/customer/access-requests           customer — own requests
+POST /api/v1/auth/customer/access-requests           customer — body: { requested_access, reason? }
 ```
 
 ### CRM-6 Communications
