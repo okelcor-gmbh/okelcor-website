@@ -100,23 +100,29 @@ function buildDraftBody(
 ): Record<string, unknown> {
   // Persisted quote items (quote_request_items) — preferred path. These are the
   // priced line items the editor saves and the proposal total is derived from.
+  // `name` is required_with:items by the backend draft validation — always send it.
   if (Array.isArray(items) && items.length > 0) {
     return {
-      items: items.map((it) => ({
-        description: [it.brand, it.size].filter(Boolean).join(" ") || "Tyre",
-        brand:      it.brand ?? undefined,
-        size:       it.size ?? "",
-        quantity:   it.quantity || 1,
-        unit_price: it.unit_price ?? undefined,
-        currency:   it.currency ?? "EUR",
-        notes:      it.notes ?? undefined,
-      })),
+      items: items.map((it) => {
+        const name = [it.brand, it.model, it.size].filter(Boolean).join(" ") || "Tyre";
+        return {
+          name,
+          description: name,
+          brand:      it.brand ?? undefined,
+          size:       it.size ?? "",
+          quantity:   it.quantity || 1,
+          unit_price: it.unit_price ?? undefined,
+          currency:   it.currency ?? "EUR",
+          notes:      it.notes ?? undefined,
+        };
+      }),
     };
   }
   // Fallback: structured tyre_items from the original inquiry (no pricing)
   if (Array.isArray(quote.tyre_items) && quote.tyre_items.length > 0) {
     return {
       items: quote.tyre_items.map((item) => ({
+        name: item.size || "Tyre",
         description: item.size || "Tyre",
         size: item.size || "",
         quantity: item.quantity || "1",
@@ -127,6 +133,7 @@ function buildDraftBody(
   if (quote.tyre_size || quote.quantity) {
     return {
       items: [{
+        name: quote.tyre_size || "Tyre",
         description: quote.tyre_size || "Tyre",
         size: quote.tyre_size || "",
         quantity: quote.quantity || "1",
