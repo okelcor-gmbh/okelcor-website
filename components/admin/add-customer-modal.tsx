@@ -46,7 +46,8 @@ export default function AddCustomerModal({ onClose, onCreated }: Props) {
   const [errors, setErrors]       = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [done, setDone]           = useState<{ invited: boolean } | null>(null);
+  // emailSent: true = backend confirmed sent, false = send failed, null = unknown/not requested
+  const [done, setDone]           = useState<{ invited: boolean; emailSent: boolean | null } | null>(null);
 
   const isB2b = customerType === "b2b";
 
@@ -111,7 +112,20 @@ export default function AddCustomerModal({ onClose, onCreated }: Props) {
         return;
       }
 
-      setDone({ invited: sendInvitation });
+      // Backend returns the invitation send result in data.invitation_email.
+      // Shape isn't guaranteed — accept boolean, string status, or { sent }.
+      let emailSent: boolean | null = null;
+      if (sendInvitation) {
+        const inv = (json?.data as Record<string, unknown> | undefined)?.invitation_email;
+        if (typeof inv === "boolean") emailSent = inv;
+        else if (typeof inv === "string") emailSent = inv === "sent" || inv === "success";
+        else if (inv && typeof inv === "object") {
+          const o = inv as Record<string, unknown>;
+          emailSent = Boolean(o.sent ?? o.success ?? (o.status === "sent"));
+        }
+      }
+
+      setDone({ invited: sendInvitation, emailSent });
     } catch {
       setFormError("Network error. Please try again.");
     } finally {
@@ -123,17 +137,21 @@ export default function AddCustomerModal({ onClose, onCreated }: Props) {
 
   // ── Success state ──────────────────────────────────────────────────────────
   if (done) {
+    // Email explicitly failed to send → warn so staff can resend, don't claim success.
+    const emailFailed = done.invited && done.emailSent === false;
     return (
       <Shell onClose={onClose}>
         <div className="px-7 py-10 text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
-            <CheckCircle2 size={28} className="text-emerald-600" />
+          <div className={`mx-auto flex h-14 w-14 items-center justify-center rounded-full ${emailFailed ? "bg-amber-100" : "bg-emerald-100"}`}>
+            {emailFailed ? <AlertCircle size={28} className="text-amber-600" /> : <CheckCircle2 size={28} className="text-emerald-600" />}
           </div>
           <p className="mt-5 text-[1.05rem] font-extrabold text-[#1a1a1a]">Customer created</p>
           <p className="mx-auto mt-2 max-w-sm text-[0.84rem] leading-relaxed text-[#5c5e62]">
-            {done.invited
-              ? "An invitation email with a set-password link has been sent so they can access the portal."
-              : "The account was created. You can send an invitation later from the customer’s profile."}
+            {!done.invited
+              ? "The account was created. You can send an invitation later from the customer’s profile."
+              : emailFailed
+              ? "The account was created, but the invitation email could not be sent. Open the customer’s profile and use “Resend Invitation.”"
+              : "An invitation email with a set-password link has been sent so they can access the portal."}
           </p>
           <button
             type="button"
