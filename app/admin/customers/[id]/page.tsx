@@ -737,7 +737,7 @@ export default function CustomerProfilePage() {
                 <ActionButton label="Send Invitation" icon={UserPlus} variant="success" loading={actionPending === "invite"} onClick={() => doAction("invite")} />
               )}
               {customer.onboarding_status === "invited" && (
-                <ActionButton label="Resend Invite" icon={Send} loading={actionPending === "resend_invite"} onClick={() => doAction("resend_invite")} />
+                <ActionButton label="Resend Invitation" icon={Send} loading={actionPending === "resend_invite"} onClick={() => doAction("resend_invite")} />
               )}
               {customer.onboarding_status && !["rejected", "blocked"].includes(customer.onboarding_status) && customer.onboarding_status !== "pending_review" && (
                 <ActionButton label="Block Account" icon={UserX} variant="danger" loading={actionPending === "block"} onClick={() => setConfirm("block")} />

@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import {
   Upload, Search, ChevronLeft, ChevronRight, Download,
   FileText, AlertCircle, CheckCircle2, Loader2, Mail, Send,
-  Eye, Ban, Trash2, ShieldOff, ShieldCheck, UserCheck, UserX, UserPlus, MoreHorizontal,
-  Copy,
+  Eye, Ban, Trash2, ShieldOff, ShieldCheck, UserCheck, UserX, UserPlus,
+  Copy, Plus,
 } from "lucide-react";
+import { useAdminPermissions } from "@/hooks/use-admin-permissions";
+import AddCustomerModal from "@/components/admin/add-customer-modal";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -227,6 +229,10 @@ function ConfirmModal({
 
 export default function CustomersPage() {
   const router = useRouter();
+  const { can } = useAdminPermissions();
+
+  // ── Add-customer modal ────────────────────────────────────────────────────
+  const [addOpen, setAddOpen] = useState(false);
 
   // ── Import state ─────────────────────────────────────────────────────────
   const fileRef = useRef<HTMLInputElement>(null);
@@ -410,10 +416,26 @@ export default function CustomersPage() {
     <div className="p-6 md:p-8">
 
       {/* Page header */}
-      <div className="mb-7">
-        <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#E85C1A]">Customer Management</p>
-        <p className="mt-1 text-[0.875rem] text-[#5c5e62]">Manage accounts, review status, and monitor security.</p>
+      <div className="mb-7 flex items-start justify-between gap-4">
+        <div>
+          <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#E85C1A]">Customer Management</p>
+          <p className="mt-1 text-[0.875rem] text-[#5c5e62]">Manage accounts, review status, and monitor security.</p>
+        </div>
+        {can("customers.create") && (
+          <button type="button" onClick={() => setAddOpen(true)}
+            className="flex h-[42px] shrink-0 items-center gap-2 rounded-full bg-[#E85C1A] px-5 text-[0.875rem] font-semibold text-white transition hover:bg-[#d44d10]">
+            <Plus size={16} /> Add Customer
+          </button>
+        )}
       </div>
+
+      {/* Add-customer modal */}
+      {addOpen && (
+        <AddCustomerModal
+          onClose={() => setAddOpen(false)}
+          onCreated={() => { setAddOpen(false); setPage(1); fetchCustomers(); }}
+        />
+      )}
 
       {/* ── Import card ── */}
       <div className="mb-6 rounded-2xl bg-white p-6 shadow-sm">
@@ -666,6 +688,13 @@ export default function CustomersPage() {
                               <button type="button" title="Send invitation" onClick={() => doAction(c.id, "invite")}
                                 className="flex h-7 w-7 items-center justify-center rounded-lg border border-purple-200 text-purple-600 transition hover:bg-purple-50">
                                 <UserPlus size={13} />
+                              </button>
+                            )}
+                            {/* Onboarding: Resend invitation */}
+                            {c.onboarding_status === "invited" && (
+                              <button type="button" title="Resend invitation" onClick={() => doAction(c.id, "resend_invite")}
+                                className="flex h-7 w-7 items-center justify-center rounded-lg border border-purple-200 text-purple-600 transition hover:bg-purple-50">
+                                <Send size={13} />
                               </button>
                             )}
                             {/* Suspend / Activate */}

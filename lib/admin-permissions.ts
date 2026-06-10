@@ -102,6 +102,7 @@ const PERMISSION_ROLES: Record<string, string[]> = {
 
   // Customers
   "customers.view":        ["super_admin", "admin", "sales_manager", "support"],
+  "customers.create":      ["super_admin", "admin", "sales_manager"],
   "customers.export":      ["super_admin", "admin"],
 
   // Settings
