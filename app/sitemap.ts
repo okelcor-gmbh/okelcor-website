@@ -34,6 +34,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.8,
     },
+    {
+      url: `${BASE_URL}/tyre-wholesaler`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
     // SEO catalogue landing pages — Phase 4A
     { url: `${BASE_URL}/passenger-tires`,   lastModified: now, changeFrequency: "weekly"  as const, priority: 0.85 },
     { url: `${BASE_URL}/light-truck-tires`, lastModified: now, changeFrequency: "weekly"  as const, priority: 0.85 },
