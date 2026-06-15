@@ -367,6 +367,20 @@ export type QualificationStatus =
 export type LeadSource =
   | "website_quote" | "contact_form" | "ebay" | "phone" | "email" | "referral";
 
+// CRM-3: admin notifications (e.g. "lead assigned to you")
+export type AdminNotificationType =
+  | "lead_assigned" | "follow_up_due" | "proposal_accepted" | "proposal_rejected" | string;
+
+export type AdminNotification = {
+  id: number;
+  type: AdminNotificationType;
+  title: string;
+  message?: string | null;
+  link?: string | null;
+  read_at?: string | null;
+  created_at: string;
+};
+
 // CRM-7 quote request items (admin-structured line items for proposal)
 export type QuoteItem = {
   id: number;

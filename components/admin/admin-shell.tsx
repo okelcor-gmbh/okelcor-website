@@ -39,6 +39,7 @@ import {
 import { logoutAdmin } from "@/app/admin/actions";
 import { canAccess, PATH_SECTION, ROLE_LABELS, ROLE_BADGE_COLORS } from "@/lib/admin-permissions";
 import CrispNotifier from "@/components/admin/crisp-notifier";
+import NotificationsBell from "@/components/admin/notifications-bell";
 
 // ── Navigation ────────────────────────────────────────────────────────────────
 
@@ -422,8 +423,10 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             <h1 className="text-[0.95rem] font-extrabold text-[#1a1a1a]">{activePage}</h1>
           </div>
 
-          {/* Right: role badge + avatar dropdown */}
+          {/* Right: notifications + role badge + avatar dropdown */}
           <div className="flex items-center gap-3">
+            <NotificationsBell />
+
             {role && (
               <span
                 className={`hidden rounded-full px-2.5 py-0.5 text-[0.72rem] font-semibold sm:block ${

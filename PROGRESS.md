@@ -1,8 +1,8 @@
 # Okelcor Website — Progress Tracker
 
-**Last updated:** 2026-06-03  
+**Last updated:** 2026-06-08  
 **Branch:** `main`  
-**Build status:** TypeScript 0 errors · Clean build
+**Build status:** TypeScript 0 errors · ESLint clean · Production build passes
 
 ---
 
@@ -182,27 +182,31 @@
 | CRM-1 — Controlled B2B customer onboarding | `39fc8bc` | ✅ Complete |
 | CRM-2 — Inquiry quality filtering | `61ddac4` | ✅ Complete |
 | CRM-3 — Lead qualification & sales pipeline | `d283e74` | ✅ Complete |
+| CRM-3 — Admin notifications bell (lead assignment) | pending | ✅ Frontend complete |
 | CRM-4 — Customer segmentation & access control | `cc2cab5` | ✅ Complete |
 | CRM-5 — Customer data quality & deduplication | `62850bc` | ✅ Complete |
 | CRM-6 — Communication timeline & follow-up automation | `6fd6f58` | ✅ Complete |
 | CRM-7 — Proposal management & customer acceptance | `224ab1c` | ✅ Frontend complete |
-| CRM-8 — Buyer approval & customer lifecycle | — | ✅ Frontend complete |
+| CRM-8 — Buyer approval & customer lifecycle | `8c85cc0` | ✅ Frontend complete |
 
 #### CRM-8 Detail
 
-| Sub-feature | Status |
-|---|---|
-| `lib/crm8.ts` — tiers, verification, risk, approval-profile matrix, timeline labels | ✅ |
-| Admin nav + RBAC entry (`/admin/customer-approvals`, section `customers`) | ✅ |
-| Customer Approvals page — queues, summary cards, table, Access Requests tab | ✅ |
-| Buyer Lifecycle card (tier/risk/health, apply profile, approve, restrict, block) | ✅ |
-| Access Profile modal (before→after change preview) | ✅ |
-| Verification card (add / mark verified / reject) | ✅ |
-| Lifecycle Timeline card | ✅ |
-| Access Requests table (admin approve/reject) | ✅ |
-| Customer portal Request-Access panel (account dashboard, B2B) | ✅ |
-| 14 proxy routes (graceful 404/405 degradation) | ✅ |
-| Backend endpoints | ⏳ Backend team |
+| Sub-feature | Commit | Status |
+|---|---|---|
+| `lib/crm8.ts` — tiers, verification, risk, approval-profile matrix, timeline labels | `8c85cc0` | ✅ |
+| Admin nav + RBAC entry (`/admin/customer-approvals`, section `customers`) | `8c85cc0` | ✅ |
+| Customer Approvals page — queues, summary cards, table, Access Requests tab | `8c85cc0` | ✅ |
+| Buyer Lifecycle card (tier/risk/health, apply profile, approve, restrict, block) | `8c85cc0` | ✅ |
+| Access Profile modal (before→after change preview) | `8c85cc0` | ✅ |
+| Verification card (add / mark verified / reject) | `8c85cc0` | ✅ |
+| Lifecycle Timeline card | `8c85cc0` | ✅ |
+| Access Requests table (admin approve/reject) | `8c85cc0` | ✅ |
+| Customer portal Request-Access panel (account dashboard, B2B) | `8c85cc0` | ✅ |
+| 14 proxy routes (graceful 404/405 degradation) | `8c85cc0` | ✅ |
+| FIX — "Check approval status" (retry-login) on pending screen | `2b15758` | ✅ |
+| FIX — register verify→review messaging | `2b15758` | ✅ |
+| FIX — approval-email status feedback (admin approve success message) | `2b15758` | ✅ |
+| Backend endpoints | — | ⏳ Backend team |
 
 #### CRM-7 Detail
 
@@ -217,6 +221,8 @@
 | Quote items editor (QuoteItemsCard) | `c93f1c7` | ✅ |
 | Import from inquiry button | `c93f1c7` | ✅ |
 | ProposalCard gated on itemCount > 0 | `c93f1c7` | ✅ |
+| FIX — proposal draft built from persisted quote items (not `tyre_items`) | `3a2941b` | ✅ |
+| FIX — send required `name` field in proposal draft items payload | `4a7fa05` | ✅ |
 | Backend endpoints (7 routes) | — | ⏳ Backend team |
 | Quote items backend (5 routes) | — | ⏳ Backend team |
 
@@ -248,6 +254,23 @@ PATCH  /api/v1/admin/quote-requests/{id}/items/{itemId}
 DELETE /api/v1/admin/quote-requests/{id}/items/{itemId}
 POST   /api/v1/admin/quote-requests/{id}/items/import-from-inquiry
 ```
+
+### CRM-3 Admin Notifications
+
+Bell icon + dropdown panel in the admin topbar (`components/admin/notifications-bell.tsx`),
+polling every 30s for unread count. Currently used for "lead assigned to you" but the
+`type`/`link` fields are generic enough to reuse for other events (follow-up due,
+proposal accepted, etc.).
+
+```
+GET  /api/v1/admin/notifications                returns: { data: [{ id, type, title, message?, link?, read_at?, created_at }], unread_count }
+POST /api/v1/admin/notifications/{id}/read
+POST /api/v1/admin/notifications/read-all
+```
+
+Trigger: when `POST /admin/quote-requests/{id}/assign` changes `assigned_to` to a
+new user, create a `lead_assigned` notification for that user with a `link` to
+`/admin/quotes/{id}`.
 
 ### CRM-8 Buyer Lifecycle
 
@@ -318,6 +341,17 @@ GET /api/v1/admin/system/health
 GET /api/v1/admin/system/errors?limit=N
 ```
 
+### CRM-3 Admin Notifications
+
+```
+GET  /api/v1/admin/notifications                returns: { data: [{ id, type, title, message?, link?, read_at?, created_at }], unread_count }
+POST /api/v1/admin/notifications/{id}/read
+POST /api/v1/admin/notifications/read-all
+```
+
+Plus: on assign (`POST /admin/quote-requests/{id}/assign`), create a `lead_assigned`
+notification for the newly assigned user, linking to `/admin/quotes/{id}`.
+
 ---
 
 ## Frontend Architecture Notes
@@ -336,6 +370,7 @@ GET /api/v1/admin/system/errors?limit=N
 | Item | Priority | Notes |
 |---|---|---|
 | CRM-7 backend activation | High | 12 endpoints pending |
+| CRM-8 backend activation | High | 14 endpoints + approve must flip `onboarding_status`/`is_active` & send approval email (see CRM-8 contract block) |
+| CRM-3 notifications backend activation | Medium | 3 endpoints + trigger on lead assignment (see CRM-3 Admin Notifications contract block) |
 | Customer proposal view (account portal) | Medium | Show proposal status on account quotes |
 | Proposal PDF document (AN number) | Medium | Backend to generate; frontend to display |
-| CRM-8 (TBD) | — | |
