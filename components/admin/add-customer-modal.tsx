@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { X, Loader2, AlertCircle, CheckCircle2, UserPlus } from "lucide-react";
+import { COUNTRIES } from "@/lib/countries";
 
 // Keep in step with the access levels rendered in the customers table.
 const ACCESS_LEVELS: { value: string; label: string; hint: string }[] = [
@@ -9,13 +10,6 @@ const ACCESS_LEVELS: { value: string; label: string; hint: string }[] = [
   { value: "wholesale_buyer", label: "Wholesale Buyer", hint: "Approved buyer + wholesale pricing & catalogue" },
   { value: "quote_only",      label: "Quote Only",      hint: "Can request quotes; no checkout" },
   { value: "inquiry_only",    label: "Inquiry Only",    hint: "Inquiries only; most restricted" },
-];
-
-const COUNTRIES = [
-  "Germany", "United Kingdom", "Netherlands", "Belgium", "France", "Italy", "Spain",
-  "Sweden", "Poland", "Austria", "Switzerland", "United States", "Canada",
-  "United Arab Emirates", "Saudi Arabia", "Nigeria", "South Africa", "Kenya",
-  "Uganda", "Tanzania", "Singapore", "China", "India", "Japan", "Australia",
 ];
 
 type Props = {

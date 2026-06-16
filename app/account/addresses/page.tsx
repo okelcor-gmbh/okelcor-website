@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
+import { COUNTRIES } from "@/lib/countries";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -30,15 +31,6 @@ const EMPTY_FORM: AddressForm = {
 };
 
 // ─── Countries ────────────────────────────────────────────────────────────────
-
-const COUNTRIES = [
-  "Germany", "United Kingdom", "France", "Netherlands", "Belgium", "Austria",
-  "Switzerland", "Poland", "Czech Republic", "Hungary", "Romania", "Bulgaria",
-  "Spain", "Portugal", "Italy", "Greece", "Turkey", "Ukraine",
-  "United Arab Emirates", "Saudi Arabia", "Qatar", "Kuwait", "Bahrain", "Oman",
-  "Nigeria", "Ghana", "Kenya", "South Africa", "Egypt", "Morocco",
-  "United States", "Canada", "Australia", "Other",
-];
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 

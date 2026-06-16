@@ -6,6 +6,7 @@ import { ChevronRight, Eye, EyeOff, CheckCircle2, XCircle } from "lucide-react";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { useCustomerAuth } from "@/context/CustomerAuthContext";
+import { COUNTRIES } from "@/lib/countries";
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
@@ -22,15 +23,6 @@ const selectCls =
   "w-full rounded-[12px] border border-black/[0.08] bg-white px-4 py-3 text-[0.93rem] text-[var(--foreground)] outline-none transition focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/10 appearance-none";
 
 // ─── Countries ────────────────────────────────────────────────────────────────
-
-const COUNTRIES = [
-  "Germany", "United Kingdom", "France", "Netherlands", "Belgium", "Austria",
-  "Switzerland", "Poland", "Czech Republic", "Hungary", "Romania", "Bulgaria",
-  "Spain", "Portugal", "Italy", "Greece", "Turkey", "Ukraine",
-  "United Arab Emirates", "Saudi Arabia", "Qatar", "Kuwait", "Bahrain", "Oman",
-  "Nigeria", "Ghana", "Kenya", "South Africa", "Egypt", "Morocco",
-  "United States", "Canada", "Australia", "Other",
-];
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 

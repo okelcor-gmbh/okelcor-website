@@ -8,6 +8,7 @@ import VatField from "@/components/vat-field";
 import { useCustomerAuth } from "@/context/CustomerAuthContext";
 import { shouldShowVatField, isVatRequired, isNonEuB2B, EU_COUNTRIES } from "@/lib/eu-vat";
 import { checkInquiryQuality } from "@/lib/inquiry-quality";
+import { COUNTRIES } from "@/lib/countries";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -46,13 +47,6 @@ const REQUIRED: (keyof FormData)[] = [
 ];
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-
-const COUNTRIES = [
-  "Germany", "United Kingdom", "Netherlands", "Belgium", "France", "Italy", "Spain",
-  "Sweden", "Poland", "Austria", "Switzerland", "United States", "Canada",
-  "United Arab Emirates", "Saudi Arabia", "Nigeria", "South Africa", "Kenya",
-  "Uganda", "Tanzania", "Singapore", "China", "India", "Japan", "Australia",
-];
 
 const EU_INCOTERMS = [
   { value: "DAP",    label: "DAP" },

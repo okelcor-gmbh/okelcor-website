@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Eye, EyeOff, CheckCircle2, XCircle, AlertTriangle, Loader2, Clock, Building2 } from "lucide-react";
 import Navbar from "@/components/navbar";
 import { registerCustomer } from "@/lib/customer-auth";
+import { COUNTRIES } from "@/lib/countries";
 
 // ─── Input styles ─────────────────────────────────────────────────────────────
 
@@ -18,15 +19,6 @@ const selectCls =
   "w-full rounded-[12px] border border-black/[0.08] bg-white px-4 py-3 text-[0.93rem] text-[var(--foreground)] outline-none transition focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/10 appearance-none";
 
 // ─── Countries ────────────────────────────────────────────────────────────────
-
-const COUNTRIES = [
-  "Germany", "United Kingdom", "France", "Netherlands", "Belgium", "Austria",
-  "Switzerland", "Poland", "Czech Republic", "Hungary", "Romania", "Bulgaria",
-  "Spain", "Portugal", "Italy", "Greece", "Turkey", "Ukraine", "Russia",
-  "United Arab Emirates", "Saudi Arabia", "Qatar", "Kuwait", "Bahrain", "Oman",
-  "Nigeria", "Ghana", "Kenya", "South Africa", "Egypt", "Morocco", "Algeria",
-  "United States", "Canada", "Australia", "Other",
-];
 
 const INDUSTRIES = [
   "Fleet Operator",

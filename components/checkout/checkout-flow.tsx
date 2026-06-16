@@ -11,6 +11,7 @@ import OrderSummary from "./order-summary";
 import VatField from "@/components/vat-field";
 import { trackCheckoutStarted } from "@/lib/analytics";
 import { shouldShowVatField, isVatRequired, isNonEuB2B } from "@/lib/eu-vat";
+import { COUNTRIES } from "@/lib/countries";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -29,14 +30,6 @@ type DeliveryErrors = Partial<DeliveryData>;
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const DELIVERY_COST = 0;
-
-const COUNTRIES = [
-  "Germany", "United Kingdom", "Netherlands", "Belgium", "France",
-  "Italy", "Spain", "Sweden", "Poland", "Austria", "Switzerland",
-  "United States", "Canada", "United Arab Emirates", "Saudi Arabia",
-  "Nigeria", "South Africa", "Kenya", "Uganda", "Singapore",
-  "China", "India", "Japan", "Australia",
-];
 
 function getVatMessage(country: string, vatValid: boolean): {
   text: string; variant: "green" | "amber";
