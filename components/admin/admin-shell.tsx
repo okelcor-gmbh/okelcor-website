@@ -73,6 +73,30 @@ const SALES_CHANNELS_NAV = [
   { label: "eBay", href: "/admin/ebay", icon: ShoppingBag, section: "ebay" },
 ] as const;
 
+// ── Breadcrumb ────────────────────────────────────────────────────────────────
+
+function getAdminBreadcrumb(pathname: string): { parent: { label: string; href: string } | null; current: string } {
+  const allNav = [...NAV, ...SALES_CHANNELS_NAV] as ReadonlyArray<{ label: string; href: string }>;
+  const sorted = [...allNav].sort((a, b) => b.href.length - a.href.length);
+
+  const best = sorted.find(({ href }) =>
+    href === "/admin" ? pathname === "/admin" : pathname.startsWith(href)
+  );
+
+  if (!best) return { parent: null, current: "Admin" };
+
+  const remainder = pathname.slice(best.href.length).replace(/^\//, "");
+  if (!remainder) return { parent: null, current: best.label };
+
+  const lastSeg = remainder.split("/").pop() ?? "";
+  let subLabel: string;
+  if (lastSeg === "new") subLabel = "New";
+  else if (lastSeg === "trash") subLabel = "Trash";
+  else subLabel = lastSeg.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+
+  return { parent: { label: best.label, href: best.href }, current: subLabel };
+}
+
 // ROLE_LABELS and ROLE_BADGE_COLORS imported from lib/admin-permissions
 
 function getCookie(name: string): string {
@@ -327,10 +351,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   // Bare layout for auth pages
   if (pathname === "/admin/login") return <>{children}</>;
 
-  const activePage =
-    NAV.find(({ href }) =>
-      href === "/admin" ? pathname === "/admin" : pathname.startsWith(href)
-    )?.label ?? "Admin";
+  const { parent: breadcrumbParent, current: activePage } = getAdminBreadcrumb(pathname);
 
   const avatarInitials = (displayName || adminName)
     ? (displayName || adminName).split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()
@@ -410,7 +431,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         {/* Top bar */}
         <header className="flex h-16 shrink-0 items-center justify-between border-b border-black/[0.07] bg-white px-4 lg:px-6">
 
-          {/* Left: hamburger (mobile) + page title */}
+          {/* Left: hamburger (mobile) + page title / breadcrumb */}
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -420,7 +441,21 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             >
               <Menu size={20} strokeWidth={1.8} />
             </button>
-            <h1 className="text-[0.95rem] font-extrabold text-[#1a1a1a]">{activePage}</h1>
+
+            {breadcrumbParent ? (
+              <div className="flex items-center gap-1.5">
+                <Link
+                  href={breadcrumbParent.href}
+                  className="text-[0.9rem] font-medium text-[#5c5e62] transition hover:text-[#1a1a1a]"
+                >
+                  {breadcrumbParent.label}
+                </Link>
+                <ChevronRight size={13} strokeWidth={2.2} className="shrink-0 text-[#5c5e62]/50" />
+                <h1 className="text-[0.9rem] font-extrabold text-[#1a1a1a]">{activePage}</h1>
+              </div>
+            ) : (
+              <h1 className="text-[0.95rem] font-extrabold text-[#1a1a1a]">{activePage}</h1>
+            )}
           </div>
 
           {/* Right: notifications + role badge + avatar dropdown */}

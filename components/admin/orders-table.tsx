@@ -4,9 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  Search, Eye, ChevronLeft, ChevronRight, X, ShoppingBag,
+  Search, Eye, ChevronLeft, ChevronRight, X, ShoppingBag, ShoppingCart,
 } from "lucide-react";
 import type { AdminOrder } from "@/lib/admin-api";
+import EmptyState from "@/components/ui/empty-state";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -202,8 +203,13 @@ export default function OrdersTable({
             <tbody className="divide-y divide-black/[0.04]">
               {orders.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center text-[0.875rem] text-[#5c5e62]">
-                    No orders found.
+                  <td colSpan={7}>
+                    <EmptyState
+                      icon={ShoppingCart}
+                      heading="No orders found"
+                      description="Orders will appear here once customers place them, or try adjusting your filters."
+                      compact
+                    />
                   </td>
                 </tr>
               ) : (

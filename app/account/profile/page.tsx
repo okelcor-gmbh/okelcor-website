@@ -336,7 +336,7 @@ export default function ProfilePage() {
                 <button
                   type="submit"
                   disabled={savingInfo}
-                  className="flex h-[46px] items-center justify-center rounded-full bg-[var(--primary)] px-8 text-[0.9rem] font-semibold text-white transition hover:bg-[var(--primary-hover)] disabled:opacity-60"
+                  className="flex h-11 items-center justify-center rounded-full bg-[var(--primary)] px-8 text-[0.9rem] font-semibold text-white transition hover:bg-[var(--primary-hover)] disabled:opacity-60"
                 >
                   {savingInfo ? (
                     <span className="flex items-center gap-2">
@@ -407,7 +407,7 @@ export default function ProfilePage() {
                 <button
                   type="submit"
                   disabled={savingPw}
-                  className="flex h-[46px] items-center justify-center rounded-full bg-[var(--primary)] px-8 text-[0.9rem] font-semibold text-white transition hover:bg-[var(--primary-hover)] disabled:opacity-60"
+                  className="flex h-11 items-center justify-center rounded-full bg-[var(--primary)] px-8 text-[0.9rem] font-semibold text-white transition hover:bg-[var(--primary-hover)] disabled:opacity-60"
                 >
                   {savingPw ? (
                     <span className="flex items-center gap-2">

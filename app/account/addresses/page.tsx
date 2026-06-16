@@ -192,14 +192,14 @@ function AddressModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 rounded-full border border-black/[0.08] py-3 text-[0.9rem] font-semibold text-[var(--foreground)] transition hover:border-black/20"
+              className="flex h-11 flex-1 items-center justify-center rounded-full border border-black/[0.08] text-[0.9rem] font-semibold text-[var(--foreground)] transition hover:border-black/20"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 rounded-full bg-[var(--primary)] py-3 text-[0.9rem] font-semibold text-white transition hover:bg-[var(--primary-hover)] disabled:opacity-60"
+              className="flex h-11 flex-1 items-center justify-center rounded-full bg-[var(--primary)] text-[0.9rem] font-semibold text-white transition hover:bg-[var(--primary-hover)] disabled:opacity-60"
             >
               {saving ? "Saving…" : "Save Address"}
             </button>

@@ -3,10 +3,11 @@
 import { useState, useTransition, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Search, Pencil, Trash2, ToggleLeft, ToggleRight, ChevronLeft, ChevronRight, X, ShoppingBag, PackageX, PackageCheck, AlertTriangle, ExternalLink, AlertCircle } from "lucide-react";
+import { Search, Pencil, Trash2, ToggleLeft, ToggleRight, ChevronLeft, ChevronRight, X, ShoppingBag, PackageX, PackageCheck, AlertTriangle, ExternalLink, AlertCircle, Package } from "lucide-react";
 import { toggleProductActive, deleteProduct, listOnEbay, removeFromEbay, toggleProductStock, markAllOutOfStock, markAllInStock } from "@/app/admin/products/actions";
 import type { AdminProduct } from "@/lib/admin-api";
 import { getProductImageUrl } from "@/lib/utils";
+import EmptyState from "@/components/ui/empty-state";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -487,14 +488,30 @@ export default function ProductsTable({
             <tbody className="divide-y divide-black/[0.04]">
               {displayProducts.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="px-4 py-12 text-center text-[0.875rem] text-[#5c5e62]">
-                    {currentView === "b2b"
-                      ? "No B2B products found. Import a CSV with price_b2b values or add pricing in the product edit page."
-                      : currentView === "b2c"
-                      ? "No B2C products found. Import a CSV with price_b2c values or add pricing in the product edit page."
-                      : <>No products found. Try adjusting your search or{" "}
-                          <Link href="/admin/products/new" className="font-semibold text-[#E85C1A] underline">add one</Link>.</>
-                    }
+                  <td colSpan={10}>
+                    <EmptyState
+                      icon={Package}
+                      heading={
+                        currentView === "b2b"
+                          ? "No B2B products found"
+                          : currentView === "b2c"
+                          ? "No B2C products found"
+                          : "No products found"
+                      }
+                      description={
+                        currentView === "b2b"
+                          ? "Import a CSV with price_b2b values or add B2B pricing in the product edit page."
+                          : currentView === "b2c"
+                          ? "Import a CSV with price_b2c values or add B2C pricing in the product edit page."
+                          : "Try adjusting your search or add a new product to the catalogue."
+                      }
+                      action={
+                        currentView === "all"
+                          ? { label: "Add Product", href: "/admin/products/new" }
+                          : undefined
+                      }
+                      compact
+                    />
                   </td>
                 </tr>
               ) : (

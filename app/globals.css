@@ -436,6 +436,16 @@ select:focus-visible {
   outline-offset: 0;
 }
 
+/* ─── Boost Tailwind focus-ring visibility ───────────────────────────────────
+   Many inputs use focus:ring-[color]/10 which is nearly invisible.
+   Unlayered rules win over @layer utilities in Tailwind v4, so this
+   overrides --tw-ring-color globally without touching individual files.     */
+input:focus,
+select:focus,
+textarea:focus {
+  --tw-ring-color: rgba(244, 81, 30, 0.25);
+}
+
 /* Hero elements sit on dark image backgrounds — use white ring for contrast */
 .tesla-hero-btn-primary:focus-visible,
 .tesla-hero-btn-secondary:focus-visible,

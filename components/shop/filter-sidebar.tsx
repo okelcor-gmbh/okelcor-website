@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
 
 export type FilterState = {
@@ -90,11 +90,10 @@ export default function FilterSidebar({ filters, onChange, brands }: Props) {
             <span className="text-[0.93rem] font-semibold text-[var(--foreground)]">
               {section.title}
             </span>
-            {open[section.key] ? (
-              <ChevronUp size={15} className="text-[var(--muted)]" />
-            ) : (
-              <ChevronDown size={15} className="text-[var(--muted)]" />
-            )}
+            <ChevronDown
+              size={15}
+              className={`shrink-0 text-[var(--muted)] transition-transform duration-200 ${open[section.key] ? "rotate-180" : ""}`}
+            />
           </button>
 
           {open[section.key] && (
