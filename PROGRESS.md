@@ -1,6 +1,6 @@
 # Okelcor Website — Progress Tracker
 
-**Last updated:** 2026-06-08  
+**Last updated:** 2026-06-15  
 **Branch:** `main`  
 **Build status:** TypeScript 0 errors · ESLint clean · Production build passes
 
@@ -182,7 +182,7 @@
 | CRM-1 — Controlled B2B customer onboarding | `39fc8bc` | ✅ Complete |
 | CRM-2 — Inquiry quality filtering | `61ddac4` | ✅ Complete |
 | CRM-3 — Lead qualification & sales pipeline | `d283e74` | ✅ Complete |
-| CRM-3 — Admin notifications bell (lead assignment) | pending | ✅ Frontend complete |
+| CRM-3 — Admin notifications bell (lead assignment) | `972859b` | ✅ Frontend complete |
 | CRM-4 — Customer segmentation & access control | `cc2cab5` | ✅ Complete |
 | CRM-5 — Customer data quality & deduplication | `62850bc` | ✅ Complete |
 | CRM-6 — Communication timeline & follow-up automation | `6fd6f58` | ✅ Complete |
