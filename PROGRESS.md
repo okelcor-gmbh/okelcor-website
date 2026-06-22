@@ -77,6 +77,7 @@
 | SEO Phase 5A — Season/category copy sync (5 pages) | `ce827c9` | Approved copy applied |
 | SEO Phase 5B — Brand copy sync (7 pages) | `83a0ac1` | Approved copy applied |
 | Internal links on all 12 catalogue pages | `8eac305` | |
+| `/tyre-wholesaler` ads/SEO landing refresh | _pending commit_ | Dedicated minimal header + footer, darker inventory overlays, SEO-manager lead form → `POST /api/leads/tyre-wholesaler` (proxy to backend `/leads/tyre-wholesaler`, forwards client IP for throttle), raw interest/volume + flat UTM/gclid/fbclid/referrer attribution, CRM-2 preserved, `/tyre-wholesaler/thank-you` conversion page |
 
 ---
 

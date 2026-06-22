@@ -4,7 +4,7 @@ import { RECENT_SHIPMENTS } from "./data";
 
 export default function WholesalerShipments() {
   return (
-    <section id="shipments" className="w-full border-t border-black/[0.06] bg-[#f5f5f5] py-16 md:py-20">
+    <section id="shipments" className="w-full scroll-mt-24 border-t border-black/[0.06] bg-[#f5f5f5] py-16 md:py-20">
       <div className="tesla-shell">
         <Reveal>
           <div className="mx-auto max-w-3xl text-center">

@@ -6,7 +6,7 @@ import { INVENTORY_CATEGORIES } from "./data";
 
 export default function WholesalerInventory() {
   return (
-    <section id="inventory" className="w-full bg-white py-16 md:py-20">
+    <section id="inventory" className="w-full scroll-mt-24 bg-white py-16 md:py-20">
       <div className="tesla-shell">
         <Reveal>
           <div className="border-l-4 border-[var(--primary)] pl-6">
@@ -33,9 +33,11 @@ export default function WholesalerInventory() {
                   src={cat.image}
                   alt={cat.imageAlt}
                   fill
-                  className="object-cover opacity-60 transition-opacity duration-300 group-hover:opacity-40"
+                  className="object-cover opacity-80 transition-transform duration-500 group-hover:scale-105"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                 />
+                {/* Readability overlay — stronger gradient so text stays legible */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/55 to-black/25 transition-colors duration-300 group-hover:from-black/90 group-hover:via-black/60" />
                 <div className="absolute inset-0 flex flex-col justify-end p-6">
                   <h3 className="text-[1.3rem] font-extrabold text-white">{cat.title}</h3>
                   <p className="mt-2 text-[0.82rem] leading-6 text-white/85">{cat.description}</p>

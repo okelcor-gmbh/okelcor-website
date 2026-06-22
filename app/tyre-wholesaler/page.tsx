@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
-import QuoteForm from "@/components/quote/quote-form";
+import WholesalerHeader from "@/components/tyre-wholesaler/wholesaler-header";
+import WholesalerFooter from "@/components/tyre-wholesaler/wholesaler-footer";
+import WholesalerLeadForm from "@/components/tyre-wholesaler/wholesaler-lead-form";
 import WholesalerHero from "@/components/tyre-wholesaler/wholesaler-hero";
 import WholesalerCapabilities from "@/components/tyre-wholesaler/wholesaler-capabilities";
 import WholesalerInventory from "@/components/tyre-wholesaler/wholesaler-inventory";
@@ -95,7 +95,7 @@ export default function TyreWholesalerPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify([wholesaleStore, breadcrumb, faqSchema]) }}
       />
-      <Navbar />
+      <WholesalerHeader />
 
       <WholesalerHero />
       <WholesalerCapabilities />
@@ -115,14 +115,14 @@ export default function TyreWholesalerPage() {
             </p>
           </div>
           <div className="mx-auto max-w-3xl">
-            <QuoteForm />
+            <WholesalerLeadForm />
           </div>
         </div>
       </section>
 
       <WholesalerFaq />
 
-      <Footer />
+      <WholesalerFooter />
     </main>
   );
 }

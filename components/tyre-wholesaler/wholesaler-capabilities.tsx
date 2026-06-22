@@ -21,7 +21,7 @@ const CAPABILITIES = [
 
 export default function WholesalerCapabilities() {
   return (
-    <section id="capabilities" className="w-full bg-[#f5f5f5] py-16 md:py-20">
+    <section id="capabilities" className="w-full scroll-mt-24 bg-[#f5f5f5] py-16 md:py-20">
       <div className="tesla-shell">
         <Reveal>
           <div className="mx-auto max-w-3xl text-center">
