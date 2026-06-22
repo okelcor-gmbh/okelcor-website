@@ -34,6 +34,8 @@ import {
   Activity,
   ScanLine,
   BellRing,
+  Bell,
+  ClipboardCheck,
   UserCheck,
 } from "lucide-react";
 import { logoutAdmin } from "@/app/admin/actions";
@@ -45,6 +47,8 @@ import NotificationsBell from "@/components/admin/notifications-bell";
 
 const NAV = [
   { label: "Dashboard",      href: "/admin",             icon: LayoutDashboard, section: "dashboard" },
+  { label: "My Work",        href: "/admin/my-work",     icon: ClipboardCheck,  section: null },
+  { label: "Notifications",  href: "/admin/notifications", icon: Bell,          section: null },
   { label: "Analytics",      href: "/admin/analytics",  icon: BarChart2,       section: "analytics" },
   { label: "Live Chats",     href: "/admin/chats",      icon: MessageSquare,   section: "chats" },
   { label: "Products",       href: "/admin/products",    icon: Package,         section: "products" },

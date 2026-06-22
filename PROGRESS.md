@@ -1,6 +1,6 @@
 # Okelcor Website — Progress Tracker
 
-**Last updated:** 2026-06-16  
+**Last updated:** 2026-06-22  
 **Branch:** `main`  
 **Build status:** TypeScript 0 errors · ESLint clean · Production build passes
 
@@ -183,6 +183,7 @@
 | CRM-2 — Inquiry quality filtering | `61ddac4` | ✅ Complete |
 | CRM-3 — Lead qualification & sales pipeline | `d283e74` | ✅ Complete |
 | CRM-3 — Admin notifications bell (lead assignment) | `972859b` | ✅ Frontend complete |
+| CRM-3B — Notification center & assignment work queue | _pending commit_ | ✅ Frontend complete |
 | CRM-4 — Customer segmentation & access control | `cc2cab5` | ✅ Complete |
 | CRM-5 — Customer data quality & deduplication | `62850bc` | ✅ Complete |
 | CRM-6 — Communication timeline & follow-up automation | `6fd6f58` | ✅ Complete |
@@ -226,6 +227,22 @@
 | Backend endpoints (7 routes) | — | ⏳ Backend team |
 | Quote items backend (5 routes) | — | ⏳ Backend team |
 
+#### CRM-3B Detail — Notification Center & Work Queue
+
+| Sub-feature | Status |
+|---|---|
+| `AdminNotification` type extended to CRM-3B contract (`severity`, `body`, `action_url`, `related_type`/`related_id`, `dismissed_at`, `metadata`) + legacy `message`/`link` fallbacks | ✅ |
+| `MyWorkItem` type (`lib/admin-api.ts`) | ✅ |
+| `lib/admin-notifications.ts` — severity styles, type→icon (`NotifIcon`), body/link accessors, `timeAgo` | ✅ |
+| Notifications bell — lightweight unread-count poll (30s), list-on-open, severity icons, dismiss, "View all" | ✅ |
+| Notifications center page `/admin/notifications` — unread/type/severity filters, mark-all-read, dismiss, pagination | ✅ |
+| Work queue page `/admin/my-work` — sectioned (Assigned Leads, Due Follow-ups, Proposal Accepted, Customer Approvals, Access Requests) | ✅ |
+| Sidebar nav entries (My Work, Notifications) — visible to all admin roles | ✅ |
+| Assignment UX — "Pipeline updated. {name} has been notified." on quote assign | ✅ |
+| Follow-ups "Assigned to me" filter tab (`mine=1`) | ✅ |
+| Proxy routes: `notifications` (filters), `notifications/unread-count`, `notifications/{id}/dismiss`, `my-work` (graceful 200/empty degradation) | ✅ |
+| Backend endpoints (table, service, triggers, dedupe, scheduler) | ⏳ Backend team |
+
 ---
 
 ## Pending — Backend Contracts
@@ -255,22 +272,38 @@ DELETE /api/v1/admin/quote-requests/{id}/items/{itemId}
 POST   /api/v1/admin/quote-requests/{id}/items/import-from-inquiry
 ```
 
-### CRM-3 Admin Notifications
+### CRM-3B Admin Notifications & Work Queue
 
-Bell icon + dropdown panel in the admin topbar (`components/admin/notifications-bell.tsx`),
-polling every 30s for unread count. Currently used for "lead assigned to you" but the
-`type`/`link` fields are generic enough to reuse for other events (follow-up due,
-proposal accepted, etc.).
+Frontend complete (bell + `/admin/notifications` + `/admin/my-work`). The bell polls
+`unread-count` every 30s and fetches the list on open. Notification fields follow the
+CRM-3B contract (`severity`, `body`, `action_url`, `related_type`/`related_id`); the
+frontend also accepts the legacy `message`/`link` fields as fallbacks.
 
 ```
-GET  /api/v1/admin/notifications                returns: { data: [{ id, type, title, message?, link?, read_at?, created_at }], unread_count }
+GET  /api/v1/admin/notifications              filters: unread=1, type, severity, page
+       returns: { data: [{ id, type, title, body?, severity?, action_url?, related_type?,
+                  related_id?, read_at?, dismissed_at?, metadata?, created_at }],
+                  unread_count, meta }
+GET  /api/v1/admin/notifications/unread-count returns: { unread_count }
 POST /api/v1/admin/notifications/{id}/read
+POST /api/v1/admin/notifications/{id}/dismiss
 POST /api/v1/admin/notifications/read-all
+
+GET  /api/v1/admin/my-work                    returns: { data: [{ type, title, subtitle?,
+                  priority?, due_at?, action_url?, status? }] }
 ```
 
-Trigger: when `POST /admin/quote-requests/{id}/assign` changes `assigned_to` to a
-new user, create a `lead_assigned` notification for that user with a `link` to
-`/admin/quotes/{id}`.
+Notification types: `lead_assigned`, `follow_up_due`, `proposal_accepted`,
+`customer_access_requested`, `customer_approval_needed`, `quote_needs_review`,
+`order_payment_milestone`, `document_action_needed`. Severities: `info`, `success`,
+`warning`, `urgent`.
+
+Triggers (backend): lead assigned (on `POST /admin/quote-requests/{id}/assign`),
+follow-up due (`admin:notifications:due-followups` scheduler), proposal accepted,
+customer access requested, customer approval needed, quote needs review. Dedupe on
+`type + related_type + related_id + date/stage`; never duplicate an existing **unread**
+notification. The follow-ups list should honour a `mine=1` filter (used by the
+"Assigned to me" tab).
 
 ### CRM-8 Buyer Lifecycle
 
@@ -341,17 +374,6 @@ GET /api/v1/admin/system/health
 GET /api/v1/admin/system/errors?limit=N
 ```
 
-### CRM-3 Admin Notifications
-
-```
-GET  /api/v1/admin/notifications                returns: { data: [{ id, type, title, message?, link?, read_at?, created_at }], unread_count }
-POST /api/v1/admin/notifications/{id}/read
-POST /api/v1/admin/notifications/read-all
-```
-
-Plus: on assign (`POST /admin/quote-requests/{id}/assign`), create a `lead_assigned`
-notification for the newly assigned user, linking to `/admin/quotes/{id}`.
-
 ---
 
 ## Frontend Architecture Notes
@@ -383,6 +405,6 @@ notification for the newly assigned user, linking to `/admin/quotes/{id}`.
 |---|---|---|
 | CRM-7 backend activation | High | 12 endpoints pending |
 | CRM-8 backend activation | High | 14 endpoints + approve must flip `onboarding_status`/`is_active` & send approval email (see CRM-8 contract block) |
-| CRM-3 notifications backend activation | Medium | 3 endpoints + trigger on lead assignment (see CRM-3 Admin Notifications contract block) |
+| CRM-3B notifications backend activation | High | `admin_notifications` table + service + 6 endpoints + `my-work` + triggers + dedupe + `due-followups` scheduler (see CRM-3B contract block) |
 | Customer proposal view (account portal) | Medium | Show proposal status on account quotes |
 | Proposal PDF document (AN number) | Medium | Backend to generate; frontend to display |

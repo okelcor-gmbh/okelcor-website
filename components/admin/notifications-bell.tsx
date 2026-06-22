@@ -2,50 +2,56 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Bell, CheckCheck } from "lucide-react";
+import { Bell, CheckCheck, X } from "lucide-react";
 import type { AdminNotification } from "@/lib/admin-api";
+import {
+  notifBody, notifLink, NotifIcon, severityStyle, timeAgo,
+} from "@/lib/admin-notifications";
 
 const POLL_MS = 30_000;
 
-function timeAgo(iso: string): string {
-  const date = new Date(iso);
-  const diffMin = Math.floor((Date.now() - date.getTime()) / 60_000);
-  if (diffMin < 1) return "just now";
-  if (diffMin < 60) return `${diffMin}m ago`;
-  const diffHr = Math.floor(diffMin / 60);
-  if (diffHr < 24) return `${diffHr}h ago`;
-  const diffDay = Math.floor(diffHr / 24);
-  if (diffDay < 7) return `${diffDay}d ago`;
-  return new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short" }).format(date);
-}
-
 // ── Bell + dropdown panel ─────────────────────────────────────────────────────
-// Polls /api/admin/notifications every 30s for the unread count. Backend
-// is expected to create a notification (e.g. type "lead_assigned") whenever
-// a quote/lead is assigned to an admin user — see PROGRESS.md for the contract.
+// CRM-3B. Polls the lightweight /unread-count endpoint every 30s for the badge,
+// and fetches the latest 10 notifications when the panel is opened. The backend
+// creates a notification (e.g. type "lead_assigned") whenever work is assigned
+// to an admin user — see PROGRESS.md / docs for the contract.
 
 export default function NotificationsBell() {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<AdminNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [loading, setLoading] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  const poll = useCallback(async () => {
+  const pollCount = useCallback(async () => {
     try {
-      const res = await fetch("/api/admin/notifications", { cache: "no-store" });
-      const json = await res.json().catch(() => ({ data: [], unread_count: 0 }));
-      setItems(Array.isArray(json.data) ? json.data : []);
+      const res = await fetch("/api/admin/notifications/unread-count", { cache: "no-store" });
+      const json = await res.json().catch(() => ({ unread_count: 0 }));
       setUnreadCount(typeof json.unread_count === "number" ? json.unread_count : 0);
     } catch {
       // Network error — silently skip
     }
   }, []);
 
+  const loadList = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/notifications?per_page=10", { cache: "no-store" });
+      const json = await res.json().catch(() => ({ data: [], unread_count: 0 }));
+      setItems(Array.isArray(json.data) ? json.data : []);
+      if (typeof json.unread_count === "number") setUnreadCount(json.unread_count);
+    } catch {
+      // Network error — silently skip
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    void poll();
-    const t = setInterval(() => void poll(), POLL_MS);
+    void pollCount();
+    const t = setInterval(() => void pollCount(), POLL_MS);
     return () => clearInterval(t);
-  }, [poll]);
+  }, [pollCount]);
 
   // Close on outside click
   useEffect(() => {
@@ -70,9 +76,18 @@ export default function NotificationsBell() {
     fetch("/api/admin/notifications/read-all", { method: "POST" }).catch(() => {});
   }, []);
 
+  const dismiss = useCallback((id: number) => {
+    setItems((prev) => {
+      const target = prev.find((n) => n.id === id);
+      if (target && !target.read_at) setUnreadCount((c) => Math.max(0, c - 1));
+      return prev.filter((n) => n.id !== id);
+    });
+    fetch(`/api/admin/notifications/${id}/dismiss`, { method: "POST" }).catch(() => {});
+  }, []);
+
   const handleToggle = () => {
     setOpen((v) => {
-      if (!v) void poll();
+      if (!v) void loadList();
       return !v;
     });
   };
@@ -110,7 +125,9 @@ export default function NotificationsBell() {
           </div>
 
           <div className="max-h-96 overflow-y-auto">
-            {items.length === 0 ? (
+            {loading && items.length === 0 ? (
+              <p className="px-4 py-6 text-center text-[0.8rem] text-[#9ca3af]">Loading…</p>
+            ) : items.length === 0 ? (
               <p className="px-4 py-6 text-center text-[0.8rem] text-[#9ca3af]">
                 No notifications yet.
               </p>
@@ -120,10 +137,21 @@ export default function NotificationsBell() {
                   key={n.id}
                   notification={n}
                   onRead={markRead}
+                  onDismiss={dismiss}
                   onNavigate={() => setOpen(false)}
                 />
               ))
             )}
+          </div>
+
+          <div className="border-t border-black/[0.06]">
+            <Link
+              href="/admin/notifications"
+              onClick={() => setOpen(false)}
+              className="block px-4 py-2.5 text-center text-[0.78rem] font-semibold text-[#E85C1A] transition hover:bg-[#f0f2f5]"
+            >
+              View all
+            </Link>
           </div>
         </div>
       )}
@@ -136,55 +164,68 @@ export default function NotificationsBell() {
 function NotificationRow({
   notification,
   onRead,
+  onDismiss,
   onNavigate,
 }: {
   notification: AdminNotification;
   onRead: (id: number) => void;
+  onDismiss: (id: number) => void;
   onNavigate: () => void;
 }) {
   const unread = !notification.read_at;
+  const body = notifBody(notification);
+  const link = notifLink(notification);
+  const sev = severityStyle(notification.severity);
 
   const handleClick = () => {
     if (unread) onRead(notification.id);
     onNavigate();
   };
 
-  const body = (
+  const inner = (
     <div
       className={[
-        "flex items-start gap-3 px-4 py-3 text-left transition hover:bg-[#f0f2f5]",
+        "flex items-start gap-2.5 px-4 py-3 text-left transition hover:bg-[#f0f2f5]",
         unread ? "bg-[#E85C1A]/[0.04]" : "",
       ].join(" ")}
     >
-      <span
-        className={[
-          "mt-1.5 h-2 w-2 shrink-0 rounded-full",
-          unread ? "bg-[#E85C1A]" : "bg-transparent",
-        ].join(" ")}
-      />
+      <span className={["mt-0.5 shrink-0", sev.icon].join(" ")}>
+        <NotifIcon type={notification.type} size={15} strokeWidth={1.9} />
+      </span>
       <div className="min-w-0 flex-1">
         <p className="text-[0.82rem] font-semibold text-[#1a1a1a]">{notification.title}</p>
-        {notification.message && (
-          <p className="mt-0.5 line-clamp-2 text-[0.76rem] leading-[1.5] text-[#5c5e62]">
-            {notification.message}
-          </p>
+        {body && (
+          <p className="mt-0.5 line-clamp-2 text-[0.76rem] leading-[1.5] text-[#5c5e62]">{body}</p>
         )}
         <p className="mt-1 text-[0.7rem] text-[#9ca3af]">{timeAgo(notification.created_at)}</p>
       </div>
+      {unread && <span className={["mt-1.5 h-2 w-2 shrink-0 rounded-full", sev.dot].join(" ")} />}
     </div>
   );
 
-  if (notification.link) {
-    return (
-      <Link href={notification.link} onClick={handleClick} className="block">
-        {body}
-      </Link>
-    );
-  }
-
   return (
-    <button type="button" onClick={handleClick} className="block w-full">
-      {body}
-    </button>
+    <div className="group relative">
+      {link ? (
+        <Link href={link} onClick={handleClick} className="block">
+          {inner}
+        </Link>
+      ) : (
+        <button type="button" onClick={handleClick} className="block w-full">
+          {inner}
+        </button>
+      )}
+      <button
+        type="button"
+        aria-label="Dismiss notification"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onDismiss(notification.id);
+        }}
+        className="absolute right-2 top-2 hidden h-6 w-6 items-center justify-center rounded-md text-[#9ca3af] transition hover:bg-black/[0.06] hover:text-[#1a1a1a] group-hover:flex"
+      >
+        <X size={13} strokeWidth={2} />
+      </button>
+    </div>
   );
 }

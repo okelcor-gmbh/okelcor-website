@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   CheckCircle2, Clock, AlertTriangle, CalendarClock,
-  User, Loader2, AlertCircle, RotateCcw, X,
+  User, Loader2, RotateCcw, X,
 } from "lucide-react";
 import type { FollowUpItem } from "@/lib/admin-api";
 
@@ -154,7 +154,7 @@ function RescheduleModal({
 
 // ── Main table ────────────────────────────────────────────────────────────────
 
-type Filter = "all" | "overdue" | "due_today" | "upcoming";
+type Filter = "all" | "mine" | "overdue" | "due_today" | "upcoming";
 
 function fmtDate(iso?: string | null) {
   if (!iso) return "—";
@@ -172,6 +172,7 @@ export default function FollowUpsTable({ initialFilter = "all" }: { initialFilte
   const load = useCallback(async () => {
     setLoading(true);
     const p = new URLSearchParams();
+    if (filter === "mine")      p.set("mine", "1");
     if (filter === "overdue")   p.set("overdue", "1");
     if (filter === "due_today") p.set("due", "today");
     if (filter === "upcoming")  p.set("upcoming", "1");
@@ -187,6 +188,7 @@ export default function FollowUpsTable({ initialFilter = "all" }: { initialFilte
 
   const filterTabs: { key: Filter; label: string }[] = [
     { key: "all",       label: "All" },
+    { key: "mine",      label: "Assigned to me" },
     { key: "overdue",   label: "Overdue" },
     { key: "due_today", label: "Due Today" },
     { key: "upcoming",  label: "Upcoming" },

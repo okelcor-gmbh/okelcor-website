@@ -272,7 +272,8 @@ export default function QuoteDetail({
       if (!qualRes.ok) throw new Error((qualJson as Record<string, unknown>).error as string ?? `Error ${qualRes.status}`);
 
       // Save assign if changed
-      if (pipeline.assigned_to !== (q.assigned_to as number | null)) {
+      const assignChanged = pipeline.assigned_to !== (q.assigned_to as number | null);
+      if (assignChanged) {
         await fetch(`/api/admin/quotes/${quote.id}/assign`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -280,7 +281,13 @@ export default function QuoteDetail({
         });
       }
 
-      setPipelineMsg({ type: "ok", text: "Pipeline updated successfully." });
+      // CRM-3B: confirm the assignee was notified when a new owner was set.
+      const assignedName = pipeline.assigned_to_name?.trim();
+      const assignNotice =
+        assignChanged && pipeline.assigned_to != null
+          ? ` ${assignedName || "The assignee"} has been notified.`
+          : "";
+      setPipelineMsg({ type: "ok", text: `Pipeline updated successfully.${assignNotice}` });
     } catch (err) {
       setPipelineMsg({ type: "err", text: err instanceof Error ? err.message : "Save failed." });
     } finally {

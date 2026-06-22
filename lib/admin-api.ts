@@ -367,18 +367,60 @@ export type QualificationStatus =
 export type LeadSource =
   | "website_quote" | "contact_form" | "ebay" | "phone" | "email" | "referral";
 
-// CRM-3: admin notifications (e.g. "lead assigned to you")
+// CRM-3 / CRM-3B: admin notifications (e.g. "lead assigned to you")
 export type AdminNotificationType =
-  | "lead_assigned" | "follow_up_due" | "proposal_accepted" | "proposal_rejected" | string;
+  | "lead_assigned"
+  | "follow_up_due"
+  | "proposal_accepted"
+  | "proposal_rejected"
+  | "customer_access_requested"
+  | "customer_approval_needed"
+  | "quote_needs_review"
+  | "order_payment_milestone"
+  | "document_action_needed"
+  | string;
+
+export type AdminNotificationSeverity = "info" | "success" | "warning" | "urgent";
+
+export type AdminNotificationRelatedType =
+  | "quote_request" | "customer" | "order" | "trade_document" | "follow_up" | string;
 
 export type AdminNotification = {
   id: number;
   type: AdminNotificationType;
   title: string;
+  /** CRM-3B body text. Legacy backend used `message` — read with `body ?? message`. */
+  body?: string | null;
   message?: string | null;
+  severity?: AdminNotificationSeverity | null;
+  /** CRM-3B link. Legacy backend used `link` — read with `action_url ?? link`. */
+  action_url?: string | null;
   link?: string | null;
+  related_type?: AdminNotificationRelatedType | null;
+  related_id?: number | null;
   read_at?: string | null;
+  dismissed_at?: string | null;
+  metadata?: Record<string, unknown> | null;
   created_at: string;
+};
+
+// CRM-3B: actionable work queue item (GET /admin/my-work)
+export type MyWorkType =
+  | "assigned_lead"
+  | "follow_up"
+  | "proposal_accepted"
+  | "customer_approval"
+  | "access_request"
+  | string;
+
+export type MyWorkItem = {
+  type: MyWorkType;
+  title: string;
+  subtitle?: string | null;
+  priority?: "low" | "normal" | "high" | "urgent" | string | null;
+  due_at?: string | null;
+  action_url?: string | null;
+  status?: string | null;
 };
 
 // CRM-7 quote request items (admin-structured line items for proposal)
