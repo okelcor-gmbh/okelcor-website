@@ -34,14 +34,48 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [locale, setLocaleState] = useState<Locale>(defaultLocale);
 
-  // Restore saved locale on mount and sync cookie so server components see it
+  // On mount: a stored locale (returning visitor OR an explicit manual choice)
+  // always wins. Only when nothing is stored do we auto-detect from the visitor's
+  // country — strictly first-visit. Once detection resolves, we persist the result
+  // so it never runs again and any later manual switch overrides it.
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY) as Locale | null;
     if (stored && stored in translations) {
       setLocaleState(stored);
       persistLocale(stored);
+      return;
     }
-  }, []);
+
+    let cancelled = false;
+    (async () => {
+      try {
+        // Backend resolves country (via CDN geo headers) → locale through its
+        // authoritative country→locale map. Country list is never hardcoded here.
+        const res = await fetch("/api/i18n/detect", { cache: "no-store" });
+        if (!res.ok) return;
+        const data: { locale?: string } = await res.json();
+        const detected = data.locale;
+        if (cancelled || !detected || !(detected in translations)) return;
+
+        if (detected !== defaultLocale) {
+          const next = detected as Locale;
+          setLocaleState(next);
+          persistLocale(next);
+          // Re-render server components so they re-fetch with the new locale cookie.
+          router.refresh();
+        } else {
+          // Remember that we resolved to the default so we don't re-detect.
+          persistLocale(defaultLocale);
+        }
+      } catch {
+        // Geo/backend unavailable — stay on the default locale.
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
 
   // Keep <html lang="..."> in sync
   useEffect(() => {

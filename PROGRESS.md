@@ -50,6 +50,7 @@
 | LANG-2 — locale-aware metadata (all public pages) | `17149ab` | |
 | LANG-3 prep — `uiLabels` in CatalogueLanding | `d7f33c2` | |
 | Spanish locale in admin article form | `49386cc` | |
+| LANG-4 — first-visit geo locale auto-detection | _pending commit_ | `/api/i18n/detect` proxy reads CDN geo header (`x-vercel-ip-country`/`cf-ipcountry`) + cached backend country→locale map (`/i18n/locales`, revalidate 1h); `LanguageProvider` auto-switches on first visit only, stored choice/manual override always wins; graceful default-only fallback until backend live |
 
 ---
 
@@ -328,6 +329,24 @@ POST /api/v1/admin/customer-access-requests/{id}/reject
 GET  /api/v1/auth/customer/access-requests           customer — own requests
 POST /api/v1/auth/customer/access-requests           customer — body: { requested_access, reason? }
 ```
+
+### LANG-4 i18n Locale Resolution (geo auto-detection)
+
+Frontend complete (`/api/i18n/detect` proxy + `LanguageProvider` first-visit detection).
+The proxy reads the visitor country from CDN geo headers and resolves it via the backend
+country→locale map. **No frontend blocker** — degrades to default-only (everyone `en`,
+no auto-switch) until the routes go live.
+
+```
+GET /api/v1/i18n/locales              returns: { supported, default, country_locale }   🔧 built, needs deploy
+GET /api/v1/i18n/resolve?country=XX   returns: { locale, country, source, is_default, supported }  (not used by FE — FE resolves from the cached map)
+```
+
+Frontend uses the **cached-map** style: fetches `/i18n/locales` once (server-side,
+revalidate 1h, shared across visitors) and resolves `map[country] ?? default` itself,
+so there is no per-request backend round trip and country geo stays server-side.
+Wiring `LocaleResolver` into the content controllers is **not required** for this
+integration (FE always sends `?locale=`); it's optional backend cleanup.
 
 ### CRM-6 Communications
 
