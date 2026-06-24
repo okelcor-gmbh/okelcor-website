@@ -1,6 +1,6 @@
 # Okelcor Website — Progress Tracker
 
-**Last updated:** 2026-06-22  
+**Last updated:** 2026-06-24  
 **Branch:** `main`  
 **Build status:** TypeScript 0 errors · ESLint clean · Production build passes
 
@@ -50,7 +50,7 @@
 | LANG-2 — locale-aware metadata (all public pages) | `17149ab` | |
 | LANG-3 prep — `uiLabels` in CatalogueLanding | `d7f33c2` | |
 | Spanish locale in admin article form | `49386cc` | |
-| LANG-4 — first-visit geo locale auto-detection | _pending commit_ | `/api/i18n/detect` proxy reads CDN geo header (`x-vercel-ip-country`/`cf-ipcountry`) + cached backend country→locale map (`/i18n/locales`, revalidate 1h); `LanguageProvider` auto-switches on first visit only, stored choice/manual override always wins; graceful default-only fallback until backend live |
+| LANG-4 — first-visit geo locale auto-detection | `3a67c29` | `/api/i18n/detect` proxy reads CDN geo header (`x-vercel-ip-country`/`cf-ipcountry`) + cached backend country→locale map (`/i18n/locales`, revalidate 1h); `LanguageProvider` auto-switches on first visit only, stored choice/manual override always wins; graceful default-only fallback until backend live |
 
 ---
 
@@ -78,7 +78,7 @@
 | SEO Phase 5A — Season/category copy sync (5 pages) | `ce827c9` | Approved copy applied |
 | SEO Phase 5B — Brand copy sync (7 pages) | `83a0ac1` | Approved copy applied |
 | Internal links on all 12 catalogue pages | `8eac305` | |
-| `/tyre-wholesaler` ads/SEO landing refresh | _pending commit_ | Dedicated minimal header + footer, darker inventory overlays, SEO-manager lead form → `POST /api/leads/tyre-wholesaler` (proxy to backend `/leads/tyre-wholesaler`, forwards client IP for throttle), raw interest/volume + flat UTM/gclid/fbclid/referrer attribution, CRM-2 preserved, `/tyre-wholesaler/thank-you` conversion page |
+| `/tyre-wholesaler` ads/SEO landing refresh | `d012cea` | Dedicated minimal header + footer, darker inventory overlays, SEO-manager lead form → `POST /api/leads/tyre-wholesaler` (proxy to backend `/leads/tyre-wholesaler`, forwards client IP for throttle), raw interest/volume + flat UTM/gclid/fbclid/referrer attribution, CRM-2 preserved, `/tyre-wholesaler/thank-you` conversion page |
 
 ---
 
@@ -185,7 +185,7 @@
 | CRM-2 — Inquiry quality filtering | `61ddac4` | ✅ Complete |
 | CRM-3 — Lead qualification & sales pipeline | `d283e74` | ✅ Complete |
 | CRM-3 — Admin notifications bell (lead assignment) | `972859b` | ✅ Frontend complete |
-| CRM-3B — Notification center & assignment work queue | _pending commit_ | ✅ Frontend complete |
+| CRM-3B — Notification center & assignment work queue | `6d3ca6d` | ✅ Frontend complete |
 | CRM-4 — Customer segmentation & access control | `cc2cab5` | ✅ Complete |
 | CRM-5 — Customer data quality & deduplication | `62850bc` | ✅ Complete |
 | CRM-6 — Communication timeline & follow-up automation | `6fd6f58` | ✅ Complete |
