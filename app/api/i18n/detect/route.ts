@@ -8,7 +8,7 @@ import { NextRequest, NextResponse } from "next/server";
  *
  * Why a server-side proxy instead of the browser calling the Laravel API directly:
  *  - Geo headers (x-vercel-ip-country / cf-ipcountry) are only present on the edge
- *    request to *this* Next route. A browser → api.okelcor.de call would not carry
+ *    request to *this* Next route. A browser → api.okelcor.com call would not carry
  *    them, which is exactly the failure mode the backend warned about.
  *  - The country→locale map is fetched once per hour (revalidate) and shared across
  *    all visitors, so there is no per-request backend round trip.

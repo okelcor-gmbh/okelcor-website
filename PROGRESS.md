@@ -16,7 +16,7 @@
 | Auth (customer) | Custom cookie-based — `customer_token` httpOnly, proxied Laravel API |
 | Auth (admin) | Cookie-based — `admin_token`, mandatory 2FA, 5h session TTL |
 | Email | Resend (contact + checkout; quote emails owned by backend) |
-| Backend | Laravel API — `https://api.okelcor.de/api/v1` |
+| Backend | Laravel API — `https://api.okelcor.com/api/v1` |
 
 ---
 
