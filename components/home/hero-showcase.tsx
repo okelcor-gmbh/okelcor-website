@@ -71,18 +71,11 @@ export default function HeroShowcase() {
       if (prefersReducedMotion()) return;
       const cards = cardRefs.current.filter(Boolean) as HTMLDivElement[];
 
-      // Headline: flowing per-character reveal (subtle rise + fade).
-      gsap.fromTo(
-        ".hs-char",
-        { opacity: 0, yPercent: 40 },
-        { opacity: 1, yPercent: 0, duration: 0.5, ease: "power3.out", stagger: 0.018, delay: 0.05 }
-      );
-
-      // Entrance: text fades up (via CSS targets), cards scale/fade in staggered.
+      // Entrance: eyebrow, headline, subtitle, CTAs, chips fade up together.
       gsap.fromTo(
         ".hs-fade",
         { opacity: 0, y: 18 },
-        { opacity: 1, y: 0, duration: 0.7, ease: ease.entrance, stagger: 0.08, delay: 0.15 }
+        { opacity: 1, y: 0, duration: 0.7, ease: ease.entrance, stagger: 0.08, delay: 0.05 }
       );
       gsap.fromTo(
         cards,
@@ -235,21 +228,8 @@ export default function HeroShowcase() {
               {h.eyebrow}
             </span>
 
-            <h1
-              aria-label={h.title}
-              className="mt-5 max-w-xl text-4xl font-extrabold leading-[1.05] tracking-tight text-[var(--foreground)] sm:text-5xl lg:text-[3.4rem]"
-            >
-              <span aria-hidden="true">
-                {h.title.split(" ").map((word, wi) => (
-                  <span key={`${word}-${wi}`} className="mr-[0.25em] inline-block">
-                    {Array.from(word).map((ch, ci) => (
-                      <span key={ci} className="hs-char inline-block will-change-[transform,opacity]">
-                        {ch}
-                      </span>
-                    ))}
-                  </span>
-                ))}
-              </span>
+            <h1 className="hs-fade mt-5 max-w-xl text-4xl font-extrabold leading-[1.05] tracking-tight text-[var(--foreground)] sm:text-5xl lg:text-[3.4rem]">
+              {h.title}
             </h1>
 
             <p className="hs-fade mt-5 max-w-lg text-[1.05rem] leading-8 text-[var(--muted)]">

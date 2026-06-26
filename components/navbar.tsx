@@ -90,6 +90,7 @@ export default function Navbar() {
   const [openShopMega,  setOpenShopMega]  = useState(false);
   const [openFetMega,   setOpenFetMega]   = useState(false);
   const [openAboutMega, setOpenAboutMega] = useState(false);
+  const [scrolled,      setScrolled]      = useState(false);
 
   const shopCloseTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fetCloseTimer   = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -128,6 +129,17 @@ export default function Navbar() {
       document.body.style.overflow = "";
     };
   }, [openMenu, openMobileLang]);
+
+  // ── Scroll-aware header — gains a subtle border + shadow once scrolled ────
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    const raf = requestAnimationFrame(onScroll); // defer initial read off the effect body
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, []);
 
   const closeAll = () => {
     setOpenMenu(false);
@@ -362,7 +374,13 @@ export default function Navbar() {
     <>
       {/* ── Fixed header bar ─────────────────────────────────────────────── */}
       <header ref={headerRef} className="fixed left-0 z-50 w-full" style={{ top: "var(--bar-h, 0px)" }}>
-        <div className="border-b border-black/[0.04] bg-white/96 backdrop-blur-xl">
+        <div
+          className={`border-b backdrop-blur-xl transition-[background-color,border-color,box-shadow] duration-300 ${
+            scrolled
+              ? "border-black/[0.08] bg-white/90 shadow-[0_6px_24px_rgba(0,0,0,0.05)]"
+              : "border-black/[0.04] bg-white/96"
+          }`}
+        >
           <div className="tesla-shell grid h-[76px] grid-cols-[auto_1fr_auto] items-center gap-4 lg:h-20 lg:grid-cols-[1fr_auto_1fr]">
 
             {/* Logo */}
