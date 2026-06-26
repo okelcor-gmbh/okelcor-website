@@ -12,6 +12,7 @@ import RexCertified from "@/components/rex-certified";
 import CTASection from "@/components/cta-section";
 import Footer from "@/components/footer";
 import HeroShowcase from "@/components/home/hero-showcase";
+import GlobalReach from "@/components/home/global-reach";
 import CategoriesSection from "@/components/home/categories-section";
 import BrandsSection from "@/components/home/brands-section";
 import PlatformShowcase from "@/components/home/platform-showcase";
@@ -46,6 +47,9 @@ export default function Home() {
       <Navbar />
 
       <HeroShowcase />
+
+      {/* Global reach — scrolling flag strip of markets served */}
+      <GlobalReach />
 
       {/* Social proof first — brands right under the hero */}
       <Suspense fallback={<BrandsSkeleton />}>

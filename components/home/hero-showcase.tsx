@@ -17,13 +17,17 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Search, Truck, ShieldCheck, Boxes, BadgeCheck, Globe, ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Search, Truck, ShieldCheck, Boxes, BadgeCheck, Globe, ArrowRight, ArrowUpRight } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
 import { gsap, useGSAP, ease, prefersReducedMotion } from "@/lib/gsap";
 import MagneticButton from "@/components/ui/magnetic-button";
 
 const CHIP_ICONS = [BadgeCheck, ShieldCheck, Boxes, Globe] as const;
 const ROTATE_MS = 3000;
+
+// Shop filter target per product (aligned with the heroShowcase.products order)
+const PRODUCT_HREFS = ["/shop?type=TBR", "/shop?type=PCR", "/shop?type=OTR", "/shop?type=USED"] as const;
 
 export default function HeroShowcase() {
   const { t } = useLanguage();
@@ -60,11 +64,18 @@ export default function HeroShowcase() {
       if (prefersReducedMotion()) return;
       const cards = cardRefs.current.filter(Boolean) as HTMLDivElement[];
 
+      // Headline: premium word-by-word reveal (fade + rise + de-blur).
+      gsap.fromTo(
+        ".hs-word",
+        { opacity: 0, y: 26, filter: "blur(8px)" },
+        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.7, ease: "power3.out", stagger: 0.05, delay: 0.05 }
+      );
+
       // Entrance: text fades up (via CSS targets), cards scale/fade in staggered.
       gsap.fromTo(
         ".hs-fade",
         { opacity: 0, y: 18 },
-        { opacity: 1, y: 0, duration: 0.7, ease: ease.entrance, stagger: 0.08 }
+        { opacity: 1, y: 0, duration: 0.7, ease: ease.entrance, stagger: 0.08, delay: 0.15 }
       );
       gsap.fromTo(
         cards,
@@ -118,8 +129,12 @@ export default function HeroShowcase() {
               {h.eyebrow}
             </span>
 
-            <h1 className="hs-fade mt-5 max-w-xl text-4xl font-extrabold leading-[1.05] tracking-tight text-[var(--foreground)] sm:text-5xl lg:text-[3.4rem]">
-              {h.title}
+            <h1 className="mt-5 max-w-xl text-4xl font-extrabold leading-[1.05] tracking-tight text-[var(--foreground)] sm:text-5xl lg:text-[3.4rem]">
+              {h.title.split(" ").map((word, i) => (
+                <span key={`${word}-${i}`} className="hs-word mr-[0.26em] inline-block will-change-[transform,filter]">
+                  {word}
+                </span>
+              ))}
             </h1>
 
             <p className="hs-fade mt-5 max-w-lg text-[1.05rem] leading-8 text-[var(--muted)]">
@@ -164,7 +179,7 @@ export default function HeroShowcase() {
 
             {/* Mobile: simple stack */}
             <div className="flex flex-col gap-4 lg:hidden">
-              <ProductCard refCb={(el) => (cardRefs.current[0] = el)} textRef={productTextRef} h={h} product={product} />
+              <ProductCard refCb={(el) => (cardRefs.current[0] = el)} textRef={productTextRef} h={h} product={product} href={PRODUCT_HREFS[productIdx]} />
               <SearchCard refCb={(el) => (cardRefs.current[1] = el)} h={h} />
               <ShipmentCard refCb={(el) => (cardRefs.current[2] = el)} h={h} />
             </div>
@@ -172,7 +187,7 @@ export default function HeroShowcase() {
             {/* Desktop: overlapping cluster */}
             <div className="relative hidden h-[480px] lg:block">
               <div className="absolute right-0 top-2 w-[300px]">
-                <ProductCard refCb={(el) => (cardRefs.current[0] = el)} textRef={productTextRef} h={h} product={product} />
+                <ProductCard refCb={(el) => (cardRefs.current[0] = el)} textRef={productTextRef} h={h} product={product} href={PRODUCT_HREFS[productIdx]} />
               </div>
               <div className="absolute left-0 top-[150px] w-[280px]">
                 <SearchCard refCb={(el) => (cardRefs.current[1] = el)} h={h} />
@@ -207,21 +222,25 @@ function TyreDisc() {
 }
 
 function ProductCard({
-  refCb, textRef, h, product,
+  refCb, textRef, h, product, href,
 }: {
   refCb: (el: HTMLDivElement | null) => void;
   textRef: React.RefObject<HTMLDivElement | null>;
   h: H;
   product: H["products"][number];
+  href: string;
 }) {
   return (
-    <div ref={refCb} className={`${CARD_CLASS} p-5`}>
+    <div ref={refCb} className={`${CARD_CLASS} group relative p-5 transition-shadow duration-300 hover:shadow-[0_30px_70px_-22px_rgba(23,26,32,0.32)]`}>
+      <Link href={href} aria-label={`${product.cat} — ${product.size}`} className="absolute inset-0 z-10 rounded-2xl" />
       <div className="mb-4 flex items-center justify-between">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-wide text-emerald-600">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
           {h.inStock}
         </span>
-        <Boxes size={16} className="text-[#c0c3c8]" />
+        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#f4f4f5] text-[#9ca3af] transition group-hover:bg-[var(--primary)]/10 group-hover:text-[var(--primary)]">
+          <ArrowUpRight size={15} strokeWidth={2.2} />
+        </span>
       </div>
       <div className="flex items-center gap-4">
         <TyreDisc />
@@ -237,18 +256,40 @@ function ProductCard({
 }
 
 function SearchCard({ refCb, h }: { refCb: (el: HTMLDivElement | null) => void; h: H }) {
+  const router = useRouter();
+  const [value, setValue] = useState("");
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const v = value.trim();
+    router.push(v ? `/shop?size=${encodeURIComponent(v)}` : "/shop");
+  };
+
   return (
     <div ref={refCb} className={`${CARD_CLASS} p-5`}>
       <p className="mb-2.5 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#5c5e62]">
         {h.searchTitle}
       </p>
-      <div className="flex items-center gap-2 rounded-xl border border-black/[0.08] bg-[#fbfbfc] px-3 py-2.5">
+      <form
+        onSubmit={submit}
+        className="flex items-center gap-2 rounded-xl border border-black/[0.08] bg-[#fbfbfc] px-3 py-2.5 transition focus-within:border-[var(--primary)]/40 focus-within:ring-2 focus-within:ring-[var(--primary)]/10"
+      >
         <Search size={16} className="shrink-0 text-[#9ca3af]" />
-        <span className="truncate text-[0.85rem] text-[#9ca3af]">{h.searchPlaceholder}</span>
-        <span className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[var(--primary)]">
+        <input
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          placeholder={h.searchPlaceholder}
+          aria-label={h.searchTitle}
+          className="min-w-0 flex-1 bg-transparent text-[0.85rem] text-[#1a1a1a] outline-none placeholder:text-[#9ca3af]"
+        />
+        <button
+          type="submit"
+          aria-label={h.searchTitle}
+          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[var(--primary)] transition hover:bg-[var(--primary-hover)]"
+        >
           <ArrowRight size={13} strokeWidth={2.4} className="text-white" />
-        </span>
-      </div>
+        </button>
+      </form>
       <p className="mt-2.5 flex items-center gap-1.5 text-[0.74rem] font-semibold text-[#5c5e62]">
         <Boxes size={13} className="text-[var(--primary)]" />
         {h.stockNote}
@@ -259,7 +300,8 @@ function SearchCard({ refCb, h }: { refCb: (el: HTMLDivElement | null) => void; 
 
 function ShipmentCard({ refCb, h }: { refCb: (el: HTMLDivElement | null) => void; h: H }) {
   return (
-    <div ref={refCb} className={`${CARD_CLASS} p-5`}>
+    <div ref={refCb} className={`${CARD_CLASS} group relative p-5 transition-shadow duration-300 hover:shadow-[0_30px_70px_-22px_rgba(23,26,32,0.32)]`}>
+      <Link href="/wholesale-tire-distributors-europe" aria-label={h.shipmentLabel} className="absolute inset-0 z-10 rounded-2xl" />
       <div className="mb-3 flex items-center justify-between">
         <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#5c5e62]">
           {h.shipmentLabel}

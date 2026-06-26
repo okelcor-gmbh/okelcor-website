@@ -312,6 +312,7 @@ export type Translations = {
     searchTitle: string; searchPlaceholder: string; stockNote: string;
     shipmentLabel: string; shipmentStatus: string; shipmentRoute: string;
   };
+  globalReach: string;
 };
 
 // ─── English ──────────────────────────────────────────────────────────────────
@@ -824,6 +825,7 @@ const en: Translations = {
     shipmentStatus: "In transit",
     shipmentRoute: "Hamburg → Lagos",
   },
+  globalReach: "Sourced & delivered across 40+ countries",
 };
 
 // ─── German ───────────────────────────────────────────────────────────────────
@@ -1336,6 +1338,7 @@ const de: Translations = {
     shipmentStatus: "Unterwegs",
     shipmentRoute: "Hamburg → Lagos",
   },
+  globalReach: "Beschafft und geliefert in über 40 Länder",
 };
 
 // ─── French ───────────────────────────────────────────────────────────────────
@@ -1848,6 +1851,7 @@ const fr: Translations = {
     shipmentStatus: "En transit",
     shipmentRoute: "Hambourg → Lagos",
   },
+  globalReach: "Sourcés et livrés dans plus de 40 pays",
 };
 
 // ─── Spanish ──────────────────────────────────────────────────────────────────
@@ -2330,6 +2334,7 @@ const es: Translations = {
     shipmentStatus: "En tránsito",
     shipmentRoute: "Hamburgo → Lagos",
   },
+  globalReach: "Suministrados y entregados en más de 40 países",
 };
 
 // ─── Export ───────────────────────────────────────────────────────────────────
