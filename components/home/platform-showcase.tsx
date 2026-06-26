@@ -22,6 +22,8 @@ import { useLanguage } from "@/context/language-context";
 import Reveal from "@/components/motion/reveal";
 import { StaggerParent } from "@/components/motion/stagger";
 import { useParallax } from "@/hooks/useParallax";
+import { gsap, useGSAP, prefersReducedMotion } from "@/lib/gsap";
+import TyreRing from "./tyre-ring";
 
 // Illustrative demo data — not tied to any real order.
 const ORDER_REF = "#OK-20418";
@@ -34,20 +36,51 @@ export default function PlatformShowcase() {
   const p = t.platform;
   const { containerRef, targetRef } = useParallax<HTMLDivElement>({ speed: 0.08 });
 
+  // Ambient motion — matches the hero (rings rotate, glows drift). Reduced-safe.
+  useGSAP(
+    () => {
+      if (prefersReducedMotion()) return;
+      gsap.utils.toArray<Element>(".ps-ring").forEach((ring, i) => {
+        gsap.to(ring, {
+          rotation: i % 2 === 0 ? 360 : -360,
+          duration: 110 + i * 40,
+          ease: "none",
+          repeat: -1,
+          transformOrigin: "50% 50%",
+        });
+      });
+      gsap.to(".ps-glow", {
+        x: "+=22",
+        y: "-=16",
+        duration: 11,
+        ease: "sine.inOut",
+        repeat: -1,
+        yoyo: true,
+        stagger: 1.6,
+      });
+    },
+    { scope: containerRef }
+  );
+
   return (
     <section
       ref={containerRef}
       className="relative w-full overflow-hidden bg-[#f5f5f5] py-16 md:py-24"
     >
-      {/* Orange glow behind the device card */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute right-[-10%] top-1/2 h-[640px] w-[640px] -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(244,81,30,0.16),transparent_62%)] blur-2xl"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute left-[-12%] bottom-[-20%] h-[420px] w-[420px] rounded-full bg-[radial-gradient(circle_at_center,rgba(23,26,32,0.05),transparent_64%)] blur-2xl"
-      />
+      {/* Ambient — same animated, low-opacity visual language as the hero */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="ps-glow absolute right-[-10%] top-1/2 h-[640px] w-[640px] -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(244,81,30,0.16),transparent_62%)] blur-2xl" />
+        <div className="ps-glow absolute left-[-12%] bottom-[-20%] h-[420px] w-[420px] rounded-full bg-[radial-gradient(circle_at_center,rgba(23,26,32,0.05),transparent_64%)] blur-2xl" />
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage: "radial-gradient(rgba(23,26,32,0.7) 1px, transparent 1px)",
+            backgroundSize: "26px 26px",
+          }}
+        />
+        <TyreRing className="ps-ring absolute left-[5%] top-[8%] hidden h-[300px] w-[300px] text-[#171a20] opacity-[0.05] lg:block" />
+        <TyreRing className="ps-ring absolute right-[9%] bottom-[6%] hidden h-[220px] w-[220px] text-[#171a20] opacity-[0.05] lg:block" />
+      </div>
 
       <div className="tesla-shell relative">
         <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16">

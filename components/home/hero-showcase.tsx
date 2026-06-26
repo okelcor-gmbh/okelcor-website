@@ -22,6 +22,10 @@ import { Search, Truck, ShieldCheck, Boxes, BadgeCheck, Globe, ArrowRight, Arrow
 import { useLanguage } from "@/context/language-context";
 import { gsap, useGSAP, ease, prefersReducedMotion } from "@/lib/gsap";
 import MagneticButton from "@/components/ui/magnetic-button";
+import TyreRing from "./tyre-ring";
+
+// Sample sizes for the animated "Find your size" typewriter placeholder.
+const SIZE_SAMPLES = ["205/55 R16", "225/45 R17", "315/80 R22.5", "23.5 R25", "295/80 R22.5"];
 
 const CHIP_ICONS = [BadgeCheck, ShieldCheck, Boxes, Globe] as const;
 const ROTATE_MS = 3000;
@@ -122,6 +126,31 @@ export default function HeroShowcase() {
         ease: "none",
         repeat: -1,
       });
+
+      // Cursor-follow light (fine pointers only) — smooth lerp via quickTo.
+      const section = sectionRef.current;
+      const cursor = section?.querySelector(".hs-cursor");
+      if (section && cursor && window.matchMedia("(pointer: fine)").matches) {
+        const rect0 = section.getBoundingClientRect();
+        gsap.set(cursor, { x: rect0.width * 0.7, y: rect0.height * 0.4, opacity: 0 });
+        const xTo = gsap.quickTo(cursor, "x", { duration: 0.7, ease: "power3" });
+        const yTo = gsap.quickTo(cursor, "y", { duration: 0.7, ease: "power3" });
+        const onMove = (e: MouseEvent) => {
+          const rect = section.getBoundingClientRect();
+          xTo(e.clientX - rect.left);
+          yTo(e.clientY - rect.top);
+        };
+        const onEnter = () => gsap.to(cursor, { opacity: 1, duration: 0.5 });
+        const onLeave = () => gsap.to(cursor, { opacity: 0, duration: 0.5 });
+        section.addEventListener("mousemove", onMove);
+        section.addEventListener("mouseenter", onEnter);
+        section.addEventListener("mouseleave", onLeave);
+        return () => {
+          section.removeEventListener("mousemove", onMove);
+          section.removeEventListener("mouseenter", onEnter);
+          section.removeEventListener("mouseleave", onLeave);
+        };
+      }
     },
     { scope: sectionRef }
   );
@@ -168,6 +197,9 @@ export default function HeroShowcase() {
           <circle cx="30" cy="250" r="5" fill="currentColor" />
           <circle cx="570" cy="170" r="5" fill="currentColor" />
         </svg>
+
+        {/* Cursor-follow light — desktop only (centred on the pointer via x/y) */}
+        <div className="hs-cursor absolute left-0 top-0 -ml-[210px] -mt-[210px] hidden h-[420px] w-[420px] rounded-full bg-[radial-gradient(circle_at_center,rgba(244,81,30,0.10),transparent_60%)] blur-2xl lg:block" />
       </div>
 
       <div className="tesla-shell relative">
@@ -235,15 +267,15 @@ export default function HeroShowcase() {
               <SearchCard refCb={(el) => (cardRefs.current[1] = el)} h={h} />
             </div>
 
-            {/* Desktop: overlapping cluster */}
-            <div className="relative hidden h-[480px] lg:block">
-              <div className="absolute right-0 top-2 w-[300px]">
+            {/* Desktop: overlapping cluster — featured (wide) animated search on top */}
+            <div className="relative hidden h-[520px] lg:block">
+              <div className="absolute left-0 right-3 top-0">
+                <SearchCard refCb={(el) => (cardRefs.current[1] = el)} h={h} feature />
+              </div>
+              <div className="absolute right-0 top-[235px] w-[290px]">
                 <ProductCard refCb={(el) => (cardRefs.current[0] = el)} textRef={productTextRef} h={h} product={product} href={PRODUCT_HREFS[productIdx]} />
               </div>
-              <div className="absolute left-0 top-[150px] w-[280px]">
-                <SearchCard refCb={(el) => (cardRefs.current[1] = el)} h={h} />
-              </div>
-              <div className="absolute bottom-2 right-6 w-[290px]">
+              <div className="absolute bottom-0 left-0 w-[300px]">
                 <ShipmentCard refCb={(el) => (cardRefs.current[2] = el)} h={h} />
               </div>
             </div>
@@ -262,19 +294,6 @@ type H = ReturnType<typeof useLanguage>["t"]["heroShowcase"];
 
 const CARD_CLASS =
   "rounded-2xl border border-black/[0.06] bg-white shadow-[0_24px_55px_-22px_rgba(23,26,32,0.22)] will-change-transform";
-
-// Decorative concentric-ring motif (reads as a tyre / wheel) for the background.
-function TyreRing({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 200 200" fill="none" aria-hidden="true" className={className}>
-      <circle cx="100" cy="100" r="96" stroke="currentColor" strokeWidth="1" strokeDasharray="2 6" />
-      <circle cx="100" cy="100" r="74" stroke="currentColor" strokeWidth="1.5" />
-      <circle cx="100" cy="100" r="52" stroke="currentColor" strokeWidth="1" strokeDasharray="1 5" />
-      <circle cx="100" cy="100" r="30" stroke="currentColor" strokeWidth="1.5" />
-      <circle cx="100" cy="100" r="6" fill="currentColor" />
-    </svg>
-  );
-}
 
 function TyreDisc() {
   return (
@@ -319,42 +338,115 @@ function ProductCard({
   );
 }
 
-function SearchCard({ refCb, h }: { refCb: (el: HTMLDivElement | null) => void; h: H }) {
+// Normalise free-text size to the shop's expected "205/55R16" form, else fall
+// back to a general (?q=) search so something always filters.
+function shopHrefForSize(raw: string): string {
+  const v = raw.trim();
+  if (!v) return "/shop";
+  const norm = v.replace(/\s+/g, "").toUpperCase();
+  const isSize = /^\d{2,3}\/\d{2}R?\d{2}(\.\d)?$/.test(norm);
+  if (isSize) {
+    const withR = norm.includes("R") ? norm : norm.replace(/^(\d{2,3}\/\d{2})(\d{2})/, "$1R$2");
+    return `/shop?size=${encodeURIComponent(withR)}`;
+  }
+  return `/shop?q=${encodeURIComponent(v)}`;
+}
+
+function SearchCard({
+  refCb, h, feature = false,
+}: {
+  refCb: (el: HTMLDivElement | null) => void;
+  h: H;
+  feature?: boolean;
+}) {
   const router = useRouter();
   const [value, setValue] = useState("");
+  const [focused, setFocused] = useState(false);
+  const [typed, setTyped] = useState("");
+  const [caret, setCaret] = useState(true);
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const v = value.trim();
-    router.push(v ? `/shop?size=${encodeURIComponent(v)}` : "/shop");
-  };
+  const animate = feature && !focused && value === "";
+
+  // Typewriter placeholder — cycles through sample sizes.
+  useEffect(() => {
+    if (!animate) return;
+    if (prefersReducedMotion()) { setTyped(SIZE_SAMPLES[0]); return; }
+    let wordIdx = 0, charIdx = 0, deleting = false;
+    let timer: ReturnType<typeof setTimeout>;
+    const tick = () => {
+      const word = SIZE_SAMPLES[wordIdx];
+      if (!deleting) {
+        charIdx++;
+        setTyped(word.slice(0, charIdx));
+        if (charIdx >= word.length) { deleting = true; timer = setTimeout(tick, 1500); return; }
+        timer = setTimeout(tick, 95);
+      } else {
+        charIdx--;
+        setTyped(word.slice(0, Math.max(0, charIdx)));
+        if (charIdx <= 0) { deleting = false; wordIdx = (wordIdx + 1) % SIZE_SAMPLES.length; timer = setTimeout(tick, 450); return; }
+        timer = setTimeout(tick, 45);
+      }
+    };
+    timer = setTimeout(tick, 500);
+    return () => clearTimeout(timer);
+  }, [animate]);
+
+  // Caret blink.
+  useEffect(() => {
+    if (!animate || prefersReducedMotion()) return;
+    const id = setInterval(() => setCaret((c) => !c), 530);
+    return () => clearInterval(id);
+  }, [animate]);
+
+  const go = (raw: string) => router.push(shopHrefForSize(raw));
+  const submit = (e: React.FormEvent) => { e.preventDefault(); go(value); };
+
+  const placeholder = animate ? `${typed}${caret ? "▏" : " "}` : h.searchPlaceholder;
 
   return (
-    <div ref={refCb} className={`${CARD_CLASS} p-5`}>
+    <div ref={refCb} className={`${CARD_CLASS} ${feature ? "p-6" : "p-5"}`}>
       <p className="mb-2.5 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#5c5e62]">
         {h.searchTitle}
       </p>
       <form
         onSubmit={submit}
-        className="flex items-center gap-2 rounded-xl border border-black/[0.08] bg-[#fbfbfc] px-3 py-2.5 transition focus-within:border-[var(--primary)]/40 focus-within:ring-2 focus-within:ring-[var(--primary)]/10"
+        className={`flex items-center gap-2 rounded-xl border border-black/[0.08] bg-[#fbfbfc] px-3 transition focus-within:border-[var(--primary)]/40 focus-within:ring-2 focus-within:ring-[var(--primary)]/10 ${feature ? "py-3.5" : "py-2.5"}`}
       >
-        <Search size={16} className="shrink-0 text-[#9ca3af]" />
+        <Search size={feature ? 18 : 16} className="shrink-0 text-[#9ca3af]" />
         <input
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          placeholder={h.searchPlaceholder}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          placeholder={placeholder}
           aria-label={h.searchTitle}
-          className="min-w-0 flex-1 bg-transparent text-[0.85rem] text-[#1a1a1a] outline-none placeholder:text-[#9ca3af]"
+          className={`min-w-0 flex-1 bg-transparent text-[#1a1a1a] outline-none placeholder:text-[#9ca3af] ${feature ? "text-[0.98rem]" : "text-[0.85rem]"}`}
         />
         <button
           type="submit"
           aria-label={h.searchTitle}
-          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[var(--primary)] transition hover:bg-[var(--primary-hover)]"
+          className={`flex shrink-0 items-center justify-center rounded-lg bg-[var(--primary)] transition hover:bg-[var(--primary-hover)] ${feature ? "h-8 w-8" : "h-6 w-6"}`}
         >
-          <ArrowRight size={13} strokeWidth={2.4} className="text-white" />
+          <ArrowRight size={feature ? 15 : 13} strokeWidth={2.4} className="text-white" />
         </button>
       </form>
-      <p className="mt-2.5 flex items-center gap-1.5 text-[0.74rem] font-semibold text-[#5c5e62]">
+
+      {feature && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {["205/55 R16", "225/45 R17", "315/80 R22.5"].map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => go(s)}
+              className="rounded-full border border-black/[0.08] bg-white px-2.5 py-1 text-[0.72rem] font-semibold text-[#5c5e62] transition hover:border-[var(--primary)]/40 hover:text-[var(--primary)]"
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <p className="mt-3 flex items-center gap-1.5 text-[0.74rem] font-semibold text-[#5c5e62]">
         <Boxes size={13} className="text-[var(--primary)]" />
         {h.stockNote}
       </p>
