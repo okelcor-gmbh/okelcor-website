@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { ShieldCheck, BadgeCheck } from "lucide-react";
 import NewsletterStrip from "@/components/newsletter-strip";
 import FadeUp from "@/components/motion/fade-up";
 import { useLanguage } from "@/context/language-context";
@@ -49,6 +50,8 @@ export default function Footer() {
 
   return (
     <footer className="w-full bg-[#f5f5f5]">
+      {/* Premium accent hairline */}
+      <div aria-hidden="true" className="h-px w-full bg-gradient-to-r from-transparent via-[var(--primary)]/40 to-transparent" />
       <FadeUp><NewsletterStrip /></FadeUp>
       <div className="tesla-shell">
 
@@ -98,6 +101,18 @@ export default function Footer() {
             ))}
 
           </div>
+        </div>
+
+        {/* Trust badges — factual certifications */}
+        <div className="flex flex-wrap items-center gap-3 border-t border-black/[0.07] py-6">
+          <span className="inline-flex items-center gap-2 rounded-full border border-black/[0.08] bg-white px-3.5 py-2 text-[0.72rem] font-bold uppercase tracking-[0.14em] text-[var(--foreground)]">
+            <ShieldCheck size={14} strokeWidth={2} className="text-[var(--primary)]" />
+            ISO 9001:2015
+          </span>
+          <span className="inline-flex items-center gap-2 rounded-full border border-black/[0.08] bg-white px-3.5 py-2 text-[0.72rem] font-bold uppercase tracking-[0.14em] text-[var(--foreground)]">
+            <BadgeCheck size={14} strokeWidth={2} className="text-[var(--primary)]" />
+            REX · DEREX76000242
+          </span>
         </div>
 
         {/* Bottom bar */}

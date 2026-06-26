@@ -92,14 +92,14 @@ export default function FetShowcase() {
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
                   href="/fet"
-                  className="group inline-flex h-[48px] items-center justify-center gap-2 rounded-full bg-[#22c55e] px-7 text-[14px] font-semibold text-white shadow-[0_14px_30px_rgba(34,197,94,0.25)] transition hover:bg-[#16a34a]"
+                  className="cta-press group inline-flex h-[48px] items-center justify-center gap-2 rounded-full bg-[#22c55e] px-7 text-[14px] font-semibold text-white shadow-[0_14px_30px_rgba(34,197,94,0.25)] hover:bg-[#16a34a]"
                 >
                   {t.fetTeaser.cta}
                   <ArrowRight size={16} strokeWidth={2.4} className="transition-transform duration-200 group-hover:translate-x-0.5" />
                 </Link>
                 <Link
                   href="/tyre-supply-quotation"
-                  className="inline-flex h-[48px] items-center justify-center rounded-full border border-[#cdd8cd] bg-white px-7 text-[14px] font-semibold text-[#111111] transition hover:bg-[#f7faf7]"
+                  className="cta-press inline-flex h-[48px] items-center justify-center rounded-full border border-[#cdd8cd] bg-white px-7 text-[14px] font-semibold text-[#111111] hover:bg-[#f7faf7]"
                 >
                   {t.fetMega.requestQuote}
                 </Link>

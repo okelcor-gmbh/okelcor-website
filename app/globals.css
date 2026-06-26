@@ -205,6 +205,121 @@ a {
   background: #fff;
 }
 
+/* ─── CTA micro-interactions — subtle lift + tactile press ──────────────────
+   Lift only on real hover devices; press feedback everywhere; disabled under
+   reduced-motion. Gives every primary/secondary/hero button a premium feel.  */
+
+.tesla-btn-primary,
+.tesla-btn-secondary {
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    opacity 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  will-change: transform;
+}
+
+@media (hover: hover) {
+  .tesla-btn-primary:hover,
+  .tesla-btn-secondary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(23, 26, 32, 0.12);
+  }
+}
+
+.tesla-btn-primary:active,
+.tesla-btn-secondary:active,
+.tesla-hero-btn-primary:active,
+.tesla-hero-btn-secondary:active,
+.tesla-hero-btn-fet:active {
+  transform: translateY(0) scale(0.97);
+}
+
+/* Reusable premium CTA utility (used by the footer + future buttons) */
+.btn-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 22px;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+  will-change: transform;
+}
+
+.btn-cta-primary {
+  background: var(--primary);
+  color: #fff;
+}
+
+.btn-cta-ghost {
+  background: #fff;
+  color: var(--foreground);
+  border: 1px solid rgba(23, 26, 32, 0.14);
+}
+
+@media (hover: hover) {
+  .btn-cta-primary:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 12px 26px rgba(244, 81, 30, 0.24);
+  }
+  .btn-cta-ghost:hover {
+    transform: translateY(-1px);
+    border-color: rgba(23, 26, 32, 0.22);
+    box-shadow: 0 10px 22px rgba(23, 26, 32, 0.08);
+  }
+}
+
+.btn-cta-primary:active,
+.btn-cta-ghost:active {
+  transform: translateY(0) scale(0.97);
+}
+
+/* Behaviour-only helper — adds the lift/press to existing inline CTAs without
+   changing their size or colours. Just add `cta-press` to the className.       */
+.cta-press {
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+  will-change: transform;
+}
+
+@media (hover: hover) {
+  .cta-press:hover {
+    transform: translateY(-1px);
+  }
+}
+
+.cta-press:active {
+  transform: translateY(0) scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tesla-btn-primary,
+  .tesla-btn-secondary,
+  .tesla-hero-btn-primary,
+  .tesla-hero-btn-secondary,
+  .tesla-hero-btn-fet,
+  .btn-cta,
+  .cta-press {
+    transform: none !important;
+  }
+}
+
 /* Hero typography */
 .hero-title {
   font-size: clamp(1.875rem, 5vw, 3.75rem);
@@ -363,14 +478,39 @@ a {
 }
 
 .footer-link {
+  position: relative;
   display: inline-block;
   padding: 4px 0;
   color: var(--muted);
   transition: color 0.2s ease;
 }
 
+.footer-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 2px;
+  height: 1px;
+  width: 100%;
+  background: currentColor;
+  opacity: 0.45;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s ease;
+}
+
 .footer-link:hover {
   color: var(--foreground);
+}
+
+.footer-link:hover::after {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .footer-link::after {
+    transition: none;
+  }
 }
 
 @media (max-width: 1024px) {

@@ -128,7 +128,7 @@ export default function PlatformShowcase() {
               <div className="mt-8">
                 <Link
                   href="/register"
-                  className="group inline-flex h-[50px] items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-7 text-[14px] font-semibold text-white shadow-[0_16px_32px_rgba(244,81,30,0.22)] transition hover:bg-[var(--primary-hover)]"
+                  className="cta-press group inline-flex h-[50px] items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-7 text-[14px] font-semibold text-white shadow-[0_16px_32px_rgba(244,81,30,0.22)] hover:bg-[var(--primary-hover)]"
                 >
                   {p.cta}
                   <ArrowRight size={16} strokeWidth={2.4} className="transition-transform duration-200 group-hover:translate-x-0.5" />

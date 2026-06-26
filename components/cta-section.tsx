@@ -36,7 +36,7 @@ export default function CTASection() {
               <MagneticButton>
                 <Link
                   href="/tyre-supply-quotation"
-                  className="inline-flex items-center justify-center rounded-full bg-[var(--primary)] px-8 py-3 text-[14px] font-semibold text-white shadow-[0_16px_32px_rgba(244,81,30,0.22)] transition hover:bg-[var(--primary-hover)]"
+                  className="cta-press inline-flex items-center justify-center rounded-full bg-[var(--primary)] px-8 py-3 text-[14px] font-semibold text-white shadow-[0_16px_32px_rgba(244,81,30,0.22)] hover:bg-[var(--primary-hover)]"
                 >
                   {t.cta.button}
                 </Link>
@@ -44,7 +44,7 @@ export default function CTASection() {
               <MagneticButton>
                 <Link
                   href="/shop"
-                  className="inline-flex items-center justify-center rounded-full border border-black/10 bg-white/94 px-8 py-3 text-[14px] font-semibold text-[var(--foreground)] shadow-[0_10px_24px_rgba(0,0,0,0.06)] transition hover:bg-white"
+                  className="cta-press inline-flex items-center justify-center rounded-full border border-black/10 bg-white/94 px-8 py-3 text-[14px] font-semibold text-[var(--foreground)] shadow-[0_10px_24px_rgba(0,0,0,0.06)] hover:bg-white"
                 >
                   {t.cta.button2}
                 </Link>
