@@ -44,44 +44,92 @@ import CrispNotifier from "@/components/admin/crisp-notifier";
 import NotificationsBell from "@/components/admin/notifications-bell";
 
 // ── Navigation ────────────────────────────────────────────────────────────────
+// Grouped into labelled sections for a clean, scannable sidebar. Each group hides
+// automatically when a role can't access any of its items. `section: null` items
+// are always visible.
 
-const NAV = [
-  { label: "Dashboard",      href: "/admin",             icon: LayoutDashboard, section: "dashboard" },
-  { label: "My Work",        href: "/admin/my-work",     icon: ClipboardCheck,  section: null },
-  { label: "Notifications",  href: "/admin/notifications", icon: Bell,          section: null },
-  { label: "Analytics",      href: "/admin/analytics",  icon: BarChart2,       section: "analytics" },
-  { label: "Live Chats",     href: "/admin/chats",      icon: MessageSquare,   section: "chats" },
-  { label: "Products",       href: "/admin/products",    icon: Package,         section: "products" },
-  { label: "Articles",       href: "/admin/articles",    icon: FileText,        section: "articles" },
-  { label: "Orders",         href: "/admin/orders",      icon: ShoppingCart,    section: "orders" },
-  { label: "Quote Requests", href: "/admin/quotes",          icon: ClipboardList,   section: "quotes" },
-  { label: "Follow-ups",    href: "/admin/crm/follow-ups",  icon: BellRing,        section: "crm" },
-  { label: "EU Declarations", href: "/admin/eu-declarations", icon: FileCheck,      section: "eu_declarations" },
-  { label: "Logistics",       href: "/admin/logistics",    icon: Truck,        section: "logistics" },
-  { label: "Hero Slides",    href: "/admin/hero-slides",  icon: Layers,      section: "hero_slides" },
-  { label: "Promotions",     href: "/admin/promotions",   icon: Megaphone,   section: "promotions" },
-  { label: "FET Engines",    href: "/admin/fet",          icon: Zap,         section: "fet" },
-  { label: "Brands",         href: "/admin/brands",       icon: Star,        section: "brands" },
-  { label: "Customers",      href: "/admin/customers",   icon: ContactRound,    section: "customers" },
-  { label: "Customer Approvals", href: "/admin/customer-approvals", icon: UserCheck, section: "customers" },
-  { label: "Data Quality",   href: "/admin/customers/data-quality", icon: ScanLine, section: "customers" },
-  { label: "Security",       href: "/admin/security",    icon: ShieldAlert,     section: "security" },
-  { label: "System Health",  href: "/admin/system-health", icon: Activity,      section: "system_health" },
-  { label: "Settings",       href: "/admin/settings",    icon: Settings,        section: "settings" },
-  { label: "Supplier Intel", href: "/admin/supplier",    icon: TrendingUp,      section: "supplier" },
-  { label: "Users",          href: "/admin/users",       icon: Users,           section: "users" },
-  { label: "Profile",        href: "/admin/profile",     icon: UserCircle,      section: null },
-] as const;
+type NavItem = {
+  label: string;
+  href: string;
+  icon: typeof LayoutDashboard;
+  section: string | null;
+};
 
-const SALES_CHANNELS_NAV = [
-  { label: "eBay", href: "/admin/ebay", icon: ShoppingBag, section: "ebay" },
-] as const;
+type NavGroup = {
+  label: string | null; // null = no header (top-level overview group)
+  items: readonly NavItem[];
+};
+
+const NAV_GROUPS: readonly NavGroup[] = [
+  {
+    label: null,
+    items: [
+      { label: "Dashboard",     href: "/admin",               icon: LayoutDashboard, section: "dashboard" },
+      { label: "My Work",       href: "/admin/my-work",       icon: ClipboardCheck,  section: null },
+      { label: "Notifications", href: "/admin/notifications", icon: Bell,            section: null },
+    ],
+  },
+  {
+    label: "Commerce",
+    items: [
+      { label: "Orders",          href: "/admin/orders",          icon: ShoppingCart,  section: "orders" },
+      { label: "Quote Requests",  href: "/admin/quotes",          icon: ClipboardList, section: "quotes" },
+      { label: "Products",        href: "/admin/products",        icon: Package,       section: "products" },
+      { label: "Logistics",       href: "/admin/logistics",       icon: Truck,         section: "logistics" },
+      { label: "EU Declarations", href: "/admin/eu-declarations", icon: FileCheck,     section: "eu_declarations" },
+    ],
+  },
+  {
+    label: "Customers & CRM",
+    items: [
+      { label: "Customers",          href: "/admin/customers",              icon: ContactRound,  section: "customers" },
+      { label: "Customer Approvals", href: "/admin/customer-approvals",     icon: UserCheck,     section: "customers" },
+      { label: "Follow-ups",         href: "/admin/crm/follow-ups",         icon: BellRing,      section: "crm" },
+      { label: "Data Quality",       href: "/admin/customers/data-quality", icon: ScanLine,      section: "customers" },
+      { label: "Live Chats",         href: "/admin/chats",                  icon: MessageSquare, section: "chats" },
+    ],
+  },
+  {
+    label: "Content",
+    items: [
+      { label: "Articles",    href: "/admin/articles",    icon: FileText,  section: "articles" },
+      { label: "Hero Slides", href: "/admin/hero-slides", icon: Layers,    section: "hero_slides" },
+      { label: "Promotions",  href: "/admin/promotions",  icon: Megaphone, section: "promotions" },
+      { label: "FET Engines", href: "/admin/fet",         icon: Zap,       section: "fet" },
+      { label: "Brands",      href: "/admin/brands",      icon: Star,      section: "brands" },
+    ],
+  },
+  {
+    label: "Sales Channels",
+    items: [
+      { label: "eBay", href: "/admin/ebay", icon: ShoppingBag, section: "ebay" },
+    ],
+  },
+  {
+    label: "Insights",
+    items: [
+      { label: "Analytics",     href: "/admin/analytics", icon: BarChart2,  section: "analytics" },
+      { label: "Supplier Intel", href: "/admin/supplier", icon: TrendingUp, section: "supplier" },
+    ],
+  },
+  {
+    label: "System",
+    items: [
+      { label: "Security",      href: "/admin/security",      icon: ShieldAlert, section: "security" },
+      { label: "System Health", href: "/admin/system-health", icon: Activity,    section: "system_health" },
+      { label: "Users",         href: "/admin/users",         icon: Users,       section: "users" },
+      { label: "Settings",      href: "/admin/settings",      icon: Settings,    section: "settings" },
+    ],
+  },
+];
+
+// Flat list of every nav item — used by the breadcrumb resolver.
+const ALL_NAV_ITEMS: readonly NavItem[] = NAV_GROUPS.flatMap((g) => g.items);
 
 // ── Breadcrumb ────────────────────────────────────────────────────────────────
 
 function getAdminBreadcrumb(pathname: string): { parent: { label: string; href: string } | null; current: string } {
-  const allNav = [...NAV, ...SALES_CHANNELS_NAV] as ReadonlyArray<{ label: string; href: string }>;
-  const sorted = [...allNav].sort((a, b) => b.href.length - a.href.length);
+  const sorted = [...ALL_NAV_ITEMS].sort((a, b) => b.href.length - a.href.length);
 
   const best = sorted.find(({ href }) =>
     href === "/admin" ? pathname === "/admin" : pathname.startsWith(href)
@@ -131,16 +179,18 @@ function Sidebar({
   const isActive = (href: string) =>
     href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
 
-  const visibleNav = NAV.filter(({ section }) =>
-    section === null || !role || canAccess(role, section)
-  );
-
-  const visibleSalesChannels = SALES_CHANNELS_NAV.filter(({ section }) =>
-    !role || canAccess(role, section)
-  );
+  // Filter items per role, then drop any group left with no visible items.
+  const visibleGroups = NAV_GROUPS
+    .map((group) => ({
+      ...group,
+      items: group.items.filter(
+        ({ section }) => section === null || !role || canAccess(role, section)
+      ),
+    }))
+    .filter((group) => group.items.length > 0);
 
   return (
-    <div className="flex h-full flex-col bg-[#1a1a1a]">
+    <div className="flex h-full flex-col border-r border-white/[0.06] bg-[#161616]">
       {/* Logo */}
       <div className={[
         "flex h-16 shrink-0 items-center border-b border-white/[0.08]",
@@ -167,78 +217,62 @@ function Sidebar({
       </div>
 
       {/* Nav links */}
-      <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-2 py-4">
-        {visibleNav.map(({ label, href, icon: Icon }) => {
-          const active = isActive(href);
-          return (
-            <Link
-              key={href}
-              href={href}
-              onClick={onClose}
-              title={collapsed ? label : undefined}
-              className={[
-                "group relative flex items-center rounded-lg py-2.5 text-[0.875rem] font-medium transition-all",
-                collapsed ? "justify-center px-2" : "gap-3 px-3",
-                active
-                  ? "bg-[#E85C1A] text-white shadow-sm"
-                  : "text-white/55 hover:bg-white/[0.06] hover:text-white",
-              ].join(" ")}
-            >
-              <Icon size={16} strokeWidth={active ? 2.2 : 1.8} className="shrink-0" />
-              {!collapsed && <span className="flex-1 truncate">{label}</span>}
-              {!collapsed && label === "Live Chats" && pendingChats > 0 && (
-                <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#E85C1A] px-1 text-[9px] font-extrabold text-white">
-                  {pendingChats > 9 ? "9+" : pendingChats}
-                </span>
-              )}
-              {collapsed && label === "Live Chats" && pendingChats > 0 && (
-                <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-[#E85C1A]" />
-              )}
-              {!collapsed && active && label !== "Live Chats" && (
-                <ChevronRight size={13} strokeWidth={2.5} className="shrink-0 opacity-60" />
-              )}
-              {!collapsed && active && label === "Live Chats" && pendingChats === 0 && (
-                <ChevronRight size={13} strokeWidth={2.5} className="shrink-0 opacity-60" />
-              )}
-            </Link>
-          );
-        })}
-
-        {/* Sales Channels section */}
-        {visibleSalesChannels.length > 0 && (
-          <>
-            {!collapsed && (
-              <p className="mt-4 mb-1 px-3 text-[0.63rem] font-bold uppercase tracking-[0.18em] text-white/25">
-                Sales Channels
+      <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-2.5 py-4 [scrollbar-width:thin]">
+        {visibleGroups.map((group, gi) => (
+          <div key={group.label ?? `group-${gi}`} className={gi > 0 ? "mt-5" : undefined}>
+            {/* Group header — label when expanded, divider when collapsed */}
+            {group.label && !collapsed && (
+              <p className="mb-1.5 px-3 text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-white/30">
+                {group.label}
               </p>
             )}
-            {collapsed && <div className="my-2 border-t border-white/[0.08]" />}
-            {visibleSalesChannels.map(({ label, href, icon: Icon }) => {
-              const active = isActive(href);
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  onClick={onClose}
-                  title={collapsed ? label : undefined}
-                  className={[
-                    "group flex items-center rounded-lg py-2.5 text-[0.875rem] font-medium transition-all",
-                    collapsed ? "justify-center px-2" : "gap-3 px-3",
-                    active
-                      ? "bg-[#E85C1A] text-white shadow-sm"
-                      : "text-white/55 hover:bg-white/[0.06] hover:text-white",
-                  ].join(" ")}
-                >
-                  <Icon size={16} strokeWidth={active ? 2.2 : 1.8} className="shrink-0" />
-                  {!collapsed && <span className="flex-1 truncate">{label}</span>}
-                  {!collapsed && active && (
-                    <ChevronRight size={13} strokeWidth={2.5} className="shrink-0 opacity-60" />
-                  )}
-                </Link>
-              );
-            })}
-          </>
-        )}
+            {group.label && collapsed && gi > 0 && (
+              <div className="mx-2 mb-2 border-t border-white/[0.08]" />
+            )}
+
+            <div className="flex flex-col gap-0.5">
+              {group.items.map(({ label, href, icon: Icon }) => {
+                const active = isActive(href);
+                const showBadge = label === "Live Chats" && pendingChats > 0;
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={onClose}
+                    title={collapsed ? label : undefined}
+                    aria-current={active ? "page" : undefined}
+                    className={[
+                      "group relative flex items-center rounded-lg py-2.5 text-[0.875rem] transition-colors duration-150",
+                      collapsed ? "justify-center px-2" : "gap-3 px-3",
+                      active
+                        ? "bg-white/[0.07] font-semibold text-white"
+                        : "font-medium text-white/55 hover:bg-white/[0.05] hover:text-white",
+                    ].join(" ")}
+                  >
+                    {/* Active accent bar */}
+                    {active && (
+                      <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-[#E85C1A]" />
+                    )}
+                    <Icon
+                      size={16}
+                      strokeWidth={active ? 2.2 : 1.8}
+                      className={["shrink-0 transition-colors", active ? "text-[#E85C1A]" : ""].join(" ")}
+                    />
+                    {!collapsed && <span className="flex-1 truncate">{label}</span>}
+                    {!collapsed && showBadge && (
+                      <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#E85C1A] px-1 text-[9px] font-extrabold text-white">
+                        {pendingChats > 9 ? "9+" : pendingChats}
+                      </span>
+                    )}
+                    {collapsed && showBadge && (
+                      <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-[#E85C1A]" />
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
       {/* Collapse toggle — desktop only */}
