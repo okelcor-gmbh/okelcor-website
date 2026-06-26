@@ -11,7 +11,7 @@ import TyreHighlightsSection from "@/components/tyre-highlights";
 import RexCertified from "@/components/rex-certified";
 import CTASection from "@/components/cta-section";
 import Footer from "@/components/footer";
-import HeroSection from "@/components/home/hero-section";
+import HeroShowcase from "@/components/home/hero-showcase";
 import CategoriesSection from "@/components/home/categories-section";
 import BrandsSection from "@/components/home/brands-section";
 import PlatformShowcase from "@/components/home/platform-showcase";
@@ -20,7 +20,6 @@ import FetRoiStrip from "@/components/fet-roi-strip";
 import FetVerifiedStrip from "@/components/fet-verified-strip";
 import FetProof from "@/components/fet-proof";
 import {
-  HeroSkeleton,
   CategoriesSkeleton,
   BrandsSkeleton,
 } from "@/components/ui/skeleton";
@@ -49,31 +48,37 @@ export default function Home() {
     <main className="w-full">
       <Navbar />
 
-      <Suspense fallback={<HeroSkeleton />}>
-        <HeroSection />
+      <HeroShowcase />
+
+      {/* Social proof first — brands right under the hero */}
+      <Suspense fallback={<BrandsSkeleton />}>
+        <BrandsSection />
       </Suspense>
 
       <Suspense fallback={<CategoriesSkeleton />}>
         <CategoriesSection />
       </Suspense>
 
-      <FadeUp><WhyOkelcor /></FadeUp>
       <WhoWeServeSection />
 
+      {/* The platform / process they get */}
       <PlatformShowcase />
 
-      <Suspense fallback={<BrandsSkeleton />}>
-        <BrandsSection />
-      </Suspense>
+      {/* Global supply + product depth */}
+      <Logistics />
+      <TyreHighlightsSection />
 
+      <FadeUp><WhyOkelcor /></FadeUp>
+
+      {/* Certification trust band */}
+      <RexCertified />
+
+      {/* Second product line */}
       <FetTeaser />
       <FetRoiStrip />
       <FetVerifiedStrip />
       <FetProof />
 
-      <Logistics />
-      <TyreHighlightsSection />
-      <RexCertified />
       <CTASection />
       <Footer />
     </main>

@@ -299,6 +299,19 @@ export type Translations = {
       live: string;
     };
   };
+  heroShowcase: {
+    eyebrow: string; title: string; subtitle: string;
+    chips: [string, string, string, string];
+    inStock: string;
+    products: [
+      { cat: string; size: string },
+      { cat: string; size: string },
+      { cat: string; size: string },
+      { cat: string; size: string },
+    ];
+    searchTitle: string; searchPlaceholder: string; stockNote: string;
+    shipmentLabel: string; shipmentStatus: string; shipmentRoute: string;
+  };
 };
 
 // ─── English ──────────────────────────────────────────────────────────────────
@@ -791,6 +804,25 @@ const en: Translations = {
       docs: ["Proforma Invoice", "Packing List", "Commercial Invoice"],
       live: "Live",
     },
+  },
+  heroShowcase: {
+    eyebrow: "Global Tyre Supply · REX Certified",
+    title: "Premium tyres, sourced and shipped worldwide.",
+    subtitle: "PCR, TBR, OTR and quality used tyres from trusted brands — with full export documentation, delivered across Europe, Africa and the Middle East.",
+    chips: ["ISO 9001 Certified", "REX Registered", "31 Premium Brands", "Ships to 40+ countries"],
+    inStock: "In stock",
+    products: [
+      { cat: "Truck & Bus (TBR)", size: "315/80 R22.5" },
+      { cat: "Passenger (PCR)", size: "205/55 R16" },
+      { cat: "Off-Road (OTR)", size: "23.5 R25" },
+      { cat: "Used Tyres", size: "Graded export lots" },
+    ],
+    searchTitle: "Find your size",
+    searchPlaceholder: "e.g. 205/55 R16",
+    stockNote: "11,650+ tyres ready to ship",
+    shipmentLabel: "Shipment",
+    shipmentStatus: "In transit",
+    shipmentRoute: "Hamburg → Lagos",
   },
 };
 
@@ -1285,6 +1317,25 @@ const de: Translations = {
       live: "Live",
     },
   },
+  heroShowcase: {
+    eyebrow: "Globale Reifenversorgung · REX-zertifiziert",
+    title: "Premium-Reifen, weltweit beschafft und geliefert.",
+    subtitle: "PCR-, TBR-, OTR- und geprüfte Gebrauchtreifen von vertrauenswürdigen Marken – mit vollständiger Exportdokumentation, geliefert in Europa, Afrika und im Nahen Osten.",
+    chips: ["ISO 9001 zertifiziert", "REX registriert", "31 Premium-Marken", "Lieferung in 40+ Länder"],
+    inStock: "Auf Lager",
+    products: [
+      { cat: "Lkw & Bus (TBR)", size: "315/80 R22.5" },
+      { cat: "Pkw (PCR)", size: "205/55 R16" },
+      { cat: "Gelände (OTR)", size: "23.5 R25" },
+      { cat: "Gebrauchtreifen", size: "Sortierte Exportposten" },
+    ],
+    searchTitle: "Größe finden",
+    searchPlaceholder: "z. B. 205/55 R16",
+    stockNote: "11.650+ Reifen versandbereit",
+    shipmentLabel: "Sendung",
+    shipmentStatus: "Unterwegs",
+    shipmentRoute: "Hamburg → Lagos",
+  },
 };
 
 // ─── French ───────────────────────────────────────────────────────────────────
@@ -1778,6 +1829,25 @@ const fr: Translations = {
       live: "En direct",
     },
   },
+  heroShowcase: {
+    eyebrow: "Approvisionnement mondial · Certifié REX",
+    title: "Des pneus premium, sourcés et expédiés dans le monde entier.",
+    subtitle: "Pneus PCR, TBR, OTR et pneus d'occasion de qualité, de marques de confiance — avec documentation d'exportation complète, livrés en Europe, en Afrique et au Moyen-Orient.",
+    chips: ["Certifié ISO 9001", "Enregistré REX", "31 marques premium", "Livraison dans 40+ pays"],
+    inStock: "En stock",
+    products: [
+      { cat: "Camion & Bus (TBR)", size: "315/80 R22.5" },
+      { cat: "Tourisme (PCR)", size: "205/55 R16" },
+      { cat: "Tout-terrain (OTR)", size: "23.5 R25" },
+      { cat: "Pneus d'occasion", size: "Lots d'export triés" },
+    ],
+    searchTitle: "Trouvez votre taille",
+    searchPlaceholder: "ex. 205/55 R16",
+    stockNote: "11 650+ pneus prêts à expédier",
+    shipmentLabel: "Expédition",
+    shipmentStatus: "En transit",
+    shipmentRoute: "Hambourg → Lagos",
+  },
 };
 
 // ─── Spanish ──────────────────────────────────────────────────────────────────
@@ -2240,6 +2310,25 @@ const es: Translations = {
       docs: ["Factura proforma", "Lista de empaque", "Factura comercial"],
       live: "En vivo",
     },
+  },
+  heroShowcase: {
+    eyebrow: "Suministro mundial · Certificado REX",
+    title: "Neumáticos premium, suministrados y enviados a todo el mundo.",
+    subtitle: "Neumáticos PCR, TBR, OTR y usados de calidad, de marcas de confianza — con documentación de exportación completa, entregados en Europa, África y Oriente Medio.",
+    chips: ["Certificado ISO 9001", "Registrado REX", "31 marcas premium", "Envío a más de 40 países"],
+    inStock: "En stock",
+    products: [
+      { cat: "Camión y Autobús (TBR)", size: "315/80 R22.5" },
+      { cat: "Turismo (PCR)", size: "205/55 R16" },
+      { cat: "Todoterreno (OTR)", size: "23.5 R25" },
+      { cat: "Neumáticos usados", size: "Lotes de exportación clasificados" },
+    ],
+    searchTitle: "Encuentra tu medida",
+    searchPlaceholder: "ej. 205/55 R16",
+    stockNote: "Más de 11.650 neumáticos listos para enviar",
+    shipmentLabel: "Envío",
+    shipmentStatus: "En tránsito",
+    shipmentRoute: "Hamburgo → Lagos",
   },
 };
 
