@@ -13,6 +13,7 @@ import CTASection from "@/components/cta-section";
 import Footer from "@/components/footer";
 import HeroShowcase from "@/components/home/hero-showcase";
 import GlobalReach from "@/components/home/global-reach";
+import FetPromo from "@/components/home/fet-promo";
 import CategoriesSection from "@/components/home/categories-section";
 import BrandsSection from "@/components/home/brands-section";
 import PlatformShowcase from "@/components/home/platform-showcase";
@@ -79,6 +80,9 @@ export default function Home() {
 
       <CTASection />
       <Footer />
+
+      {/* First-visit FET spotlight (delayed, dismissible) */}
+      <FetPromo />
     </main>
   );
 }

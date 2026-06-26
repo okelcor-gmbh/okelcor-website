@@ -17,7 +17,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
+
+const TYRE_SRC = "/car-wheel-disk-with-tyre-and-brakes-on-black-back-.webp";
 import { Search, Truck, ShieldCheck, Boxes, BadgeCheck, Globe, ArrowRight, ArrowUpRight } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
 import { gsap, useGSAP, ease, prefersReducedMotion } from "@/lib/gsap";
@@ -127,6 +130,17 @@ export default function HeroShowcase() {
         repeat: -1,
       });
 
+      // Spin the tyre(s) slowly.
+      gsap.utils.toArray<Element>(".hs-tyre").forEach((el, i) => {
+        gsap.to(el, {
+          rotation: 360,
+          duration: 24 + i * 8,
+          ease: "none",
+          repeat: -1,
+          transformOrigin: "50% 50%",
+        });
+      });
+
       // Cursor-follow light (fine pointers only) — smooth lerp via quickTo.
       const section = sectionRef.current;
       const cursor = section?.querySelector(".hs-cursor");
@@ -200,6 +214,15 @@ export default function HeroShowcase() {
 
         {/* Cursor-follow light — desktop only (centred on the pointer via x/y) */}
         <div className="hs-cursor absolute left-0 top-0 -ml-[210px] -mt-[210px] hidden h-[420px] w-[420px] rounded-full bg-[radial-gradient(circle_at_center,rgba(244,81,30,0.10),transparent_60%)] blur-2xl lg:block" />
+
+        {/* Slowly-spinning real tyre — fills the empty corner, behind the cards */}
+        <Image
+          src={TYRE_SRC}
+          alt=""
+          width={220}
+          height={220}
+          className="hs-tyre absolute bottom-[3%] right-[2%] hidden h-[210px] w-[210px] object-contain opacity-[0.7] mix-blend-multiply lg:block"
+        />
       </div>
 
       <div className="tesla-shell relative">
@@ -296,11 +319,15 @@ const CARD_CLASS =
   "rounded-2xl border border-black/[0.06] bg-white shadow-[0_24px_55px_-22px_rgba(23,26,32,0.22)] will-change-transform";
 
 function TyreDisc() {
+  // Real tyre product image; white bg vanishes via mix-blend on the white card.
   return (
-    <div className="relative grid h-16 w-16 shrink-0 place-items-center rounded-full bg-[radial-gradient(circle,#2b2b2b_0%,#121212_72%)] shadow-inner">
-      <div className="absolute inset-1.5 rounded-full border-2 border-dashed border-white/15" />
-      <div className="h-7 w-7 rounded-full bg-[#0b0b0c] ring-4 ring-[#262626]" />
-    </div>
+    <Image
+      src={TYRE_SRC}
+      alt=""
+      width={72}
+      height={72}
+      className="hs-tyre h-16 w-16 shrink-0 object-contain mix-blend-multiply"
+    />
   );
 }
 
