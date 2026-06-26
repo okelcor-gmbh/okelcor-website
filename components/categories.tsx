@@ -4,8 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { gsap, ScrollTrigger, useGSAP, ease, scrollDefaults, prefersReducedMotion } from "@/lib/gsap";
+import { gsap, useGSAP, ease, scrollDefaults, prefersReducedMotion } from "@/lib/gsap";
 import { useReveal } from "@/hooks/useReveal";
+import SectionHeading from "@/components/ui/section-heading";
 import { useLanguage } from "@/context/language-context";
 
 const CARD_IMAGES = [
@@ -223,12 +224,7 @@ export default function Categories() {
     <section className="w-full bg-[#f5f5f5] py-12 md:py-16">
       <div className="tesla-shell">
         <div ref={headingRef} className="mb-6 px-1">
-          <p className="text-[13px] font-bold uppercase tracking-[0.28em] text-[var(--primary)]">
-            {t.categories.eyebrow}
-          </p>
-          <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-[var(--foreground)] md:text-4xl">
-            {t.categories.heading}
-          </h2>
+          <SectionHeading eyebrow={t.categories.eyebrow} heading={t.categories.heading} />
         </div>
 
         <div className="relative">

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Reveal from "@/components/motion/reveal";
+import SectionHeading from "@/components/ui/section-heading";
 import { useLanguage } from "@/context/language-context";
 
 export default function WhoWeServeSection() {
@@ -11,14 +12,7 @@ export default function WhoWeServeSection() {
     <section className="w-full bg-[#f5f5f5] py-12 md:py-16">
       <div className="tesla-shell">
         {/* Section header */}
-        <div className="mb-5 text-center">
-          <p className="text-[13px] font-bold uppercase tracking-[0.28em] text-[var(--primary)]">
-            {t.whoWeServe.eyebrow}
-          </p>
-          <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-[var(--foreground)] sm:text-4xl">
-            {t.whoWeServe.heading}
-          </h2>
-        </div>
+        <SectionHeading eyebrow={t.whoWeServe.eyebrow} heading={t.whoWeServe.heading} align="center" className="mb-5" />
 
         <Reveal>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

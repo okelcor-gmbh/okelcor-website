@@ -458,10 +458,14 @@ a {
 
 
 /* ── Fade-up scroll animation (components/motion/fade-up.tsx) ──────────────── */
+/* Cadence matched to the GSAP Reveal hook (y rise, 0.7s, ~power3.out) so the
+   CSS-driven and GSAP-driven section reveals feel identical across the page. */
 .fade-up {
   opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
+  transform: translateY(28px);
+  transition:
+    opacity 0.7s cubic-bezier(0.33, 1, 0.68, 1),
+    transform 0.7s cubic-bezier(0.33, 1, 0.68, 1);
 }
 
 .fade-up.is-visible {

@@ -14,6 +14,7 @@ import Footer from "@/components/footer";
 import HeroShowcase from "@/components/home/hero-showcase";
 import GlobalReach from "@/components/home/global-reach";
 import FetPromo from "@/components/home/fet-promo";
+import ScrollProgress from "@/components/home/scroll-progress";
 import CategoriesSection from "@/components/home/categories-section";
 import BrandsSection from "@/components/home/brands-section";
 import PlatformShowcase from "@/components/home/platform-showcase";
@@ -45,6 +46,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function Home() {
   return (
     <main className="w-full">
+      <ScrollProgress />
       <Navbar />
 
       <HeroShowcase />
