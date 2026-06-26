@@ -285,6 +285,20 @@ export type Translations = {
   fetVerified: {
     copy: string; fieldTested: string;
   };
+  platform: {
+    eyebrow: string; heading: string; body: string;
+    features: [string, string, string];
+    cta: string;
+    mock: {
+      orderLabel: string; statusLabel: string;
+      milestonesTitle: string;
+      steps: [string, string, string, string, string];
+      confirmed: string; inProgress: string;
+      documentsTitle: string;
+      docs: [string, string, string];
+      live: string;
+    };
+  };
 };
 
 // ─── English ──────────────────────────────────────────────────────────────────
@@ -755,6 +769,28 @@ const en: Translations = {
   fetVerified: {
     copy: "Independently verified — 13.9% fuel reduction on a German state authority vehicle",
     fieldTested: "Field Tested",
+  },
+  platform: {
+    eyebrow: "The Okelcor Platform",
+    heading: "Every order, tracked from quote to delivery",
+    body: "Buyers get a live view of each order — payment milestones, trade documents and shipment status — backed by full REX-certified export paperwork.",
+    features: [
+      "Live payment milestones, from deposit to shipment release",
+      "Trade documents on demand — proforma, packing list, commercial invoice",
+      "Real-time order and delivery status, anywhere in the world",
+    ],
+    cta: "Request account access",
+    mock: {
+      orderLabel: "Your Order",
+      statusLabel: "In Production",
+      milestonesTitle: "Payment Milestones",
+      steps: ["Deposit Requested", "Deposit Paid", "Balance Due", "Balance Paid", "Shipment Released"],
+      confirmed: "Confirmed",
+      inProgress: "In progress",
+      documentsTitle: "Trade Documents",
+      docs: ["Proforma Invoice", "Packing List", "Commercial Invoice"],
+      live: "Live",
+    },
   },
 };
 
@@ -1227,6 +1263,28 @@ const de: Translations = {
     copy: "Unabhängig verifiziert — 13,9 % Kraftstoffreduktion an einem Fahrzeug einer deutschen Landesbehörde",
     fieldTested: "Feldgetestet",
   },
+  platform: {
+    eyebrow: "Die Okelcor-Plattform",
+    heading: "Jede Bestellung – vom Angebot bis zur Lieferung verfolgt",
+    body: "Käufer sehen jede Bestellung in Echtzeit – Zahlungsmeilensteine, Handelsdokumente und Versandstatus – mit vollständigen, REX-zertifizierten Exportunterlagen.",
+    features: [
+      "Zahlungsmeilensteine in Echtzeit – von der Anzahlung bis zur Versandfreigabe",
+      "Handelsdokumente auf Abruf – Proforma, Packliste, Handelsrechnung",
+      "Bestell- und Lieferstatus in Echtzeit, weltweit",
+    ],
+    cta: "Kontozugang anfragen",
+    mock: {
+      orderLabel: "Ihre Bestellung",
+      statusLabel: "In Produktion",
+      milestonesTitle: "Zahlungsmeilensteine",
+      steps: ["Anzahlung angefordert", "Anzahlung bezahlt", "Restbetrag fällig", "Restbetrag bezahlt", "Versand freigegeben"],
+      confirmed: "Bestätigt",
+      inProgress: "In Bearbeitung",
+      documentsTitle: "Handelsdokumente",
+      docs: ["Proforma-Rechnung", "Packliste", "Handelsrechnung"],
+      live: "Live",
+    },
+  },
 };
 
 // ─── French ───────────────────────────────────────────────────────────────────
@@ -1698,6 +1756,28 @@ const fr: Translations = {
     copy: "Vérifié indépendamment — 13,9 % de réduction de carburant sur un véhicule d'une autorité publique allemande",
     fieldTested: "Testé sur le terrain",
   },
+  platform: {
+    eyebrow: "La plateforme Okelcor",
+    heading: "Chaque commande, suivie du devis à la livraison",
+    body: "Les acheteurs suivent chaque commande en temps réel – étapes de paiement, documents commerciaux et statut d'expédition – avec une documentation d'exportation complète certifiée REX.",
+    features: [
+      "Étapes de paiement en temps réel, de l'acompte à la libération de l'expédition",
+      "Documents commerciaux à la demande – proforma, liste de colisage, facture commerciale",
+      "Statut de commande et de livraison en temps réel, partout dans le monde",
+    ],
+    cta: "Demander un accès au compte",
+    mock: {
+      orderLabel: "Votre commande",
+      statusLabel: "En production",
+      milestonesTitle: "Étapes de paiement",
+      steps: ["Acompte demandé", "Acompte payé", "Solde dû", "Solde payé", "Expédition libérée"],
+      confirmed: "Confirmé",
+      inProgress: "En cours",
+      documentsTitle: "Documents commerciaux",
+      docs: ["Facture proforma", "Liste de colisage", "Facture commerciale"],
+      live: "En direct",
+    },
+  },
 };
 
 // ─── Spanish ──────────────────────────────────────────────────────────────────
@@ -2138,6 +2218,28 @@ const es: Translations = {
   fetVerified: {
     copy: "Verificado de forma independiente — 13,9 % de reducción de combustible en un vehículo de una autoridad estatal alemana",
     fieldTested: "Probado en campo",
+  },
+  platform: {
+    eyebrow: "La plataforma Okelcor",
+    heading: "Cada pedido, rastreado desde la cotización hasta la entrega",
+    body: "Los compradores ven cada pedido en tiempo real – hitos de pago, documentos comerciales y estado de envío – respaldado por documentación de exportación completa certificada por REX.",
+    features: [
+      "Hitos de pago en tiempo real, desde el depósito hasta la liberación del envío",
+      "Documentos comerciales a demanda: proforma, lista de empaque, factura comercial",
+      "Estado de pedido y entrega en tiempo real, en cualquier parte del mundo",
+    ],
+    cta: "Solicitar acceso a la cuenta",
+    mock: {
+      orderLabel: "Tu pedido",
+      statusLabel: "En producción",
+      milestonesTitle: "Hitos de pago",
+      steps: ["Depósito solicitado", "Depósito pagado", "Saldo pendiente", "Saldo pagado", "Envío liberado"],
+      confirmed: "Confirmado",
+      inProgress: "En curso",
+      documentsTitle: "Documentos comerciales",
+      docs: ["Factura proforma", "Lista de empaque", "Factura comercial"],
+      live: "En vivo",
+    },
   },
 };
 

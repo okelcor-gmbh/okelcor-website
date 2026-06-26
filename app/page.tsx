@@ -14,6 +14,7 @@ import Footer from "@/components/footer";
 import HeroSection from "@/components/home/hero-section";
 import CategoriesSection from "@/components/home/categories-section";
 import BrandsSection from "@/components/home/brands-section";
+import PlatformShowcase from "@/components/home/platform-showcase";
 import FetTeaser from "@/components/fet-teaser";
 import FetRoiStrip from "@/components/fet-roi-strip";
 import FetVerifiedStrip from "@/components/fet-verified-strip";
@@ -58,6 +59,8 @@ export default function Home() {
 
       <FadeUp><WhyOkelcor /></FadeUp>
       <WhoWeServeSection />
+
+      <PlatformShowcase />
 
       <Suspense fallback={<BrandsSkeleton />}>
         <BrandsSection />
