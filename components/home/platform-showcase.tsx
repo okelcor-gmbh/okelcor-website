@@ -58,6 +58,20 @@ export default function PlatformShowcase() {
         yoyo: true,
         stagger: 1.6,
       });
+
+      // Process "draws" itself: connectors grow downward as the timeline enters.
+      gsap.fromTo(
+        ".ps-connector",
+        { scaleY: 0 },
+        {
+          scaleY: 1,
+          transformOrigin: "top",
+          duration: 0.5,
+          ease: "power2.out",
+          stagger: 0.18,
+          scrollTrigger: { trigger: ".ps-timeline", start: "top 82%", once: true },
+        }
+      );
     },
     { scope: containerRef }
   );
@@ -161,28 +175,29 @@ export default function PlatformShowcase() {
                 <p className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[var(--primary)]">
                   {p.mock.milestonesTitle}
                 </p>
-                <StaggerParent stagger={0.08} className="space-y-0">
+                <StaggerParent stagger={0.08} className="ps-timeline space-y-0">
                   {p.mock.steps.map((label, i) => {
                     const state = STEP_STATE[i];
                     const isDone = state === "done";
                     const isCurr = state === "current";
                     const isLast = i === p.mock.steps.length - 1;
                     return (
-                      <div key={label} className="flex gap-3">
+                      <div key={label} className="group -mx-2 flex gap-3 rounded-lg px-2 transition-colors hover:bg-black/[0.025]">
                         {/* Dot + connector line (flex layout — never overlaps text) */}
                         <div className="flex flex-col items-center">
                           <span
                             className={[
-                              "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 bg-white",
+                              "relative mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 bg-white",
                               isDone ? "border-emerald-500 bg-emerald-500"
                                 : isCurr ? "border-[var(--primary)] bg-[var(--primary)]"
                                 : "border-black/20",
                             ].join(" ")}
                           >
-                            {isDone && <CheckCircle2 size={10} className="text-white" strokeWidth={3} />}
-                            {isCurr && <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" />}
+                            {isCurr && <span aria-hidden="true" className="absolute inset-0 rounded-full bg-[var(--primary)] opacity-40 motion-safe:animate-ping" />}
+                            {isDone && <CheckCircle2 size={10} className="relative text-white" strokeWidth={3} />}
+                            {isCurr && <span className="relative h-1.5 w-1.5 rounded-full bg-white motion-safe:animate-pulse" />}
                           </span>
-                          {!isLast && <span className="mt-1 w-0.5 flex-1 rounded bg-black/[0.08]" />}
+                          {!isLast && <span className="ps-connector mt-1 w-0.5 flex-1 origin-top rounded bg-black/[0.08]" />}
                         </div>
 
                         {/* Content */}

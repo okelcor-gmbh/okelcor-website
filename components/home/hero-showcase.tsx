@@ -71,11 +71,11 @@ export default function HeroShowcase() {
       if (prefersReducedMotion()) return;
       const cards = cardRefs.current.filter(Boolean) as HTMLDivElement[];
 
-      // Headline: premium word-by-word reveal (fade + rise + de-blur).
+      // Headline: flowing per-character reveal (subtle rise + fade).
       gsap.fromTo(
-        ".hs-word",
-        { opacity: 0, y: 26, filter: "blur(8px)" },
-        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.7, ease: "power3.out", stagger: 0.05, delay: 0.05 }
+        ".hs-char",
+        { opacity: 0, yPercent: 40 },
+        { opacity: 1, yPercent: 0, duration: 0.5, ease: "power3.out", stagger: 0.018, delay: 0.05 }
       );
 
       // Entrance: text fades up (via CSS targets), cards scale/fade in staggered.
@@ -235,12 +235,21 @@ export default function HeroShowcase() {
               {h.eyebrow}
             </span>
 
-            <h1 className="mt-5 max-w-xl text-4xl font-extrabold leading-[1.05] tracking-tight text-[var(--foreground)] sm:text-5xl lg:text-[3.4rem]">
-              {h.title.split(" ").map((word, i) => (
-                <span key={`${word}-${i}`} className="hs-word mr-[0.26em] inline-block will-change-[transform,filter]">
-                  {word}
-                </span>
-              ))}
+            <h1
+              aria-label={h.title}
+              className="mt-5 max-w-xl text-4xl font-extrabold leading-[1.05] tracking-tight text-[var(--foreground)] sm:text-5xl lg:text-[3.4rem]"
+            >
+              <span aria-hidden="true">
+                {h.title.split(" ").map((word, wi) => (
+                  <span key={`${word}-${wi}`} className="mr-[0.25em] inline-block">
+                    {Array.from(word).map((ch, ci) => (
+                      <span key={ci} className="hs-char inline-block will-change-[transform,opacity]">
+                        {ch}
+                      </span>
+                    ))}
+                  </span>
+                ))}
+              </span>
             </h1>
 
             <p className="hs-fade mt-5 max-w-lg text-[1.05rem] leading-8 text-[var(--muted)]">
