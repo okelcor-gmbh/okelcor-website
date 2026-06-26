@@ -94,6 +94,34 @@ export default function HeroShowcase() {
           delay: 0.8 + i * 0.2,
         });
       });
+
+      // Ambient motion — rings rotate, glows drift, route dashes flow.
+      gsap.utils.toArray<Element>(".hs-ring").forEach((ring, i) => {
+        gsap.to(ring, {
+          rotation: i % 2 === 0 ? 360 : -360,
+          duration: 90 + i * 40,
+          ease: "none",
+          repeat: -1,
+          transformOrigin: "50% 50%",
+        });
+      });
+
+      gsap.to(".hs-glow", {
+        x: "+=26",
+        y: "-=20",
+        duration: 10,
+        ease: "sine.inOut",
+        repeat: -1,
+        yoyo: true,
+        stagger: 1.4,
+      });
+
+      gsap.to(".hs-route", {
+        attr: { "stroke-dashoffset": -180 },
+        duration: 5,
+        ease: "none",
+        repeat: -1,
+      });
     },
     { scope: sectionRef }
   );
@@ -105,10 +133,11 @@ export default function HeroShowcase() {
       ref={sectionRef}
       className="relative w-full overflow-hidden bg-gradient-to-b from-white to-[#eef0f3] pt-20"
     >
-      {/* Ambient background — soft, blends into the light page */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-        <div className="absolute right-[-8%] top-[-12%] h-[640px] w-[640px] rounded-full bg-[radial-gradient(circle_at_center,rgba(244,81,30,0.12),transparent_62%)] blur-2xl" />
-        <div className="absolute left-[-12%] bottom-[-22%] h-[480px] w-[480px] rounded-full bg-[radial-gradient(circle_at_center,rgba(23,26,32,0.05),transparent_64%)] blur-2xl" />
+      {/* Ambient background — soft, animated, low-opacity (decorative only) */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="hs-glow absolute right-[-8%] top-[-12%] h-[640px] w-[640px] rounded-full bg-[radial-gradient(circle_at_center,rgba(244,81,30,0.12),transparent_62%)] blur-2xl" />
+        <div className="hs-glow absolute left-[-12%] bottom-[-22%] h-[480px] w-[480px] rounded-full bg-[radial-gradient(circle_at_center,rgba(23,26,32,0.05),transparent_64%)] blur-2xl" />
+
         {/* faint dotted grid */}
         <div
           className="absolute inset-0 opacity-[0.04]"
@@ -117,10 +146,32 @@ export default function HeroShowcase() {
             backgroundSize: "26px 26px",
           }}
         />
+
+        {/* Slowly-rotating tyre rings — desktop only, fills the empty space */}
+        <TyreRing className="hs-ring absolute right-[7%] top-[1%] hidden h-[380px] w-[380px] text-[#171a20] opacity-[0.05] lg:block" />
+        <TyreRing className="hs-ring absolute left-[-3%] bottom-[2%] hidden h-[260px] w-[260px] text-[#171a20] opacity-[0.06] lg:block" />
+
+        {/* Flowing shipping-route arc — desktop only */}
+        <svg
+          viewBox="0 0 600 300"
+          fill="none"
+          className="absolute left-1/2 top-1/2 hidden h-[440px] w-[780px] -translate-x-1/2 -translate-y-1/2 text-[var(--primary)] opacity-[0.10] lg:block"
+        >
+          <path
+            className="hs-route"
+            d="M30,250 C190,60 410,60 570,170"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeDasharray="6 12"
+          />
+          <circle cx="30" cy="250" r="5" fill="currentColor" />
+          <circle cx="570" cy="170" r="5" fill="currentColor" />
+        </svg>
       </div>
 
       <div className="tesla-shell relative">
-        <div className="grid min-h-[calc(100vh-5rem)] grid-cols-1 items-center gap-12 py-14 lg:min-h-[88vh] lg:grid-cols-2 lg:gap-10 lg:py-20">
+        <div className="grid grid-cols-1 items-center gap-10 py-12 lg:min-h-[88vh] lg:grid-cols-2 lg:gap-10 lg:py-20">
 
           {/* ── Left: copy ─────────────────────────────────── */}
           <div>
@@ -177,11 +228,11 @@ export default function HeroShowcase() {
           {/* ── Right: floating UI cluster ─────────────────── */}
           <div className="relative mx-auto w-full max-w-[520px]">
 
-            {/* Mobile: simple stack */}
+            {/* Mobile: compact stack — rotating product + working search only
+                (shipment/global story is covered by the flag strip below) */}
             <div className="flex flex-col gap-4 lg:hidden">
               <ProductCard refCb={(el) => (cardRefs.current[0] = el)} textRef={productTextRef} h={h} product={product} href={PRODUCT_HREFS[productIdx]} />
               <SearchCard refCb={(el) => (cardRefs.current[1] = el)} h={h} />
-              <ShipmentCard refCb={(el) => (cardRefs.current[2] = el)} h={h} />
             </div>
 
             {/* Desktop: overlapping cluster */}
@@ -211,6 +262,19 @@ type H = ReturnType<typeof useLanguage>["t"]["heroShowcase"];
 
 const CARD_CLASS =
   "rounded-2xl border border-black/[0.06] bg-white shadow-[0_24px_55px_-22px_rgba(23,26,32,0.22)] will-change-transform";
+
+// Decorative concentric-ring motif (reads as a tyre / wheel) for the background.
+function TyreRing({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 200 200" fill="none" aria-hidden="true" className={className}>
+      <circle cx="100" cy="100" r="96" stroke="currentColor" strokeWidth="1" strokeDasharray="2 6" />
+      <circle cx="100" cy="100" r="74" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="100" cy="100" r="52" stroke="currentColor" strokeWidth="1" strokeDasharray="1 5" />
+      <circle cx="100" cy="100" r="30" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="100" cy="100" r="6" fill="currentColor" />
+    </svg>
+  );
+}
 
 function TyreDisc() {
   return (
