@@ -92,17 +92,17 @@ export default function HeroShowcase() {
   return (
     <section
       ref={sectionRef}
-      className="relative w-full overflow-hidden bg-[#0b0b0c] pt-20"
+      className="relative w-full overflow-hidden bg-gradient-to-b from-white to-[#eef0f3] pt-20"
     >
-      {/* Ambient background */}
+      {/* Ambient background — soft, blends into the light page */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-        <div className="absolute right-[-8%] top-[-10%] h-[620px] w-[620px] rounded-full bg-[radial-gradient(circle_at_center,rgba(244,81,30,0.20),transparent_60%)] blur-2xl" />
-        <div className="absolute left-[-10%] bottom-[-20%] h-[460px] w-[460px] rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.05),transparent_64%)] blur-2xl" />
+        <div className="absolute right-[-8%] top-[-12%] h-[640px] w-[640px] rounded-full bg-[radial-gradient(circle_at_center,rgba(244,81,30,0.12),transparent_62%)] blur-2xl" />
+        <div className="absolute left-[-12%] bottom-[-22%] h-[480px] w-[480px] rounded-full bg-[radial-gradient(circle_at_center,rgba(23,26,32,0.05),transparent_64%)] blur-2xl" />
         {/* faint dotted grid */}
         <div
-          className="absolute inset-0 opacity-[0.05]"
+          className="absolute inset-0 opacity-[0.04]"
           style={{
-            backgroundImage: "radial-gradient(rgba(255,255,255,0.6) 1px, transparent 1px)",
+            backgroundImage: "radial-gradient(rgba(23,26,32,0.7) 1px, transparent 1px)",
             backgroundSize: "26px 26px",
           }}
         />
@@ -113,16 +113,16 @@ export default function HeroShowcase() {
 
           {/* ── Left: copy ─────────────────────────────────── */}
           <div>
-            <span className="hs-fade inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.05] px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-white/80 backdrop-blur-sm">
+            <span className="hs-fade inline-flex items-center gap-2 rounded-full border border-black/[0.08] bg-white px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-[#5c5e62] shadow-sm">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--primary)]" />
               {h.eyebrow}
             </span>
 
-            <h1 className="hs-fade mt-5 max-w-xl text-4xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-[3.4rem]">
+            <h1 className="hs-fade mt-5 max-w-xl text-4xl font-extrabold leading-[1.05] tracking-tight text-[var(--foreground)] sm:text-5xl lg:text-[3.4rem]">
               {h.title}
             </h1>
 
-            <p className="hs-fade mt-5 max-w-lg text-[1.05rem] leading-8 text-white/60">
+            <p className="hs-fade mt-5 max-w-lg text-[1.05rem] leading-8 text-[var(--muted)]">
               {h.subtitle}
             </p>
 
@@ -133,7 +133,10 @@ export default function HeroShowcase() {
                 </Link>
               </MagneticButton>
               <MagneticButton>
-                <Link href="/shop" className="tesla-hero-btn-secondary">
+                <Link
+                  href="/shop"
+                  className="inline-flex h-[44px] min-w-[140px] items-center justify-center rounded-full border border-black/15 bg-white px-6 text-[0.88rem] font-bold text-[var(--foreground)] transition hover:bg-[#f3f3f4] sm:h-[46px] sm:min-w-[160px] sm:px-7 sm:text-[0.95rem]"
+                >
                   {t.hero.ctaSecondary}
                 </Link>
               </MagneticButton>
@@ -146,7 +149,7 @@ export default function HeroShowcase() {
                 return (
                   <span
                     key={chip}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[0.76rem] font-semibold text-white/70"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-black/[0.08] bg-white px-3 py-1.5 text-[0.76rem] font-semibold text-[#5c5e62] shadow-sm"
                   >
                     <Icon size={13} strokeWidth={2} className="text-[var(--primary)]" />
                     {chip}
@@ -192,7 +195,7 @@ export default function HeroShowcase() {
 type H = ReturnType<typeof useLanguage>["t"]["heroShowcase"];
 
 const CARD_CLASS =
-  "rounded-2xl border border-white/10 bg-white shadow-[0_30px_70px_-25px_rgba(0,0,0,0.7)] will-change-transform";
+  "rounded-2xl border border-black/[0.06] bg-white shadow-[0_24px_55px_-22px_rgba(23,26,32,0.22)] will-change-transform";
 
 function TyreDisc() {
   return (

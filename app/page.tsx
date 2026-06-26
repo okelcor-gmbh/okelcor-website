@@ -15,10 +15,7 @@ import HeroShowcase from "@/components/home/hero-showcase";
 import CategoriesSection from "@/components/home/categories-section";
 import BrandsSection from "@/components/home/brands-section";
 import PlatformShowcase from "@/components/home/platform-showcase";
-import FetTeaser from "@/components/fet-teaser";
-import FetRoiStrip from "@/components/fet-roi-strip";
-import FetVerifiedStrip from "@/components/fet-verified-strip";
-import FetProof from "@/components/fet-proof";
+import FetShowcase from "@/components/home/fet-showcase";
 import {
   CategoriesSkeleton,
   BrandsSkeleton,
@@ -74,10 +71,7 @@ export default function Home() {
       <RexCertified />
 
       {/* Second product line */}
-      <FetTeaser />
-      <FetRoiStrip />
-      <FetVerifiedStrip />
-      <FetProof />
+      <FetShowcase />
 
       <CTASection />
       <Footer />

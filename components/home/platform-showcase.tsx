@@ -92,7 +92,7 @@ export default function PlatformShowcase() {
 
           {/* ── Right: floating app-window mock ────────────── */}
           <div ref={targetRef} className="relative will-change-transform">
-            <div className="mx-auto w-full max-w-[480px] overflow-hidden rounded-[20px] border border-black/[0.06] bg-white shadow-[0_40px_90px_-30px_rgba(23,26,32,0.45)]">
+            <div className="mx-auto w-full max-w-[480px] overflow-hidden rounded-[20px] border border-black/[0.06] bg-white shadow-[0_28px_65px_-26px_rgba(23,26,32,0.25)]">
 
               {/* Window chrome */}
               <div className="flex items-center gap-2 border-b border-black/[0.06] bg-[#fbfbfc] px-4 py-3">
