@@ -128,45 +128,51 @@ export default function PlatformShowcase() {
                 <p className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[var(--primary)]">
                   {p.mock.milestonesTitle}
                 </p>
-                <StaggerParent stagger={0.08} className="relative space-y-0 border-l-2 border-black/[0.06] pl-5">
+                <StaggerParent stagger={0.08} className="space-y-0">
                   {p.mock.steps.map((label, i) => {
                     const state = STEP_STATE[i];
                     const isDone = state === "done";
                     const isCurr = state === "current";
                     const isLast = i === p.mock.steps.length - 1;
                     return (
-                      <div key={label} className={isLast ? "pb-0 pt-1" : "pb-4 pt-1"}>
-                        <span
-                          className={[
-                            "absolute -left-[9px] flex h-4 w-4 items-center justify-center rounded-full border-2 bg-white",
-                            isDone ? "border-emerald-500 bg-emerald-500"
-                              : isCurr ? "border-[var(--primary)] bg-[var(--primary)]"
-                              : "border-black/20",
-                          ].join(" ")}
-                          style={{ marginTop: "2px" }}
-                        >
-                          {isDone && <CheckCircle2 size={10} className="text-white" strokeWidth={3} />}
-                          {isCurr && <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" />}
-                        </span>
+                      <div key={label} className="flex gap-3">
+                        {/* Dot + connector line (flex layout — never overlaps text) */}
+                        <div className="flex flex-col items-center">
+                          <span
+                            className={[
+                              "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 bg-white",
+                              isDone ? "border-emerald-500 bg-emerald-500"
+                                : isCurr ? "border-[var(--primary)] bg-[var(--primary)]"
+                                : "border-black/20",
+                            ].join(" ")}
+                          >
+                            {isDone && <CheckCircle2 size={10} className="text-white" strokeWidth={3} />}
+                            {isCurr && <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" />}
+                          </span>
+                          {!isLast && <span className="mt-1 w-0.5 flex-1 rounded bg-black/[0.08]" />}
+                        </div>
 
-                        <p className={`text-[0.85rem] font-semibold ${isDone ? "text-emerald-700" : isCurr ? "text-[#1a1a1a]" : "text-[#9ca3af]"}`}>
-                          {label}
-                        </p>
-                        {STEP_SUB[i] && (
-                          <p className={`mt-0.5 text-[0.74rem] ${isDone || isCurr ? "text-[#5c5e62]" : "text-[#b0b3b8]"}`}>
-                            {STEP_SUB[i]}
+                        {/* Content */}
+                        <div className={`min-w-0 ${isLast ? "pb-0" : "pb-4"}`}>
+                          <p className={`text-[0.85rem] font-semibold ${isDone ? "text-emerald-700" : isCurr ? "text-[#1a1a1a]" : "text-[#9ca3af]"}`}>
+                            {label}
                           </p>
-                        )}
-                        {isDone && STEP_DATE[i] && (
-                          <p className="mt-0.5 text-[0.7rem] text-emerald-600">
-                            {p.mock.confirmed} {STEP_DATE[i]}
-                          </p>
-                        )}
-                        {isCurr && (
-                          <p className="mt-0.5 text-[0.7rem] font-medium text-[var(--primary)]">
-                            {p.mock.inProgress}
-                          </p>
-                        )}
+                          {STEP_SUB[i] && (
+                            <p className={`mt-0.5 text-[0.74rem] ${isDone || isCurr ? "text-[#5c5e62]" : "text-[#b0b3b8]"}`}>
+                              {STEP_SUB[i]}
+                            </p>
+                          )}
+                          {isDone && STEP_DATE[i] && (
+                            <p className="mt-0.5 text-[0.7rem] text-emerald-600">
+                              {p.mock.confirmed} {STEP_DATE[i]}
+                            </p>
+                          )}
+                          {isCurr && (
+                            <p className="mt-0.5 text-[0.7rem] font-medium text-[var(--primary)]">
+                              {p.mock.inProgress}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     );
                   })}
