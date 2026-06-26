@@ -8,7 +8,7 @@ export default function WhoWeServeSection() {
   const { t } = useLanguage();
 
   return (
-    <section className="w-full bg-[#f5f5f5] py-6">
+    <section className="w-full bg-[#f5f5f5] py-12 md:py-16">
       <div className="tesla-shell">
         {/* Section header */}
         <div className="mb-5 text-center">

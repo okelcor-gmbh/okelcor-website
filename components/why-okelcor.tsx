@@ -7,12 +7,12 @@ import { useLanguage } from "@/context/language-context";
 export default function WhyOkelcor() {
   const { t } = useLanguage();
   return (
-    <section className="w-full bg-[#f5f5f5] py-6">
+    <section className="w-full bg-[#f5f5f5] py-12 md:py-16">
       <div className="tesla-shell">
         <StaggerParent className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-[1.1fr_0.55fr_1.1fr_0.55fr]">
 
           {/* Card 1 */}
-          <StaggerChild className="rounded-[22px] bg-[#efefef] p-6 sm:p-8 md:p-10">
+          <StaggerChild className="rounded-[22px] border border-black/[0.05] bg-[#efefef] p-6 shadow-[0_4px_24px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_14px_38px_rgba(0,0,0,0.09)] sm:p-8 md:p-10">
             <h2 className="text-3xl font-extrabold tracking-tight text-[var(--foreground)] md:text-4xl lg:text-5xl">
               {t.why.card1.title}
             </h2>
@@ -31,7 +31,7 @@ export default function WhyOkelcor() {
 
           {/* Image 1 — hidden on mobile */}
           <StaggerChild
-            className="hidden rounded-[22px] bg-cover bg-center md:block"
+            className="hidden rounded-[22px] border border-black/[0.05] bg-cover bg-center shadow-[0_4px_24px_rgba(0,0,0,0.05)] md:block"
             style={{
               minHeight: "280px",
               backgroundImage:
@@ -40,7 +40,7 @@ export default function WhyOkelcor() {
           />
 
           {/* Card 2 */}
-          <StaggerChild className="rounded-[22px] bg-[#efefef] p-6 sm:p-8 md:p-10">
+          <StaggerChild className="rounded-[22px] border border-black/[0.05] bg-[#efefef] p-6 shadow-[0_4px_24px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_14px_38px_rgba(0,0,0,0.09)] sm:p-8 md:p-10">
             <h2 className="text-3xl font-extrabold tracking-tight text-[var(--foreground)] md:text-4xl lg:text-5xl">
               {t.why.card2.title}
             </h2>
@@ -59,7 +59,7 @@ export default function WhyOkelcor() {
 
           {/* Image 2 — hidden on mobile */}
           <StaggerChild
-            className="hidden rounded-[22px] bg-cover bg-center md:block"
+            className="hidden rounded-[22px] border border-black/[0.05] bg-cover bg-center shadow-[0_4px_24px_rgba(0,0,0,0.05)] md:block"
             style={{
               minHeight: "280px",
               backgroundImage:

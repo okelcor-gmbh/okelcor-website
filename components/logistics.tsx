@@ -9,7 +9,7 @@ export default function Logistics() {
   const { t } = useLanguage();
 
   return (
-    <section className="w-full bg-[#f5f5f5] py-6">
+    <section className="w-full bg-[#f5f5f5] py-12 md:py-16">
       <div className="tesla-shell">
         <div className="grid gap-6 md:grid-cols-[1.35fr_0.9fr]">
           {/* Large logistics card */}
@@ -74,7 +74,7 @@ export default function Logistics() {
               </div>
             </div>
 
-            <div className="rounded-[22px] bg-[#efefef] p-6 sm:p-8 md:p-10">
+            <div className="rounded-[22px] border border-black/[0.05] bg-[#efefef] p-6 shadow-[0_4px_24px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_14px_40px_rgba(0,0,0,0.10)] sm:p-8 md:p-10">
               <p className="text-[13px] font-bold uppercase tracking-[0.28em] text-[var(--primary)]">
                 {t.logistics.distEyebrow}
               </p>

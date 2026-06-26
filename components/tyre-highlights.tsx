@@ -8,13 +8,13 @@ export default function TyreHighlightsSection() {
   const { t } = useLanguage();
 
   return (
-    <section className="w-full bg-[#f5f5f5] py-6">
+    <section className="w-full bg-[#f5f5f5] py-12 md:py-16">
       <div className="tesla-shell">
         <Reveal>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 
             {/* Used Tyres */}
-            <div className="overflow-hidden rounded-[22px] bg-[#efefef]">
+            <div className="overflow-hidden rounded-[22px] border border-black/[0.05] bg-[#efefef] shadow-[0_4px_24px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_14px_40px_rgba(0,0,0,0.10)]">
               <div
                 className="relative min-h-[220px] overflow-hidden transition-transform duration-700 hover:scale-[1.02] sm:min-h-[260px]"
                 style={{
@@ -53,7 +53,7 @@ export default function TyreHighlightsSection() {
             </div>
 
             {/* TBR Tyres */}
-            <div className="overflow-hidden rounded-[22px] bg-[#efefef]">
+            <div className="overflow-hidden rounded-[22px] border border-black/[0.05] bg-[#efefef] shadow-[0_4px_24px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_14px_40px_rgba(0,0,0,0.10)]">
               <div
                 className="relative min-h-[220px] overflow-hidden transition-transform duration-700 hover:scale-[1.02] sm:min-h-[260px]"
                 style={{
