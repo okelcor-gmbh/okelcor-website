@@ -3,45 +3,58 @@
 /**
  * components/home/fet-promo.tsx
  *
- * Subtle, first-visit FET promo — a small dismissible card that slides in at the
- * bottom-left a few seconds after load to spotlight the FET product line without
- * congesting the Okelcor homepage.
+ * Subtle FET promo — a small card that slides in at the bottom-left once the
+ * visitor scrolls down, then auto-dismisses after a few seconds, to spotlight
+ * the FET product line without congesting the Okelcor homepage.
  *
- * - first visit only (localStorage), dismiss = gone until storage is cleared
- * - delayed entrance, Esc to close, slide/fade animation
+ * - appears on scroll-down, once per session (sessionStorage)
+ * - auto-hides after a few seconds (paused while hovered), Esc / × to close
  * - FET green design system (never Okelco orange); copy reused from t.fetTeaser
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { X, Zap, ArrowRight } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
 
 const KEY = "fet_promo_seen";
-const DELAY_MS = 3500;
+const SHOW_AT = 600;        // px scrolled before it appears
+const AUTO_HIDE_MS = 6500;  // auto-dismiss delay once shown
 
 export default function FetPromo() {
   const { t } = useLanguage();
   const [render, setRender] = useState(false);
   const [shown, setShown] = useState(false);
 
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const dismiss = useCallback(() => {
+    if (hideTimer.current) clearTimeout(hideTimer.current);
     setShown(false);
-    try { localStorage.setItem(KEY, "1"); } catch { /* storage blocked — ignore */ }
+    try { sessionStorage.setItem(KEY, "1"); } catch { /* storage blocked — ignore */ }
     setTimeout(() => setRender(false), 300);
   }, []);
 
-  // First-visit, delayed entrance.
+  const startHideTimer = useCallback(() => {
+    if (hideTimer.current) clearTimeout(hideTimer.current);
+    hideTimer.current = setTimeout(dismiss, AUTO_HIDE_MS);
+  }, [dismiss]);
+
+  // Appear on scroll-down (once per session), then auto-dismiss.
   useEffect(() => {
     let seen = false;
-    try { seen = localStorage.getItem(KEY) === "1"; } catch { /* ignore */ }
+    try { seen = sessionStorage.getItem(KEY) === "1"; } catch { /* ignore */ }
     if (seen) return;
-    const timer = setTimeout(() => {
+    const onScroll = () => {
+      if (window.scrollY < SHOW_AT) return;
+      window.removeEventListener("scroll", onScroll);
       setRender(true);
       requestAnimationFrame(() => setShown(true));
-    }, DELAY_MS);
-    return () => clearTimeout(timer);
-  }, []);
+      startHideTimer();
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [startHideTimer]);
 
   // Esc to close.
   useEffect(() => {
@@ -57,6 +70,8 @@ export default function FetPromo() {
     <div
       role="region"
       aria-label="FET Engine Treatment"
+      onMouseEnter={() => { if (hideTimer.current) clearTimeout(hideTimer.current); }}
+      onMouseLeave={startHideTimer}
       className={`fixed bottom-4 left-4 right-4 z-[70] transition-all duration-300 ease-out sm:right-auto sm:max-w-[360px] ${
         shown ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
       }`}
