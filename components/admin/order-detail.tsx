@@ -13,6 +13,7 @@ import type { AdminOrderFull, AdminOrderLog, ShipmentEvent } from "@/lib/admin-a
 import { canDo } from "@/lib/admin-permissions";
 import TradeDocumentsCard from "@/components/admin/trade-documents-card";
 import PaymentMilestonesCard from "@/components/admin/payment-milestones-card";
+import AssignTrackingDeviceControl from "@/components/admin/tracking/assign-device-control";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -1502,7 +1503,14 @@ export default function OrderDetail({
           TAB: LOGISTICS
       ══════════════════════════════════════════════════════════════════════ */}
       {activeTab === "logistics" && (
-        <ShipmentEventManager orderId={order.id} initialEvents={order.shipment_events ?? []} />
+        <div className="flex flex-col gap-5">
+          <AssignTrackingDeviceControl
+            orderId={order.id}
+            initialDeviceId={order.tracking_device_id}
+            canManage={canDo(adminRole, "orders.update")}
+          />
+          <ShipmentEventManager orderId={order.id} initialEvents={order.shipment_events ?? []} />
+        </div>
       )}
 
       {/* ══════════════════════════════════════════════════════════════════════

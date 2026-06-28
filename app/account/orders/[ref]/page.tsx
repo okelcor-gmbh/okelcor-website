@@ -5,6 +5,7 @@ import { ChevronLeft, Clock, Truck, Receipt } from "lucide-react";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import InvoiceDownloadButton from "@/components/account/invoice-download-button";
+import DeliveryTracking from "@/components/account/delivery-tracking";
 import ShipmentTracker from "@/components/account/shipment-tracker";
 import OrderPaymentCard from "@/components/account/order-payment-card";
 import EntryCertificateCard from "@/components/account/entry-certificate-card";
@@ -470,6 +471,9 @@ export default async function OrderDetailPage({ params }: Props) {
             </p>
             <StatusTimeline status={order.status} />
           </div>
+
+          {/* ── Live delivery tracking (self-hides when unavailable) ── */}
+          <DeliveryTracking orderRef={order.ref} poll={order.status === "shipped"} />
 
           {/* ── Shipment details ── */}
           <div className="rounded-[18px] bg-[#efefef] p-4 sm:rounded-[22px] sm:p-6 lg:p-8">
