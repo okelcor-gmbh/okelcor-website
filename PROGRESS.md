@@ -1,6 +1,6 @@
 # Okelcor Website — Progress Tracker
 
-**Last updated:** 2026-06-24  
+**Last updated:** 2026-06-26  
 **Branch:** `main`  
 **Build status:** TypeScript 0 errors · ESLint clean · Production build passes
 
@@ -97,6 +97,7 @@
 | Delivery confirmation card | `4255f03` | |
 | Payment milestone progress (customer) | `a1ef863` | 5-step timeline |
 | Order Confirmation acceptance (customer) | `c52ac1b` | Accept + Decline with reason |
+| **Portal premium pass + notification inbox** | pending | Dashboard uplift (recent-activity widget + account-status card) and a full customer notification system — navbar bell (30s unread poll), inbox center `/account/notifications` (filters, pagination, "Emailed" tag), email preferences. ✅ Frontend complete · ⏳ backend — see contract block below |
 
 ---
 
@@ -250,6 +251,35 @@
 ## Pending — Backend Contracts
 
 These frontend flows are complete. Backend endpoints are required to activate them.
+
+### Customer Portal Notifications ("Email = Inbox")
+
+Frontend complete (navbar bell + `/account/notifications` inbox + dashboard
+recent-activity widget + email preferences). **Core principle: every transactional
+email the backend sends a customer must also write a `customer_notifications` row
+with the same subject/body** (set `email_sent_at`). Degrades to empty/0 until live.
+**Full contract + table + triggers + dedupe: `docs/BACKEND-CUSTOMER-NOTIFICATIONS.md`.**
+
+```
+GET  /api/v1/auth/customer/notifications                filters: unread=1, type, severity, page, per_page
+       returns: { data: CustomerNotification[], unread_count, meta }
+GET  /api/v1/auth/customer/notifications/unread-count   returns: { unread_count }   (polled 30s — keep cheap)
+POST /api/v1/auth/customer/notifications/{id}/read
+POST /api/v1/auth/customer/notifications/{id}/dismiss
+POST /api/v1/auth/customer/notifications/read-all
+
+GET  /api/v1/auth/customer/notification-preferences     returns: { data: CustomerNotificationPreferences }
+PUT  /api/v1/auth/customer/notification-preferences     body:    CustomerNotificationPreferences
+```
+
+Notification types: `order_placed`, `order_confirmation`, `order_confirmed`,
+`payment_milestone`, `order_shipped`, `order_delivered`, `quote_received`,
+`quote_ready`, `proposal_reminder`, `document_ready`, `account_approved`,
+`access_request_update`, `verification_update`, `security_alert`, `welcome`,
+`announcement`. Severities: `info`, `success`, `warning`, `urgent`. `action_url`
+must be a relative portal path. Dedupe on `customer_id + type + related_type +
+related_id + metadata->stage`; never duplicate an existing **unread** row.
+`email_orders` + `security_alert` always email; `email_marketing` is opt-in.
 
 ### CRM-7 Proposal
 
@@ -416,6 +446,38 @@ GET /api/v1/admin/system/errors?limit=N
 | Shared `EmptyState` component | `0dd05c0` | `components/ui/empty-state.tsx` — icon + heading + description + optional CTA; applied to admin orders & products tables |
 | Filter sidebar chevron rotation | `0dd05c0` | Single `ChevronDown` rotates 180° on open (`transition-transform duration-200`) instead of swapping two icons |
 | Form button heights standardised to 44px | `0dd05c0` | Customer account profile & addresses pages: `h-[46px]`/`py-3` → `h-11` |
+
+---
+
+### ✅ UI Polish — Homepage Redesign & Premium Pass (Phase 2)
+
+A full senior-level UI/UX pass on the public homepage + admin shell, plus a
+reusable polish layer. Light, blended, premium; Linear-inspired restraint.
+All visual/motion only — no SEO meta/copy/alt/images disturbed; new visible
+text routed through i18n (EN/DE/FR/ES, type-enforced).
+
+| Feature | Commit | Notes |
+|---|---|---|
+| Admin sidebar — grouped sections + premium active state | `9372948` | Flat 25-item nav → 7 role-aware groups (Overview, Commerce, Customers & CRM, Content, Sales Channels, Insights, System); empty groups auto-hide; orange accent-bar active state; dropped redundant Profile row |
+| Homepage spacing rhythm + card depth + dark REX band | `7385346` | `py-6` → `py-12 md:py-16`; flat `#efefef` cards get border + soft shadow + hover; REX converted to dark cinematic trust band |
+| Platform Showcase — order-tracking UI mock | `db4b750`, `f81986d` | Rendered (non-screenshot) mock: floating app window, payment-milestone timeline (mirrors admin `PaymentMilestonesCard`), trade-doc rows; `t.platform` i18n; flex timeline (no dot/label overlap) |
+| Hero redesign — "living" floating-UI cluster | `b2a6825`, `9e36027` | Replaced image slider with headline + CTAs + trust chips + floating product/search/shipment cards; **light blended** theme; section reorder (Hero → Brands → Categories → Who-We-Serve → Platform → Logistics → Tyre Highlights → Why → REX → FET → CTA). Old `Hero`/Hero-Slides CMS left intact (reversible) |
+| Consolidated FET section | `9e36027` | 4 FET strips (teaser/ROI/verified/proof) → one premium `fet-showcase` with interactive Before/After video toggle (FET green system); homepage sections 14 → 11 |
+| Interactive hero cards + global flag strip | `cc254bf`, `6b9b113` | Product card → `/shop?type=…`, working size search → `/shop?size=…` (normalised) with `?q=` fallback; featured search has typewriter placeholder + quick-pick chips; `GlobalReach` marquee of markets with Twemoji SVG flags (Windows-safe); `t.heroShowcase` + `t.globalReach` i18n |
+| Hero ambient + tyre visuals | `7f6fbf9`, `230c98d` | Low-opacity animated background (counter-rotating tyre rings, flowing shipping-route arc, drifting glows, cursor-follow light); real spinning tyre (`mix-blend-multiply`) in product card + hero corner; tightened mobile hero |
+| Ambient uniformity (platform section) | `6b9b113` | Platform section shares hero's rings/grid/glows; shared `TyreRing` component |
+| FET promo card | `230c98d`, `6e6e042` | Appears on scroll-down, auto-dismisses (~6.5s, pauses on hover), once per session; FET green, bottom-left, `/fet` CTA |
+| Interactive milestone timeline | `38d28e0` | Connectors "draw" downward on scroll, current step pulsing ring, hover-highlight rows (motion-safe) |
+| Scroll-aware navbar | `77b843d` | Header gains subtle border + shadow + tighter bg once scrolled (no layout shift) |
+| CTA micro-interaction system | `9a63f6a` | Hover-lift + tactile active-press on canonical buttons; reusable `.btn-cta` + behaviour-only `.cta-press` (applied to CTA section, platform, FET); animated footer-link underlines; hover-only + reduced-motion safe |
+| Footer elevation | `9a63f6a` | Accent hairline + factual trust badges (ISO 9001:2015 · REX DEREX76000242) |
+| `<SectionHeading>` system | `8e6d308` | One eyebrow + heading rhythm/type scale; adopted in Who-We-Serve & Categories |
+| Scroll-progress bar | `8e6d308` | Thin top reading-progress indicator (rAF, transform-only, homepage) |
+| Unified reveal cadence | `8e6d308` | CSS `FadeUp` aligned to GSAP `Reveal` (0.7s, ~`power3.out`) |
+
+**New homepage components:** `home/hero-showcase`, `home/platform-showcase`, `home/fet-showcase`, `home/global-reach`, `home/fet-promo`, `home/scroll-progress`, `home/tyre-ring`, `ui/section-heading`.
+
+**Open polish (optional):** roll `.cta-press` across remaining body CTAs · adopt `<SectionHeading>` in remaining sections · lighten REX band for full-light consistency · trim/merge WhyOkelcor · self-host flag SVGs (currently jsDelivr Twemoji) · wire flag strip to a live aggregated top-countries endpoint.
 
 ---
 

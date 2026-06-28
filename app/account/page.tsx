@@ -4,12 +4,15 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import {
   Package, FileText, Receipt, Building2, ShieldCheck,
-  MapPin, User, ChevronRight,
+  MapPin, User, ChevronRight, BadgeCheck, MailCheck, MailWarning,
+  ShoppingCart, Tag, Clock,
 } from "lucide-react";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import AccessRequestsPanel from "@/components/account/access-requests-panel";
+import ActivityPreview from "@/components/account/activity-preview";
 import { getCustomerFromCookie } from "@/lib/get-customer";
+import type { Customer } from "@/lib/customer-auth";
 
 export const metadata: Metadata = {
   title: "My Account",
@@ -54,6 +57,79 @@ function DashCard({
         View <ChevronRight size={13} strokeWidth={2.5} />
       </div>
     </Link>
+  );
+}
+
+// ─── Account status card ──────────────────────────────────────────────────────
+
+function StatusRow({
+  icon: Icon,
+  label,
+  granted,
+}: {
+  icon: React.ComponentType<{ size?: number; strokeWidth?: number; className?: string }>;
+  label: string;
+  granted: boolean;
+}) {
+  return (
+    <div className="flex items-center justify-between py-2.5">
+      <div className="flex items-center gap-2.5">
+        <Icon size={15} strokeWidth={1.9} className="text-[var(--muted)]" />
+        <span className="text-[0.84rem] font-medium text-[var(--foreground)]">{label}</span>
+      </div>
+      {granted ? (
+        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[0.7rem] font-bold text-emerald-700">
+          <BadgeCheck size={12} strokeWidth={2.2} /> Active
+        </span>
+      ) : (
+        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-[0.7rem] font-bold text-amber-700">
+          <Clock size={12} strokeWidth={2.2} /> Pending
+        </span>
+      )}
+    </div>
+  );
+}
+
+function AccountStatusCard({ customer, isB2B }: { customer: Customer; isB2B: boolean }) {
+  const verified = customer.email_verified;
+  return (
+    <div className="rounded-[20px] border border-black/[0.06] bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
+      <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.22em] text-[var(--muted)]">
+        Account Status
+      </p>
+
+      {/* Email verification — applies to everyone */}
+      <div
+        className={`mb-4 flex items-start gap-3 rounded-2xl border p-4 ${
+          verified ? "border-emerald-100 bg-emerald-50/60" : "border-amber-100 bg-amber-50/60"
+        }`}
+      >
+        {verified ? (
+          <MailCheck size={20} strokeWidth={1.8} className="mt-0.5 shrink-0 text-emerald-600" />
+        ) : (
+          <MailWarning size={20} strokeWidth={1.8} className="mt-0.5 shrink-0 text-amber-600" />
+        )}
+        <div>
+          <p className="text-[0.86rem] font-bold text-[var(--foreground)]">
+            {verified ? "Email verified" : "Verify your email"}
+          </p>
+          <p className="mt-0.5 text-[0.78rem] leading-snug text-[var(--muted)]">
+            {verified
+              ? "Your account is fully active."
+              : "Check your inbox to confirm your email address."}
+          </p>
+        </div>
+      </div>
+
+      {/* B2B access matrix — only when the backend has set the flags */}
+      {isB2B && (
+        <div className="divide-y divide-black/[0.05]">
+          <StatusRow icon={ShoppingCart} label="Checkout" granted={customer.approved_for_checkout !== false} />
+          <StatusRow icon={FileText} label="Trade documents" granted={customer.approved_for_documents !== false} />
+          <StatusRow icon={Tag} label="Wholesale pricing" granted={customer.approved_for_wholesale_pricing !== false} />
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -197,6 +273,12 @@ export default async function AccountPage() {
           )}
 
           <p className="mt-1 text-[0.85rem] text-[var(--muted)]">{customer.email}</p>
+        </div>
+
+        {/* Top row — recent activity + account status */}
+        <div className="mb-10 grid gap-4 lg:grid-cols-[1.5fr_1fr]">
+          <ActivityPreview />
+          <AccountStatusCard customer={customer} isB2B={isB2B} />
         </div>
 
         {/* Dashboard cards */}
