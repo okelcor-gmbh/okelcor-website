@@ -19,12 +19,12 @@ export async function GET(
 
   const { id } = await params;
 
-  // The caller may pass ?src=<pdf_url> when the backend does not yet expose a
-  // dedicated /auth/invoices/{id}/download route.  The pdf_url comes from the
-  // trusted invoice list API response — we just proxy it here so auth headers
-  // are forwarded correctly.
+  // Canonical authenticated download route (self-heals a missing PDF server-side).
+  // The proxy forwards the customer bearer so the PDF streams back correctly.
   //
-  // SSRF guard: only absolute HTTPS URLs are accepted.
+  // Legacy: callers may still pass ?src=<pdf_url> (absolute HTTPS only, SSRF-guarded)
+  // to proxy a direct PDF URL — kept for backward compatibility, but the dedicated
+  // route below is preferred.
   const src = request.nextUrl.searchParams.get("src");
 
   let targetUrl: string;
@@ -34,8 +34,7 @@ export async function GET(
     }
     targetUrl = src;
   } else {
-    // Fallback to the canonical auth endpoint for when the backend implements it.
-    targetUrl = `${API_URL}/auth/invoices/${id}/download`;
+    targetUrl = `${API_URL}/invoices/${id}/download`;
   }
 
   console.log("[invoice-download] target URL        :", targetUrl);

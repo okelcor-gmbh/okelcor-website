@@ -59,6 +59,11 @@ export type Order = {
   balance_amount?: number | null;
   deposit_paid_at?: string | null;
   balance_paid_at?: string | null;
+  // Invoice (released tax invoice) — backend-computed, self-healed before response
+  invoice_number?: string | null;
+  invoice_available?: boolean;
+  invoice_pending_release?: boolean;
+  invoice_download_url?: string | null;
 };
 
 // ─── Status badge config ──────────────────────────────────────────────────────

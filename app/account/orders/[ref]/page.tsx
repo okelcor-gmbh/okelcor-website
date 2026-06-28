@@ -1,9 +1,10 @@
 import { redirect, notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronLeft, Clock, Truck } from "lucide-react";
+import { ChevronLeft, Clock, Truck, Receipt } from "lucide-react";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
+import InvoiceDownloadButton from "@/components/account/invoice-download-button";
 import ShipmentTracker from "@/components/account/shipment-tracker";
 import OrderPaymentCard from "@/components/account/order-payment-card";
 import EntryCertificateCard from "@/components/account/entry-certificate-card";
@@ -220,6 +221,65 @@ function StatusTimeline({ status }: { status: OrderStatus }) {
   );
 }
 
+// ─── Invoice card ───────────────────────────────────────────────────────────────
+// State → UI mapping per the backend contract:
+//   invoice_available        → download button
+//   invoice_pending_release  → "pending" message, paired with EU-certificate guidance
+//   both false               → no invoice affordance (unpaid / pre-invoice)
+
+function InvoiceCard({ order }: { order: Order }) {
+  // Parse the numeric invoice id from the backend download URL so we can route
+  // through our authenticated proxy (/api/account/invoices/{id}/download).
+  const invoiceId = order.invoice_download_url?.match(/invoices\/(\d+)\/download/)?.[1] ?? null;
+
+  if (order.invoice_available && invoiceId) {
+    return (
+      <div className="rounded-[18px] bg-[#efefef] p-4 sm:rounded-[22px] sm:p-6 lg:p-8">
+        <div className="mb-3 flex items-center gap-2 sm:mb-4">
+          <Receipt size={16} strokeWidth={1.9} className="text-[var(--primary)] sm:hidden" />
+          <Receipt size={18} strokeWidth={1.9} className="hidden text-[var(--primary)] sm:block" />
+          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--primary)] sm:text-[11px]">
+            Invoice
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="font-mono font-semibold text-[var(--foreground)]">
+              {order.invoice_number ?? "Tax invoice"}
+            </p>
+            <p className="text-[0.8rem] text-[var(--muted)]">Your tax invoice is ready to download.</p>
+          </div>
+          <InvoiceDownloadButton invoiceId={invoiceId} label="Download invoice" />
+        </div>
+      </div>
+    );
+  }
+
+  if (order.invoice_pending_release) {
+    const hint = order.declaration_required
+      ? order.declaration_status === "signed"
+        ? "We've received your EU entry certificate and are finalising your invoice."
+        : order.declaration_status === "acknowledged"
+        ? "Your certificate is confirmed — your invoice will be available here shortly."
+        : "Please sign your EU entry certificate above to release your invoice."
+      : "Your invoice is being prepared and will be available here shortly.";
+
+    return (
+      <div className="rounded-[18px] border border-amber-200 bg-amber-50 p-4 sm:rounded-[22px] sm:p-6 lg:p-8">
+        <div className="flex items-start gap-3">
+          <Clock size={18} strokeWidth={1.9} className="mt-0.5 shrink-0 text-amber-600" />
+          <div>
+            <p className="text-[0.9rem] font-bold text-[var(--foreground)]">Invoice pending</p>
+            <p className="mt-1 text-[0.83rem] leading-relaxed text-[var(--muted)]">{hint}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function OrderDetailPage({ params }: Props) {
@@ -386,6 +446,9 @@ export default async function OrderDetailPage({ params }: Props) {
                     orderStatus={order.status}
                   />
                 )}
+
+                {/* ── Invoice (download / pending release) ── */}
+                <InvoiceCard order={order} />
 
                 {/* ── Trade Documents ── */}
                 {order.trade_documents !== undefined && (

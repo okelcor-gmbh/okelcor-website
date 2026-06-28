@@ -2,9 +2,10 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronRight, Receipt, Download, CheckCircle2, Clock, AlertCircle, Lock } from "lucide-react";
+import { ChevronRight, Receipt, CheckCircle2, Clock, AlertCircle } from "lucide-react";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
+import InvoiceDownloadButton from "@/components/account/invoice-download-button";
 import { getCustomerFromCookie } from "@/lib/get-customer";
 
 export const metadata: Metadata = {
@@ -29,6 +30,10 @@ type Invoice = {
   order_ref?: string;
   released_at?: string | null;
   tax_treatment?: string | null;
+  // Backend-computed (self-healed before the response): the single source of
+  // truth for whether the download is ready. Held/reverse-charge invoices are
+  // omitted from this list entirely until released, so they never appear here.
+  download_available?: boolean;
 };
 
 const STATUS_CONFIG: Record<InvoiceStatus, { label: string; cls: string; icon: React.ComponentType<{ size?: number; className?: string }> }> = {
@@ -82,9 +87,11 @@ export default async function InvoicesPage() {
   const isB2B = customer.customer_type === "b2b";
   const { invoices, fetchError } = await fetchInvoices(token);
 
-  const pageLabel    = isB2B ? "Invoices"           : "Receipts & Invoices";
-  const accountLabel = isB2B ? "B2B"                : "Personal";
-  const emptyTitle   = isB2B ? "No invoices yet"    : "No receipts yet";
+  // Backend has a single tax-invoice artifact (no separate "receipt" document),
+  // so we label consistently as "Invoices" for both account types.
+  const pageLabel    = "Invoices";
+  const accountLabel = isB2B ? "B2B" : "Personal";
+  const emptyTitle   = "No invoices yet";
   const emptyBody    = isB2B
     ? "Paid orders will appear here after checkout."
     : "Your paid orders will appear here.";
@@ -153,14 +160,9 @@ export default async function InvoicesPage() {
             {invoices.map((inv, i) => {
               const s = STATUS_CONFIG[inv.status] ?? STATUS_CONFIG.unpaid;
               const Icon = s.icon;
-              // An invoice is locked when the PDF exists but hasn't been released
-              // yet (EU reverse-charge orders awaiting certificate acknowledgement).
-              const isLocked = !!inv.pdf_url && inv.released_at == null;
-              // Pass pdf_url as ?src= so the proxy can fetch it directly.
-              // The backend dedicated /download route may not exist yet.
-              const downloadHref = inv.pdf_url
-                ? `/api/account/invoices/${inv.id}/download?src=${encodeURIComponent(inv.pdf_url)}`
-                : `/api/account/invoices/${inv.id}/download`;
+              // Trust the backend's self-healed flag. Treat a missing flag as
+              // available (legacy rows) — held invoices never reach this list.
+              const canDownload = inv.download_available !== false;
               return (
                 <div
                   key={inv.id}
@@ -186,27 +188,11 @@ export default async function InvoicesPage() {
                       <Icon size={11} />
                       {s.label}
                     </span>
-                    {isLocked ? (
-                      <span
-                        title="Available after EU Entry Certificate is acknowledged"
-                        className="inline-flex items-center gap-1 rounded-full border border-black/[0.06] px-2.5 py-0.5 text-[0.68rem] font-medium text-[var(--muted)]"
-                      >
-                        <Lock size={10} strokeWidth={2} />
-                        Locked
-                      </span>
-                    ) : inv.pdf_url ? (
-                      <a
-                        href={downloadHref}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex h-8 w-8 items-center justify-center rounded-full border border-black/[0.08] text-[var(--muted)] transition hover:border-[var(--primary)]/40 hover:text-[var(--primary)]"
-                        aria-label="View Invoice"
-                      >
-                        <Download size={13} strokeWidth={2} />
-                      </a>
+                    {canDownload ? (
+                      <InvoiceDownloadButton invoiceId={inv.id} variant="icon" label={`Download ${inv.invoice_number}`} />
                     ) : (
                       <span className="rounded-full border border-black/[0.06] px-2.5 py-0.5 text-[0.68rem] font-medium text-[var(--muted)]">
-                        PDF pending
+                        Preparing
                       </span>
                     )}
                   </div>
