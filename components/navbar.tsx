@@ -44,8 +44,10 @@ import {
   MapPin,
   ShieldCheck,
   Download,
+  Bell,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import NotificationBell from "@/components/account/notification-bell";
 import { useCustomerAuth } from "@/context/CustomerAuthContext";
 import { useCart } from "@/context/cart-context";
 import { useLanguage } from "@/context/language-context";
@@ -492,6 +494,8 @@ export default function Navbar() {
                 {authLoading ? (
                   <div className="h-9 w-9 animate-pulse rounded-full bg-black/[0.06]" aria-hidden="true" />
                 ) : isAuthed ? (
+                  <>
+                  <NotificationBell />
                   <div className="relative">
                     <button
                       type="button"
@@ -534,6 +538,14 @@ export default function Navbar() {
                           My Account
                         </Link>
                         <Link
+                          href="/account/notifications"
+                          onClick={() => setOpenProfile(false)}
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[0.875rem] font-semibold text-black/70 transition hover:bg-black/[0.04] hover:text-black"
+                        >
+                          <Bell size={16} strokeWidth={1.9} />
+                          Notifications
+                        </Link>
+                        <Link
                           href="/account/orders"
                           onClick={() => setOpenProfile(false)}
                           className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[0.875rem] font-semibold text-black/70 transition hover:bg-black/[0.04] hover:text-black"
@@ -553,6 +565,7 @@ export default function Navbar() {
                       </div>
                     </div>
                   </div>
+                  </>
                 ) : (
                   <Link href="/login" className="tesla-icon-btn" aria-label="Sign in">
                     <UserCircle2 size={21} strokeWidth={1.9} />
@@ -1017,6 +1030,16 @@ export default function Navbar() {
                       <div className="flex items-center gap-4">
                         <LayoutDashboard size={22} strokeWidth={1.9} />
                         <span className="text-[1rem] font-semibold text-black">My Account</span>
+                      </div>
+                    </Link>
+                    <Link
+                      href="/account/notifications"
+                      onClick={closeAll}
+                      className="tesla-mobile-meta-link"
+                    >
+                      <div className="flex items-center gap-4">
+                        <Bell size={22} strokeWidth={1.9} />
+                        <span className="text-[1rem] font-semibold text-black">Notifications</span>
                       </div>
                     </Link>
                     <Link
