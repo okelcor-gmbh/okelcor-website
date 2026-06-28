@@ -166,6 +166,19 @@
 
 ---
 
+### ✅ Fleet / GPS Tracking (Traccar) — frontend
+
+| Feature | Notes |
+|---|---|
+| Map library | **Leaflet + react-leaflet v5** (free, keyless, OSM tiles); client-only via `next/dynamic({ ssr:false })`. Shared types/WKT parser/helpers in `lib/tracking.ts` |
+| Admin fleet page (`/admin/tracking`) | Status banner, device list, live map (markers coloured by status, 30s position poll), geofences from WKT (`CIRCLE`/`POLYGON`), route polyline + trips panel on device select. RBAC section `tracking` (super_admin/admin/order_manager/sales_manager) + nav entry |
+| Admin order page | "Customer Tracking" control on the Logistics tab → assign/clear device (`PUT /admin/tracking/orders/{id}/device`, gated on `orders.update`) |
+| Customer order page | `DeliveryTracking` card — live position + trail polyline + "last updated"; self-hides when `available:false`; polls 30s while shipped |
+| Proxy routes (8) | 7 admin (`/api/admin/tracking/*`) + 1 customer (`/api/account/orders/[ref]/tracking`); all graceful (degrade to empty/disconnected until Traccar is configured) |
+| Decisions | Customer trail = **current trip** (backend to switch from last-24h); **no ETA** for now. Contract: `FRONTEND_NOTE_tracking.md` |
+
+---
+
 ### ✅ Admin Panel — Security (SEC series)
 
 | Feature | Commit | Notes |

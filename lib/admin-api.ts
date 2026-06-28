@@ -249,6 +249,8 @@ export type AdminOrderFull = AdminOrder & {
   carrier?: string | null;
   carrier_type?: string | null;
   tracking_number?: string | null;
+  /** GPS device id a customer can live-track (assigned via the tracking control). */
+  tracking_device_id?: string | number | null;
   estimated_delivery?: string | null;
   eta?: string;
   items: AdminOrderItem[];

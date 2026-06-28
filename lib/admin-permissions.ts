@@ -17,10 +17,10 @@ export type AdminRole = (typeof ALL_ROLES)[number];
 // Mirrors backend ROLE_ACCESS table.
 
 export const ROLE_ACCESS: Record<string, string[]> = {
-  super_admin:     ["dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "analytics", "chats", "security", "eu_declarations", "logistics", "system_health", "crm"],
-  admin:           ["dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "analytics", "chats", "security", "eu_declarations", "logistics", "system_health", "crm"],
-  order_manager:   ["dashboard", "orders", "quotes", "supplier", "eu_declarations", "logistics", "crm"],
-  sales_manager:   ["dashboard", "orders", "quotes", "customers", "analytics", "logistics", "crm"],
+  super_admin:     ["dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "analytics", "chats", "security", "eu_declarations", "logistics", "system_health", "crm", "tracking"],
+  admin:           ["dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "analytics", "chats", "security", "eu_declarations", "logistics", "system_health", "crm", "tracking"],
+  order_manager:   ["dashboard", "orders", "quotes", "supplier", "eu_declarations", "logistics", "crm", "tracking"],
+  sales_manager:   ["dashboard", "orders", "quotes", "customers", "analytics", "logistics", "crm", "tracking"],
   content_manager: ["dashboard", "articles", "hero_slides", "promotions", "fet", "brands"],
   support:         ["dashboard", "orders", "quotes", "customers", "chats", "logistics"],
   editor:          ["dashboard", "articles", "hero_slides", "promotions", "fet"],
@@ -55,6 +55,7 @@ export const PATH_SECTION: Record<string, string> = {
   "/admin/logistics":       "logistics",
   "/admin/system-health":   "system_health",
   "/admin/crm":             "crm",
+  "/admin/tracking":        "tracking",
 };
 
 // ── Permission map ─────────────────────────────────────────────────────────────
@@ -117,6 +118,9 @@ const PERMISSION_ROLES: Record<string, string[]> = {
 
   // eBay
   "ebay.manage": ["super_admin", "admin"],
+
+  // Fleet / GPS tracking
+  "tracking.view":         ["super_admin", "admin", "order_manager", "sales_manager"],
 
   // System health
   "system.manage":         ["super_admin", "admin"],
