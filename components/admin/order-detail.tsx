@@ -1006,7 +1006,7 @@ export default function OrderDetail({
                     className="h-10 appearance-none rounded-xl border border-black/[0.09] bg-white pl-3.5 pr-9 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
                   >
                     <option value="">— select —</option>
-                    <option value="bus">Bus Freight</option>
+                    <option value="truck">Truck Freight</option>
                     <option value="road">Road Freight</option>
                     <option value="dhl">DHL</option>
                     <option value="sea">Sea Freight</option>

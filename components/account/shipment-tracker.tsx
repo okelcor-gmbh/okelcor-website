@@ -21,11 +21,11 @@ type Props = {
 };
 
 const CARRIER_TYPE_LABELS: Record<string, string> = {
-  bus:  "Bus Freight",
-  road: "Road Freight",
-  dhl:  "DHL",
-  sea:  "Sea Freight",
-  air:  "Air Freight",
+  truck: "Truck Freight",
+  road:  "Road Freight",
+  dhl:   "DHL",
+  sea:   "Sea Freight",
+  air:   "Air Freight",
 };
 
 function formatDate(iso?: string): string {
