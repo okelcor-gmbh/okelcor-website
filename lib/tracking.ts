@@ -62,18 +62,47 @@ export type TrackingStatus = {
   message?: string | null;
 };
 
-/** Customer delivery-tracking payload (lean; always HTTP 200). */
+/** Straight-line (not traffic-aware) delivery ETA. `eta` is null when unknown. */
+export type DeliveryEta = {
+  eta: string | null;
+  minutes_remaining?: number | null;
+  distance_remaining_km?: number | null;
+  speed_kmh_used?: number | null;
+  progress_percent?: number | null;
+};
+
+export type TrackingUnavailableReason =
+  | "no_device" | "not_shipped" | "order_cancelled" | "unavailable" | string;
+
+/** Customer delivery-tracking payload (lean; always HTTP 200). Status-aware. */
 export type CustomerTracking =
-  | { available: false; reason?: "no_device" | "unavailable" | string }
+  | { available: false; reason?: TrackingUnavailableReason }
   | {
       available: true;
       order_ref: string;
       name?: string | null;
       status?: DeviceStatus | null;
+      /** Order lifecycle status — poll only while "shipped". */
+      order_status?: string | null;
+      /** True once delivered: final position, empty route, no eta. */
+      delivered?: boolean;
       last_update?: string | null;
       position: Position;
       route?: { latitude: number; longitude: number; fix_time?: string | null }[];
+      eta?: DeliveryEta | null;
     };
+
+/** Countdown string from a millisecond remainder: "Xd Yh" → "Yh Zm" → "Zm". */
+export function formatCountdown(ms: number): string {
+  if (!Number.isFinite(ms) || ms <= 0) return "Arriving now";
+  const totalMin = Math.floor(ms / 60000);
+  const d = Math.floor(totalMin / 1440);
+  const h = Math.floor((totalMin % 1440) / 60);
+  const m = totalMin % 60;
+  if (d > 0) return `${d}d ${h}h`;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
 
 // ─── Status → colour ──────────────────────────────────────────────────────────
 

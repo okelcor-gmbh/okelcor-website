@@ -472,8 +472,8 @@ export default async function OrderDetailPage({ params }: Props) {
             <StatusTimeline status={order.status} />
           </div>
 
-          {/* ── Live delivery tracking (self-hides when unavailable) ── */}
-          <DeliveryTracking orderRef={order.ref} poll={order.status === "shipped"} />
+          {/* ── Live delivery tracking (status-aware; self-hides when unavailable) ── */}
+          <DeliveryTracking orderRef={order.ref} />
 
           {/* ── Shipment details ── */}
           <div className="rounded-[18px] bg-[#efefef] p-4 sm:rounded-[22px] sm:p-6 lg:p-8">
