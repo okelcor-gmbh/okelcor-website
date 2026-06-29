@@ -66,8 +66,12 @@ export default function AssignTrackingDeviceControl({
         <MapPin size={15} strokeWidth={2} className="text-[#E85C1A]" />
         <p className="text-[0.85rem] font-bold text-[#1a1a1a]">Customer Tracking</p>
       </div>
-      <p className="mb-3 text-[0.78rem] text-[#5c5e62]">
+      <p className="mb-2 text-[0.78rem] text-[#5c5e62]">
         Assign a GPS device to let the customer follow this delivery live on their order page.
+      </p>
+      <p className="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-[0.74rem] text-amber-700">
+        Tip: assign the device <strong>before</strong> marking the order shipped — the shipped
+        notification then includes a “track it live” link. Re-marking a shipped order won&apos;t resend it.
       </p>
 
       <div className="flex flex-wrap items-center gap-2.5">

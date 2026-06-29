@@ -19,7 +19,7 @@ import type {
   CustomerNotification, CustomerNotificationType, CustomerNotificationPreferences,
 } from "@/lib/customer-notifications";
 import {
-  notifBody, notifLink, NotifIcon, severityStyle, isEmailed, timeAgo, typeLabel,
+  notifBody, notifLink, NotifIcon, severityStyle, isEmailed, isLiveTracking, timeAgo, typeLabel,
 } from "@/lib/customer-notifications";
 
 // ── Filter options ─────────────────────────────────────────────────────────────
@@ -209,6 +209,11 @@ function NotificationRow({
           <span className="text-[0.66rem] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">
             {typeLabel(notification.type)}
           </span>
+          {isLiveTracking(notification) && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[0.64rem] font-bold text-emerald-700">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> Live
+            </span>
+          )}
           {isEmailed(notification) && (
             <span className="inline-flex items-center gap-1 rounded-full bg-[#f5f5f5] px-2 py-0.5 text-[0.64rem] font-semibold text-[var(--muted)]">
               <Mail size={9} strokeWidth={2.2} /> Emailed

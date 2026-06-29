@@ -101,6 +101,11 @@ export function isEmailed(n: CustomerNotification): boolean {
   return Boolean(n.email_sent_at);
 }
 
+/** True when the notification deep-links to a live delivery map (metadata.live_tracking). */
+export function isLiveTracking(n: CustomerNotification): boolean {
+  return n.metadata?.live_tracking === true;
+}
+
 // ─── Severity → colour tokens (Okelcor orange for "info") ────────────────────────
 
 type SeverityStyle = { dot: string; chip: string; icon: string; ring: string };

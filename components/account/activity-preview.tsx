@@ -12,7 +12,7 @@ import Link from "next/link";
 import { Activity, ArrowRight, Mail } from "lucide-react";
 import type { CustomerNotification } from "@/lib/customer-notifications";
 import {
-  notifBody, notifLink, NotifIcon, severityStyle, isEmailed, timeAgo,
+  notifBody, notifLink, NotifIcon, severityStyle, isEmailed, isLiveTracking, timeAgo,
 } from "@/lib/customer-notifications";
 
 export default function ActivityPreview() {
@@ -80,6 +80,11 @@ export default function ActivityPreview() {
                   {body && <p className="mt-0.5 line-clamp-1 text-[0.78rem] text-[var(--muted)]">{body}</p>}
                   <div className="mt-1 flex items-center gap-2">
                     <span className="text-[0.7rem] text-[#9ca3af]">{timeAgo(n.created_at)}</span>
+                    {isLiveTracking(n) && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-1.5 py-0.5 text-[0.62rem] font-bold text-emerald-700">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> Live
+                      </span>
+                    )}
                     {isEmailed(n) && (
                       <span className="inline-flex items-center gap-1 text-[0.66rem] font-semibold text-[#9ca3af]">
                         <Mail size={10} strokeWidth={2} /> Emailed
