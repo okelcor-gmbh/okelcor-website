@@ -15,8 +15,16 @@ import Link from "next/link";
 import { Bell, CheckCheck, Mail, X } from "lucide-react";
 import type { CustomerNotification } from "@/lib/customer-notifications";
 import {
-  notifBody, notifLink, NotifIcon, severityStyle, isEmailed, timeAgo,
+  notifBody, notifLink, NotifIcon, severityStyle, isEmailed, isLiveTracking, timeAgo,
 } from "@/lib/customer-notifications";
+
+function LiveBadge() {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-1.5 py-0.5 text-[0.62rem] font-bold text-emerald-700">
+      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> Live
+    </span>
+  );
+}
 
 const POLL_MS = 30_000;
 
@@ -208,6 +216,7 @@ function BellRow({
         {body && <p className="mt-0.5 line-clamp-2 text-[0.76rem] leading-[1.5] text-[var(--muted)]">{body}</p>}
         <div className="mt-1 flex items-center gap-2">
           <span className="text-[0.7rem] text-[#9ca3af]">{timeAgo(notification.created_at)}</span>
+          {isLiveTracking(notification) && <LiveBadge />}
           {isEmailed(notification) && (
             <span className="inline-flex items-center gap-1 text-[0.66rem] font-semibold text-[#9ca3af]">
               <Mail size={10} strokeWidth={2} /> Emailed
