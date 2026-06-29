@@ -251,6 +251,9 @@ export type AdminOrderFull = AdminOrder & {
   tracking_number?: string | null;
   /** GPS device id a customer can live-track (assigned via the tracking control). */
   tracking_device_id?: string | number | null;
+  /** Delivery destination for ETA (manual override when geocoding fails). */
+  dest_lat?: number | null;
+  dest_lon?: number | null;
   estimated_delivery?: string | null;
   eta?: string;
   items: AdminOrderItem[];

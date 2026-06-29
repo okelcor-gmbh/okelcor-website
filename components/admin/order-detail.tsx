@@ -14,6 +14,7 @@ import { canDo } from "@/lib/admin-permissions";
 import TradeDocumentsCard from "@/components/admin/trade-documents-card";
 import PaymentMilestonesCard from "@/components/admin/payment-milestones-card";
 import AssignTrackingDeviceControl from "@/components/admin/tracking/assign-device-control";
+import SetDestinationControl from "@/components/admin/tracking/set-destination-control";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -1507,6 +1508,12 @@ export default function OrderDetail({
           <AssignTrackingDeviceControl
             orderId={order.id}
             initialDeviceId={order.tracking_device_id}
+            canManage={canDo(adminRole, "orders.update")}
+          />
+          <SetDestinationControl
+            orderId={order.id}
+            initialLat={order.dest_lat}
+            initialLon={order.dest_lon}
             canManage={canDo(adminRole, "orders.update")}
           />
           <ShipmentEventManager orderId={order.id} initialEvents={order.shipment_events ?? []} />
