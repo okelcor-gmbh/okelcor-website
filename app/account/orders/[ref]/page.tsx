@@ -1,12 +1,11 @@
-import { redirect, notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronLeft, Clock, Truck, Receipt } from "lucide-react";
+import { ChevronLeft, Clock, Receipt } from "lucide-react";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import InvoiceDownloadButton from "@/components/account/invoice-download-button";
-import DeliveryTracking from "@/components/account/delivery-tracking";
-import ShipmentTracker from "@/components/account/shipment-tracker";
+import OrderTracking from "@/components/account/order-tracking";
 import OrderPaymentCard from "@/components/account/order-payment-card";
 import EntryCertificateCard from "@/components/account/entry-certificate-card";
 import DeliveryConfirmationCard from "@/components/account/delivery-confirmation-card";
@@ -14,25 +13,8 @@ import TradeDocumentsCard from "@/components/account/trade-documents-card";
 import OrderConfirmationAcceptance from "@/components/account/order-confirmation-acceptance";
 import PaymentMilestoneProgress from "@/components/account/payment-milestone-progress";
 import { getCustomerFromCookie } from "@/lib/get-customer";
-import { StatusBadge, formatDate, type Order, type OrderStatus } from "../page";
+import { StatusBadge, formatDate, type Order } from "../page";
 
-// ─── Timeline config ──────────────────────────────────────────────────────────
-
-const TIMELINE_STEPS: { key: OrderStatus; label: string }[] = [
-  { key: "pending",   label: "Order Placed" },
-  { key: "confirmed", label: "Confirmed"    },
-  { key: "shipped",   label: "Shipped"      },
-  { key: "delivered", label: "Delivered"    },
-];
-
-const STEP_ORDER: Record<OrderStatus, number> = {
-  pending:    0,
-  confirmed:  1,
-  processing: 1,  // maps to same step as confirmed
-  shipped:    2,
-  delivered:  3,
-  cancelled: -1,
-};
 
 // ─── Data fetching ────────────────────────────────────────────────────────────
 
@@ -113,114 +95,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return { title: `Order ${ref}` };
 }
 
-// ─── Timeline component ───────────────────────────────────────────────────────
-
-function StatusTimeline({ status }: { status: OrderStatus }) {
-  if (status === "cancelled") {
-    return (
-      <div className="rounded-[14px] border border-red-200 bg-red-50 px-4 py-3 sm:px-5 sm:py-4">
-        <p className="text-[0.88rem] font-semibold text-red-700">
-          This order has been cancelled.
-        </p>
-      </div>
-    );
-  }
-
-  const currentIdx = STEP_ORDER[status] ?? 0;
-
-  return (
-    <>
-      {/* ── Vertical timeline (mobile < sm) ── */}
-      <div className="flex flex-col gap-0 sm:hidden">
-        {TIMELINE_STEPS.map((step, i) => {
-          const stepIdx   = STEP_ORDER[step.key] ?? i;
-          const isDone    = stepIdx < currentIdx;
-          const isCurrent = stepIdx === currentIdx;
-          const isLast    = i === TIMELINE_STEPS.length - 1;
-
-          return (
-            <div key={step.key} className="flex items-stretch gap-3">
-              {/* Left: circle + connector */}
-              <div className="flex flex-col items-center">
-                <div
-                  className={[
-                    "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 font-bold text-[0.75rem] transition-colors",
-                    isDone
-                      ? "border-green-500 bg-green-500 text-white"
-                      : isCurrent
-                      ? "border-[var(--primary)] bg-[var(--primary)] text-white"
-                      : "border-black/10 bg-white text-[var(--muted)]",
-                  ].join(" ")}
-                >
-                  {isDone || isCurrent ? "✓" : i + 1}
-                </div>
-                {!isLast && (
-                  <div className={`w-[2px] flex-1 my-1 transition-colors ${isDone ? "bg-[var(--primary)]" : "bg-black/10"}`} />
-                )}
-              </div>
-
-              {/* Right: label */}
-              <p
-                className={[
-                  "pb-4 pt-1.5 text-[0.85rem] font-semibold leading-none",
-                  isCurrent ? "text-[var(--primary)]" : isDone ? "text-green-600" : "text-[var(--muted)]",
-                ].join(" ")}
-              >
-                {step.label}
-              </p>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* ── Horizontal timeline (sm+) ── */}
-      <div className="hidden sm:flex items-start gap-0">
-        {TIMELINE_STEPS.map((step, i) => {
-          const stepIdx   = STEP_ORDER[step.key] ?? i;
-          const isDone    = stepIdx < currentIdx;
-          const isCurrent = stepIdx === currentIdx;
-          const isLast    = i === TIMELINE_STEPS.length - 1;
-
-          return (
-            <div key={step.key} className="flex flex-1 flex-col items-center">
-              <div className="flex w-full items-center">
-                {i > 0 && (
-                  <div className={`h-[3px] flex-1 transition-colors ${isDone || isCurrent ? "bg-[var(--primary)]" : "bg-black/10"}`} />
-                )}
-
-                <div
-                  className={[
-                    "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 font-bold text-[0.78rem] transition-colors",
-                    isDone
-                      ? "border-green-500 bg-green-500 text-white"
-                      : isCurrent
-                      ? "border-[var(--primary)] bg-[var(--primary)] text-white"
-                      : "border-black/10 bg-white text-[var(--muted)]",
-                  ].join(" ")}
-                >
-                  {isDone || isCurrent ? "✓" : i + 1}
-                </div>
-
-                {!isLast && (
-                  <div className={`h-[3px] flex-1 transition-colors ${isDone ? "bg-[var(--primary)]" : "bg-black/10"}`} />
-                )}
-              </div>
-
-              <p
-                className={[
-                  "mt-2 text-center text-[0.75rem] font-semibold",
-                  isCurrent ? "text-[var(--primary)]" : isDone ? "text-green-600" : "text-[var(--muted)]",
-                ].join(" ")}
-              >
-                {step.label}
-              </p>
-            </div>
-          );
-        })}
-      </div>
-    </>
-  );
-}
 
 // ─── Invoice card ───────────────────────────────────────────────────────────────
 // State → UI mapping per the backend contract:
@@ -464,36 +338,18 @@ export default async function OrderDetailPage({ params }: Props) {
             );
           })()}
 
-          {/* ── Status timeline ── */}
-          <div className="rounded-[18px] bg-[#efefef] p-4 sm:rounded-[22px] sm:p-6 lg:p-8">
-            <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--primary)] sm:mb-6 sm:text-[11px]">
-              Order Status
-            </p>
-            <StatusTimeline status={order.status} />
-          </div>
-
-          {/* ── Live delivery tracking (status-aware; self-hides when unavailable) ── */}
-          <DeliveryTracking orderRef={order.ref} />
-
-          {/* ── Shipment details ── */}
-          <div className="rounded-[18px] bg-[#efefef] p-4 sm:rounded-[22px] sm:p-6 lg:p-8">
-            <div className="mb-3 flex items-center gap-2 sm:mb-4">
-              <Truck size={16} strokeWidth={1.9} className="text-[var(--primary)] sm:hidden" />
-              <Truck size={18} strokeWidth={1.9} className="hidden text-[var(--primary)] sm:block" />
-              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--primary)] sm:text-[11px]">
-                Shipment Details
-              </p>
-            </div>
-
-            <ShipmentTracker
-              carrier={order.carrier}
-              carrierType={order.carrier_type}
-              trackingNumber={order.tracking_number}
-              estimatedDelivery={order.estimated_delivery ?? order.eta}
-              trackingStatus={order.tracking_status}
-              events={order.shipment_events}
-            />
-          </div>
+          {/* ── Unified premium order tracking (status hero + stepper + live map + shipment + events) ── */}
+          <OrderTracking
+            orderRef={order.ref}
+            status={order.status}
+            createdAt={order.created_at}
+            carrier={order.carrier}
+            carrierType={order.carrier_type}
+            trackingNumber={order.tracking_number}
+            estimatedDelivery={order.estimated_delivery ?? order.eta}
+            trackingStatus={order.tracking_status}
+            events={order.shipment_events}
+          />
 
           {/* ── Order items ── */}
           <div className="overflow-hidden rounded-[18px] bg-[#efefef] sm:rounded-[22px]">
