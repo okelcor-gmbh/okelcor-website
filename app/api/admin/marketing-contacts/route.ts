@@ -21,52 +21,62 @@ export const maxDuration = 120;
 
 const BASE = `${process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1"}/admin`;
 
-// Alternative header names → canonical name the backend expects.
-// Keys are lowercase-trimmed for matching; values are the canonical form.
+// Maps trimmed-lowercase input header → exact column name the backend expects.
+// The backend JSON schema uses snake_case lowercase ("email", "company", "source")
+// so all canonical values here are lowercase to match.
 const HEADER_MAP: Record<string, string> = {
-  "email":          "Email",
-  "e-mail":         "Email",
-  "email address":  "Email",
-  "email 1":        "Email",
-  "company":        "Company",
-  "company name":   "Company",
-  "businessname":   "Company",
-  "business name":  "Company",
-  "first name":     "First Name",
-  "firstname":      "First Name",
-  "last name":      "Last Name",
-  "lastname":       "Last Name",
-  "phone":          "Phone 1",
-  "phone 1":        "Phone 1",
-  "mobile":         "Phone 1",
-  "country":        "Country/Region",
-  "country/region": "Country/Region",
-  "source":         "Source",
-  "source type":    "Source",
-  "bussines type":  "Source",   // misspelling in contacts.csv
-  "business type":  "Source",
-  "labels":         "Labels",
-  "label":          "Labels",
-  "tags":           "Labels",
-  "vat":            "VAT ID",
-  "vat id":         "VAT ID",
-  "vat number":     "VAT ID",
+  // email
+  "email":          "email",
+  "e-mail":         "email",
+  "email address":  "email",
+  "email 1":        "email",
+  // company
+  "company":        "company",
+  "company name":   "company",
+  "business name":  "company",
+  "businessname":   "company",
+  // name
+  "first name":     "first_name",
+  "firstname":      "first_name",
+  "last name":      "last_name",
+  "lastname":       "last_name",
+  // phone
+  "phone":          "phone",
+  "phone 1":        "phone",
+  "mobile":         "phone",
+  // country
+  "country":        "country",
+  "country/region": "country",
+  // source / labels
+  "source":         "source",
+  "source type":    "source",
+  "bussines type":  "source",  // misspelling in contacts.csv
+  "business type":  "source",
+  "labels":         "labels",
+  "label":          "labels",
+  "tags":           "labels",
+  // vat
+  "vat":            "vat_id",
+  "vat id":         "vat_id",
+  "vat number":     "vat_id",
 };
 
 function normaliseContactsCsv(raw: string): string {
-  // 1. Strip UTF-8 BOM (U+FEFF) if present
-  const text = raw.startsWith("﻿") ? raw.slice(1) : raw;
+  // 1. Strip UTF-8 BOM (U+FEFF) — use charCodeAt so the check works regardless
+  //    of how the source file itself is encoded.
+  const text = raw.charCodeAt(0) === 0xFEFF ? raw.slice(1) : raw;
 
   const newline = text.includes("\r\n") ? "\r\n" : "\n";
   const lines   = text.split(newline);
   if (lines.length === 0) return text;
 
-  // 2. Parse, trim, and remap header row
+  // 2. Trim every header cell and remap to backend field names.
   const headerLine = lines[0];
   const headers = headerLine.split(",").map((h) => {
-    const trimmed  = h.trim();
+    const trimmed   = h.trim();
     const canonical = HEADER_MAP[trimmed.toLowerCase()];
-    return canonical ?? trimmed;
+    // Unknown headers: pass through as lowercase so the backend can still try
+    return canonical ?? trimmed.toLowerCase();
   });
 
   lines[0] = headers.join(",");
