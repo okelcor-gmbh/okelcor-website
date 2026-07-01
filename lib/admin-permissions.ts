@@ -17,9 +17,9 @@ export type AdminRole = (typeof ALL_ROLES)[number];
 // Mirrors backend ROLE_ACCESS table.
 
 export const ROLE_ACCESS: Record<string, string[]> = {
-  super_admin:     ["dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "analytics", "chats", "security", "eu_declarations", "logistics", "system_health", "crm", "tracking"],
-  admin:           ["dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "analytics", "chats", "security", "eu_declarations", "logistics", "system_health", "crm", "tracking"],
-  order_manager:   ["dashboard", "orders", "quotes", "supplier", "eu_declarations", "logistics", "crm", "tracking"],
+  super_admin:     ["dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "analytics", "chats", "security", "eu_declarations", "logistics", "system_health", "crm", "tracking", "marketing"],
+  admin:           ["dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "analytics", "chats", "security", "eu_declarations", "logistics", "system_health", "crm", "tracking", "marketing"],
+  order_manager:   ["dashboard", "orders", "quotes", "supplier", "eu_declarations", "logistics", "crm", "tracking", "marketing"],
   sales_manager:   ["dashboard", "orders", "quotes", "customers", "analytics", "logistics", "crm", "tracking"],
   content_manager: ["dashboard", "articles", "hero_slides", "promotions", "fet", "brands"],
   support:         ["dashboard", "orders", "quotes", "customers", "chats", "logistics"],
@@ -56,6 +56,7 @@ export const PATH_SECTION: Record<string, string> = {
   "/admin/system-health":   "system_health",
   "/admin/crm":             "crm",
   "/admin/tracking":        "tracking",
+  "/admin/marketing":       "marketing",
 };
 
 // ── Permission map ─────────────────────────────────────────────────────────────
@@ -124,6 +125,9 @@ const PERMISSION_ROLES: Record<string, string[]> = {
 
   // System health
   "system.manage":         ["super_admin", "admin"],
+
+  // Marketing contacts & bulk email
+  "marketing.manage":      ["super_admin", "admin", "order_manager"],
 
   // Users / audit
   "users.manage":          ["super_admin", "admin"],

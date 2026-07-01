@@ -644,6 +644,67 @@ export type AdminProfile = {
   last_login_at: string | null;
 };
 
+// ── Marketing Contacts ────────────────────────────────────────────────────────
+
+export type MarketingContactStatus = "subscribed" | "unsubscribed" | "unknown";
+
+export type MarketingContact = {
+  id: number;
+  email: string;
+  first_name?: string | null;
+  last_name?: string | null;
+  phone?: string | null;
+  company?: string | null;
+  country?: string | null;
+  vat_id?: string | null;
+  labels?: string | null;
+  source?: string | null;
+  status: MarketingContactStatus;
+  created_at: string;
+  updated_at: string;
+};
+
+export type MarketingContactStats = {
+  total: number;
+  subscribed: number;
+  unsubscribed: number;
+  unknown: number;
+};
+
+export type MarketingContactImportResult = {
+  imported: number;
+  updated: number;
+  skipped_no_email: number;
+  unsubscribed: number;
+  subscribed: number;
+  errors: string[];
+};
+
+// ── Bulk Email Campaigns ──────────────────────────────────────────────────────
+
+export type BulkEmailStatus = "queued" | "sending" | "completed" | "failed";
+
+export type BulkEmailFilters = {
+  company?: string;
+  country?: string;
+  status?: "subscribed" | "unknown";
+  search?: string;
+};
+
+export type BulkEmail = {
+  id: number;
+  subject: string;
+  body_html?: string | null;
+  filters?: BulkEmailFilters | null;
+  total_recipients: number;
+  sent_count: number;
+  failed_count: number;
+  status: BulkEmailStatus;
+  created_by: string;
+  created_at: string;
+  completed_at?: string | null;
+};
+
 // ── Options ───────────────────────────────────────────────────────────────────
 
 export type AdminFetchOptions = {

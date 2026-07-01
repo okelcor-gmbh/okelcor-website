@@ -38,6 +38,8 @@ import {
   Bell,
   ClipboardCheck,
   UserCheck,
+  Mail,
+  Send,
 } from "lucide-react";
 import { logoutAdmin } from "@/app/admin/actions";
 import { canAccess, PATH_SECTION, ROLE_LABELS, ROLE_BADGE_COLORS } from "@/lib/admin-permissions";
@@ -99,6 +101,13 @@ const NAV_GROUPS: readonly NavGroup[] = [
       { label: "Promotions",  href: "/admin/promotions",  icon: Megaphone, section: "promotions" },
       { label: "FET Engines", href: "/admin/fet",         icon: Zap,       section: "fet" },
       { label: "Brands",      href: "/admin/brands",      icon: Star,      section: "brands" },
+    ],
+  },
+  {
+    label: "Marketing",
+    items: [
+      { label: "Contacts",   href: "/admin/marketing/contacts",  icon: Mail, section: "marketing" },
+      { label: "Campaigns",  href: "/admin/marketing/campaigns", icon: Send, section: "marketing" },
     ],
   },
   {
