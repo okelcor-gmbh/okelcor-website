@@ -1,6 +1,6 @@
 # Okelcor Website — Progress Tracker
 
-**Last updated:** 2026-06-26  
+**Last updated:** 2026-07-01  
 **Branch:** `main`  
 **Build status:** TypeScript 0 errors · ESLint clean · Production build passes
 
@@ -126,6 +126,21 @@
 | Brands management | early | |
 | Promotions management | early | |
 | Settings page | early | |
+| **Media Library** | `fd43ca2` | Standalone `/admin/media` screen — thumbnail grid (collection tabs, search, pagination, upload, delete, copy URL); article editor gets "Browse Media Library" button in image dialog; `MediaPickerModal` overlay for insert-from-library in TipTap; `editor` + `content_manager` roles have access |
+
+---
+
+### ✅ Admin Panel — Marketing
+
+| Feature | Commit | Notes |
+|---|---|---|
+| Marketing Contacts — list, stats, delete | `a731c86` | `/admin/marketing/contacts` · paginated table with filter (status/company/country/search) · stats cards · unsubscribed rows dimmed |
+| Marketing Contacts — CSV import | `dc57662` | Drag-drop + file picker; proxy normalises UTF-8 BOM, trims header whitespace, remaps column names (snake_case) before forwarding to backend import endpoint |
+| Bulk Email Campaigns — compose & send | `a731c86` | `/admin/marketing/campaigns` · TipTap HTML composer · debounced recipient-count preview · company/country/status/search filters · send |
+| Bulk Email Campaigns — history & progress | `a731c86` | Paginated history table · 3-second poller while status is `queued`/`sending` · progress bar · body-preview modal |
+| RBAC — `marketing` section | `a731c86` | `super_admin`, `admin`, `order_manager`; `marketing.manage` permission |
+
+> **CSV import status:** Frontend normalisation ships (`dc57662`). Import still returns `skipped_no_email: 188` — root cause is a column-name mismatch between the normalised CSV and what the Laravel importer expects. Backend team has been notified with full reproduction details; awaiting the exact expected header name.
 
 ---
 
@@ -262,6 +277,25 @@
 ---
 
 ## Pending — Backend Contracts
+
+### Marketing Contacts CSV Import — Column Name Clarification
+
+Frontend normalises the CSV (BOM stripped, headers trimmed, mapped to snake_case) but all 188 rows are still `skipped_no_email`. The backend importer's expected header string for the email column is unknown. **Waiting on backend team to confirm the exact header name** (e.g. `email`, `Email`, `email_address`).
+
+### Media Library (3 endpoints — backend confirmed built)
+
+```
+GET    /api/v1/admin/media?collection=&search=&per_page=
+POST   /api/v1/admin/media        multipart: file, collection?, alt_text?
+DELETE /api/v1/admin/media/{id}
+```
+
+Item shape: `{ id, filename, original_name, path, url, mime_type, size_bytes, width, height, alt_text, collection, created_at }`
+Backend confirmed two bugs fixed (image-processing library API mismatch + `created_at` formatting 500). Frontend proxy routes and UI are live.
+
+---
+
+## Pending — Backend Contracts (legacy)
 
 These frontend flows are complete. Backend endpoints are required to activate them.
 
@@ -498,6 +532,8 @@ text routed through i18n (EN/DE/FR/ES, type-enforced).
 
 | Item | Priority | Notes |
 |---|---|---|
+| Marketing CSV import fix | High | Backend to clarify expected email column header name |
+| Media Library backend activation | High | 3 endpoints confirmed built; two bugs fixed — ready to test |
 | CRM-7 backend activation | High | 12 endpoints pending |
 | CRM-8 backend activation | High | 14 endpoints + approve must flip `onboarding_status`/`is_active` & send approval email (see CRM-8 contract block) |
 | CRM-3B notifications backend activation | High | `admin_notifications` table + service + 6 endpoints + `my-work` + triggers + dedupe + `due-followups` scheduler (see CRM-3B contract block) |
