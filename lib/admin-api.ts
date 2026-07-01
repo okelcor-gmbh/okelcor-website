@@ -644,6 +644,29 @@ export type AdminProfile = {
   last_login_at: string | null;
 };
 
+// ── Media Library ─────────────────────────────────────────────────────────────
+
+export type MediaItem = {
+  id: number;
+  filename: string;
+  original_name: string;
+  path: string;
+  url: string;
+  mime_type: string;
+  size_bytes: number;
+  width: number | null;
+  height: number | null;
+  alt_text: string | null;
+  collection: string;
+  created_at: string;
+};
+
+export const MEDIA_COLLECTIONS = [
+  "articles", "products", "hero", "brands", "categories", "general",
+] as const;
+
+export type MediaCollection = typeof MEDIA_COLLECTIONS[number];
+
 // ── Marketing Contacts ────────────────────────────────────────────────────────
 
 export type MarketingContactStatus = "subscribed" | "unsubscribed" | "unknown";

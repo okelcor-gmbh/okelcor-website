@@ -8,7 +8,8 @@ import Image from "@tiptap/extension-image";
 import { Table, TableRow, TableHeader, TableCell } from "@tiptap/extension-table";
 import Placeholder from "@tiptap/extension-placeholder";
 import TextAlign from "@tiptap/extension-text-align";
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, lazy, Suspense } from "react";
+const MediaPickerModal = lazy(() => import("@/components/admin/media-picker-modal"));
 import {
   Bold, Italic, UnderlineIcon, Strikethrough,
   Heading1, Heading2, Heading3,
@@ -128,10 +129,12 @@ function LinkDialog({
 function ImageDialog({
   onConfirmUrl,
   onUploadFile,
+  onOpenMediaPicker,
   onCancel,
 }: {
   onConfirmUrl: (url: string, alt: string) => void;
   onUploadFile?: (file: File, alt: string) => void;
+  onOpenMediaPicker?: () => void;
   onCancel: () => void;
 }) {
   const [tab, setTab] = useState<"url" | "upload">(onUploadFile ? "upload" : "url");
@@ -217,6 +220,16 @@ function ImageDialog({
           Cancel
         </button>
       </div>
+
+      {onOpenMediaPicker && (
+        <button
+          type="button"
+          onClick={onOpenMediaPicker}
+          className="mt-2 w-full rounded-lg border border-black/[0.08] bg-[#f5f5f5] py-1 text-[0.74rem] font-semibold text-[#5c5e62] transition hover:bg-[#ebebeb]"
+        >
+          Browse Media Library →
+        </button>
+      )}
     </div>
   );
 }
@@ -227,10 +240,12 @@ function Toolbar({
   editor,
   onToggleHtml,
   uploadBodyImage,
+  onOpenMediaPicker,
 }: {
   editor: Editor | null;
   onToggleHtml: () => void;
   uploadBodyImage?: (file: File) => Promise<string | null>;
+  onOpenMediaPicker?: () => void;
 }) {
   const [showLink,  setShowLink]  = useState(false);
   const [showImage, setShowImage] = useState(false);
@@ -372,6 +387,7 @@ function Toolbar({
           <ImageDialog
             onConfirmUrl={handleImageConfirmUrl}
             onUploadFile={uploadBodyImage ? handleImageUploadFile : undefined}
+            onOpenMediaPicker={onOpenMediaPicker ? () => { setShowImage(false); onOpenMediaPicker(); } : undefined}
             onCancel={() => setShowImage(false)}
           />
         )}
@@ -414,6 +430,7 @@ export default function ArticleRichEditor({
 }: Props) {
   const [mode, setMode] = useState<EditorMode>("editor");
   const [htmlSource, setHtmlSource] = useState(value);
+  const [showMediaPicker, setShowMediaPicker] = useState(false);
 
   // Stable ref so ProseMirror handlers can always reach the latest upload fn
   const articleIdRef = useRef(articleId);
@@ -568,6 +585,7 @@ export default function ArticleRichEditor({
           editor={editor}
           onToggleHtml={handleToggleHtml}
           uploadBodyImage={articleId ? uploadBodyImage : undefined}
+          onOpenMediaPicker={() => setShowMediaPicker(true)}
         />
       )}
 
@@ -630,6 +648,19 @@ export default function ArticleRichEditor({
           className="w-full resize-y bg-[#1a1a1a] px-4 py-3 font-mono text-[0.78rem] leading-6 text-[#e0e0e0] outline-none"
           style={{ minHeight: minHeight }}
         />
+      )}
+
+      {/* ── Media picker modal ── */}
+      {showMediaPicker && (
+        <Suspense fallback={null}>
+          <MediaPickerModal
+            onSelect={(url, alt) => {
+              editor?.chain().focus().setImage({ src: url, alt }).run();
+              setShowMediaPicker(false);
+            }}
+            onClose={() => setShowMediaPicker(false)}
+          />
+        </Suspense>
       )}
     </div>
   );

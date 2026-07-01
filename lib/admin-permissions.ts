@@ -21,9 +21,9 @@ export const ROLE_ACCESS: Record<string, string[]> = {
   admin:           ["dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "analytics", "chats", "security", "eu_declarations", "logistics", "system_health", "crm", "tracking", "marketing"],
   order_manager:   ["dashboard", "orders", "quotes", "supplier", "eu_declarations", "logistics", "crm", "tracking", "marketing"],
   sales_manager:   ["dashboard", "orders", "quotes", "customers", "analytics", "logistics", "crm", "tracking"],
-  content_manager: ["dashboard", "articles", "hero_slides", "promotions", "fet", "brands"],
+  content_manager: ["dashboard", "articles", "hero_slides", "promotions", "fet", "brands", "media"],
   support:         ["dashboard", "orders", "quotes", "customers", "chats", "logistics"],
-  editor:          ["dashboard", "articles", "hero_slides", "promotions", "fet"],
+  editor:          ["dashboard", "articles", "hero_slides", "promotions", "fet", "media"],
   viewer:          ["dashboard", "analytics"],
 };
 
@@ -57,6 +57,7 @@ export const PATH_SECTION: Record<string, string> = {
   "/admin/crm":             "crm",
   "/admin/tracking":        "tracking",
   "/admin/marketing":       "marketing",
+  "/admin/media":           "media",
 };
 
 // ── Permission map ─────────────────────────────────────────────────────────────

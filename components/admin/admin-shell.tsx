@@ -40,6 +40,7 @@ import {
   UserCheck,
   Mail,
   Send,
+  Images,
 } from "lucide-react";
 import { logoutAdmin } from "@/app/admin/actions";
 import { canAccess, PATH_SECTION, ROLE_LABELS, ROLE_BADGE_COLORS } from "@/lib/admin-permissions";
@@ -101,6 +102,7 @@ const NAV_GROUPS: readonly NavGroup[] = [
       { label: "Promotions",  href: "/admin/promotions",  icon: Megaphone, section: "promotions" },
       { label: "FET Engines", href: "/admin/fet",         icon: Zap,       section: "fet" },
       { label: "Brands",      href: "/admin/brands",      icon: Star,      section: "brands" },
+      { label: "Media Library", href: "/admin/media",       icon: Images,    section: "media" },
     ],
   },
   {
