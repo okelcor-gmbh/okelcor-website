@@ -5,15 +5,73 @@
  * Proxies to:
  *   GET  /admin/marketing-contacts?status=&company=&country=&search=&per_page=&page=
  *   POST /admin/marketing-contacts/import   (multipart file field: "file")
+ *
+ * The POST handler normalises the CSV before forwarding:
+ *   1. Strips the UTF-8 BOM (ef bb bf / U+FEFF) that Excel/Wix sometimes prepend
+ *   2. Trims leading/trailing whitespace from every header cell
+ *   3. Maps alternative column names to the canonical Wix/backend names so that
+ *      plain exports (e.g. "Company name", "Bussines type") land correctly
  */
 
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 120; // allow time for large CSV imports
+export const maxDuration = 120;
 
 const BASE = `${process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1"}/admin`;
+
+// Alternative header names → canonical name the backend expects.
+// Keys are lowercase-trimmed for matching; values are the canonical form.
+const HEADER_MAP: Record<string, string> = {
+  "email":          "Email",
+  "e-mail":         "Email",
+  "email address":  "Email",
+  "email 1":        "Email",
+  "company":        "Company",
+  "company name":   "Company",
+  "businessname":   "Company",
+  "business name":  "Company",
+  "first name":     "First Name",
+  "firstname":      "First Name",
+  "last name":      "Last Name",
+  "lastname":       "Last Name",
+  "phone":          "Phone 1",
+  "phone 1":        "Phone 1",
+  "mobile":         "Phone 1",
+  "country":        "Country/Region",
+  "country/region": "Country/Region",
+  "source":         "Source",
+  "source type":    "Source",
+  "bussines type":  "Source",   // misspelling in contacts.csv
+  "business type":  "Source",
+  "labels":         "Labels",
+  "label":          "Labels",
+  "tags":           "Labels",
+  "vat":            "VAT ID",
+  "vat id":         "VAT ID",
+  "vat number":     "VAT ID",
+};
+
+function normaliseContactsCsv(raw: string): string {
+  // 1. Strip UTF-8 BOM (U+FEFF) if present
+  const text = raw.startsWith("﻿") ? raw.slice(1) : raw;
+
+  const newline = text.includes("\r\n") ? "\r\n" : "\n";
+  const lines   = text.split(newline);
+  if (lines.length === 0) return text;
+
+  // 2. Parse, trim, and remap header row
+  const headerLine = lines[0];
+  const headers = headerLine.split(",").map((h) => {
+    const trimmed  = h.trim();
+    const canonical = HEADER_MAP[trimmed.toLowerCase()];
+    return canonical ?? trimmed;
+  });
+
+  lines[0] = headers.join(",");
+  return lines.join(newline);
+}
 
 async function getToken() {
   const store = await cookies();
@@ -75,8 +133,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "File too large. Maximum upload size is 10 MB." }, { status: 413 });
   }
 
+  // Read and normalise the CSV text before forwarding
+  const rawText      = await rawFile.text();
+  const normalisedText = normaliseContactsCsv(rawText);
+  const normalisedFile = new File([normalisedText], rawFile.name, { type: "text/csv" });
+
   const outForm = new FormData();
-  outForm.append("file", rawFile);
+  outForm.append("file", normalisedFile);
 
   try {
     const res = await fetch(`${BASE}/marketing-contacts/import`, {
