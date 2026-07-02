@@ -15,6 +15,7 @@ import TradeDocumentsCard from "@/components/admin/trade-documents-card";
 import PaymentMilestonesCard from "@/components/admin/payment-milestones-card";
 import AssignTrackingDeviceControl from "@/components/admin/tracking/assign-device-control";
 import SetDestinationControl from "@/components/admin/tracking/set-destination-control";
+import TrackShipmentControl from "@/components/admin/tracking/track-shipment-control";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -1072,9 +1073,12 @@ export default function OrderDetail({
             </div>
 
             <div className="rounded-2xl bg-white p-6 shadow-sm">
-              <p className="mb-5 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
-                Order Summary
-              </p>
+              <div className="mb-5 flex items-center justify-between gap-3">
+                <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+                  Order Summary
+                </p>
+                <TrackShipmentControl orderId={order.id} carrier={order.carrier} trackingNumber={order.tracking_number} />
+              </div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <InfoRow label="Order Ref"        value={order.order_ref} />
                 <InfoRow label="Payment Method"   value={order.payment_method} />

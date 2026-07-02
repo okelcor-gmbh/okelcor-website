@@ -80,7 +80,10 @@
       "Bash(Get-ChildItem -Recurse -Filter \"*translation*\" -File)",
       "Bash(Select-Object FullName)",
       "Bash(grep -r \"lang=\\\\|locale=\\\\|\\\\\\\\[lang\\\\\\\\]\\\\|\\\\\\\\[locale\\\\\\\\]\" app --include=\"*.tsx\" --include=\"*.ts\")",
-      "Bash(grep -r \"locale\\\\|Locale\\\\|t\\\\\\\\.nav\\\\|useLanguage\" app/shop --include=\"*.tsx\")"
+      "Bash(grep -r \"locale\\\\|Locale\\\\|t\\\\\\\\.nav\\\\|useLanguage\" app/shop --include=\"*.tsx\")",
+      "Bash(npm install *)",
+      "Bash(npx tsc *)",
+      "Bash(npx eslint *)"
     ]
   }
 }

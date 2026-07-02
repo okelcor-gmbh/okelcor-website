@@ -35,9 +35,14 @@ const POLL_MS = 30_000;
 type ShipmentEvent = {
   id: number;
   event_date?: string | null;
+  time?: string | null;
   status_label: string;
   location?: string | null;
   description?: string | null;
+};
+
+const CARRIER_STAGE_LABELS: Record<string, string> = {
+  preparing: "Preparing", in_transit: "In Transit", delivered: "Delivered",
 };
 
 type Props = {
@@ -133,6 +138,9 @@ export default function OrderTracking({
 
   const isLive = !!live && live.available === true;
   const liveData = isLive ? (live as Extract<CustomerTracking, { available: true }>) : null;
+  // Discriminate by `mode` — "carrier" (GLS/DHL/ocean freight) has no GPS position/route/eta.
+  const carrierData = liveData && liveData.mode === "carrier" ? liveData : null;
+  const gpsData = liveData && liveData.mode !== "carrier" ? liveData : null;
   const delivered = liveData?.delivered === true || status === "delivered";
   const shouldPoll = !!liveData && liveData.order_status === "shipped" && !liveData.delivered;
 
@@ -150,7 +158,8 @@ export default function OrderTracking({
 
   // ── Derive hero state ──────────────────────────────────────────────────────
   const cancelled = status === "cancelled";
-  const inTransit = status === "shipped" && !delivered;
+  // Carrier `stage` is more current than the order's own status when present.
+  const inTransit = carrierData ? carrierData.stage === "in_transit" : status === "shipped" && !delivered;
 
   const heroKey = cancelled ? "cancelled" : delivered ? "delivered" : inTransit ? "transit" : "prep";
   const accent = ACCENTS[heroKey];
@@ -168,14 +177,32 @@ export default function OrderTracking({
       ? "Your order is confirmed and being prepared for shipment."
       : "We've received your order and are getting it ready.";
 
-  const eta = liveData?.eta;
+  const eta = gpsData?.eta;
   const showEtaBlock = inTransit && eta && eta.eta;
   const remainingMs = showEtaBlock ? new Date(eta!.eta as string).getTime() - now : 0;
   const progress = Math.max(0, Math.min(100, Math.round(eta?.progress_percent ?? 0)));
 
   const currentIdx = delivered ? 3 : (STEP_ORDER[status] ?? 0);
-  const sortedEvents = [...events].sort((a, b) => (a.event_date ?? "").localeCompare(b.event_date ?? ""));
-  const currentStatusChip = trackingStatus ?? sortedEvents[sortedEvents.length - 1]?.status_label;
+
+  // Carrier-mode live events take priority over the order's own (manually-entered) log.
+  const effectiveCarrier = carrierData?.carrier ?? carrier;
+  const effectiveTrackingNumber = carrierData?.tracking_number ?? trackingNumber;
+  const effectiveEvents: ShipmentEvent[] = carrierData
+    ? carrierData.events.map((ev, i) => ({
+        id: i,
+        event_date: ev.event_date,
+        time: ev.time,
+        status_label: ev.status_label,
+        location: ev.location,
+        description: ev.description,
+      }))
+    : events;
+  const sortedEvents = [...effectiveEvents].sort((a, b) =>
+    `${a.event_date ?? ""} ${a.time ?? ""}`.localeCompare(`${b.event_date ?? ""} ${b.time ?? ""}`)
+  );
+  const currentStatusChip = carrierData?.stage
+    ? CARRIER_STAGE_LABELS[carrierData.stage] ?? carrierData.stage
+    : trackingStatus ?? sortedEvents[sortedEvents.length - 1]?.status_label;
 
   return (
     <div className="overflow-hidden rounded-[18px] bg-[#efefef] sm:rounded-[24px]">
@@ -236,7 +263,7 @@ export default function OrderTracking({
                 <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-white/80 px-3.5 py-1.5 text-[0.8rem] font-semibold text-[var(--foreground)] ring-1 ring-black/[0.05]">
                   <Calendar size={13} strokeWidth={2} className={accent.iconText} />
                   {delivered
-                    ? `Delivered ${liveData?.last_update ? formatDate(liveData.last_update) : estimatedDelivery ? formatDate(estimatedDelivery) : ""}`.trim()
+                    ? `Delivered ${gpsData?.last_update ? formatDate(gpsData.last_update) : estimatedDelivery ? formatDate(estimatedDelivery) : ""}`.trim()
                     : `Estimated delivery: ${formatDate(estimatedDelivery)}`}
                 </div>
               )}
@@ -247,8 +274,8 @@ export default function OrderTracking({
         {/* ── Stepper ── */}
         {!cancelled && <Stepper currentIdx={currentIdx} createdAt={createdAt} />}
 
-        {/* ── Live map ── */}
-        {isLive && liveData && (
+        {/* ── Live map (GPS-tracked fleet orders only — carrier mode has no position) ── */}
+        {isLive && gpsData && (
           <div className="overflow-hidden rounded-[18px] border border-black/[0.05] bg-white">
             <div className="flex items-center justify-between gap-3 px-4 py-3">
               <p className="flex items-center gap-1.5 text-[0.7rem] font-bold uppercase tracking-[0.16em] text-[var(--muted)]">
@@ -257,31 +284,31 @@ export default function OrderTracking({
               {!delivered && (
                 <span className="flex items-center gap-1.5 text-[0.72rem] text-[var(--muted)]">
                   {shouldPoll && <RefreshCw size={11} strokeWidth={2} className="text-emerald-500" aria-hidden="true" />}
-                  Updated {lastSeen(liveData.last_update ?? liveData.position.fix_time)}
+                  Updated {lastSeen(gpsData.last_update ?? gpsData.position.fix_time)}
                 </span>
               )}
             </div>
             <div className="h-[300px] w-full sm:h-[380px]">
-              <DeliveryMap position={liveData.position} route={liveData.route} name={liveData.name} />
+              <DeliveryMap position={gpsData.position} route={gpsData.route} name={gpsData.name} />
             </div>
             <div className="flex flex-wrap items-center gap-x-5 gap-y-1 px-4 py-3 text-[0.82rem] text-[var(--muted)]">
-              {liveData.name && <span className="font-semibold text-[var(--foreground)]">{liveData.name}</span>}
-              {!delivered && <span>Speed: {formatSpeed(liveData.position.speed_kmh)}</span>}
-              {liveData.position.address && <span className="truncate">{liveData.position.address}</span>}
+              {gpsData.name && <span className="font-semibold text-[var(--foreground)]">{gpsData.name}</span>}
+              {!delivered && <span>Speed: {formatSpeed(gpsData.position.speed_kmh)}</span>}
+              {gpsData.position.address && <span className="truncate">{gpsData.position.address}</span>}
             </div>
           </div>
         )}
 
         {/* ── Shipment details ── */}
-        {(carrier || trackingNumber || estimatedDelivery || currentStatusChip) && (
+        {(effectiveCarrier || effectiveTrackingNumber || estimatedDelivery || currentStatusChip) && (
           <div className="rounded-[18px] border border-black/[0.05] bg-white p-4 sm:p-5">
             <p className="mb-3 flex items-center gap-1.5 text-[0.7rem] font-bold uppercase tracking-[0.16em] text-[var(--muted)]">
               <Truck size={12} strokeWidth={2.2} className="text-[var(--primary)]" /> Shipment details
             </p>
             <div className="flex flex-wrap items-center gap-2">
-              {carrier && (
+              {effectiveCarrier && (
                 <span className="flex items-center gap-1.5 rounded-full border border-black/[0.08] bg-white px-3 py-1.5 text-[0.82rem] font-semibold text-[var(--foreground)]">
-                  <Truck size={13} strokeWidth={1.9} className="text-[var(--primary)]" /> {carrier}
+                  <Truck size={13} strokeWidth={1.9} className="text-[var(--primary)]" /> {effectiveCarrier}
                 </span>
               )}
               {carrierType && CARRIER_TYPE_LABELS[carrierType] && (
@@ -296,14 +323,14 @@ export default function OrderTracking({
               )}
             </div>
 
-            {(trackingNumber || estimatedDelivery) && (
+            {(effectiveTrackingNumber || estimatedDelivery) && (
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                {trackingNumber && (
+                {effectiveTrackingNumber && (
                   <div className="rounded-xl border border-black/[0.07] bg-[#fafafa] px-4 py-3">
                     <p className="text-[0.66rem] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">Tracking Ref / Waybill</p>
                     <div className="mt-1 flex items-center gap-2">
-                      <p className="font-mono text-[0.88rem] font-bold tracking-wide text-[var(--foreground)]">{trackingNumber}</p>
-                      <CopyBtn value={trackingNumber} />
+                      <p className="font-mono text-[0.88rem] font-bold tracking-wide text-[var(--foreground)]">{effectiveTrackingNumber}</p>
+                      <CopyBtn value={effectiveTrackingNumber} />
                     </div>
                   </div>
                 )}
@@ -325,7 +352,7 @@ export default function OrderTracking({
         {sortedEvents.length > 0 && <EventTimeline events={sortedEvents} />}
 
         {/* Empty hint when there's genuinely nothing yet */}
-        {!isLive && !carrier && !trackingNumber && sortedEvents.length === 0 && !cancelled && (
+        {!isLive && !effectiveCarrier && !effectiveTrackingNumber && sortedEvents.length === 0 && !cancelled && (
           <p className="rounded-[14px] border border-black/[0.05] bg-white px-4 py-3.5 text-[0.83rem] text-[var(--muted)]">
             Detailed tracking will appear here once Okelcor dispatches your shipment.
           </p>
@@ -427,7 +454,9 @@ function EventTimeline({ events }: { events: ShipmentEvent[] }) {
                   <span className={`text-[0.85rem] font-bold ${isLatest ? "text-[var(--primary)]" : "text-[var(--foreground)]"}`}>
                     {ev.status_label}
                   </span>
-                  <span className="text-[0.74rem] text-[var(--muted)]">{formatDate(ev.event_date)}</span>
+                  <span className="text-[0.74rem] text-[var(--muted)]">
+                    {formatDate(ev.event_date)}{ev.time ? ` · ${ev.time}` : ""}
+                  </span>
                 </div>
                 {ev.location && (
                   <div className="mt-0.5 flex items-center gap-1">
@@ -435,7 +464,9 @@ function EventTimeline({ events }: { events: ShipmentEvent[] }) {
                     <span className="text-[0.77rem] text-[var(--muted)]">{ev.location}</span>
                   </div>
                 )}
-                {ev.description && <p className="mt-0.5 text-[0.8rem] leading-relaxed text-[var(--muted)]">{ev.description}</p>}
+                {ev.description && ev.description !== ev.status_label && (
+                  <p className="mt-0.5 text-[0.8rem] leading-relaxed text-[var(--muted)]">{ev.description}</p>
+                )}
               </div>
             </li>
           );

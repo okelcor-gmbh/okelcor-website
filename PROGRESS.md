@@ -1,6 +1,6 @@
 # Okelcor Website — Progress Tracker
 
-**Last updated:** 2026-07-01  
+**Last updated:** 2026-07-02  
 **Branch:** `main`  
 **Build status:** TypeScript 0 errors · ESLint clean · Production build passes
 
@@ -181,16 +181,22 @@
 
 ---
 
-### ✅ Fleet / GPS Tracking (Traccar) — frontend
+### ✅ Fleet / GPS Tracking (Traccar) + Carrier Tracking (GLS/DHL/ocean) — frontend
+
+Backend confirmed built + tested (10 tests); activates once a Traccar server is configured.
 
 | Feature | Notes |
 |---|---|
 | Map library | **Leaflet + react-leaflet v5** (free, keyless, OSM tiles); client-only via `next/dynamic({ ssr:false })`. Shared types/WKT parser/helpers in `lib/tracking.ts` |
 | Admin fleet page (`/admin/tracking`) | Status banner, device list, live map (markers coloured by status, 30s position poll), geofences from WKT (`CIRCLE`/`POLYGON`), route polyline + trips panel on device select. RBAC section `tracking` (super_admin/admin/order_manager/sales_manager) + nav entry |
-| Admin order page | "Customer Tracking" control on the Logistics tab → assign/clear device (`PUT /admin/tracking/orders/{id}/device`, gated on `orders.update`) |
-| Customer order page | `DeliveryTracking` card — live position + trail polyline + "last updated"; self-hides when `available:false`; polls 30s while shipped |
-| Proxy routes (8) | 7 admin (`/api/admin/tracking/*`) + 1 customer (`/api/account/orders/[ref]/tracking`); all graceful (degrade to empty/disconnected until Traccar is configured) |
-| Decisions | Customer trail = **current trip** (backend to switch from last-24h); **no ETA** for now. Contract: `FRONTEND_NOTE_tracking.md` |
+| Admin order page — Logistics tab | Assign/clear GPS device (`PUT /admin/tracking/orders/{id}/device`) · **Set delivery destination** for ETA — map pin or geocoded address (`PUT /admin/tracking/orders/{id}/destination`) · manual shipment-event log (`ShipmentEventManager`) |
+| Admin order page — Order Summary | **Track Shipment** button (`components/admin/tracking/track-shipment-control.tsx`) — on-demand modal calling `GET /api/admin/orders/{id}/shipment-tracking` (live carrier-API call + persists new events); 3-node stage stepper + shipping overview + newest-first event list. Works for any order (manual or eBay-sourced) with a carrier + tracking number |
+| Customer order page | Unified `OrderTracking` component (`components/account/order-tracking.tsx`) — status hero, live ETA countdown + progress bar, 4-step stepper, live GPS map, shipment details, event timeline. Polls `/api/account/orders/[ref]/tracking` 30s while shipped, stops on delivered |
+| **Carrier-mode discriminator** | `CustomerTracking` type (`lib/tracking.ts`) branches on `mode`: `"gps_live"` (existing map/ETA flow, unchanged) vs `"carrier"` (GLS/DHL/ocean freight incl. Maersk via ShipsGo — no GPS position; carrier + tracking_number + stage + events instead). `OrderTracking` prefers live carrier-mode `carrier`/`tracking_number`/`events` over the order's own (manually-entered) fields when present |
+| Delivery ETA | `eta.eta` timestamp + `distance_remaining_km` + `progress_percent` (GPS mode only); countdown re-derived client-side every second, payload refreshed on the 30s poll. Straight-line estimate, labelled "Estimated" |
+| Carrier types | `bus` removed, `truck` added (`sea`, `air`, `dhl`, `road`, `truck`) — admin order carrier-type `<select>` updated |
+| Proxy routes | 8 admin (`/api/admin/tracking/*` + `/api/admin/orders/[id]/shipment-tracking`) + 1 customer (`/api/account/orders/[ref]/tracking`); all graceful (degrade to empty/disconnected until Traccar/carrier data is configured) |
+| Decisions | Customer trail = **current trip** (bounded to `TRACCAR_ROUTE_HOURS`, default 12). Contract: `FRONTEND_NOTE_tracking.md` |
 
 ---
 
@@ -277,6 +283,19 @@
 ---
 
 ## Pending — Backend Contracts
+
+### Proposal → Proforma Gating — Needs `proposal_accepted_at` Surfaced on Order Payload
+
+Backend note: for orders from an accepted CRM-7 proposal, admin should be able to generate/send the
+Proforma Invoice right after proposal acceptance, without requiring a separate Order Confirmation
+acceptance step. The gate that currently blocks "Generate Proforma" is `customerAcceptancePending`
+(`components/admin/order-detail.tsx:544`, `order.customer_acceptance_status === "pending"`), consumed
+by `TradeDocumentsCard`. **`AdminOrderFull` (`lib/admin-api.ts`) does not currently expose the
+originating quote's `proposal_status`/`proposal_accepted_at`** — there's no field to check. Backend's
+own note says to ask if this needs surfacing. **Not implemented — waiting on backend to add e.g.
+`order.proposal_accepted_at` (or similar) to the admin order detail response** so the gate can also
+pass when it's set. Direct/manual orders with no proposal history are unaffected (still need explicit
+Order Confirmation acceptance).
 
 ### Marketing Contacts CSV Import — Column Name Clarification
 

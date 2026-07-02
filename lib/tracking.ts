@@ -74,11 +74,22 @@ export type DeliveryEta = {
 export type TrackingUnavailableReason =
   | "no_device" | "not_shipped" | "order_cancelled" | "unavailable" | string;
 
+export type CarrierShipmentStage = "preparing" | "in_transit" | "delivered" | string;
+
+export type CarrierShipmentEvent = {
+  event_date?: string | null;
+  time?: string | null;
+  location?: string | null;
+  status_label: string;
+  description?: string | null;
+};
+
 /** Customer delivery-tracking payload (lean; always HTTP 200). Status-aware. */
 export type CustomerTracking =
   | { available: false; reason?: TrackingUnavailableReason }
   | {
       available: true;
+      mode?: "gps_live"; // absent on legacy payloads = gps_live
       order_ref: string;
       name?: string | null;
       status?: DeviceStatus | null;
@@ -90,6 +101,17 @@ export type CustomerTracking =
       position: Position;
       route?: { latitude: number; longitude: number; fix_time?: string | null }[];
       eta?: DeliveryEta | null;
+    }
+  | {
+      available: true;
+      mode: "carrier";
+      order_ref: string;
+      order_status?: string | null;
+      delivered?: boolean;
+      carrier: string;
+      tracking_number: string;
+      stage: CarrierShipmentStage;
+      events: CarrierShipmentEvent[];
     };
 
 /** Countdown string from a millisecond remainder: "Xd Yh" → "Yh Zm" → "Zm". */
