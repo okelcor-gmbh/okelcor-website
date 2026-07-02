@@ -1,6 +1,6 @@
 # Okelcor Website — Progress Tracker
 
-**Last updated:** 2026-07-02  
+**Last updated:** 2026-07-02 (rev 2)  
 **Branch:** `main`  
 **Build status:** TypeScript 0 errors · ESLint clean · Production build passes
 
@@ -189,8 +189,9 @@ Backend confirmed built + tested (10 tests); activates once a Traccar server is 
 |---|---|
 | Map library | **Leaflet + react-leaflet v5** (free, keyless, OSM tiles); client-only via `next/dynamic({ ssr:false })`. Shared types/WKT parser/helpers in `lib/tracking.ts` |
 | Admin fleet page (`/admin/tracking`) | Status banner, device list, live map (markers coloured by status, 30s position poll), geofences from WKT (`CIRCLE`/`POLYGON`), route polyline + trips panel on device select. RBAC section `tracking` (super_admin/admin/order_manager/sales_manager) + nav entry |
-| Admin order page — Logistics tab | Assign/clear GPS device (`PUT /admin/tracking/orders/{id}/device`) · **Set delivery destination** for ETA — map pin or geocoded address (`PUT /admin/tracking/orders/{id}/destination`) · manual shipment-event log (`ShipmentEventManager`) |
-| Admin order page — Order Summary | **Track Shipment** button (`components/admin/tracking/track-shipment-control.tsx`) — on-demand modal calling `GET /api/admin/orders/{id}/shipment-tracking` (live carrier-API call + persists new events); 3-node stage stepper + shipping overview + newest-first event list. Works for any order (manual or eBay-sourced) with a carrier + tracking number |
+| Admin order page — Logistics tab | Assign/clear GPS device (`PUT /admin/tracking/orders/{id}/device`) · **Set delivery destination** for ETA — map pin or geocoded address (`PUT /admin/tracking/orders/{id}/destination`) · manual shipment-event log (`ShipmentEventManager` — `POST/PUT/DELETE /admin/orders/{id}/shipment-events`, predates this series, commit `9465e6e`) |
+| Admin order page — Overview tab | **Carrier / Carrier Type / Tracking Number** editable fields (`order-detail.tsx:992-1029`) — this + the shipment-events log above is the **active/priority path** (backend note: GLS's live API integration hit persistent auth failures, so admin enters carrier data by hand for now; auto-sync is "a bonus once GLS is sorted, not a blocker") |
+| Admin order page — Order Summary | **Track Shipment** button (`components/admin/tracking/track-shipment-control.tsx`) — on-demand modal calling `GET /api/admin/orders/{id}/shipment-tracking` (live carrier-API call + persists new events); 3-node stage stepper + shipping overview + newest-first event list. **Secondary/bonus path** — GLS calls currently fail (backend-side credential issue), so this only reliably works for DHL/ocean orders today; degrades to a clear error message otherwise. Kept as-is per product call — not hidden, not the primary flow |
 | Customer order page | Unified `OrderTracking` component (`components/account/order-tracking.tsx`) — status hero, live ETA countdown + progress bar, 4-step stepper, live GPS map, shipment details, event timeline. Polls `/api/account/orders/[ref]/tracking` 30s while shipped, stops on delivered |
 | **Carrier-mode discriminator** | `CustomerTracking` type (`lib/tracking.ts`) branches on `mode`: `"gps_live"` (existing map/ETA flow, unchanged) vs `"carrier"` (GLS/DHL/ocean freight incl. Maersk via ShipsGo — no GPS position; carrier + tracking_number + stage + events instead). `OrderTracking` prefers live carrier-mode `carrier`/`tracking_number`/`events` over the order's own (manually-entered) fields when present |
 | Delivery ETA | `eta.eta` timestamp + `distance_remaining_km` + `progress_percent` (GPS mode only); countdown re-derived client-side every second, payload refreshed on the 30s poll. Straight-line estimate, labelled "Estimated" |

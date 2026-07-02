@@ -83,7 +83,8 @@
       "Bash(grep -r \"locale\\\\|Locale\\\\|t\\\\\\\\.nav\\\\|useLanguage\" app/shop --include=\"*.tsx\")",
       "Bash(npm install *)",
       "Bash(npx tsc *)",
-      "Bash(npx eslint *)"
+      "Bash(npx eslint *)",
+      "Bash(awk 'NR==945,NR==1050{print NR\": \"$0}' components/admin/order-detail.tsx)"
     ]
   }
 }
