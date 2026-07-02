@@ -111,6 +111,8 @@ export type CustomerTracking =
       carrier: string;
       tracking_number: string;
       stage: CarrierShipmentStage;
+      /** Deep link to the carrier's own public tracking page (GLS/DHL/Maersk). Null if unrecognized. */
+      tracking_url?: string | null;
       events: CarrierShipmentEvent[];
     };
 

@@ -11,7 +11,7 @@
  */
 
 import { useState } from "react";
-import { Truck, Loader2, AlertCircle, MapPin, RefreshCw, X } from "lucide-react";
+import { Truck, Loader2, AlertCircle, MapPin, RefreshCw, X, ExternalLink } from "lucide-react";
 
 type ShipmentTrackingEvent = {
   event_date?: string | null;
@@ -25,6 +25,8 @@ type ShipmentTracking = {
   carrier: string;
   tracking_number: string;
   stage: "preparing" | "in_transit" | "delivered" | string;
+  /** Deep link to the carrier's own public tracking page (GLS/DHL/Maersk). Null if unrecognized. */
+  tracking_url?: string | null;
   events: ShipmentTrackingEvent[];
 };
 
@@ -142,6 +144,16 @@ export default function TrackShipmentControl({
                   <p className="mt-1 text-[0.88rem] font-semibold text-[#1a1a1a]">
                     {data.carrier} · <span className="font-mono">{data.tracking_number}</span>
                   </p>
+                  {data.tracking_url && (
+                    <a
+                      href={data.tracking_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-2 inline-flex items-center gap-1.5 text-[0.78rem] font-semibold text-[#E85C1A] hover:underline"
+                    >
+                      <ExternalLink size={12} strokeWidth={2} /> Track on {data.carrier}&apos;s site
+                    </a>
+                  )}
                 </div>
 
                 {/* Events, newest first */}
@@ -153,7 +165,9 @@ export default function TrackShipmentControl({
                     </button>
                   </div>
                   {data.events.length === 0 ? (
-                    <p className="text-[0.83rem] text-[#9ca3af]">No tracking events yet.</p>
+                    <p className="text-[0.83rem] text-[#9ca3af]">
+                      No tracking events yet{data.tracking_url ? " — track directly using the link above." : "."}
+                    </p>
                   ) : (
                     <ol className="flex flex-col gap-3">
                       {data.events.map((ev, i) => (

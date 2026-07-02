@@ -19,7 +19,7 @@ import { useCallback, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import {
   Package, CheckCircle2, Truck, PackageCheck, XCircle, Clock, Navigation,
-  MapPin, Calendar, Copy, Check, RefreshCw,
+  MapPin, Calendar, Copy, Check, RefreshCw, ExternalLink,
 } from "lucide-react";
 import type { CustomerTracking } from "@/lib/tracking";
 import { formatSpeed, formatDistance, lastSeen, formatCountdown } from "@/lib/tracking";
@@ -187,6 +187,7 @@ export default function OrderTracking({
   // Carrier-mode live events take priority over the order's own (manually-entered) log.
   const effectiveCarrier = carrierData?.carrier ?? carrier;
   const effectiveTrackingNumber = carrierData?.tracking_number ?? trackingNumber;
+  const trackingUrl = carrierData?.tracking_url;
   const effectiveEvents: ShipmentEvent[] = carrierData
     ? carrierData.events.map((ev, i) => ({
         id: i,
@@ -345,11 +346,29 @@ export default function OrderTracking({
                 )}
               </div>
             )}
+
+            {trackingUrl && (
+              <a
+                href={trackingUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-[var(--primary)]/25 bg-[var(--primary)]/[0.06] px-3.5 py-1.5 text-[0.8rem] font-semibold text-[var(--primary)] transition hover:bg-[var(--primary)]/10"
+              >
+                <ExternalLink size={13} strokeWidth={2} /> Track on {effectiveCarrier || "carrier"}&apos;s site
+              </a>
+            )}
           </div>
         )}
 
         {/* ── Event timeline ── */}
-        {sortedEvents.length > 0 && <EventTimeline events={sortedEvents} />}
+        {sortedEvents.length > 0 ? (
+          <EventTimeline events={sortedEvents} />
+        ) : carrierData ? (
+          <p className="rounded-[14px] border border-black/[0.05] bg-white px-4 py-3.5 text-[0.83rem] text-[var(--muted)]">
+            No updates yet{effectiveCarrier ? ` — track directly on ${effectiveCarrier}'s site` : ""}
+            {trackingUrl ? " using the link above" : ""}.
+          </p>
+        ) : null}
 
         {/* Empty hint when there's genuinely nothing yet */}
         {!isLive && !effectiveCarrier && !effectiveTrackingNumber && sortedEvents.length === 0 && !cancelled && (
