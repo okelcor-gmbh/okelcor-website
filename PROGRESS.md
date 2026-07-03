@@ -1,6 +1,6 @@
 # Okelcor Website — Progress Tracker
 
-**Last updated:** 2026-07-03 (rev 3)  
+**Last updated:** 2026-07-03  
 **Branch:** `main`  
 **Build status:** TypeScript 0 errors · ESLint clean · Production build passes
 
@@ -267,6 +267,7 @@ tracking payload is now always `"carrier"`.
 | ProposalCard gated on itemCount > 0 | `c93f1c7` | ✅ |
 | FIX — proposal draft built from persisted quote items (not `tyre_items`) | `3a2941b` | ✅ |
 | FIX — send required `name` field in proposal draft items payload | `4a7fa05` | ✅ |
+| Signed Proposal return — customer upload (alt. to digital Accept) + admin badge/download | `24ee49b` | ✅ (see Admin Panel — Orders & Documents table) |
 | Backend endpoints (7 routes) | — | ⏳ Backend team |
 | Quote items backend (5 routes) | — | ⏳ Backend team |
 
