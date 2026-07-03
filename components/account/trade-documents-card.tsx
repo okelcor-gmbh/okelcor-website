@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { Download, ExternalLink, FileText, Loader2, Lock, Paperclip } from "lucide-react";
+import { useEffect, useState } from "react";
+import { CheckCircle2, Download, ExternalLink, FileText, Loader2, Lock, Paperclip, Upload } from "lucide-react";
 import type { TradeDocument } from "@/lib/admin-api";
 import { useCustomerAuth } from "@/context/CustomerAuthContext";
 
 const TYPE_LABEL: Record<string, string> = {
   order_confirmation: "Order Confirmation",
   proforma_invoice:   "Proforma Invoice",
+  proforma_signed:    "Signed Proforma Invoice",
   commercial_invoice: "Commercial Invoice",
   packing_list:       "Packing List",
   delivery_note:      "Delivery Note",
@@ -19,10 +20,14 @@ const TYPE_LABEL: Record<string, string> = {
 const TYPE_DESCRIPTION: Record<string, string> = {
   order_confirmation: "Confirmed order summary",
   proforma_invoice:   "Pre-shipment estimate",
+  proforma_signed:    "Signed & returned by you",
   commercial_invoice: "Export / trade document",
   packing_list:       "Goods enumeration for customs",
   delivery_note:      "Delivery confirmation",
 };
+
+const MAX_SIGNED_COPY_BYTES = 20 * 1024 * 1024;
+const SIGNED_COPY_ACCEPT = ".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png";
 
 // Document types that require EU certificate sign-off before download
 const GATED_TYPES = new Set(["commercial_invoice", "final_invoice"]);
@@ -56,11 +61,13 @@ function canViewInline(doc: TradeDocument): boolean {
 }
 
 export default function TradeDocumentsCard({
+  orderRef,
   documents,
   declarationRequired,
   declarationStatus,
   acceptancePending,
 }: {
+  orderRef: string;
   documents: TradeDocument[];
   declarationRequired?: boolean | null;
   declarationStatus?: "pending" | "signed" | "acknowledged" | null;
@@ -69,6 +76,53 @@ export default function TradeDocumentsCard({
 }) {
   const { customer } = useCustomerAuth();
   const [downloading, setDownloading] = useState<number | null>(null);
+  const [docs, setDocs] = useState<TradeDocument[]>(documents);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  useEffect(() => { setDocs(documents); }, [documents]);
+
+  async function handleSignedCopyUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-selecting the same file later
+    if (!file) return;
+
+    if (file.size > MAX_SIGNED_COPY_BYTES) {
+      setUploadError("That file is too large — max 20MB.");
+      return;
+    }
+
+    setUploading(true);
+    setUploadError(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch(`/api/account/orders/${orderRef}/proforma/signed-copy`, {
+        method: "POST",
+        body: formData,
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setUploadError((json as { message?: string }).message ?? "Couldn't upload the signed copy. Please try again.");
+        return;
+      }
+      const data = (json as { data?: { id: number; original_filename?: string } }).data;
+      setDocs((prev) => [
+        ...prev,
+        {
+          id: data?.id ?? Date.now(),
+          type: "proforma_signed",
+          status: "issued",
+          original_filename: data?.original_filename ?? file.name,
+          issued_at: new Date().toISOString(),
+        },
+      ]);
+    } catch {
+      setUploadError("Network error — please try again.");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   // CRM-4: If documents access is explicitly disabled, show blocked message.
   // Guard only activates when the field is explicitly false — never for
@@ -121,16 +175,19 @@ export default function TradeDocumentsCard({
   // Customer-visible statuses: issued and sent only — draft/superseded/void hidden
   const HIDDEN_STATUSES = new Set(["draft", "superseded", "void"]);
 
-  const tradeDocs    = documents.filter(
+  const tradeDocs    = docs.filter(
     (d) =>
       d.type !== "shipment_document" &&
       !HIDDEN_STATUSES.has(d.status) &&
       // Hide proforma until customer has accepted the order confirmation
       !(acceptancePending && d.type === "proforma_invoice"),
   );
-  const shipmentDocs = documents.filter(
+  const shipmentDocs = docs.filter(
     (d) => d.type === "shipment_document" && !HIDDEN_STATUSES.has(d.status),
   );
+
+  const hasProforma       = tradeDocs.some((d) => d.type === "proforma_invoice");
+  const hasSignedProforma = tradeDocs.some((d) => d.type === "proforma_signed");
 
   // Show empty state when there are genuinely no customer-visible docs
   if (tradeDocs.length === 0 && shipmentDocs.length === 0) {
@@ -210,6 +267,37 @@ export default function TradeDocumentsCard({
               );
             })}
           </div>
+
+          {/* ── Signed Proforma prompt / confirmation ── */}
+          {hasProforma && (
+            hasSignedProforma ? (
+              <div className="mt-3 flex items-center gap-2 rounded-[12px] bg-emerald-50 px-4 py-2.5 text-[0.78rem] font-semibold text-emerald-700">
+                <CheckCircle2 size={14} strokeWidth={2.2} className="shrink-0" />
+                Signed copy received
+              </div>
+            ) : (
+              <div className="mt-3 rounded-[12px] border border-dashed border-[var(--primary)]/30 bg-white px-4 py-3.5">
+                <p className="text-[0.85rem] font-semibold text-[var(--foreground)]">
+                  Please print, sign, and return your proforma invoice
+                </p>
+                <p className="mt-0.5 text-[0.75rem] leading-relaxed text-[var(--muted)]">
+                  Print the Proforma Invoice above, sign it (and stamp it, if applicable), then upload a scan or photo — PDF, JPG or PNG, up to 20MB.
+                </p>
+                <label className="mt-2.5 inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-full bg-[var(--primary)] px-4 text-[0.8rem] font-semibold text-white transition hover:opacity-90 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50">
+                  {uploading ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} strokeWidth={2.2} />}
+                  {uploading ? "Uploading…" : "Upload signed copy"}
+                  <input
+                    type="file"
+                    accept={SIGNED_COPY_ACCEPT}
+                    className="hidden"
+                    onChange={handleSignedCopyUpload}
+                    disabled={uploading}
+                  />
+                </label>
+                {uploadError && <p className="mt-2 text-[0.76rem] text-red-600">{uploadError}</p>}
+              </div>
+            )
+          )}
         </>
       )}
 

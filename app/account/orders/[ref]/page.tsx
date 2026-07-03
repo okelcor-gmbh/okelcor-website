@@ -328,6 +328,7 @@ export default async function OrderDetailPage({ params }: Props) {
                 {/* ── Trade Documents ── */}
                 {order.trade_documents !== undefined && (
                   <TradeDocumentsCard
+                    orderRef={ref}
                     documents={order.trade_documents}
                     declarationRequired={order.declaration_required}
                     declarationStatus={order.declaration_status}

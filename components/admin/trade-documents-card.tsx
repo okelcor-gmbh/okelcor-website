@@ -14,6 +14,7 @@ import { useAdminPermissions } from "@/hooks/use-admin-permissions";
 const TYPE_LABEL: Record<string, string> = {
   order_confirmation: "Order Confirmation",
   proforma_invoice:   "Proforma Invoice",
+  proforma_signed:    "Signed Proforma Invoice",
   commercial_invoice: "Commercial Invoice",
   packing_list:       "Packing List",
   delivery_note:      "Delivery Note",
@@ -36,6 +37,7 @@ const INLINE_GENERATED = new Set(["order_confirmation", "commercial_invoice", "p
 const TYPE_DESCRIPTION: Record<string, string> = {
   order_confirmation: "Confirmed order summary (AB-xxxx)",
   proforma_invoice:   "Pre-shipment estimate",
+  proforma_signed:    "Signed & returned by the customer",
   commercial_invoice: "Export / trade document",
   packing_list:       "Goods enumeration for customs",
   delivery_note:      "Delivery confirmation",
@@ -185,11 +187,12 @@ export default function TradeDocumentsCard({
   const [deleteError,   setDeleteError]   = useState<string | null>(null);
 
   // Derived
-  const hasOrderConf     = documents.some((d) => d.type === "order_confirmation");
-  const hasProforma      = documents.some((d) => d.type === "proforma_invoice");
-  const hasCommercialInv = documents.some((d) => d.type === "commercial_invoice");
-  const hasPacking       = documents.some((d) => d.type === "packing_list");
-  const hasDeliveryNote  = documents.some((d) => d.type === "delivery_note");
+  const hasOrderConf      = documents.some((d) => d.type === "order_confirmation");
+  const hasProforma       = documents.some((d) => d.type === "proforma_invoice");
+  const hasSignedProforma = documents.some((d) => d.type === "proforma_signed");
+  const hasCommercialInv  = documents.some((d) => d.type === "commercial_invoice");
+  const hasPacking        = documents.some((d) => d.type === "packing_list");
+  const hasDeliveryNote   = documents.some((d) => d.type === "delivery_note");
   const generatedDocs    = documents.filter((d) => d.type !== "shipment_document");
   const shipmentDocs     = documents.filter((d) => d.type === "shipment_document");
 
@@ -600,6 +603,11 @@ export default function TradeDocumentsCard({
                         <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[0.68rem] font-bold capitalize ${STATUS_BADGE[doc.status] ?? "bg-gray-100 text-gray-600"}`}>
                           {doc.status}
                         </span>
+                        {doc.type === "proforma_invoice" && hasSignedProforma && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[0.68rem] font-bold text-emerald-700">
+                            <CheckCircle2 size={11} strokeWidth={2.4} /> Signed
+                          </span>
+                        )}
                       </div>
                       {TYPE_DESCRIPTION[doc.type] && (
                         <p className="mt-0.5 text-[0.7rem] text-[#9ca3af]">{TYPE_DESCRIPTION[doc.type]}</p>
