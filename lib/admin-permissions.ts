@@ -17,10 +17,10 @@ export type AdminRole = (typeof ALL_ROLES)[number];
 // Mirrors backend ROLE_ACCESS table.
 
 export const ROLE_ACCESS: Record<string, string[]> = {
-  super_admin:     ["dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "analytics", "chats", "security", "eu_declarations", "logistics", "system_health", "crm", "tracking", "marketing"],
-  admin:           ["dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "analytics", "chats", "security", "eu_declarations", "logistics", "system_health", "crm", "tracking", "marketing"],
-  order_manager:   ["dashboard", "orders", "quotes", "supplier", "eu_declarations", "logistics", "crm", "tracking", "marketing"],
-  sales_manager:   ["dashboard", "orders", "quotes", "customers", "analytics", "logistics", "crm", "tracking"],
+  super_admin:     ["dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "analytics", "chats", "security", "eu_declarations", "logistics", "system_health", "crm", "marketing"],
+  admin:           ["dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "analytics", "chats", "security", "eu_declarations", "logistics", "system_health", "crm", "marketing"],
+  order_manager:   ["dashboard", "orders", "quotes", "supplier", "eu_declarations", "logistics", "crm", "marketing"],
+  sales_manager:   ["dashboard", "orders", "quotes", "customers", "analytics", "logistics", "crm"],
   content_manager: ["dashboard", "articles", "hero_slides", "promotions", "fet", "brands", "media"],
   support:         ["dashboard", "orders", "quotes", "customers", "chats", "logistics"],
   editor:          ["dashboard", "articles", "hero_slides", "promotions", "fet", "media"],
@@ -55,7 +55,6 @@ export const PATH_SECTION: Record<string, string> = {
   "/admin/logistics":       "logistics",
   "/admin/system-health":   "system_health",
   "/admin/crm":             "crm",
-  "/admin/tracking":        "tracking",
   "/admin/marketing":       "marketing",
   "/admin/media":           "media",
 };
@@ -121,7 +120,7 @@ const PERMISSION_ROLES: Record<string, string[]> = {
   // eBay
   "ebay.manage": ["super_admin", "admin"],
 
-  // Fleet / GPS tracking
+  // Carrier shipment tracking (GET /admin/orders/{id}/shipment-tracking)
   "tracking.view":         ["super_admin", "admin", "order_manager", "sales_manager"],
 
   // System health

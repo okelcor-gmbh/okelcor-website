@@ -1,6 +1,6 @@
 # Okelcor Website — Progress Tracker
 
-**Last updated:** 2026-07-02 (rev 3)  
+**Last updated:** 2026-07-03  
 **Branch:** `main`  
 **Build status:** TypeScript 0 errors · ESLint clean · Production build passes
 
@@ -181,24 +181,25 @@
 
 ---
 
-### ✅ Fleet / GPS Tracking (Traccar) + Carrier Tracking (GLS/DHL/ocean) — frontend
+### ✅ Shipment Tracking — Carrier-based (GLS/DHL/ocean freight) — frontend
 
-Backend confirmed built + tested (10 tests); activates once a Traccar server is configured.
+**Traccar/GPS own-fleet tracking was removed backend-side (2026-07-03; live, verified against
+real orders) in favour of real carrier tracking, which is simpler and doesn't need a fleet at
+all.** All fleet-only frontend was removed to match: admin fleet dashboard (`/admin/tracking`,
+map/device-list/route-trip playback/geofences), the "Assign tracking device" + "Set destination"
+controls on the admin order page, and `gps_live` mode (live map, ETA countdown/progress bar) on
+the customer side — none of those backend endpoints exist anymore (404). `mode` on the customer
+tracking payload is now always `"carrier"`.
 
 | Feature | Notes |
 |---|---|
-| Map library | **Leaflet + react-leaflet v5** (free, keyless, OSM tiles); client-only via `next/dynamic({ ssr:false })`. Shared types/WKT parser/helpers in `lib/tracking.ts` |
-| Admin fleet page (`/admin/tracking`) | Status banner, device list, live map (markers coloured by status, 30s position poll), geofences from WKT (`CIRCLE`/`POLYGON`), route polyline + trips panel on device select. RBAC section `tracking` (super_admin/admin/order_manager/sales_manager) + nav entry |
-| Admin order page — Logistics tab | Assign/clear GPS device (`PUT /admin/tracking/orders/{id}/device`) · **Set delivery destination** for ETA — map pin or geocoded address (`PUT /admin/tracking/orders/{id}/destination`) · manual shipment-event log (`ShipmentEventManager` — `POST/PUT/DELETE /admin/orders/{id}/shipment-events`, predates this series, commit `9465e6e`) |
-| Admin order page — Overview tab | **Carrier / Carrier Type / Tracking Number** editable fields (`order-detail.tsx:992-1029`) — the one field admin actually needs to fill in; everything else stacks on top (backend's "three layers" model: 1. `tracking_url` deep link — zero effort, works the moment carrier+number are set 2. automatic DHL/ocean event sync — already live 3. manual shipment-events log — optional, richest). eBay orders auto-backfill carrier/tracking from eBay's own fulfillment record hourly, no admin action needed |
-| Admin order page — Logistics tab | + manual shipment-event log (`ShipmentEventManager` — `POST/PUT/DELETE /admin/orders/{id}/shipment-events`, predates this series, commit `9465e6e`) — optional layer 3, not a prerequisite |
-| Admin order page — Order Summary | **Track Shipment** button (`components/admin/tracking/track-shipment-control.tsx`) — on-demand modal calling `GET /api/admin/orders/{id}/shipment-tracking` (live carrier-API call + persists new events, always returns a usable response incl. `tracking_url` even if the live call fails — only errors when there's no carrier/tracking at all); 3-node stage stepper + shipping overview + "Track on {carrier}'s site ↗" link + newest-first event list (empty state when none synced/entered yet) |
-| Customer order page | Unified `OrderTracking` component (`components/account/order-tracking.tsx`) — status hero, live ETA countdown + progress bar, 4-step stepper, live GPS map, shipment details incl. "Track on {carrier}'s site ↗" deep link, event timeline (empty state when carrier-mode has no events yet). Polls `/api/account/orders/[ref]/tracking` 30s while shipped, stops on delivered |
-| **Carrier-mode discriminator** | `CustomerTracking` type (`lib/tracking.ts`) branches on `mode`: `"gps_live"` (existing map/ETA flow, unchanged) vs `"carrier"` (GLS/DHL/ocean freight incl. Maersk via ShipsGo — no GPS position; carrier + tracking_number + stage + `tracking_url` + events instead). `OrderTracking` prefers live carrier-mode `carrier`/`tracking_number`/`events` over the order's own (manually-entered) fields when present |
-| Delivery ETA | `eta.eta` timestamp + `distance_remaining_km` + `progress_percent` (GPS mode only); countdown re-derived client-side every second, payload refreshed on the 30s poll. Straight-line estimate, labelled "Estimated" |
-| Carrier types | `bus` removed, `truck` added (`sea`, `air`, `dhl`, `road`, `truck`) — admin order carrier-type `<select>` updated |
-| Proxy routes | 8 admin (`/api/admin/tracking/*` + `/api/admin/orders/[id]/shipment-tracking`) + 1 customer (`/api/account/orders/[ref]/tracking`); all graceful (degrade to empty/disconnected until Traccar/carrier data is configured) |
-| Decisions | Customer trail = **current trip** (bounded to `TRACCAR_ROUTE_HOURS`, default 12). Contract: `FRONTEND_NOTE_tracking.md` |
+| Admin order page — Overview tab | **Carrier / Carrier Type / Tracking Number** editable fields (`order-detail.tsx:992-1029`) — the one field admin needs to fill in for tracking to work at all. `carrier_type`: `sea`, `air`, `dhl`, `road`, `truck` (`bus` retired). eBay orders auto-backfill carrier/tracking from eBay's own fulfillment record hourly, never overriding a manual entry — same fields, no separate eBay UI |
+| Admin order page — Logistics tab | Manual shipment-event log (`ShipmentEventManager` — `POST/PUT/DELETE /admin/orders/{id}/shipment-events`, predates this series, commit `9465e6e`) — optional, for hand-adding/annotating events on top of the carrier sync |
+| Admin order page — Order Summary | **Track Shipment** button (`components/admin/tracking/track-shipment-control.tsx`, gated on `canDo(adminRole,"tracking.view")`) — on-demand modal calling `GET /api/admin/orders/{id}/shipment-tracking` (live carrier-API call + persists new events, confirmed working for GLS/DHL/ocean; always returns a usable response incl. `tracking_url` even if the live call fails — only errors when there's no carrier/tracking at all); 3-node stage stepper + shipping overview + "Track on {carrier}'s site ↗" link + newest-first event list (empty state when none synced/entered yet) |
+| Customer order page | Unified `OrderTracking` component (`components/account/order-tracking.tsx`) — status hero, 4-step stepper, shipment details incl. "Track on {carrier}'s site ↗" deep link (`tracking_url`, works even with zero events), event timeline with empty state. Polls `/api/account/orders/[ref]/tracking` 30s while shipped, stops on delivered |
+| `CustomerTracking` type (`lib/tracking.ts`) | Single shape now: `available:false` (`reason`) or `available:true, mode:"carrier"` with `carrier`/`tracking_number`/`stage`/`tracking_url`/`events`. Trimmed of all GPS-only types (`Device`, `Trip`, `Geofence`, `Position`, `DeliveryEta`) and helpers (`formatCountdown`, `statusStyle`, `parseWkt`, `centroid`, `formatSpeed`, `formatDuration`, `lastSeen`) |
+| eBay tracking | eBay's Sell API never exposes the detailed event history to sellers (carrier code + tracking number + ship date only) — not a gap to fix, our own carrier sync covers it since a GLS-carried eBay order reads from the same GLS feed eBay does |
+| Removed | `app/admin/tracking/`, `components/admin/tracking/{fleet-dashboard,assign-device-control,set-destination-control}.tsx`, `components/tracking/{fleet-map,delivery-map,location-picker-map}.tsx`, `app/api/admin/tracking/**` (7 routes), `tracking` RBAC section/nav entry, `tracking_device_id`/`dest_lat`/`dest_lon` on `AdminOrderFull`. `tracking.view` permission kept (still gates the Track Shipment refresh) |
 
 ---
 

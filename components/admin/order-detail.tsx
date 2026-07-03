@@ -13,8 +13,6 @@ import type { AdminOrderFull, AdminOrderLog, ShipmentEvent } from "@/lib/admin-a
 import { canDo } from "@/lib/admin-permissions";
 import TradeDocumentsCard from "@/components/admin/trade-documents-card";
 import PaymentMilestonesCard from "@/components/admin/payment-milestones-card";
-import AssignTrackingDeviceControl from "@/components/admin/tracking/assign-device-control";
-import SetDestinationControl from "@/components/admin/tracking/set-destination-control";
 import TrackShipmentControl from "@/components/admin/tracking/track-shipment-control";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -1077,7 +1075,9 @@ export default function OrderDetail({
                 <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
                   Order Summary
                 </p>
-                <TrackShipmentControl orderId={order.id} carrier={order.carrier} trackingNumber={order.tracking_number} />
+                {canDo(adminRole, "tracking.view") && (
+                  <TrackShipmentControl orderId={order.id} carrier={order.carrier} trackingNumber={order.tracking_number} />
+                )}
               </div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <InfoRow label="Order Ref"        value={order.order_ref} />
@@ -1509,17 +1509,6 @@ export default function OrderDetail({
       ══════════════════════════════════════════════════════════════════════ */}
       {activeTab === "logistics" && (
         <div className="flex flex-col gap-5">
-          <AssignTrackingDeviceControl
-            orderId={order.id}
-            initialDeviceId={order.tracking_device_id}
-            canManage={canDo(adminRole, "orders.update")}
-          />
-          <SetDestinationControl
-            orderId={order.id}
-            initialLat={order.dest_lat}
-            initialLon={order.dest_lon}
-            canManage={canDo(adminRole, "orders.update")}
-          />
           <ShipmentEventManager orderId={order.id} initialEvents={order.shipment_events ?? []} />
         </div>
       )}

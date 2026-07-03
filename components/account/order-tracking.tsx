@@ -4,31 +4,24 @@
  * Premium unified "Track Your Order" experience for the customer order page.
  *
  * Combines, in one cohesive section:
- *  - a status hero (current state + live ETA countdown + progress bar),
+ *  - a status hero (current state),
  *  - an animated 4-step progress stepper,
- *  - the live GPS map (when the order is being tracked),
- *  - shipment details (carrier, copyable tracking ref, ETA),
+ *  - shipment details (carrier, copyable tracking ref, "track on carrier's site" link),
  *  - a refined shipment-event timeline.
  *
  * Live data comes from /api/account/orders/{ref}/tracking (status-aware: polls
- * only while shipped, stops on delivered). Everything degrades gracefully — an
- * order with no live device still shows the stepper, details and events.
+ * only while shipped, stops on delivered) — carrier-based tracking (GLS/DHL/
+ * ocean freight), not Okelco's own fleet. Everything degrades gracefully — an
+ * order with no carrier/tracking number yet still shows the stepper + details.
  */
 
 import { useCallback, useEffect, useState } from "react";
-import dynamic from "next/dynamic";
 import {
-  Package, CheckCircle2, Truck, PackageCheck, XCircle, Clock, Navigation,
-  MapPin, Calendar, Copy, Check, RefreshCw, ExternalLink,
+  Package, CheckCircle2, Truck, PackageCheck, XCircle,
+  MapPin, Calendar, Copy, Check, ExternalLink,
 } from "lucide-react";
 import type { CustomerTracking } from "@/lib/tracking";
-import { formatSpeed, formatDistance, lastSeen, formatCountdown } from "@/lib/tracking";
 import type { OrderStatus } from "@/app/account/orders/page";
-
-const DeliveryMap = dynamic(() => import("@/components/tracking/delivery-map"), {
-  ssr: false,
-  loading: () => <div className="h-full w-full animate-pulse bg-black/[0.05]" />,
-});
 
 const POLL_MS = 30_000;
 
@@ -109,7 +102,6 @@ export default function OrderTracking({
   estimatedDelivery, trackingStatus, events = [],
 }: Props) {
   const [live, setLive] = useState<CustomerTracking | null>(null);
-  const [now, setNow] = useState(() => Date.now());
 
   const load = useCallback(async () => {
     try {
@@ -137,24 +129,15 @@ export default function OrderTracking({
   }, [orderRef]);
 
   const isLive = !!live && live.available === true;
-  const liveData = isLive ? (live as Extract<CustomerTracking, { available: true }>) : null;
-  // Discriminate by `mode` — "carrier" (GLS/DHL/ocean freight) has no GPS position/route/eta.
-  const carrierData = liveData && liveData.mode === "carrier" ? liveData : null;
-  const gpsData = liveData && liveData.mode !== "carrier" ? liveData : null;
-  const delivered = liveData?.delivered === true || status === "delivered";
-  const shouldPoll = !!liveData && liveData.order_status === "shipped" && !liveData.delivered;
+  const carrierData = isLive ? (live as Extract<CustomerTracking, { available: true }>) : null;
+  const delivered = carrierData?.delivered === true || status === "delivered";
+  const shouldPoll = !!carrierData && carrierData.order_status === "shipped" && !carrierData.delivered;
 
   useEffect(() => {
     if (!shouldPoll) return;
     const t = setInterval(() => void load(), POLL_MS);
     return () => clearInterval(t);
   }, [shouldPoll, load]);
-
-  useEffect(() => {
-    if (!isLive) return;
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
-  }, [isLive]);
 
   // ── Derive hero state ──────────────────────────────────────────────────────
   const cancelled = status === "cancelled";
@@ -172,15 +155,10 @@ export default function OrderTracking({
 
   const heroSubtitle = cancelled ? "This order has been cancelled."
     : delivered ? "Your order has arrived. Thank you for choosing Okelcor."
-    : inTransit ? "Your order is in transit. Track its live progress below."
+    : inTransit ? "Your order is in transit. Track its progress below."
     : status === "confirmed" || status === "processing"
       ? "Your order is confirmed and being prepared for shipment."
       : "We've received your order and are getting it ready.";
-
-  const eta = gpsData?.eta;
-  const showEtaBlock = inTransit && eta && eta.eta;
-  const remainingMs = showEtaBlock ? new Date(eta!.eta as string).getTime() - now : 0;
-  const progress = Math.max(0, Math.min(100, Math.round(eta?.progress_percent ?? 0)));
 
   const currentIdx = delivered ? 3 : (STEP_ORDER[status] ?? 0);
 
@@ -230,41 +208,11 @@ export default function OrderTracking({
               </h2>
               <p className="mt-1 text-[0.85rem] leading-relaxed text-[var(--muted)]">{heroSubtitle}</p>
 
-              {/* Live ETA countdown */}
-              {showEtaBlock && (
-                <div className="mt-4 rounded-2xl border border-black/[0.06] bg-white/80 p-4 backdrop-blur-sm">
-                  <div className="flex flex-wrap items-end justify-between gap-2">
-                    <div>
-                      <p className="flex items-center gap-1.5 text-[0.68rem] font-bold uppercase tracking-[0.16em] text-[var(--muted)]">
-                        <Clock size={12} strokeWidth={2.2} /> Estimated arrival
-                      </p>
-                      <p className="mt-1 text-[1.7rem] font-extrabold leading-none text-[var(--foreground)]">
-                        {formatCountdown(remainingMs)}
-                      </p>
-                    </div>
-                    <p className="text-[0.85rem] font-semibold text-[var(--muted)]">
-                      ~{new Date(eta!.eta as string).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
-                    </p>
-                  </div>
-                  <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-black/[0.06]">
-                    <div className={`h-full rounded-full ${accent.bar} transition-[width] duration-700`} style={{ width: `${progress}%` }} />
-                  </div>
-                  <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[0.74rem] text-[var(--muted)]">
-                    {eta?.distance_remaining_km != null && (
-                      <span className="flex items-center gap-1"><Navigation size={11} strokeWidth={2} /> {formatDistance(eta.distance_remaining_km)} to go</span>
-                    )}
-                    <span>{progress}% complete</span>
-                    <span className="text-[#9ca3af]">Estimated · straight-line</span>
-                  </div>
-                </div>
-              )}
-
-              {/* Fallback ETA / delivered date when there's no live countdown */}
-              {!showEtaBlock && !cancelled && (delivered || estimatedDelivery) && (
+              {!cancelled && (delivered || estimatedDelivery) && (
                 <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-white/80 px-3.5 py-1.5 text-[0.8rem] font-semibold text-[var(--foreground)] ring-1 ring-black/[0.05]">
                   <Calendar size={13} strokeWidth={2} className={accent.iconText} />
                   {delivered
-                    ? `Delivered ${gpsData?.last_update ? formatDate(gpsData.last_update) : estimatedDelivery ? formatDate(estimatedDelivery) : ""}`.trim()
+                    ? `Delivered${estimatedDelivery ? ` ${formatDate(estimatedDelivery)}` : ""}`
                     : `Estimated delivery: ${formatDate(estimatedDelivery)}`}
                 </div>
               )}
@@ -274,31 +222,6 @@ export default function OrderTracking({
 
         {/* ── Stepper ── */}
         {!cancelled && <Stepper currentIdx={currentIdx} createdAt={createdAt} />}
-
-        {/* ── Live map (GPS-tracked fleet orders only — carrier mode has no position) ── */}
-        {isLive && gpsData && (
-          <div className="overflow-hidden rounded-[18px] border border-black/[0.05] bg-white">
-            <div className="flex items-center justify-between gap-3 px-4 py-3">
-              <p className="flex items-center gap-1.5 text-[0.7rem] font-bold uppercase tracking-[0.16em] text-[var(--muted)]">
-                <MapPin size={12} strokeWidth={2.2} className="text-[var(--primary)]" /> Live location
-              </p>
-              {!delivered && (
-                <span className="flex items-center gap-1.5 text-[0.72rem] text-[var(--muted)]">
-                  {shouldPoll && <RefreshCw size={11} strokeWidth={2} className="text-emerald-500" aria-hidden="true" />}
-                  Updated {lastSeen(gpsData.last_update ?? gpsData.position.fix_time)}
-                </span>
-              )}
-            </div>
-            <div className="h-[300px] w-full sm:h-[380px]">
-              <DeliveryMap position={gpsData.position} route={gpsData.route} name={gpsData.name} />
-            </div>
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-1 px-4 py-3 text-[0.82rem] text-[var(--muted)]">
-              {gpsData.name && <span className="font-semibold text-[var(--foreground)]">{gpsData.name}</span>}
-              {!delivered && <span>Speed: {formatSpeed(gpsData.position.speed_kmh)}</span>}
-              {gpsData.position.address && <span className="truncate">{gpsData.position.address}</span>}
-            </div>
-          </div>
-        )}
 
         {/* ── Shipment details ── */}
         {(effectiveCarrier || effectiveTrackingNumber || estimatedDelivery || currentStatusChip) && (
