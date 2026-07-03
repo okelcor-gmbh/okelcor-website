@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRight, CheckCircle2, ExternalLink, XCircle } from "lucide-react";
+import { ArrowRight, CheckCircle2, ExternalLink, Loader2, Upload, XCircle } from "lucide-react";
 
 type AcceptanceStatus = "pending" | "accepted" | "rejected" | null | undefined;
+
+const MAX_SIGNED_COPY_BYTES = 20 * 1024 * 1024;
+const SIGNED_COPY_ACCEPT = ".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png";
 
 export default function QuoteAcceptanceActions({
   quoteRef,
@@ -17,7 +20,7 @@ export default function QuoteAcceptanceActions({
   const [status,        setStatus]        = useState<AcceptanceStatus>(initialStatus);
   const [showReject,    setShowReject]     = useState(false);
   const [rejectReason,  setRejectReason]  = useState("");
-  const [loading,       setLoading]       = useState<"accept" | "reject" | null>(null);
+  const [loading,       setLoading]       = useState<"accept" | "reject" | "upload" | null>(null);
   const [error,         setError]         = useState<string | null>(null);
 
   if (status === "accepted") {
@@ -92,6 +95,38 @@ export default function QuoteAcceptanceActions({
     }
   };
 
+  const handleSignedCopyUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-selecting the same file later
+    if (!file) return;
+
+    if (file.size > MAX_SIGNED_COPY_BYTES) {
+      setError("That file is too large — max 20MB.");
+      return;
+    }
+
+    setLoading("upload");
+    setError(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch(`/api/account/quotes/${encodeURIComponent(quoteRef)}/proposal/signed-copy`, {
+        method: "POST",
+        body: formData,
+      });
+      if (res.ok) {
+        setStatus("accepted");
+      } else {
+        const json = await res.json().catch(() => ({})) as { message?: string };
+        setError(json.message ?? "Couldn't upload the signed copy. Please try again.");
+      }
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setLoading(null);
+    }
+  };
+
   return (
     <div className="rounded-[22px] border border-blue-200 bg-blue-50/50 p-6 sm:p-8">
       <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-700">
@@ -138,6 +173,17 @@ export default function QuoteAcceptanceActions({
           >
             Decline
           </button>
+          <label className="inline-flex items-center gap-2 rounded-full border border-black/[0.08] bg-white px-5 py-2.5 text-[0.85rem] font-semibold text-[var(--foreground)] transition hover:bg-[#f5f5f5] has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60 cursor-pointer">
+            {loading === "upload" ? <Loader2 size={13} strokeWidth={2.5} className="animate-spin" /> : <Upload size={13} strokeWidth={2.5} />}
+            {loading === "upload" ? "Uploading…" : "Upload signed copy instead"}
+            <input
+              type="file"
+              accept={SIGNED_COPY_ACCEPT}
+              className="hidden"
+              onChange={handleSignedCopyUpload}
+              disabled={loading !== null}
+            />
+          </label>
         </div>
       ) : (
         <div className="flex flex-col gap-3">

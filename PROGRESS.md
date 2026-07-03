@@ -1,6 +1,6 @@
 # Okelcor Website — Progress Tracker
 
-**Last updated:** 2026-07-03 (rev 2)  
+**Last updated:** 2026-07-03 (rev 3)  
 **Branch:** `main`  
 **Build status:** TypeScript 0 errors · ESLint clean · Production build passes
 
@@ -163,7 +163,9 @@
 | Trade documents — Send by email | `2abc6ec` | Modal + backend proxy |
 | Superseded / void document handling | `56891e9` | Admin sees dimmed; customer filtered |
 | Logistics dashboard v2 | `af5038c` | 9 summary cards, eBay + payment stage filters |
-| Signed Proforma Invoice return | 2026-07-03 | Legal paper-trail: Proforma PDF now has a Date/Signature/Stamp block. Customer order page — once a `proforma_invoice` doc exists and no `proforma_signed` one does, shows a prompt + file upload (pdf/jpg/jpeg/png, max 20MB) → `POST /api/account/orders/{ref}/proforma/signed-copy`; swaps to a "✓ Signed copy received" confirmation once uploaded (optimistic local state, no page reload). Uploaded copy appears as a normal entry in `trade_documents` (downloads via the existing generic document-download proxy — no new download route). Admin side: "Signed" badge on the Proforma Invoice row when a signed copy exists, no other UI change needed |
+| Signed Proforma Invoice return | 2026-07-03 | Legal paper-trail: Proforma PDF now has a Date/Signature/Stamp block. Customer order page — once a `proforma_invoice` doc exists and no `proforma_signed` one does, shows a prompt + file upload (pdf/jpg/jpeg/png, max 20MB) → `POST /api/account/orders/{ref}/proforma/signed-copy`; swaps to a "✓ Signed copy received" confirmation once uploaded (optimistic local state, no page reload). Uploaded copy appears as a normal entry in `trade_documents` (downloads via the existing generic document-download proxy — no new download route). Admin side: "Signed" badge on the Proforma Invoice row when a signed copy exists |
+| Signed Proposal return | 2026-07-03 | Same paper-trail pattern, one stage earlier: Proposal PDF also has a Date/Signature/Stamp block. `QuoteAcceptanceActions` (`/account/quotes/[ref]`) gets an "Upload signed copy instead" file picker next to Accept/Decline → `POST /api/account/quotes/{ref}/proposal/signed-copy` (new proxy); **this is itself an acceptance** — 201 sets local status to `accepted`, same as clicking Accept (no separate state to handle). 422/410 (no active proposal / expired) surfaced as inline errors. Admin: `AdminQuoteFull.proposal_signed_copy_download_url` + a "Signed" badge and download row in the accepted-state block of `ProposalCard` |
+| Payment-gated documents — expanded | 2026-07-03 | Packing List, Delivery Note, and Shipment Documents now follow the same full-payment gate as the Commercial Invoice (hidden from `trade_documents` until `balance_paid`/`shipment_released`/`paid`). Server-side only — confirmed no client-side logic assumed pre-payment visibility, so no FE change needed |
 
 ---
 

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import {
   FileText, Send, CheckCircle2, XCircle, Clock, AlertCircle,
-  Copy, Loader2, AlertTriangle, RotateCcw, X, Check,
+  Copy, Loader2, AlertTriangle, RotateCcw, X, Check, Download,
 } from "lucide-react";
 import type { AdminQuoteFull, ProposalStatus, QuoteItem } from "@/lib/admin-api";
 
@@ -80,6 +80,7 @@ interface ProposalState {
   proposal_rejection_reason: string | null;
   proposal_total: number | null;
   proposal_currency: string | null;
+  proposal_signed_copy_download_url: string | null;
 }
 
 interface Props {
@@ -180,6 +181,7 @@ export default function ProposalCard({ quote, onStatusChange, items, itemCount }
     proposal_rejection_reason: (q.proposal_rejection_reason as string | null) ?? null,
     proposal_total:            (q.proposal_total            as number | null) ?? null,
     proposal_currency:         (q.proposal_currency         as string | null) ?? null,
+    proposal_signed_copy_download_url: (q.proposal_signed_copy_download_url as string | null) ?? null,
   });
 
   const [loading, setLoading] = useState<string | null>(null);
@@ -495,7 +497,14 @@ export default function ProposalCard({ quote, onStatusChange, items, itemCount }
             <div className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-4">
               <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-emerald-600" />
               <div>
-                <p className="text-[0.875rem] font-bold text-emerald-800">Proposal Accepted</p>
+                <p className="flex items-center gap-2 text-[0.875rem] font-bold text-emerald-800">
+                  Proposal Accepted
+                  {proposal.proposal_signed_copy_download_url && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-200/70 px-2 py-0.5 text-[0.68rem] font-bold text-emerald-800">
+                      <CheckCircle2 size={11} strokeWidth={2.4} /> Signed
+                    </span>
+                  )}
+                </p>
                 <p className="mt-0.5 text-[0.8rem] text-emerald-700">
                   The customer accepted this proposal. &ldquo;Convert to Order&rdquo; is now unlocked.
                 </p>
@@ -506,6 +515,19 @@ export default function ProposalCard({ quote, onStatusChange, items, itemCount }
                 <div className="flex items-center justify-between px-4 py-2.5 text-[0.83rem]">
                   <span className="text-[#5c5e62]">Accepted on</span>
                   <span className="font-semibold text-[#1a1a1a]">{longDate(proposal.proposal_accepted_at)}</span>
+                </div>
+              )}
+              {proposal.proposal_signed_copy_download_url && (
+                <div className="flex items-center justify-between px-4 py-2.5 text-[0.83rem]">
+                  <span className="text-[#5c5e62]">Signed copy</span>
+                  <a
+                    href={proposal.proposal_signed_copy_download_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 font-semibold text-[#E85C1A] hover:underline"
+                  >
+                    <Download size={12} strokeWidth={2.2} /> Download
+                  </a>
                 </div>
               )}
               {proposal.proposal_total != null && (

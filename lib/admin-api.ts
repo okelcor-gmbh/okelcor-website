@@ -534,6 +534,8 @@ export type AdminQuoteFull = AdminQuote & {
   proposal_rejection_reason?: string | null;
   proposal_total?: number | null;
   proposal_currency?: string | null;
+  /** Present once the customer has printed/signed/uploaded the proposal back (alternative to digital Accept). */
+  proposal_signed_copy_download_url?: string | null;
 };
 
 export type AdminHeroSlideTranslation = {

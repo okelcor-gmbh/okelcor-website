@@ -87,7 +87,8 @@
       "Bash(awk 'NR==945,NR==1050{print NR\": \"$0}' components/admin/order-detail.tsx)",
       "Bash(npx next *)",
       "Bash(echo \"exit: $?\")",
-      "Bash(npm uninstall *)"
+      "Bash(npm uninstall *)",
+      "Bash(xargs -I{} sh -c 'echo \"=== {} ===\"; cat {}')"
     ]
   }
 }
