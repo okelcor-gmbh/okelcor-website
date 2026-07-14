@@ -4,10 +4,11 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   Upload, Search, ChevronLeft, ChevronRight, Download,
-  FileText, AlertCircle, CheckCircle2, Loader2, Mail, Send,
+  FileText, AlertCircle, CheckCircle2, Loader2, Send,
   Eye, Ban, Trash2, ShieldOff, ShieldCheck, UserCheck, UserX, UserPlus,
   Copy, Plus,
 } from "lucide-react";
+import { BUYER_TIER_STYLES, BUYER_TIER_LABELS, RISK_LEVEL_STYLES, RISK_LEVEL_LABELS } from "@/lib/crm8";
 import { useAdminPermissions } from "@/hooks/use-admin-permissions";
 import AddCustomerModal from "@/components/admin/add-customer-modal";
 
@@ -39,6 +40,9 @@ type Customer = {
   // CRM-5 data quality
   data_quality_score?: number | null;
   data_review_status?: string;
+  // CRM-8 buyer lifecycle
+  buyer_tier?: string | null;
+  risk_level?: string | null;
   last_login_at?: string | null;
   last_login_location?: string | null;
   failed_login_count?: number;
@@ -48,7 +52,6 @@ type ImportResult = {
   imported: number; skipped_no_email: number; skipped_duplicate: number;
   b2b: number; b2c: number; errors?: { row: number; message: string }[];
 };
-type EmailResult  = { sent: number; failed: number; total: number; test_mode: boolean };
 type StatusFilter = "all" | "active" | "suspended" | "banned" | "locked" | "new_this_week" | "pending_review" | "duplicate_suspected";
 type TypeFilter   = "all" | "b2b" | "b2c" | "wix";
 
@@ -196,6 +199,24 @@ function DataQualityBadge({ score, reviewStatus }: { score?: number | null; revi
   );
 }
 
+function BuyerTierBadge({ tier }: { tier?: string | null }) {
+  if (!tier || tier === "none") return null;
+  return (
+    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[0.63rem] font-bold ${BUYER_TIER_STYLES[tier] ?? "bg-gray-100 text-gray-500"}`}>
+      {BUYER_TIER_LABELS[tier] ?? tier}
+    </span>
+  );
+}
+
+function RiskLevelBadge({ risk }: { risk?: string | null }) {
+  if (!risk || risk === "low" || risk === "unknown") return null;
+  return (
+    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[0.63rem] font-bold ${RISK_LEVEL_STYLES[risk] ?? "bg-gray-100 text-gray-500"}`}>
+      {RISK_LEVEL_LABELS[risk] ?? risk}
+    </span>
+  );
+}
+
 // ── Action modal ──────────────────────────────────────────────────────────────
 
 function ConfirmModal({
@@ -240,13 +261,6 @@ export default function CustomersPage() {
   const [importing, setImporting]     = useState(false);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
-
-  // ── Migration email state ─────────────────────────────────────────────────
-  const [emailSending, setEmailSending] = useState(false);
-  const [emailResult, setEmailResult]   = useState<EmailResult | null>(null);
-  const [emailError, setEmailError]     = useState<string | null>(null);
-  const [confirmOpen, setConfirmOpen]   = useState(false);
-  const [emailProgress, setEmailProgress] = useState<{ sent: number; total: number } | null>(null);
 
   // ── Table state ──────────────────────────────────────────────────────────
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -314,34 +328,6 @@ export default function CustomersPage() {
       if (!res.ok) { setImportError(json.error ?? json.message ?? "Import failed."); }
       else { setImportResult(json.data ?? json); setFile(null); if (fileRef.current) fileRef.current.value = ""; fetchCustomers(); }
     } catch { setImportError("Network error."); } finally { setImporting(false); }
-  };
-
-  // ── Migration email ───────────────────────────────────────────────────────
-
-  const sendMigrationEmail = async (testMode: boolean) => {
-    setEmailSending(true); setEmailError(null); setEmailResult(null); setEmailProgress(null); setConfirmOpen(false);
-    try {
-      const res = await fetch("/api/admin/customers/migration-email", {
-        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ test_mode: testMode }),
-      });
-      if (!res.ok) { const j = await res.json().catch(() => ({})); setEmailError(j.error ?? "Failed."); return; }
-      if (testMode) { const j = await res.json(); setEmailResult(j); return; }
-      const reader = res.body!.getReader(); const dec = new TextDecoder(); let buf = "";
-      while (true) {
-        const { done, value } = await reader.read(); if (done) break;
-        buf += dec.decode(value, { stream: true });
-        const lines = buf.split("\n"); buf = lines.pop() ?? "";
-        for (const line of lines) {
-          if (!line.startsWith("data: ")) continue;
-          try {
-            const d = JSON.parse(line.slice(6));
-            if (d.error) setEmailError(d.error);
-            if (!d.done) setEmailProgress({ sent: d.sent, total: d.total });
-            else { setEmailResult({ sent: d.sent, failed: d.failed, total: d.total, test_mode: false }); setEmailProgress(null); }
-          } catch { /* ignore */ }
-        }
-      }
-    } catch { setEmailError("Network error."); } finally { setEmailSending(false); }
   };
 
   // ── Inline actions ────────────────────────────────────────────────────────
@@ -479,64 +465,6 @@ export default function CustomersPage() {
         )}
       </div>
 
-      {/* ── Migration email card ── */}
-      <div className="mb-6 rounded-2xl bg-white p-6 shadow-sm">
-        <div className="mb-4 flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#171a20]">
-            <Mail size={18} strokeWidth={1.8} className="text-white" />
-          </div>
-          <div>
-            <p className="font-extrabold text-[#1a1a1a]">Platform Migration Email</p>
-            <p className="mt-0.5 text-[0.83rem] text-[#5c5e62]">Notify all customers about okelcor.com and prompt them to set a password.</p>
-          </div>
-        </div>
-        <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5">
-          <p className="text-[0.83rem] text-amber-800"><strong>Test first:</strong> send to <span className="font-mono text-[0.78rem]">johngraphics18@gmail.com</span> before sending to all.</p>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <button type="button" disabled={emailSending} onClick={() => sendMigrationEmail(true)}
-            className="flex h-[42px] items-center gap-2 rounded-full border border-[#E85C1A] px-5 text-[0.875rem] font-semibold text-[#E85C1A] transition hover:bg-orange-50 disabled:opacity-50">
-            {emailSending ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />} Send Test
-          </button>
-          <button type="button" disabled={emailSending} onClick={() => { setConfirmOpen(true); setEmailError(null); setEmailResult(null); }}
-            className="flex h-[42px] items-center gap-2 rounded-full bg-[#E85C1A] px-6 text-[0.875rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:opacity-50">
-            {emailSending && !emailProgress ? <><Loader2 size={15} className="animate-spin" /> Starting…</> : <><Mail size={15} /> Send to All</>}
-          </button>
-        </div>
-        {emailSending && emailProgress && (
-          <div className="mt-4">
-            <div className="mb-1 flex items-center justify-between text-[0.83rem]">
-              <span className="font-semibold">Sending…</span><span className="text-[#5c5e62]">{emailProgress.sent}/{emailProgress.total}</span>
-            </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-[#f0f2f5]">
-              <div className="h-full rounded-full bg-[#E85C1A] transition-all" style={{ width: `${Math.round((emailProgress.sent/emailProgress.total)*100)}%` }} />
-            </div>
-          </div>
-        )}
-        {emailError && <div className="mt-3 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5"><AlertCircle size={14} className="shrink-0 text-red-500" /><p className="text-[0.83rem] text-red-700">{emailError}</p></div>}
-        {emailResult && !emailResult.test_mode && (
-          <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-            <div className="mb-2 flex items-center gap-2"><CheckCircle2 size={14} className="text-emerald-600" /><p className="text-[0.875rem] font-semibold text-emerald-800">Emails sent</p></div>
-            <div className="grid grid-cols-3 gap-2">
-              {[["Sent", emailResult.sent], ["Failed", emailResult.failed], ["Total", emailResult.total]].map(([l, v]) => (
-                <div key={String(l)} className="rounded-lg bg-white px-3 py-2 text-center shadow-sm"><p className="text-[1rem] font-extrabold">{v}</p><p className="text-[0.68rem] text-[#5c5e62]">{l}</p></div>
-              ))}
-            </div>
-          </div>
-        )}
-        {emailResult?.test_mode && (
-          <div className="mt-3 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5">
-            <CheckCircle2 size={14} className="text-emerald-600" /><p className="text-[0.875rem] font-semibold text-emerald-800">Test email sent to johngraphics18@gmail.com</p>
-          </div>
-        )}
-      </div>
-
-      {/* Send-all confirm modal */}
-      {confirmOpen && (
-        <ConfirmModal title="Send to all customers?" body="This will email every registered customer. Make sure you tested it first."
-          confirmLabel="Yes, Send Now" onCancel={() => setConfirmOpen(false)} onConfirm={() => sendMigrationEmail(false)} />
-      )}
-
       {/* Inline action confirm modal */}
       {pendingAction && (
         <ConfirmModal
@@ -628,10 +556,12 @@ export default function CustomersPage() {
                             <OnboardingBadge status={c.onboarding_status} />
                           </div>
                         )}
-                        {c.access_level && (
+                        {(c.access_level || c.buyer_tier || c.risk_level) && (
                           <div className="mt-0.5 flex flex-wrap items-center gap-1">
                             <AccessLevelBadge level={c.access_level} />
                             <SegmentBadge segment={c.customer_segment} />
+                            <BuyerTierBadge tier={c.buyer_tier} />
+                            <RiskLevelBadge risk={c.risk_level} />
                           </div>
                         )}
                         <PermissionDots checkout={c.approved_for_checkout} documents={c.approved_for_documents} />

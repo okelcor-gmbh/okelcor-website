@@ -15,6 +15,7 @@ import {
 import BuyerLifecycleCard from "@/components/admin/buyer-lifecycle-card";
 import CustomerVerificationsCard from "@/components/admin/customer-verifications-card";
 import CustomerTimelineCard from "@/components/admin/customer-timeline-card";
+import EditCustomerModal from "@/components/admin/edit-customer-modal";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -28,6 +29,7 @@ type CustomerFull = {
   last_login_at?: string; last_login_ip?: string; last_login_location?: string;
   admin_notes?: string; created_at: string;
   failed_login_count?: number; is_locked?: boolean;
+  vat_number?: string | null; vat_verified?: boolean; industry?: string | null;
   // CRM-4 segmentation & access
   customer_segment?: string;
   access_level?: string;
@@ -135,12 +137,15 @@ function OrderStatusBadge({ status, paymentStatus }: { status: string; paymentSt
   );
 }
 
-function SectionCard({ title, icon: Icon, children }: { title: string; icon: React.ElementType; children: React.ReactNode }) {
+function SectionCard({ title, icon: Icon, action, children }: { title: string; icon: React.ElementType; action?: React.ReactNode; children: React.ReactNode }) {
   return (
     <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
-      <div className="flex items-center gap-2.5 border-b border-black/[0.06] px-5 py-4">
-        <Icon size={15} className="text-[#5c5e62]" />
-        <p className="text-[0.9rem] font-extrabold text-[#1a1a1a]">{title}</p>
+      <div className="flex items-center justify-between gap-2.5 border-b border-black/[0.06] px-5 py-4">
+        <div className="flex items-center gap-2.5">
+          <Icon size={15} className="text-[#5c5e62]" />
+          <p className="text-[0.9rem] font-extrabold text-[#1a1a1a]">{title}</p>
+        </div>
+        {action}
       </div>
       {children}
     </div>
@@ -222,6 +227,9 @@ export default function CustomerProfilePage() {
   const [notes, setNotes]           = useState("");
   const [editNotes, setEditNotes]   = useState(false);
   const [savingNotes, setSavingNotes] = useState(false);
+
+  // Edit customer modal
+  const [editOpen, setEditOpen] = useState(false);
 
   // ── Fetch ─────────────────────────────────────────────────────────────────
 
@@ -536,13 +544,36 @@ export default function CustomerProfilePage() {
         />
       )}
 
+      {/* Edit customer modal */}
+      {editOpen && (
+        <EditCustomerModal
+          customer={customer}
+          onClose={() => setEditOpen(false)}
+          onSaved={(patch, message) => {
+            patchCustomer(patch);
+            setNotes((patch.admin_notes as string | undefined) ?? notes);
+            setActionMsg({ type: "ok", text: message ?? "Customer updated successfully." });
+            setEditOpen(false);
+          }}
+        />
+      )}
+
       <div className="grid gap-6 lg:grid-cols-3">
 
         {/* ── LEFT COLUMN ── */}
         <div className="space-y-5 lg:col-span-1">
 
           {/* Account info */}
-          <SectionCard title="Account Info" icon={User}>
+          <SectionCard
+            title="Account Info"
+            icon={User}
+            action={
+              <button type="button" onClick={() => setEditOpen(true)}
+                className="flex items-center gap-1.5 rounded-lg border border-black/[0.08] px-2.5 py-1 text-[0.75rem] font-semibold text-[#5c5e62] transition hover:bg-[#f0f2f5] hover:text-[#1a1a1a]">
+                <Edit3 size={12} /> Edit
+              </button>
+            }
+          >
             <div className="divide-y divide-black/[0.04]">
               {[
                 { icon: User,     label: "Name",    value: name },

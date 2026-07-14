@@ -1,6 +1,6 @@
 # Okelcor Website — Progress Tracker
 
-**Last updated:** 2026-07-03  
+**Last updated:** 2026-07-14  
 **Branch:** `main`  
 **Build status:** TypeScript 0 errors · ESLint clean · Production build passes
 
@@ -203,6 +203,7 @@ tracking payload is now always `"carrier"`.
 | `CustomerTracking` type (`lib/tracking.ts`) | Single shape now: `available:false` (`reason`) or `available:true, mode:"carrier"` with `carrier`/`tracking_number`/`stage`/`tracking_url`/`events`. Trimmed of all GPS-only types (`Device`, `Trip`, `Geofence`, `Position`, `DeliveryEta`) and helpers (`formatCountdown`, `statusStyle`, `parseWkt`, `centroid`, `formatSpeed`, `formatDuration`, `lastSeen`) |
 | eBay tracking | eBay's Sell API never exposes the detailed event history to sellers (carrier code + tracking number + ship date only) — not a gap to fix, our own carrier sync covers it since a GLS-carried eBay order reads from the same GLS feed eBay does |
 | Removed | `app/admin/tracking/`, `components/admin/tracking/{fleet-dashboard,assign-device-control,set-destination-control}.tsx`, `components/tracking/{fleet-map,delivery-map,location-picker-map}.tsx`, `app/api/admin/tracking/**` (7 routes), `tracking` RBAC section/nav entry, `tracking_device_id`/`dest_lat`/`dest_lon` on `AdminOrderFull`. `tracking.view` permission kept (still gates the Track Shipment refresh) |
+| DPD added as recognized carrier | 2026-07-06 | `tracking_url` now resolves for DPD (alongside GLS/DHL/Maersk) — no frontend code change required, the existing "render `tracking_url` if present" logic just starts working for DPD orders. DPD lacks live event auto-sync (no API credentials yet), so `events` stays empty for DPD orders — only the tracking link works for now. See `docs/FRONTEND_NOTE_tracking.md` |
 
 ---
 
@@ -250,6 +251,9 @@ tracking payload is now always `"carrier"`.
 | FIX — "Check approval status" (retry-login) on pending screen | `2b15758` | ✅ |
 | FIX — register verify→review messaging | `2b15758` | ✅ |
 | FIX — approval-email status feedback (admin approve success message) | `2b15758` | ✅ |
+| Customer profile correction — Edit modal (`components/admin/edit-customer-modal.tsx`) | 2026-07-14 | ✅ Name/email/company/type/VAT (+ "I've confirmed this" checkbox, only sent on change to avoid backend's auto-reset-to-unverified)/industry/phone/country/admin_notes via `PATCH /admin/customers/{id}`, diff-only body; inline 422 email-uniqueness error; success re-syncs `CustomerTimelineCard` |
+| Removed — "Platform Migration Email" test-block (leftover, no backend dependency) | 2026-07-14 | ✅ Deleted from `/admin/customers`; `app/api/admin/customers/migration-email` route removed |
+| Buyer tier / risk level badges on customers list | 2026-07-14 | ✅ Small coloured badges next to access/segment badges, reusing `lib/crm8` style maps |
 | Backend endpoints | — | ⏳ Backend team |
 
 #### CRM-7 Detail
