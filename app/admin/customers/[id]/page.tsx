@@ -10,12 +10,14 @@ import {
   Lock, Loader2, AlertCircle, CheckCircle2, Monitor,
   ShoppingCart, FileText, Activity, Edit3, Save, X,
   UserCheck, UserX, UserPlus, Send,
-  Gauge, RefreshCw, Copy, ExternalLink,
+  Gauge, RefreshCw, Copy, ExternalLink, PackagePlus,
 } from "lucide-react";
 import BuyerLifecycleCard from "@/components/admin/buyer-lifecycle-card";
 import CustomerVerificationsCard from "@/components/admin/customer-verifications-card";
 import CustomerTimelineCard from "@/components/admin/customer-timeline-card";
 import EditCustomerModal from "@/components/admin/edit-customer-modal";
+import AddHistoricalOrderModal from "@/components/admin/add-historical-order-modal";
+import { useAdminPermissions } from "@/hooks/use-admin-permissions";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -208,6 +210,7 @@ function ConfirmModal({ title, body, confirmLabel, danger = false, onConfirm, on
 export default function CustomerProfilePage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const { can } = useAdminPermissions();
 
   const [customer, setCustomer]     = useState<CustomerFull | null>(null);
   const [loginHistory, setLoginH]   = useState<LoginEvent[] | null>(null);
@@ -230,6 +233,9 @@ export default function CustomerProfilePage() {
 
   // Edit customer modal
   const [editOpen, setEditOpen] = useState(false);
+
+  // Add historical order modal
+  const [addOrderOpen, setAddOrderOpen] = useState(false);
 
   // ── Fetch ─────────────────────────────────────────────────────────────────
 
@@ -558,6 +564,20 @@ export default function CustomerProfilePage() {
         />
       )}
 
+      {/* Add historical order modal */}
+      {addOrderOpen && (
+        <AddHistoricalOrderModal
+          customerId={customer.id}
+          customerPhone={customer.phone}
+          customerCountry={customer.country}
+          onClose={() => setAddOrderOpen(false)}
+          onCreated={(orderId) => {
+            setAddOrderOpen(false);
+            router.push(`/admin/orders/${orderId}`);
+          }}
+        />
+      )}
+
       <div className="grid gap-6 lg:grid-cols-3">
 
         {/* ── LEFT COLUMN ── */}
@@ -855,7 +875,18 @@ export default function CustomerProfilePage() {
           </SectionCard>
 
           {/* Order history */}
-          <SectionCard title="Order History" icon={ShoppingCart}>
+          <SectionCard
+            title="Order History"
+            icon={ShoppingCart}
+            action={
+              can("orders.update") && (
+                <button type="button" onClick={() => setAddOrderOpen(true)}
+                  className="flex items-center gap-1.5 rounded-lg border border-black/[0.08] px-2.5 py-1 text-[0.75rem] font-semibold text-[#5c5e62] transition hover:bg-[#f0f2f5] hover:text-[#1a1a1a]">
+                  <PackagePlus size={12} /> Add Historical Order
+                </button>
+              )
+            }
+          >
             {orders === null ? (
               <div className="flex justify-center py-6"><Loader2 size={18} className="animate-spin text-[#E85C1A]" /></div>
             ) : orders.length === 0 ? (
