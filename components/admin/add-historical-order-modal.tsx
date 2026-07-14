@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { X, Loader2, AlertCircle, Plus, Trash2, PackagePlus } from "lucide-react";
+import {
+  X, Loader2, AlertCircle, Plus, Trash2, PackagePlus,
+  Paperclip, CheckCircle2, Upload,
+} from "lucide-react";
 import { COUNTRIES } from "@/lib/countries";
 
 type Props = {
@@ -21,13 +24,13 @@ type ItemRow = { sku: string; name: string; brand: string; unit_price: string; q
 
 const BLANK_ITEM: ItemRow = { sku: "", name: "", brand: "", unit_price: "", quantity: "1" };
 
-const ORDER_STATUSES = ["pending", "confirmed", "awaiting_proforma", "shipped", "delivered", "cancelled"] as const;
+const ORDER_STATUSES = ["pending", "confirmed", "awaiting_proforma", "processing", "shipped", "delivered", "cancelled"] as const;
 const STATUS_LABEL: Record<string, string> = {
-  pending: "Pending", confirmed: "Confirmed", awaiting_proforma: "Awaiting Proforma",
+  pending: "Pending", confirmed: "Confirmed", awaiting_proforma: "Awaiting Proforma", processing: "Processing",
   shipped: "Shipped", delivered: "Delivered", cancelled: "Cancelled",
 };
 
-const PAYMENT_STATUSES = ["paid", "unpaid", "refunded"] as const;
+const PAYMENT_STATUSES = ["pending", "paid", "failed", "refunded"] as const;
 
 const PAYMENT_STAGES = [
   "pending_proforma", "deposit_requested", "deposit_paid",
@@ -42,6 +45,24 @@ const CARRIER_TYPES = [
   ["truck", "Truck Freight"], ["road", "Road Freight"], ["dhl", "DHL"],
   ["sea", "Sea Freight"], ["air", "Air Freight"],
 ] as const;
+
+const DOC_LABELS = [
+  "Invoice", "Proforma", "Packing List", "Bill of Lading", "Order Confirmation",
+  "Certificate of Origin", "CMR", "Air Waybill", "Customs Document", "Proof of Delivery", "Other",
+];
+const DOC_ALLOWED_EXTENSIONS = ["pdf", "jpg", "jpeg", "png", "xls", "xlsx", "csv"];
+const DOC_MAX_FILE_BYTES = 20 * 1024 * 1024; // 20 MB
+
+type DocRow = {
+  file: File | null;
+  label: string;
+  customLabel: string;
+  notes: string;
+  status: "idle" | "uploading" | "done" | "error";
+  error: string | null;
+};
+
+const BLANK_DOC_ROW: DocRow = { file: null, label: "", customLabel: "", notes: "", status: "idle", error: null };
 
 const labelCls = "mb-1.5 block text-[0.78rem] font-semibold text-[#1a1a1a]";
 const inputBase =
@@ -67,6 +88,7 @@ export default function AddHistoricalOrderModal({
   const [carrier, setCarrier]             = useState("");
   const [carrierType, setCarrierType]     = useState("");
   const [trackingNumber, setTrackingNumber] = useState("");
+  const [containerNumber, setContainerNumber] = useState("");
 
   const [adminNotes, setAdminNotes] = useState("");
 
@@ -78,11 +100,54 @@ export default function AddHistoricalOrderModal({
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // Step 2 — document upload, once the order exists
+  const [step, setStep] = useState<"form" | "documents">("form");
+  const [createdOrder, setCreatedOrder] = useState<{ id: number; ref: string; paymentStage: string } | null>(null);
+  const [docRows, setDocRows] = useState<DocRow[]>([{ ...BLANK_DOC_ROW }]);
+
   function updateItem(idx: number, field: keyof ItemRow, value: string) {
     setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, [field]: value } : it)));
   }
   function addItemRow() { setItems((prev) => [...prev, { ...BLANK_ITEM }]); }
   function removeItemRow(idx: number) { setItems((prev) => prev.filter((_, i) => i !== idx)); }
+
+  function updateDocRow(idx: number, field: keyof DocRow, value: DocRow[keyof DocRow]) {
+    setDocRows((prev) => prev.map((r, i) => (i === idx ? { ...r, [field]: value } : r)));
+  }
+  function addDocRow() { setDocRows((prev) => [...prev, { ...BLANK_DOC_ROW }]); }
+  function removeDocRow(idx: number) { setDocRows((prev) => prev.filter((_, i) => i !== idx)); }
+
+  async function uploadDocRow(idx: number) {
+    if (!createdOrder) return;
+    const row = docRows[idx];
+    const label = row.label === "Other" ? row.customLabel.trim() : row.label;
+    if (!label) { updateDocRow(idx, "error", "Choose a document type."); return; }
+    if (!row.file) { updateDocRow(idx, "error", "Choose a file to upload."); return; }
+
+    updateDocRow(idx, "status", "uploading");
+    updateDocRow(idx, "error", null);
+
+    const fd = new FormData();
+    fd.append("file", row.file);
+    fd.append("document_label", label);
+    if (row.notes.trim()) fd.append("notes", row.notes.trim());
+
+    try {
+      const res = await fetch(`/api/admin/orders/${createdOrder.id}/trade-documents/upload`, { method: "POST", body: fd });
+      const json = await res.json().catch(() => ({})) as { message?: string; code?: string };
+      if (res.ok) {
+        setDocRows((prev) => prev.map((r, i) => (i === idx ? { ...r, status: "done", error: null } : r)));
+        return;
+      }
+      if (res.status === 409 && json.code === "document_generation_blocked_payment_stage") {
+        setDocRows((prev) => prev.map((r, i) => (i === idx ? { ...r, status: "error", error: "This order's payment stage isn't at Deposit Paid yet — raise it on the order page first, then retry." } : r)));
+        return;
+      }
+      setDocRows((prev) => prev.map((r, i) => (i === idx ? { ...r, status: "error", error: json.message ?? "Upload failed." } : r)));
+    } catch {
+      setDocRows((prev) => prev.map((r, i) => (i === idx ? { ...r, status: "error", error: "Network error. Please try again." } : r)));
+    }
+  }
 
   function validate(): FieldErrors {
     const e: FieldErrors = {};
@@ -120,6 +185,7 @@ export default function AddHistoricalOrderModal({
     if (carrier.trim()) body.carrier = carrier.trim();
     if (carrierType) body.carrier_type = carrierType;
     if (trackingNumber.trim()) body.tracking_number = trackingNumber.trim();
+    if (containerNumber.trim()) body.container_number = containerNumber.trim();
     if (adminNotes.trim()) body.admin_notes = adminNotes.trim();
 
     if (mode === "total") {
@@ -168,7 +234,9 @@ export default function AddHistoricalOrderModal({
       const data = (json?.data ?? json) as Record<string, unknown>;
       const orderId = Number(data.id);
       const orderRef = String(data.order_ref ?? data.ref ?? "");
-      onCreated(orderId, orderRef);
+      const stage = String(data.payment_stage ?? paymentStage ?? "balance_paid");
+      setCreatedOrder({ id: orderId, ref: orderRef, paymentStage: stage });
+      setStep("documents");
     } catch {
       setFormError("Network error. Please try again.");
     } finally {
@@ -178,6 +246,153 @@ export default function AddHistoricalOrderModal({
 
   const ic = (field: string) => `${inputBase} ${errors[field] ? errBorder : okBorder}`;
 
+  // ── Step 2: attach documents to the order just created ──────────────────
+  if (step === "documents" && createdOrder) {
+    const stageBlocked = ["pending_proforma", "deposit_requested"].includes(createdOrder.paymentStage);
+    const finish = () => onCreated(createdOrder.id, createdOrder.ref);
+
+    return (
+      <Shell onClose={finish}>
+        <div className="flex items-start gap-3 border-b border-black/[0.06] px-7 py-5">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E85C1A]">
+            <Paperclip size={18} className="text-white" />
+          </div>
+          <div>
+            <p className="text-[1rem] font-extrabold text-[#1a1a1a]">
+              Attach Documents — {createdOrder.ref || `Order #${createdOrder.id}`}
+            </p>
+            <p className="mt-0.5 text-[0.8rem] text-[#5c5e62]">
+              Upload the actual invoice, packing list, or bill of lading already sent to this customer — don&apos;t regenerate paperwork for a historical order.
+            </p>
+          </div>
+        </div>
+
+        <div className="max-h-[65vh] space-y-4 overflow-y-auto px-7 py-6">
+          {stageBlocked && (
+            <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5">
+              <AlertCircle size={14} className="shrink-0 text-amber-600" />
+              <p className="text-[0.8rem] text-amber-800">
+                This order&apos;s payment stage is still {PAYMENT_STAGE_LABEL[createdOrder.paymentStage] ?? createdOrder.paymentStage} — uploads need Deposit Paid or later. Raise the stage on the order page, then come back to upload.
+              </p>
+            </div>
+          )}
+          <div className="rounded-xl border border-black/[0.07] bg-[#fafafa] px-4 py-2.5">
+            <p className="text-[0.78rem] text-[#5c5e62]">
+              Uploaded documents only appear in the customer&apos;s portal once the order is fully paid (Balance Paid / Shipment Released) — that&apos;s the intentional payment gate, same as generated documents.
+            </p>
+          </div>
+
+          {docRows.map((row, idx) => (
+            <div key={idx} className="rounded-xl border border-black/[0.08] p-4">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <label className={labelCls}>Document Type</label>
+                  <select
+                    value={row.label}
+                    onChange={(e) => updateDocRow(idx, "label", e.target.value)}
+                    disabled={row.status === "done"}
+                    className={`${inputBase} ${okBorder} disabled:opacity-60`}
+                  >
+                    <option value="">Select document type…</option>
+                    {DOC_LABELS.map((l) => <option key={l} value={l}>{l}</option>)}
+                  </select>
+                  {row.label === "Other" && (
+                    <input
+                      value={row.customLabel}
+                      onChange={(e) => updateDocRow(idx, "customLabel", e.target.value)}
+                      disabled={row.status === "done"}
+                      className={`${inputBase} ${okBorder} mt-2 disabled:opacity-60`}
+                      placeholder="Describe the document"
+                    />
+                  )}
+                </div>
+                <div>
+                  <label className={labelCls}>Notes <span className="font-normal text-[#9ca3af]">(optional)</span></label>
+                  <input
+                    value={row.notes}
+                    onChange={(e) => updateDocRow(idx, "notes", e.target.value)}
+                    disabled={row.status === "done"}
+                    className={`${inputBase} ${okBorder} disabled:opacity-60`}
+                    placeholder="e.g. Container TCNU1234567"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                {row.status !== "done" ? (
+                  <>
+                    <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-black/[0.15] bg-white px-3 py-2 text-[0.82rem] text-[#5c5e62] transition hover:border-[#E85C1A]/40 hover:text-[#E85C1A]">
+                      <Paperclip size={14} strokeWidth={2} />
+                      {row.file ? row.file.name : "Choose file…"}
+                      <input
+                        type="file"
+                        accept={DOC_ALLOWED_EXTENSIONS.map((e) => `.${e}`).join(",")}
+                        className="sr-only"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] ?? null;
+                          updateDocRow(idx, "error", null);
+                          if (!file) { updateDocRow(idx, "file", null); return; }
+                          const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
+                          if (!DOC_ALLOWED_EXTENSIONS.includes(ext)) {
+                            updateDocRow(idx, "error", `File type ".${ext}" not allowed. Use: ${DOC_ALLOWED_EXTENSIONS.join(", ")}.`);
+                            e.target.value = "";
+                            return;
+                          }
+                          if (file.size > DOC_MAX_FILE_BYTES) {
+                            updateDocRow(idx, "error", "File exceeds 20 MB limit.");
+                            e.target.value = "";
+                            return;
+                          }
+                          updateDocRow(idx, "file", file);
+                        }}
+                      />
+                    </label>
+                    <button type="button" disabled={row.status === "uploading"} onClick={() => uploadDocRow(idx)}
+                      className="flex items-center gap-1.5 rounded-xl bg-[#1a1a1a] px-4 py-2 text-[0.8rem] font-semibold text-white transition hover:bg-black disabled:opacity-50">
+                      {row.status === "uploading" ? <><Loader2 size={13} className="animate-spin" /> Uploading…</> : <><Upload size={13} /> Upload</>}
+                    </button>
+                    {docRows.length > 1 && (
+                      <button type="button" onClick={() => removeDocRow(idx)}
+                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-black/[0.08] text-red-400 transition hover:bg-red-50 hover:text-red-600">
+                        <Trash2 size={13} />
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <p className="flex items-center gap-1.5 text-[0.8rem] font-semibold text-emerald-700">
+                    <CheckCircle2 size={14} /> Uploaded{row.file ? ` — ${row.file.name}` : ""}
+                  </p>
+                )}
+              </div>
+              {row.error && (
+                <p className="mt-2 flex items-center gap-1.5 text-[0.75rem] text-red-600">
+                  <AlertCircle size={12} className="shrink-0" /> {row.error}
+                </p>
+              )}
+            </div>
+          ))}
+
+          <button type="button" onClick={addDocRow}
+            className="flex items-center gap-1.5 text-[0.78rem] font-semibold text-[#E85C1A] hover:underline">
+            <Plus size={13} /> Add another document
+          </button>
+        </div>
+
+        <div className="flex justify-end gap-3 border-t border-black/[0.06] px-7 py-4">
+          <button type="button" onClick={finish}
+            className="h-10 rounded-xl border border-black/[0.1] px-5 text-[0.82rem] font-semibold text-[#5c5e62] transition hover:bg-[#f0f2f5]">
+            Skip for now
+          </button>
+          <button type="button" onClick={finish}
+            className="flex h-10 items-center gap-2 rounded-xl bg-[#E85C1A] px-6 text-[0.82rem] font-semibold text-white transition hover:bg-[#d44d10]">
+            Done — View Order
+          </button>
+        </div>
+      </Shell>
+    );
+  }
+
+  // ── Step 1: order details ────────────────────────────────────────────────
   return (
     <Shell onClose={onClose}>
       <form onSubmit={handleSubmit}>
@@ -188,7 +403,7 @@ export default function AddHistoricalOrderModal({
           <div>
             <p className="text-[1rem] font-extrabold text-[#1a1a1a]">Add Historical Order</p>
             <p className="mt-0.5 text-[0.8rem] text-[#5c5e62]">
-              Backfill an order this customer already has with Okelcor. Once created, add its documents and shipment tracking on the order page.
+              Backfill an order this customer already has with Okelcor. Next, you&apos;ll attach its real documents — shipment tracking can be added afterwards on the order page.
             </p>
           </div>
         </div>
@@ -271,7 +486,7 @@ export default function AddHistoricalOrderModal({
           {/* Carrier / tracking */}
           <div className="rounded-xl border border-black/[0.07] p-4">
             <p className="mb-3 text-[0.72rem] font-bold uppercase tracking-wide text-[#9ca3af]">Carrier &amp; Tracking <span className="font-normal normal-case text-[#9ca3af]">(optional — for shipments still in transit)</span></p>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label htmlFor="ho-carrier" className={labelCls}>Carrier</label>
                 <input id="ho-carrier" value={carrier} onChange={(e) => setCarrier(e.target.value)} className={ic("carrier")} placeholder="e.g. GLS" />
@@ -286,6 +501,10 @@ export default function AddHistoricalOrderModal({
               <div>
                 <label htmlFor="ho-tracking" className={labelCls}>Tracking Number</label>
                 <input id="ho-tracking" value={trackingNumber} onChange={(e) => setTrackingNumber(e.target.value)} className={ic("tracking_number")} />
+              </div>
+              <div>
+                <label htmlFor="ho-container" className={labelCls}>Container Number <span className="font-normal text-[#9ca3af]">(sea freight)</span></label>
+                <input id="ho-container" value={containerNumber} onChange={(e) => setContainerNumber(e.target.value)} className={ic("container_number")} placeholder="e.g. TCNU1234567" />
               </div>
             </div>
           </div>
