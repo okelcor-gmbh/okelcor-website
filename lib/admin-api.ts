@@ -302,6 +302,13 @@ export type CommunicationType = "email" | "call" | "whatsapp" | "note" | "system
 export type CommunicationDirection = "inbound" | "outbound" | "internal";
 export type CommunicationStatus = "planned" | "sent" | "failed" | "completed" | "skipped";
 
+export type CommunicationAttachment = {
+  name: string;
+  mime?: string | null;
+  size?: number | null;
+  download_url?: string | null;
+};
+
 export type Communication = {
   id: number;
   customer_id?: number | null;
@@ -311,8 +318,15 @@ export type Communication = {
   admin_user_name?: string | null;
   type: CommunicationType | string;
   direction: CommunicationDirection | string;
+  channel?: string | null;
   subject?: string | null;
   body?: string | null;
+  cc?: string[] | null;
+  attachments?: CommunicationAttachment[] | null;
+  message_id?: string | null;
+  in_reply_to?: number | null;
+  staff_read_at?: string | null;
+  customer_read_at?: string | null;
   status: CommunicationStatus | string;
   scheduled_at?: string | null;
   completed_at?: string | null;
@@ -639,6 +653,7 @@ export type AdminProfile = {
   role_label?: string;
   must_change_password?: boolean;
   last_login_at: string | null;
+  email_signature?: string | null;
 };
 
 // ── Media Library ─────────────────────────────────────────────────────────────

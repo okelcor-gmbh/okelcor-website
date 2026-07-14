@@ -232,8 +232,25 @@ tracking payload is now always `"carrier"`.
 | CRM-4 — Customer segmentation & access control | `cc2cab5` | ✅ Complete |
 | CRM-5 — Customer data quality & deduplication | `62850bc` | ✅ Complete |
 | CRM-6 — Communication timeline & follow-up automation | `6fd6f58` | ✅ Complete |
+| CRM-6B — Rich e-mail compose/reply, signature, customer messaging portal | 2026-07-14 | ✅ Complete (backend confirmed built + tested) |
 | CRM-7 — Proposal management & customer acceptance | `224ab1c` | ✅ Frontend complete |
 | CRM-8 — Buyer approval & customer lifecycle | `8c85cc0` | ✅ Frontend complete |
+
+#### CRM-6B Detail — Rich E-mail Compose/Reply, Signature, Customer Messaging
+
+Extends the existing CRM-6 communication log with a **real send** path (manual "I called them" / "I emailed them" logging is untouched). Deliberately **not** true inbound-e-mail capture — a customer replying to the actual e-mail in their inbox goes to the admin's personal inbox as before; two-way visibility is via the customer's own portal thread instead. **Needs an order-manager sign-off before launch that portal-only two-way messaging is acceptable** — flagged, not decided by frontend.
+
+| Sub-feature | Status |
+|---|---|
+| `Communication` type extended (`channel`, `cc`, `attachments`, `message_id`, `in_reply_to`, `staff_read_at`, `customer_read_at`) | ✅ |
+| Admin — `components/admin/signature-editor.tsx`: uncontrolled `contenteditable` (loaded once on mount, read only on Save) + `updateSignature` server action, `PUT /admin/profile/signature`, wired into `/admin/profile` | ✅ |
+| Admin — `components/admin/email-composer-modal.tsx`: uncontrolled `contenteditable` body, CC chips (max 5), drag-drop attachments (max 5, 10MB each), reply threading (`in_reply_to_id`), inline 422/502 handling (`missing_recipient_email`, `email_send_failed` — failed sends still logged, not data loss) | ✅ |
+| `CommunicationTimeline` — "Compose E-mail" button (gated on `recipientEmail`), per-row "Reply", cc/attachment/failed/unread rendering, auto-mark-read (`POST /admin/communications/{id}/read`) on load for inbound unread e-mails | ✅ |
+| Wired into customer detail page (`customer.email`) and quote detail page (`quote.email`) | ✅ |
+| Proxy routes: `customers/{id}` + `quote-requests/{id}` `communications/send-email` (multipart), `communications/{id}/read`, `communications/{id}/attachments/{index}/download` (binary passthrough) | ✅ |
+| Customer portal — `/account/messages` (`components/account/messages-center.tsx`): expandable thread rows, plain-text reply (no attachments from customer side, per spec), attachment download, mark-read-on-open | ✅ |
+| `components/account/messages-bell.tsx` — unread badge in navbar (polls list `meta.unread_count`, no dropdown — messages need the full reply flow) + "Messages" dashboard tile | ✅ |
+| Proxy routes: `account/communications` (list), `communications/{id}/reply`, `communications/{id}/read`, `communications/{id}/attachments/{index}/download` | ✅ |
 
 #### CRM-8 Detail
 

@@ -16,6 +16,7 @@ import {
 import { updateProfile, changePassword } from "@/app/admin/profile/actions";
 import type { AdminProfile } from "@/lib/admin-api";
 import { ROLE_LABELS, ROLE_COLORS } from "@/lib/admin-permissions";
+import SignatureEditor from "@/components/admin/signature-editor";
 
 function formatLastLogin(dt: string | null): string {
   if (!dt) return "First login";
@@ -357,6 +358,9 @@ export default function ProfileUI({
             </div>
           )}
         </div>
+
+        {/* ── E-mail signature card ── */}
+        <SignatureEditor initialHtml={profile.email_signature} />
 
         {/* ── Change password card ── */}
         <div className="rounded-2xl bg-white p-6 shadow-sm">

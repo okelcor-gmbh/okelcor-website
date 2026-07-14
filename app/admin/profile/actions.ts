@@ -57,6 +57,40 @@ export async function updateProfile(data: {
   return {};
 }
 
+export async function updateSignature(
+  signatureHtml: string
+): Promise<{ error?: string; signatureHtml?: string }> {
+  const token = await getToken();
+  if (!token) return { error: "Not authenticated." };
+
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}/admin/profile/signature`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ signature_html: signatureHtml }),
+      cache: "no-store",
+    });
+  } catch {
+    return { error: "Could not reach the server." };
+  }
+
+  const json = await res.json().catch(() => ({}));
+
+  if (res.status === 422) {
+    return { error: json.message ?? json.errors?.signature_html?.[0] ?? "Signature could not be saved." };
+  }
+  if (res.status === 403) return { error: "You don't have permission to update your signature." };
+  if (!res.ok) return { error: json.message || "Failed to save signature." };
+
+  const saved = json.data?.email_signature ?? json.data?.signature_html ?? json.email_signature ?? signatureHtml;
+  return { signatureHtml: saved };
+}
+
 export async function changePassword(
   current_password: string,
   password: string,

@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   Mail, Phone, MessageCircle, StickyNote, Bot,
-  Plus, X, ChevronDown, Loader2, AlertCircle, CheckCircle2,
-  ArrowUpRight, ArrowDownLeft, Lock,
+  Plus, X, Loader2, AlertCircle, CheckCircle2,
+  ArrowUpRight, ArrowDownLeft, Lock, Send, Reply, Paperclip, Download,
 } from "lucide-react";
 import type { Communication } from "@/lib/admin-api";
+import EmailComposerModal from "@/components/admin/email-composer-modal";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -42,6 +43,8 @@ type Props = {
   context: "customer" | "quote";
   entityId: number;
   compact?: boolean;
+  recipientEmail?: string | null;
+  recipientName?: string | null;
 };
 
 type FormState = {
@@ -55,13 +58,18 @@ const EMPTY_FORM: FormState = { type: "note", direction: "internal", subject: ""
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export default function CommunicationTimeline({ context, entityId, compact = false }: Props) {
+export default function CommunicationTimeline({ context, entityId, compact = false, recipientEmail, recipientName }: Props) {
   const [entries, setEntries] = useState<Communication[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [submitMsg, setSubmitMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+
+  // Composer / reply
+  const [composeOpen, setComposeOpen] = useState(false);
+  const [replyTo, setReplyTo] = useState<{ id: number; subject?: string | null } | null>(null);
+  const markedRead = useRef(new Set<number>());
 
   const apiPath = context === "customer"
     ? `/api/admin/customers/${entityId}/communications`
@@ -72,7 +80,16 @@ export default function CommunicationTimeline({ context, entityId, compact = fal
     try {
       const res = await fetch(apiPath, { cache: "no-store" });
       const json = await res.json().catch(() => ({ data: [] }));
-      setEntries(Array.isArray(json.data) ? json.data : []);
+      const rows: Communication[] = Array.isArray(json.data) ? json.data : [];
+      setEntries(rows);
+
+      // Viewing this panel counts as reading its inbound e-mails.
+      const unread = rows.filter((r) => r.type === "email" && r.direction === "inbound" && !r.staff_read_at && !markedRead.current.has(r.id));
+      if (unread.length) {
+        unread.forEach((r) => markedRead.current.add(r.id));
+        await Promise.all(unread.map((r) => fetch(`/api/admin/communications/${r.id}/read`, { method: "POST" }).catch(() => {})));
+        setEntries((prev) => prev.map((r) => (unread.some((u) => u.id === r.id) ? { ...r, staff_read_at: new Date().toISOString() } : r)));
+      }
     } catch { setEntries([]); }
     finally { setLoading(false); }
   }, [apiPath]);
@@ -114,12 +131,33 @@ export default function CommunicationTimeline({ context, entityId, compact = fal
           Communications
           {entries.length > 0 && <span className="ml-2 rounded-full bg-[#f0f2f5] px-2 py-0.5 text-[0.65rem] text-[#5c5e62]">{entries.length}</span>}
         </p>
-        <button type="button" onClick={() => { setShowForm((v) => !v); setSubmitMsg(null); }}
-          className="flex items-center gap-1.5 rounded-xl border border-black/[0.09] bg-white px-3 py-1.5 text-[0.78rem] font-semibold text-[#5c5e62] transition hover:bg-[#f5f5f5]">
-          {showForm ? <X size={13} /> : <Plus size={13} />}
-          {showForm ? "Cancel" : "Add Entry"}
-        </button>
+        <div className="flex items-center gap-2">
+          {recipientEmail && (
+            <button type="button" onClick={() => { setReplyTo(null); setComposeOpen(true); }}
+              className="flex items-center gap-1.5 rounded-xl bg-[#E85C1A] px-3 py-1.5 text-[0.78rem] font-semibold text-white transition hover:bg-[#d44d10]">
+              <Send size={12} /> Compose E-mail
+            </button>
+          )}
+          <button type="button" onClick={() => { setShowForm((v) => !v); setSubmitMsg(null); }}
+            className="flex items-center gap-1.5 rounded-xl border border-black/[0.09] bg-white px-3 py-1.5 text-[0.78rem] font-semibold text-[#5c5e62] transition hover:bg-[#f5f5f5]">
+            {showForm ? <X size={13} /> : <Plus size={13} />}
+            {showForm ? "Cancel" : "Log an Interaction"}
+          </button>
+        </div>
       </div>
+
+      {/* Composer / reply modal */}
+      {composeOpen && recipientEmail && (
+        <EmailComposerModal
+          context={context}
+          entityId={entityId}
+          recipientEmail={recipientEmail}
+          recipientName={recipientName}
+          replyTo={replyTo}
+          onClose={() => { setComposeOpen(false); setReplyTo(null); }}
+          onSent={(entry) => { setEntries((prev) => [entry, ...prev]); }}
+        />
+      )}
 
       {/* Add entry form */}
       {showForm && (
@@ -190,8 +228,11 @@ export default function CommunicationTimeline({ context, entityId, compact = fal
             const Icon = TYPE_ICON[entry.type] ?? StickyNote;
             const iconCls = TYPE_COLOR[entry.type] ?? "bg-gray-100 text-gray-500";
             const DirIcon = DIR_ICON[entry.direction] ?? Lock;
+            const isEmail = entry.type === "email";
+            const unread = isEmail && entry.direction === "inbound" && !entry.staff_read_at;
+            const failed = entry.status === "failed";
             return (
-              <div key={entry.id} className="flex gap-3 rounded-xl border border-black/[0.06] bg-white p-3">
+              <div key={entry.id} className={`flex gap-3 rounded-xl border bg-white p-3 ${unread ? "border-[#E85C1A]/30 bg-orange-50/20" : "border-black/[0.06]"}`}>
                 <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${iconCls}`}>
                   <Icon size={14} strokeWidth={1.8} />
                 </div>
@@ -204,13 +245,38 @@ export default function CommunicationTimeline({ context, entityId, compact = fal
                     {entry.admin_user_name && (
                       <span className="text-[0.68rem] text-[#9ca3af]">· {entry.admin_user_name}</span>
                     )}
+                    {unread && <span className="rounded-full bg-[#E85C1A] px-1.5 py-0.5 text-[0.6rem] font-bold text-white">New</span>}
+                    {failed && <span className="flex items-center gap-1 rounded-full bg-red-100 px-1.5 py-0.5 text-[0.6rem] font-bold text-red-700"><AlertCircle size={9} /> Failed to send</span>}
                     <span className="ml-auto text-[0.68rem] text-[#9ca3af]">{fmtDT(entry.created_at)}</span>
                   </div>
                   {entry.subject && (
                     <p className="mt-0.5 text-[0.78rem] font-medium text-[#1a1a1a]">{entry.subject}</p>
                   )}
+                  {entry.cc && entry.cc.length > 0 && (
+                    <p className="mt-0.5 text-[0.7rem] text-[#9ca3af]">cc: {entry.cc.join(", ")}</p>
+                  )}
                   {entry.body && (
-                    <p className="mt-0.5 text-[0.78rem] leading-relaxed text-[#5c5e62] whitespace-pre-wrap">{entry.body}</p>
+                    isEmail ? (
+                      <div className="prose-comm mt-0.5 text-[0.78rem] leading-relaxed text-[#5c5e62]" dangerouslySetInnerHTML={{ __html: entry.body }} />
+                    ) : (
+                      <p className="mt-0.5 text-[0.78rem] leading-relaxed text-[#5c5e62] whitespace-pre-wrap">{entry.body}</p>
+                    )
+                  )}
+                  {entry.attachments && entry.attachments.length > 0 && (
+                    <div className="mt-1.5 flex flex-wrap gap-1.5">
+                      {entry.attachments.map((att, idx) => (
+                        <a key={idx} href={`/api/admin/communications/${entry.id}/attachments/${idx}/download`} target="_blank" rel="noopener noreferrer"
+                          className="flex items-center gap-1 rounded-lg border border-black/[0.08] bg-[#fafafa] px-2 py-1 text-[0.7rem] text-[#5c5e62] transition hover:bg-[#f0f2f5]">
+                          <Paperclip size={10} /> {att.name} <Download size={10} />
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                  {isEmail && recipientEmail && (
+                    <button type="button" onClick={() => { setReplyTo({ id: entry.id, subject: entry.subject }); setComposeOpen(true); }}
+                      className="mt-1.5 flex items-center gap-1 text-[0.72rem] font-semibold text-[#E85C1A] hover:underline">
+                      <Reply size={11} /> Reply
+                    </button>
                   )}
                 </div>
               </div>

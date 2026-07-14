@@ -48,6 +48,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import NotificationBell from "@/components/account/notification-bell";
+import MessagesBell from "@/components/account/messages-bell";
 import { useCustomerAuth } from "@/context/CustomerAuthContext";
 import { useCart } from "@/context/cart-context";
 import { useLanguage } from "@/context/language-context";
@@ -495,6 +496,7 @@ export default function Navbar() {
                   <div className="h-9 w-9 animate-pulse rounded-full bg-black/[0.06]" aria-hidden="true" />
                 ) : isAuthed ? (
                   <>
+                  <MessagesBell />
                   <NotificationBell />
                   <div className="relative">
                     <button

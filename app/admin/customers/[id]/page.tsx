@@ -1024,7 +1024,13 @@ export default function CustomerProfilePage() {
             <SectionCard title="Communications" icon={Activity}>
               <div className="p-5">
                 <Suspense fallback={<div className="py-6 text-center text-[0.83rem] text-[#9ca3af]">Loading…</div>}>
-                  <CommunicationTimeline context="customer" entityId={customer.id} compact />
+                  <CommunicationTimeline
+                    context="customer"
+                    entityId={customer.id}
+                    compact
+                    recipientEmail={customer.email}
+                    recipientName={name}
+                  />
                 </Suspense>
               </div>
             </SectionCard>

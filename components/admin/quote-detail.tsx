@@ -1282,7 +1282,13 @@ export default function QuoteDetail({
         {/* ── CRM-6: Communication Timeline ── */}
         <SectionCard title="Communications">
           <div className="p-5">
-            <CommunicationTimeline context="quote" entityId={quote.id} compact />
+            <CommunicationTimeline
+              context="quote"
+              entityId={quote.id}
+              compact
+              recipientEmail={quote.email}
+              recipientName={quote.full_name}
+            />
           </div>
         </SectionCard>
 
