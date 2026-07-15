@@ -234,12 +234,29 @@ tracking payload is now always `"carrier"`.
 | CRM-5 — Customer data quality & deduplication | `62850bc` | ✅ Complete |
 | CRM-6 — Communication timeline & follow-up automation | `6fd6f58` | ✅ Complete |
 | CRM-6B — Rich e-mail compose/reply, signature, customer messaging portal | 2026-07-14 | ✅ Complete (backend confirmed built + tested) |
+| CRM-6C — WhatsApp Business integration | 2026-07-15 | ✅ Complete (backend confirmed built + tested; depends on account-side Meta setup before real sends work) |
 | CRM-7 — Proposal management & customer acceptance | `224ab1c` | ✅ Frontend complete |
 | CRM-8 — Buyer approval & customer lifecycle | `8c85cc0` | ✅ Frontend complete |
 
+#### CRM-6C Detail — WhatsApp Business Integration
+
+WhatsApp as a second channel on the same `customer_communications` log CRM-6B built for e-mail (`type: "whatsapp"`, same `channel`/`attachments`/`staff_read_at`/`customer_read_at` fields). Two things genuinely new vs. e-mail: replies are **live** (webhook-driven, no portal-only workaround needed), and a first-time WhatsApp contact with no matching customer/quote auto-creates a lead — nothing to build for that specifically, it already surfaces in the existing quote-request inbox with `lead_source: "whatsapp"`.
+
+| Sub-feature | Status |
+|---|---|
+| `Communication` type extended (`phone_number`, `whatsapp_message_id`, `whatsapp_status`, `whatsapp_template_name`); `LeadSource` gains `"whatsapp"`; `CustomerNotificationPreferences` gains `whatsapp_enabled` | ✅ |
+| `components/admin/whatsapp-composer-modal.tsx` — plain textarea (not rich HTML — WhatsApp is plain text), no CC/subject/attachments (v1 scope). 24-hour-window failure (`502 whatsapp_send_failed`) surfaced as an amber "customer needs to message first" notice, not a generic error; `422 missing_recipient_phone` handled | ✅ |
+| `CommunicationTimeline` — "WhatsApp" compose button (gated on `recipientPhone`), phone number + delivery ticks on outbound rows (✓ sent / ✓✓ delivered / ✓✓ blue read, matching WhatsApp's own visual language), template-name badge, auto-mark-read extended to inbound WhatsApp | ✅ |
+| Wired into customer detail (`customer.phone`) and quote detail (`quote.phone`) pages | ✅ |
+| Proxy routes: `customers/{id}` + `quote-requests/{id}` `communications/send-whatsapp` (JSON, no multipart needed) | ✅ |
+| `lib/lead-source.ts` — `isSyntheticWhatsappEmail()`; quotes table + detail page render the `whatsapp+{phone}@no-email.okelcor.internal` placeholder as "No e-mail (WhatsApp lead)" instead of the raw address, and disable the (separate, pre-existing) template follow-up e-mail action for such leads | ✅ |
+| `LeadSourceBadge` on the quotes table — small badge per `lead_source`, WhatsApp gets its own green icon variant | ✅ |
+| Customer portal — `whatsapp_enabled` toggle in notification preferences (`components/account/notifications-center.tsx`), **defaults off** (unlike e-mail groups) per Meta's opt-in requirement, with a link to add a phone number if missing | ✅ |
+| Not built (scope-flagged, not an oversight): admin document-send via WhatsApp (`WhatsAppService::sendDocument` exists service-side, no endpoint wired) — small addition if wanted; no "Lead Funnel Analytics" dashboard exists in this frontend at all yet, so there was nothing to add a WhatsApp entry to there | — |
+
 #### CRM-6B Detail — Rich E-mail Compose/Reply, Signature, Customer Messaging
 
-Extends the existing CRM-6 communication log with a **real send** path (manual "I called them" / "I emailed them" logging is untouched). Deliberately **not** true inbound-e-mail capture — a customer replying to the actual e-mail in their inbox goes to the admin's personal inbox as before; two-way visibility is via the customer's own portal thread instead. **Needs an order-manager sign-off before launch that portal-only two-way messaging is acceptable** — flagged, not decided by frontend.
+Extends the existing CRM-6 communication log with a **real send** path (manual "I called them" / "I emailed them" logging is untouched).
 
 | Sub-feature | Status |
 |---|---|
@@ -252,6 +269,7 @@ Extends the existing CRM-6 communication log with a **real send** path (manual "
 | Customer portal — `/account/messages` (`components/account/messages-center.tsx`): expandable thread rows, plain-text reply (no attachments from customer side, per spec), attachment download, mark-read-on-open | ✅ |
 | `components/account/messages-bell.tsx` — unread badge in navbar (polls list `meta.unread_count`, no dropdown — messages need the full reply flow) + "Messages" dashboard tile | ✅ |
 | Proxy routes: `account/communications` (list), `communications/{id}/reply`, `communications/{id}/read`, `communications/{id}/attachments/{index}/download` | ✅ |
+| **True inbound e-mail capture** (2026-07-16) — the gap flagged above is closed: a customer's actual e-mail reply now lands back in this same thread automatically (`direction: "inbound"`, `channel: "email"`), no new endpoint. Confirmed the existing generic rendering already needed zero changes: direction icon + label + orange unread highlight already distinguish inbound rows, and `NotifIcon`/`notifBody`/`notifLink` (`lib/admin-notifications.ts`) already fall back generically for unrecognized types, so the new `email_reply_received` admin notification type (added to `AdminNotificationType`, given its own `Mail` icon — cosmetic only) needed no allow-list change. Added the one genuinely new thing: `CommunicationTimeline` now polls every 30s while the panel is open and shows a dismissible "New reply received" banner when a live reply arrives with no admin action | ✅ |
 
 #### CRM-8 Detail
 

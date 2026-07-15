@@ -1029,6 +1029,7 @@ export default function CustomerProfilePage() {
                     entityId={customer.id}
                     compact
                     recipientEmail={customer.email}
+                    recipientPhone={customer.phone}
                     recipientName={name}
                   />
                 </Suspense>

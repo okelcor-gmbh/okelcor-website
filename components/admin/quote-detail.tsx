@@ -17,6 +17,7 @@ import ProposalCard from "@/components/admin/proposal-card";
 import { updateQuoteStatus } from "@/app/admin/quotes/actions";
 import type { ConvertToOrderResult } from "@/app/admin/quotes/actions";
 import type { AdminQuoteFull, QuoteItem } from "@/lib/admin-api";
+import { isSyntheticWhatsappEmail } from "@/lib/lead-source";
 import { formatIncoterm } from "@/lib/utils";
 import QuoteConvertModal from "@/components/admin/quote-convert-modal";
 
@@ -595,7 +596,9 @@ export default function QuoteDetail({
                 </button>
               )}
               <button type="button" onClick={() => setShowEmailModal(true)}
-                className="flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-3 py-1.5 text-[0.75rem] font-semibold text-blue-700 transition hover:bg-blue-100">
+                disabled={isSyntheticWhatsappEmail(quote.email)}
+                title={isSyntheticWhatsappEmail(quote.email) ? "No real e-mail on file — this lead came in via WhatsApp" : undefined}
+                className="flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-3 py-1.5 text-[0.75rem] font-semibold text-blue-700 transition hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-40">
                 <Mail size={12} /> Send Follow-up Email
               </button>
             </div>
@@ -774,7 +777,9 @@ export default function QuoteDetail({
               {/* Lead summary */}
               <div className="mb-5 rounded-xl border border-black/[0.07] bg-[#fafafa] px-4 py-3.5 text-[0.83rem]">
                 <p className="font-semibold text-[#1a1a1a]">{quote.full_name}</p>
-                <p className="text-[#5c5e62]">{quote.email}</p>
+                <p className="text-[#5c5e62]">
+                  {isSyntheticWhatsappEmail(quote.email) ? <span className="italic text-[#9ca3af]">No e-mail (WhatsApp lead)</span> : quote.email}
+                </p>
                 {quote.company_name && <p className="text-[#5c5e62]">{quote.company_name}</p>}
                 <p className="text-[#5c5e62]">{quote.country}</p>
               </div>
@@ -1087,7 +1092,7 @@ export default function QuoteDetail({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <InfoRow label="Full Name"      value={quote.full_name} />
             <InfoRow label="Contact Person" value={quote.contact_person} />
-            <InfoRow label="Email"          value={quote.email} />
+            <InfoRow label="Email"          value={isSyntheticWhatsappEmail(quote.email) ? null : quote.email} fallback={isSyntheticWhatsappEmail(quote.email) ? "No e-mail (WhatsApp lead)" : undefined} />
             <InfoRow label="Phone"          value={quote.phone} />
             <InfoRow label="Company Name"   value={quote.company_name} />
             <InfoRow label="Business Type"  value={quote.business_type} />
@@ -1286,7 +1291,8 @@ export default function QuoteDetail({
               context="quote"
               entityId={quote.id}
               compact
-              recipientEmail={quote.email}
+              recipientEmail={isSyntheticWhatsappEmail(quote.email) ? null : quote.email}
+              recipientPhone={quote.phone}
               recipientName={quote.full_name}
             />
           </div>

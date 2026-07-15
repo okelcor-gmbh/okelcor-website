@@ -6,9 +6,10 @@ import Link from "next/link";
 import {
   Search, Eye, ChevronLeft, ChevronRight, X,
   CheckCircle2, XCircle, AlertOctagon, Loader2,
-  AlertTriangle, Clock, User,
+  AlertTriangle, Clock, User, MessageCircle,
 } from "lucide-react";
 import type { AdminQuote } from "@/lib/admin-api";
+import { isSyntheticWhatsappEmail } from "@/lib/lead-source";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -156,6 +157,17 @@ function PriorityBadge({ priority }: { priority?: string | null }) {
     <span className={`inline-flex items-center rounded border px-1.5 py-0.5 text-[0.62rem] font-bold uppercase tracking-wide ${PRIORITY_STYLES[priority] ?? PRIORITY_STYLES.normal}`}>
       {priority === "urgent" && <AlertTriangle size={9} className="mr-0.5 shrink-0" />}
       {priority}
+    </span>
+  );
+}
+
+function LeadSourceBadge({ source }: { source?: string | null }) {
+  if (!source) return null;
+  const isWhatsApp = source === "whatsapp";
+  return (
+    <span className={`mt-0.5 inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[0.62rem] font-semibold capitalize ${isWhatsApp ? "bg-emerald-50 text-emerald-700" : "bg-gray-100 text-[#9ca3af]"}`}>
+      {isWhatsApp && <MessageCircle size={9} strokeWidth={2.5} />}
+      {source.replace(/_/g, " ")}
     </span>
   );
 }
@@ -386,14 +398,14 @@ export default function QuotesTable({
                         <span className="font-mono text-[0.82rem] font-semibold text-[#1a1a1a]">
                           {quote.ref_number}
                         </span>
-                        {quote.lead_source && (
-                          <p className="mt-0.5 text-[0.65rem] text-[#9ca3af]">{quote.lead_source.replace(/_/g, " ")}</p>
-                        )}
+                        <LeadSourceBadge source={quote.lead_source} />
                       </td>
                       {/* Requester */}
                       <td className="px-4 py-3">
                         <p className="text-[0.875rem] font-semibold text-[#1a1a1a]">{quote.full_name}</p>
-                        <p className="text-[0.73rem] text-[#5c5e62]">{quote.email}</p>
+                        <p className="text-[0.73rem] text-[#5c5e62]">
+                          {isSyntheticWhatsappEmail(quote.email) ? <span className="italic text-[#9ca3af]">No e-mail (WhatsApp lead)</span> : quote.email}
+                        </p>
                         {quote.company_name && <p className="text-[0.73rem] text-[#5c5e62]">{quote.company_name}</p>}
                         <div className="mt-0.5 flex flex-wrap items-center gap-1">
                           {quote.quality_score != null && <QualityScore score={quote.quality_score} />}

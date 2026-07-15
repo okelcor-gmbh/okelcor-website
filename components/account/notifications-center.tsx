@@ -13,7 +13,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  Bell, CheckCheck, X, Loader2, ChevronLeft, ChevronRight, Mail, Inbox, ArrowRight,
+  Bell, CheckCheck, X, Loader2, ChevronLeft, ChevronRight, Mail, Inbox, ArrowRight, MessageCircle,
 } from "lucide-react";
 import type {
   CustomerNotification, CustomerNotificationType, CustomerNotificationPreferences,
@@ -293,6 +293,15 @@ function PreferencesPanel() {
     });
   };
 
+  // WhatsApp defaults OFF (unlike the e-mail groups above) — Meta requires explicit opt-in.
+  const toggleWhatsapp = () => {
+    setPrefs((prev) => {
+      const next = { ...(prev ?? {}), whatsapp_enabled: !(prev?.whatsapp_enabled ?? false) };
+      void persist(next);
+      return next;
+    });
+  };
+
   async function persist(next: CustomerNotificationPreferences) {
     setSaving(true); setSaved(false);
     try {
@@ -347,6 +356,35 @@ function PreferencesPanel() {
             </div>
           );
         })}
+      </div>
+
+      <div className="mt-4 border-t border-black/[0.06] pt-4">
+        <div className="mb-1 flex items-center gap-2">
+          <MessageCircle size={14} strokeWidth={1.9} className="text-emerald-600" />
+          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">WhatsApp</p>
+        </div>
+        <div className="flex items-start justify-between gap-3 py-2">
+          <div className="min-w-0">
+            <p className="text-[0.84rem] font-semibold text-[var(--foreground)]">Receive order and account updates on WhatsApp</p>
+            <p className="mt-0.5 text-[0.74rem] leading-snug text-[var(--muted)]">
+              Off by default. Needs a phone number on file — <Link href="/account/profile" className="font-semibold text-[var(--primary)] hover:underline">add one in your profile</Link> if you haven&apos;t.
+            </p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={prefs?.whatsapp_enabled ?? false}
+            aria-label="Toggle WhatsApp updates"
+            disabled={prefs === null}
+            onClick={toggleWhatsapp}
+            className={[
+              "relative mt-0.5 h-5 w-9 shrink-0 rounded-full transition",
+              (prefs?.whatsapp_enabled ?? false) ? "bg-emerald-600" : "bg-black/15",
+            ].join(" ")}
+          >
+            <span className={["absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all", (prefs?.whatsapp_enabled ?? false) ? "left-[18px]" : "left-0.5"].join(" ")} />
+          </button>
+        </div>
       </div>
 
       <p className="mt-4 flex items-center gap-1.5 text-[0.72rem] text-[var(--muted)]">

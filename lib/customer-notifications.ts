@@ -85,6 +85,8 @@ export type CustomerNotificationPreferences = {
   email_documents?: boolean;
   email_account?: boolean;
   email_marketing?: boolean;
+  /** Off by default for every customer — Meta requires explicit opt-in before WhatsApp sends. */
+  whatsapp_enabled?: boolean;
 };
 
 // ─── Field accessors (forward-compatible with the admin shape) ───────────────────

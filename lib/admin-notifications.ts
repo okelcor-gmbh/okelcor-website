@@ -8,7 +8,7 @@
 import { createElement } from "react";
 import {
   Bell, UserPlus, CalendarClock, CheckCircle2, ShieldQuestion,
-  UserCheck, FileWarning, CreditCard, FileText,
+  UserCheck, FileWarning, CreditCard, FileText, Mail,
   type LucideIcon, type LucideProps,
 } from "lucide-react";
 import type { AdminNotification, AdminNotificationSeverity } from "@/lib/admin-api";
@@ -48,6 +48,7 @@ const TYPE_ICONS: Record<string, LucideIcon> = {
   quote_needs_review:        FileWarning,
   order_payment_milestone:   CreditCard,
   document_action_needed:    FileText,
+  email_reply_received:      Mail,
 };
 
 /**

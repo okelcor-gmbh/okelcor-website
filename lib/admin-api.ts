@@ -327,6 +327,11 @@ export type Communication = {
   in_reply_to?: number | null;
   staff_read_at?: string | null;
   customer_read_at?: string | null;
+  // WhatsApp channel fields
+  phone_number?: string | null;
+  whatsapp_message_id?: string | null;
+  whatsapp_status?: "sent" | "delivered" | "read" | "failed" | "received" | string | null;
+  whatsapp_template_name?: string | null;
   status: CommunicationStatus | string;
   scheduled_at?: string | null;
   completed_at?: string | null;
@@ -379,7 +384,7 @@ export type QualificationStatus =
   | "new" | "needs_review" | "qualified" | "proposal_sent"
   | "customer_invited" | "converted" | "rejected" | "spam" | "closed";
 export type LeadSource =
-  | "website_quote" | "contact_form" | "ebay" | "phone" | "email" | "referral";
+  | "website_quote" | "contact_form" | "ebay" | "phone" | "email" | "referral" | "whatsapp";
 
 // CRM-3 / CRM-3B: admin notifications (e.g. "lead assigned to you")
 export type AdminNotificationType =
@@ -392,6 +397,7 @@ export type AdminNotificationType =
   | "quote_needs_review"
   | "order_payment_milestone"
   | "document_action_needed"
+  | "email_reply_received"
   | string;
 
 export type AdminNotificationSeverity = "info" | "success" | "warning" | "urgent";
