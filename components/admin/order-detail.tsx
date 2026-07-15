@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { SITE_URL } from "@/lib/constants";
 import { updateOrderStatus, cancelOrder, deleteOrder, addShipmentEvent, updateShipmentEvent, deleteShipmentEvent } from "@/app/admin/orders/actions";
-import type { AdminOrderFull, AdminOrderLog, ShipmentEvent } from "@/lib/admin-api";
+import type { AdminOrderFull, AdminOrderItem, AdminOrderLog, ShipmentEvent } from "@/lib/admin-api";
 import { canDo } from "@/lib/admin-permissions";
 import TradeDocumentsCard from "@/components/admin/trade-documents-card";
 import PaymentMilestonesCard from "@/components/admin/payment-milestones-card";
@@ -21,6 +21,8 @@ const ORDER_STATUSES = ["pending", "confirmed", "awaiting_proforma", "shipped", 
 type OrderStatus = (typeof ORDER_STATUSES)[number];
 
 type TabId = "overview" | "payments" | "documents" | "logistics" | "compliance" | "activity";
+type RevisionItemDraft = { id: number; name: string; unit_price: string; quantity: string; remove: boolean };
+type RevisionNewItemDraft = { name: string; unit_price: string; quantity: string };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -507,6 +509,24 @@ export default function OrderDetail({
   const [deleteError,     setDeleteError]     = useState<string | null>(null);
   const [isDeletePending, startDeleteTransition] = useTransition();
 
+  // ── Order item editing (unlocked, non-eBay orders) ────────────────────────
+  const [itemModalMode,  setItemModalMode]  = useState<"add" | "edit" | null>(null);
+  const [itemModalId,    setItemModalId]    = useState<number | null>(null);
+  const [itemName,       setItemName]       = useState("");
+  const [itemSku,        setItemSku]        = useState("");
+  const [itemBrand,      setItemBrand]      = useState("");
+  const [itemSize,       setItemSize]       = useState("");
+  const [itemUnitPrice,  setItemUnitPrice]  = useState("");
+  const [itemQuantity,   setItemQuantity]   = useState("");
+  const [itemReason,     setItemReason]     = useState("");
+  const [itemModalLoading, setItemModalLoading] = useState(false);
+  const [itemModalError,   setItemModalError]   = useState<string | null>(null);
+
+  const [deleteItemTarget,  setDeleteItemTarget]  = useState<AdminOrderItem | null>(null);
+  const [deleteItemReason,  setDeleteItemReason]  = useState("");
+  const [deleteItemLoading, setDeleteItemLoading] = useState(false);
+  const [deleteItemError,   setDeleteItemError]   = useState<string | null>(null);
+
   const [paymentStatus,     setPaymentStatus]     = useState(order.payment_status ?? "");
   const [markPaidOpen,      setMarkPaidOpen]      = useState(false);
   const [markPaidConfirmed, setMarkPaidConfirmed] = useState(false);
@@ -522,6 +542,9 @@ export default function OrderDetail({
   const [revisionLoading,      setRevisionLoading]      = useState(false);
   const [revisionError,        setRevisionError]        = useState<string | null>(null);
   const [revisionSubmitted,    setRevisionSubmitted]    = useState(false);
+
+  const [revisionItems,    setRevisionItems]    = useState<RevisionItemDraft[]>([]);
+  const [revisionNewItems, setRevisionNewItems] = useState<RevisionNewItemDraft[]>([]);
 
   const [approveModalOpen,   setApproveModalOpen]   = useState(false);
   const [approveConfirmed,   setApproveConfirmed]   = useState(false);
@@ -544,8 +567,10 @@ export default function OrderDetail({
   const customerRejected          = order.customer_acceptance_status === "rejected";
   const isLocked                  = order.financials_locked === true;
   const hasTradeDocs              = (order.trade_documents?.length ?? 0) > 0;
+  const isEbayOrder               = order.source === "ebay";
 
   const canCancel          = canDo(adminRole, "orders.update");
+  const canEditItems       = canCancel && !isEbayOrder && !isLocked;
   const canDelete          = canDo(adminRole, "orders.delete");
   const canApproveRevision = canDo(adminRole, "orders.approve_financial_revision");
   const cancelDisabled     = ["cancelled", "delivered"].includes(status);
@@ -581,23 +606,189 @@ export default function OrderDetail({
 
   // ── Handlers ─────────────────────────────────────────────────────────────────
 
+  const closeItemModal = () => {
+    setItemModalMode(null);
+    setItemModalId(null);
+    setItemName(""); setItemSku(""); setItemBrand(""); setItemSize("");
+    setItemUnitPrice(""); setItemQuantity(""); setItemReason("");
+    setItemModalError(null);
+  };
+
+  const openAddItem = () => {
+    closeItemModal();
+    setItemModalMode("add");
+  };
+
+  const openEditItem = (item: AdminOrderItem) => {
+    closeItemModal();
+    setItemModalMode("edit");
+    setItemModalId(item.id);
+    setItemName(item.product_name ?? "");
+    setItemSku(item.sku ?? "");
+    setItemBrand(item.brand ?? "");
+    setItemSize(item.size ?? "");
+    setItemUnitPrice(String(item.unit_price ?? ""));
+    setItemQuantity(String(item.quantity ?? ""));
+  };
+
+  const submitItemModal = async () => {
+    if (!itemReason.trim()) { setItemModalError("Please describe why this item is being changed."); return; }
+    if (itemModalMode === "add" && (!itemName.trim() || !itemUnitPrice.trim() || !itemQuantity.trim())) {
+      setItemModalError("Name, unit price, and quantity are required.");
+      return;
+    }
+    setItemModalLoading(true);
+    setItemModalError(null);
+    try {
+      const isAdd = itemModalMode === "add";
+      const currentItem = !isAdd ? order.items.find((i) => i.id === itemModalId) : undefined;
+      const body: Record<string, unknown> = { reason: itemReason.trim() };
+
+      if (isAdd) {
+        body.name = itemName.trim();
+        if (itemSku.trim()) body.sku = itemSku.trim();
+        if (itemBrand.trim()) body.brand = itemBrand.trim();
+        if (itemSize.trim()) body.size = itemSize.trim();
+        body.unit_price = parseFloat(itemUnitPrice);
+        body.quantity = parseInt(itemQuantity, 10);
+      } else if (currentItem) {
+        if (itemName.trim() !== (currentItem.product_name ?? "")) body.name = itemName.trim();
+        if (itemSku.trim() !== (currentItem.sku ?? "")) body.sku = itemSku.trim();
+        if (itemBrand.trim() !== (currentItem.brand ?? "")) body.brand = itemBrand.trim();
+        if (itemSize.trim() !== (currentItem.size ?? "")) body.size = itemSize.trim();
+        if (parseFloat(itemUnitPrice) !== Number(currentItem.unit_price)) body.unit_price = parseFloat(itemUnitPrice);
+        if (parseInt(itemQuantity, 10) !== currentItem.quantity) body.quantity = parseInt(itemQuantity, 10);
+      }
+
+      const url = isAdd
+        ? `/api/admin/orders/${order.id}/items`
+        : `/api/admin/orders/${order.id}/items/${itemModalId}`;
+      const res = await fetch(url, {
+        method: isAdd ? "POST" : "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const json = await res.json().catch(() => ({})) as Record<string, unknown>;
+      if (!res.ok) {
+        const code = json.code as string | undefined;
+        if (code === "ebay_order_not_editable") setItemModalError("This order is synced from eBay and can't be edited here.");
+        else if (res.status === 423 || code === "financials_locked") setItemModalError("Financials are locked — use Request Financial Revision instead.");
+        else setItemModalError((json.message as string) ?? "Failed to save item.");
+        return;
+      }
+      closeItemModal();
+      router.refresh();
+    } catch {
+      setItemModalError("Network error. Please try again.");
+    } finally {
+      setItemModalLoading(false);
+    }
+  };
+
+  const handleDeleteItem = async () => {
+    if (!deleteItemTarget) return;
+    if (!deleteItemReason.trim()) { setDeleteItemError("Please describe why this item is being removed."); return; }
+    setDeleteItemLoading(true);
+    setDeleteItemError(null);
+    try {
+      const res = await fetch(`/api/admin/orders/${order.id}/items/${deleteItemTarget.id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: deleteItemReason.trim() }),
+      });
+      const json = await res.json().catch(() => ({})) as Record<string, unknown>;
+      if (!res.ok) {
+        const code = json.code as string | undefined;
+        if (code === "cannot_delete_last_item") setDeleteItemError("You can't delete the only remaining item — edit it instead, or cancel the order.");
+        else if (code === "ebay_order_not_editable") setDeleteItemError("This order is synced from eBay and can't be edited here.");
+        else if (res.status === 423 || code === "financials_locked") setDeleteItemError("Financials are locked — use Request Financial Revision instead.");
+        else setDeleteItemError((json.message as string) ?? "Failed to remove item.");
+        return;
+      }
+      setDeleteItemTarget(null);
+      setDeleteItemReason("");
+      router.refresh();
+    } catch {
+      setDeleteItemError("Network error. Please try again.");
+    } finally {
+      setDeleteItemLoading(false);
+    }
+  };
+
+  const openRevisionModal = () => {
+    setRevisionItems(order.items.map((i) => ({
+      id: i.id,
+      name: i.product_name ?? "",
+      unit_price: String(i.unit_price ?? ""),
+      quantity: String(i.quantity ?? ""),
+      remove: false,
+    })));
+    setRevisionNewItems([]);
+    setRevisionModalOpen(true);
+  };
+
   const closeRevisionModal = () => {
     setRevisionModalOpen(false);
     setRevisionReason("");
     setRevisionDeliveryFee("");
+    setRevisionItems([]);
+    setRevisionNewItems([]);
     setRevisionError(null);
   };
 
+  const updateRevisionItem = (id: number, field: "name" | "unit_price" | "quantity", value: string) => {
+    setRevisionItems((prev) => prev.map((it) => (it.id === id ? { ...it, [field]: value } : it)));
+  };
+  const toggleRevisionRemove = (id: number) => {
+    setRevisionItems((prev) => prev.map((it) => (it.id === id ? { ...it, remove: !it.remove } : it)));
+  };
+  const addRevisionNewItem = () => setRevisionNewItems((prev) => [...prev, { name: "", unit_price: "", quantity: "1" }]);
+  const updateRevisionNewItem = (idx: number, field: keyof RevisionNewItemDraft, value: string) => {
+    setRevisionNewItems((prev) => prev.map((it, i) => (i === idx ? { ...it, [field]: value } : it)));
+  };
+  const removeRevisionNewItem = (idx: number) => setRevisionNewItems((prev) => prev.filter((_, i) => i !== idx));
+
   const handleRevisionRequest = async () => {
     if (!revisionReason.trim()) { setRevisionError("Please describe the correction needed."); return; }
+
+    const original = new Map(order.items.map((i) => [i.id, i]));
+    const changedItems = revisionItems
+      .filter((it) => !it.remove)
+      .map((it) => {
+        const orig = original.get(it.id);
+        if (!orig) return null;
+        const patch: Record<string, unknown> = { id: it.id };
+        let changed = false;
+        if (it.name.trim() !== (orig.product_name ?? "")) { patch.name = it.name.trim(); changed = true; }
+        if (parseFloat(it.unit_price) !== Number(orig.unit_price)) { patch.unit_price = parseFloat(it.unit_price); changed = true; }
+        if (parseInt(it.quantity, 10) !== orig.quantity) { patch.quantity = parseInt(it.quantity, 10); changed = true; }
+        return changed ? patch : null;
+      })
+      .filter((p): p is Record<string, unknown> => p !== null);
+    const removeIds = revisionItems.filter((it) => it.remove).map((it) => it.id);
+    const newItems = revisionNewItems
+      .filter((it) => it.name.trim() && it.unit_price.trim() && it.quantity.trim())
+      .map((it) => ({ name: it.name.trim(), unit_price: parseFloat(it.unit_price), quantity: parseInt(it.quantity, 10) }));
+
+    // Client-side guard mirroring the backend's revision_would_empty_order check.
+    const remainingCount = order.items.length - removeIds.length + newItems.length;
+    if (remainingCount <= 0) {
+      setRevisionError("This revision would remove every item on the order — add a replacement item or leave at least one in place.");
+      return;
+    }
+
     setRevisionLoading(true);
     setRevisionError(null);
     try {
       const body: Record<string, unknown> = { reason: revisionReason.trim() };
+      const changes: Record<string, unknown> = {};
       const fee = parseFloat(revisionDeliveryFee);
-      if (revisionDeliveryFee.trim() && !isNaN(fee)) {
-        body.changes = { delivery_fee: fee };
-      }
+      if (revisionDeliveryFee.trim() && !isNaN(fee)) changes.delivery_fee = fee;
+      if (changedItems.length) changes.items = changedItems;
+      if (newItems.length) changes.new_items = newItems;
+      if (removeIds.length) changes.remove_item_ids = removeIds;
+      if (Object.keys(changes).length) body.changes = changes;
+
       const res  = await fetch(`/api/admin/orders/${order.id}/financials/revision-request`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -605,7 +796,9 @@ export default function OrderDetail({
       });
       const json = await res.json().catch(() => ({})) as Record<string, unknown>;
       if (!res.ok) {
-        setRevisionError((json.message as string) ?? "Failed to submit revision request.");
+        const code = json.code as string | undefined;
+        if (code === "revision_would_empty_order") setRevisionError("This revision would remove every item on the order — add a replacement item or leave at least one in place.");
+        else setRevisionError((json.message as string) ?? "Failed to submit revision request.");
         return;
       }
       closeRevisionModal();
@@ -1150,11 +1343,29 @@ export default function OrderDetail({
 
           {/* Order items */}
           <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
-            <div className="border-b border-black/[0.06] px-6 py-4">
+            <div className="flex items-center justify-between gap-3 border-b border-black/[0.06] px-6 py-4">
               <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
                 Order Items
               </p>
+              {canEditItems && (
+                <button type="button" onClick={openAddItem}
+                  className="flex items-center gap-1.5 rounded-full border border-black/[0.09] bg-white px-3.5 py-1.5 text-[0.78rem] font-semibold text-[#5c5e62] transition hover:bg-[#f5f5f5]">
+                  <Plus size={13} /> Add Item
+                </button>
+              )}
             </div>
+            {isEbayOrder && (
+              <div className="flex items-center gap-2.5 border-b border-black/[0.06] bg-[#fafafa] px-6 py-3">
+                <Lock size={13} className="shrink-0 text-[#9ca3af]" />
+                <p className="text-[0.78rem] text-[#5c5e62]">Synced from eBay — line items aren&apos;t editable here.</p>
+              </div>
+            )}
+            {!isEbayOrder && isLocked && (
+              <div className="flex items-center gap-2.5 border-b border-black/[0.06] bg-indigo-50 px-6 py-3">
+                <Lock size={13} className="shrink-0 text-indigo-500" />
+                <p className="text-[0.78rem] text-indigo-700">Financials are locked — use &ldquo;Request Financial Revision&rdquo; below to correct an item.</p>
+              </div>
+            )}
             {!order.items?.length ? (
               <p className="px-6 py-8 text-center text-[0.875rem] text-[#5c5e62]">
                 No item details available.
@@ -1164,8 +1375,8 @@ export default function OrderDetail({
                 <table className="w-full min-w-[560px] text-left">
                   <thead>
                     <tr className="border-b border-black/[0.05] bg-[#fafafa]">
-                      {["Product", "SKU", "Size", "Qty", "Unit Price", "Subtotal"].map((h) => (
-                        <th key={h} className="px-4 py-3 text-[0.7rem] font-bold uppercase tracking-[0.12em] text-[#5c5e62]">
+                      {["Product", "SKU", "Size", "Qty", "Unit Price", "Subtotal", ""].map((h, i) => (
+                        <th key={i} className="px-4 py-3 text-[0.7rem] font-bold uppercase tracking-[0.12em] text-[#5c5e62]">
                           {h}
                         </th>
                       ))}
@@ -1193,6 +1404,22 @@ export default function OrderDetail({
                         <td className="px-4 py-3 text-[0.875rem] font-semibold text-[#1a1a1a]">
                           €{Number(item.subtotal).toFixed(2)}
                         </td>
+                        <td className="px-4 py-3">
+                          {canEditItems && (
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button type="button" title="Edit item" onClick={() => openEditItem(item)}
+                                className="flex h-7 w-7 items-center justify-center rounded-lg border border-black/[0.08] text-[#5c5e62] transition hover:bg-[#f0f2f5] hover:text-[#1a1a1a]">
+                                <Pencil size={12} />
+                              </button>
+                              <button type="button" title={order.items.length === 1 ? "Can't delete the only item" : "Remove item"}
+                                disabled={order.items.length === 1}
+                                onClick={() => setDeleteItemTarget(item)}
+                                className="flex h-7 w-7 items-center justify-center rounded-lg border border-black/[0.08] text-red-400 transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-30">
+                                <Trash2 size={12} />
+                              </button>
+                            </div>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -1204,6 +1431,7 @@ export default function OrderDetail({
                       <td className="px-4 py-3 text-[0.95rem] font-extrabold text-[#1a1a1a]">
                         €{Number(order.total).toFixed(2)}
                       </td>
+                      <td />
                     </tr>
                   </tfoot>
                 </table>
@@ -1218,10 +1446,10 @@ export default function OrderDetail({
             </p>
 
             <div className="flex flex-wrap gap-3">
-              {isLocked && !revisionRequired && canCancel && (
+              {isLocked && !revisionRequired && canCancel && !isEbayOrder && (
                 <button
                   type="button"
-                  onClick={() => setRevisionModalOpen(true)}
+                  onClick={openRevisionModal}
                   className="inline-flex h-9 items-center gap-1.5 rounded-full border border-indigo-300 bg-indigo-50 px-5 text-[0.83rem] font-semibold text-indigo-700 transition hover:bg-indigo-100"
                 >
                   <RotateCcw size={13} strokeWidth={2} />
@@ -1720,13 +1948,137 @@ export default function OrderDetail({
         </div>
       )}
 
+      {/* Add / Edit Item Modal */}
+      {itemModalMode && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={(e) => { if (e.target === e.currentTarget && !itemModalLoading) closeItemModal(); }}
+        >
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+            <p className="mb-5 text-[0.75rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+              {itemModalMode === "add" ? "Add Item" : "Edit Item"}
+            </p>
+
+            <div className="flex flex-col gap-4">
+              <div>
+                <p className="mb-1.5 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Product Name *</p>
+                <input type="text" value={itemName} onChange={(e) => setItemName(e.target.value)}
+                  placeholder="205/55 R16"
+                  className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="mb-1.5 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Brand</p>
+                  <input type="text" value={itemBrand} onChange={(e) => setItemBrand(e.target.value)}
+                    className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10" />
+                </div>
+                <div>
+                  <p className="mb-1.5 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">SKU</p>
+                  <input type="text" value={itemSku} onChange={(e) => setItemSku(e.target.value)}
+                    className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 font-mono text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10" />
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <p className="mb-1.5 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Size</p>
+                  <input type="text" value={itemSize} onChange={(e) => setItemSize(e.target.value)}
+                    className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10" />
+                </div>
+                <div>
+                  <p className="mb-1.5 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Unit Price *</p>
+                  <input type="number" min="0" step="0.01" value={itemUnitPrice} onChange={(e) => setItemUnitPrice(e.target.value)}
+                    className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10" />
+                </div>
+                <div>
+                  <p className="mb-1.5 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Qty *</p>
+                  <input type="number" min="1" value={itemQuantity} onChange={(e) => setItemQuantity(e.target.value)}
+                    className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10" />
+                </div>
+              </div>
+              <div>
+                <p className="mb-1.5 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">
+                  Reason <span className="text-red-500">*</span>
+                </p>
+                <textarea value={itemReason} onChange={(e) => setItemReason(e.target.value)}
+                  placeholder="e.g. Wrong price was quoted at entry — corrected to the agreed €75/unit."
+                  rows={2}
+                  className="w-full resize-none rounded-xl border border-black/[0.09] bg-white px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10" />
+                <p className="mt-1 text-[0.7rem] text-[#9ca3af]">Written to the order&apos;s audit log.</p>
+              </div>
+
+              {itemModalError && (
+                <div className="flex items-start gap-2 rounded-xl border border-red-100 bg-red-50 px-3 py-2.5 text-[0.83rem] text-red-700">
+                  <AlertCircle size={14} className="mt-0.5 shrink-0" />
+                  {itemModalError}
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3 pt-1">
+                <button type="button" onClick={closeItemModal} disabled={itemModalLoading}
+                  className="h-9 rounded-full border border-black/[0.09] bg-white px-5 text-[0.83rem] font-semibold text-[#5c5e62] transition hover:border-black/20 disabled:opacity-50">
+                  Cancel
+                </button>
+                <button type="button" onClick={submitItemModal} disabled={itemModalLoading || !itemReason.trim()}
+                  className="h-9 rounded-full bg-[#E85C1A] px-5 text-[0.83rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-50">
+                  {itemModalLoading ? "Saving…" : itemModalMode === "add" ? "Add Item" : "Save Changes"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Item Modal */}
+      {deleteItemTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={(e) => { if (e.target === e.currentTarget && !deleteItemLoading) { setDeleteItemTarget(null); setDeleteItemReason(""); setDeleteItemError(null); } }}
+        >
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+            <p className="mb-1 text-[0.75rem] font-bold uppercase tracking-[0.15em] text-red-600">
+              Remove Item
+            </p>
+            <p className="mb-5 text-[0.875rem] text-[#1a1a1a]">
+              Remove <span className="font-semibold">{deleteItemTarget.product_name}</span> from this order?
+            </p>
+
+            <p className="mb-1.5 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">
+              Reason <span className="text-red-500">*</span>
+            </p>
+            <textarea value={deleteItemReason} onChange={(e) => setDeleteItemReason(e.target.value)}
+              placeholder="e.g. Duplicate line entered by mistake."
+              rows={2} autoFocus
+              className="mb-4 w-full resize-none rounded-xl border border-black/[0.09] bg-white px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-red-400 focus:ring-2 focus:ring-red-100" />
+
+            {deleteItemError && (
+              <div className="mb-4 flex items-start gap-2 rounded-xl border border-red-100 bg-red-50 px-3 py-2.5 text-[0.83rem] text-red-700">
+                <AlertCircle size={14} className="mt-0.5 shrink-0" />
+                {deleteItemError}
+              </div>
+            )}
+
+            <div className="flex justify-end gap-3">
+              <button type="button" onClick={() => { setDeleteItemTarget(null); setDeleteItemReason(""); setDeleteItemError(null); }}
+                disabled={deleteItemLoading}
+                className="h-9 rounded-full border border-black/[0.09] bg-white px-5 text-[0.83rem] font-semibold text-[#5c5e62] transition hover:border-black/20 disabled:opacity-50">
+                Cancel
+              </button>
+              <button type="button" onClick={handleDeleteItem} disabled={deleteItemLoading || !deleteItemReason.trim()}
+                className="h-9 rounded-full bg-red-600 px-5 text-[0.83rem] font-semibold text-white transition hover:bg-red-700 disabled:opacity-50">
+                {deleteItemLoading ? "Removing…" : "Remove Item"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Request Financial Revision Modal */}
       {revisionModalOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
           onClick={(e) => { if (e.target === e.currentTarget && !revisionLoading) closeRevisionModal(); }}
         >
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
             <p className="mb-1 text-[0.75rem] font-bold uppercase tracking-[0.15em] text-indigo-600">
               Request Financial Revision
             </p>
@@ -1734,7 +2086,7 @@ export default function OrderDetail({
               Financials are locked because a commercial document has been issued. Describe the correction — a super admin or admin will review and approve it.
             </p>
 
-            <div className="flex flex-col gap-4">
+            <div className="flex max-h-[60vh] flex-col gap-4 overflow-y-auto pr-1">
               <div>
                 <p className="mb-1.5 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">
                   Reason <span className="text-red-500">*</span>
@@ -1742,7 +2094,7 @@ export default function OrderDetail({
                 <textarea
                   value={revisionReason}
                   onChange={(e) => setRevisionReason(e.target.value)}
-                  placeholder="e.g. Delivery fee entered as €2.50 — should be €2500.00"
+                  placeholder="e.g. Client disputes the quoted unit price — confirmed correct figure with them by phone."
                   rows={3}
                   className="w-full resize-none rounded-xl border border-black/[0.09] bg-white px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
                 />
@@ -1761,6 +2113,63 @@ export default function OrderDetail({
                   min="0"
                   className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
                 />
+              </div>
+
+              {/* Proposed item corrections */}
+              {revisionItems.length > 0 && (
+                <div>
+                  <p className="mb-1.5 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">
+                    Item Corrections <span className="text-[#9ca3af]">(optional)</span>
+                  </p>
+                  <div className="space-y-2">
+                    {revisionItems.map((it) => (
+                      <div key={it.id} className={`rounded-xl border p-3 ${it.remove ? "border-red-200 bg-red-50/40" : "border-black/[0.08] bg-[#fafafa]"}`}>
+                        <div className="grid grid-cols-12 gap-2">
+                          <input value={it.name} disabled={it.remove} onChange={(e) => updateRevisionItem(it.id, "name", e.target.value)}
+                            className="col-span-6 rounded-lg border border-black/[0.09] bg-white px-2.5 py-1.5 text-[0.8rem] text-[#1a1a1a] outline-none focus:border-indigo-400 disabled:opacity-50" />
+                          <input type="number" step="0.01" min="0" value={it.unit_price} disabled={it.remove} onChange={(e) => updateRevisionItem(it.id, "unit_price", e.target.value)}
+                            className="col-span-3 rounded-lg border border-black/[0.09] bg-white px-2.5 py-1.5 text-[0.8rem] text-[#1a1a1a] outline-none focus:border-indigo-400 disabled:opacity-50" placeholder="Unit €" />
+                          <input type="number" min="1" value={it.quantity} disabled={it.remove} onChange={(e) => updateRevisionItem(it.id, "quantity", e.target.value)}
+                            className="col-span-3 rounded-lg border border-black/[0.09] bg-white px-2.5 py-1.5 text-[0.8rem] text-[#1a1a1a] outline-none focus:border-indigo-400 disabled:opacity-50" placeholder="Qty" />
+                        </div>
+                        <label className="mt-2 flex cursor-pointer items-center gap-2">
+                          <input type="checkbox" checked={it.remove} onChange={() => toggleRevisionRemove(it.id)} className="h-3.5 w-3.5 accent-red-600" />
+                          <span className="text-[0.72rem] text-red-600">Remove this item</span>
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* New items to add */}
+              <div>
+                <div className="mb-1.5 flex items-center justify-between">
+                  <p className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">
+                    New Items <span className="text-[#9ca3af]">(optional)</span>
+                  </p>
+                  <button type="button" onClick={addRevisionNewItem} className="flex items-center gap-1 text-[0.72rem] font-semibold text-indigo-600 hover:underline">
+                    <Plus size={11} /> Add item
+                  </button>
+                </div>
+                {revisionNewItems.length > 0 && (
+                  <div className="space-y-2">
+                    {revisionNewItems.map((it, idx) => (
+                      <div key={idx} className="grid grid-cols-12 gap-2">
+                        <input value={it.name} onChange={(e) => updateRevisionNewItem(idx, "name", e.target.value)}
+                          placeholder="Name" className="col-span-5 rounded-lg border border-black/[0.09] bg-white px-2.5 py-1.5 text-[0.8rem] text-[#1a1a1a] outline-none focus:border-indigo-400" />
+                        <input type="number" step="0.01" min="0" value={it.unit_price} onChange={(e) => updateRevisionNewItem(idx, "unit_price", e.target.value)}
+                          placeholder="Unit €" className="col-span-3 rounded-lg border border-black/[0.09] bg-white px-2.5 py-1.5 text-[0.8rem] text-[#1a1a1a] outline-none focus:border-indigo-400" />
+                        <input type="number" min="1" value={it.quantity} onChange={(e) => updateRevisionNewItem(idx, "quantity", e.target.value)}
+                          placeholder="Qty" className="col-span-3 rounded-lg border border-black/[0.09] bg-white px-2.5 py-1.5 text-[0.8rem] text-[#1a1a1a] outline-none focus:border-indigo-400" />
+                        <button type="button" onClick={() => removeRevisionNewItem(idx)}
+                          className="col-span-1 flex items-center justify-center rounded-lg border border-black/[0.08] text-red-400 hover:bg-red-50 hover:text-red-600">
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {revisionError && (
