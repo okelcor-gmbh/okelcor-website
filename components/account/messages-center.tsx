@@ -1,13 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Mail, Paperclip, Download, Loader2, Send, ChevronDown, CheckCircle2, AlertCircle } from "lucide-react";
+import { Mail, Paperclip, Download, Loader2, Send, ChevronDown, CheckCircle2, AlertCircle, Trash2 } from "lucide-react";
 import type { CustomerCommunication } from "@/lib/customer-communications";
 import { timeAgo } from "@/lib/customer-notifications";
 
 function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 }
+
+const MAX_ATTACHMENTS = 5;
+const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024; // 10 MB
+const ALLOWED_EXTENSIONS = ["pdf", "jpg", "jpeg", "png", "doc", "docx", "xls", "xlsx", "csv"];
 
 export default function MessagesCenter() {
   const [items, setItems] = useState<CustomerCommunication[]>([]);
@@ -79,25 +83,48 @@ function MessageRow({
 }) {
   const unread = msg.direction === "outbound" && !msg.customer_read_at;
   const [replyBody, setReplyBody] = useState("");
+  const [attachments, setAttachments] = useState<File[]>([]);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  function addFiles(files: FileList | File[]) {
+    const incoming = Array.from(files);
+    if (attachments.length + incoming.length > MAX_ATTACHMENTS) {
+      setError(`Maximum ${MAX_ATTACHMENTS} attachments.`);
+      return;
+    }
+    for (const file of incoming) {
+      const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
+      if (!ALLOWED_EXTENSIONS.includes(ext)) {
+        setError(`File type ".${ext}" not allowed. Use: ${ALLOWED_EXTENSIONS.join(", ")}.`);
+        return;
+      }
+      if (file.size > MAX_ATTACHMENT_BYTES) {
+        setError(`"${file.name}" exceeds 10 MB.`);
+        return;
+      }
+    }
+    setError(null);
+    setAttachments((prev) => [...prev, ...incoming]);
+  }
+  function removeAttachment(idx: number) { setAttachments((prev) => prev.filter((_, i) => i !== idx)); }
 
   async function handleReply(e: React.FormEvent) {
     e.preventDefault();
     if (!replyBody.trim()) return;
     setSending(true);
     setError(null);
+    const fd = new FormData();
+    fd.append("body", replyBody.trim());
+    attachments.forEach((file) => fd.append("attachments[]", file));
     try {
-      const res = await fetch(`/api/account/communications/${msg.id}/reply`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ body: replyBody.trim() }),
-      });
+      const res = await fetch(`/api/account/communications/${msg.id}/reply`, { method: "POST", body: fd });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json.message ?? "Could not send your reply.");
       onReplied((json.data ?? json) as CustomerCommunication);
       setReplyBody("");
+      setAttachments([]);
       setSent(true);
       setTimeout(() => setSent(false), 4000);
     } catch (err) {
@@ -160,6 +187,27 @@ function MessageRow({
               placeholder="Write a reply…"
               className="w-full resize-none rounded-xl border border-black/[0.1] bg-white px-3.5 py-2.5 text-[0.85rem] text-[var(--foreground)] outline-none transition placeholder:text-[#aaa] focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/10"
             />
+
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <label className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-dashed border-black/[0.15] bg-white px-2.5 py-1.5 text-[0.75rem] text-[var(--muted)] transition hover:border-[var(--primary)]/40 hover:text-[var(--primary)]">
+                <Paperclip size={12} /> Attach files
+                <input type="file" multiple accept={ALLOWED_EXTENSIONS.map((e) => `.${e}`).join(",")}
+                  className="sr-only" onChange={(e) => { if (e.target.files?.length) addFiles(e.target.files); e.target.value = ""; }} />
+              </label>
+              <span className="text-[0.68rem] text-[#9ca3af]">Max {MAX_ATTACHMENTS}, 10MB each</span>
+            </div>
+            {attachments.length > 0 && (
+              <div className="mt-2 space-y-1.5">
+                {attachments.map((file, idx) => (
+                  <div key={idx} className="flex items-center justify-between gap-2 rounded-lg border border-black/[0.07] bg-white px-3 py-1.5">
+                    <span className="min-w-0 flex-1 truncate text-[0.76rem] text-[var(--foreground)]">{file.name}</span>
+                    <span className="shrink-0 text-[0.68rem] text-[#9ca3af]">{(file.size / 1024).toFixed(0)} KB</span>
+                    <button type="button" onClick={() => removeAttachment(idx)} className="shrink-0 text-red-400 hover:text-red-600"><Trash2 size={12} /></button>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {error && (
               <div className="mt-2 flex items-center gap-1.5 text-[0.75rem] text-red-600">
                 <AlertCircle size={12} className="shrink-0" /> {error}

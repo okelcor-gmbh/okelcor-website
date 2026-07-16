@@ -338,6 +338,20 @@ export type Communication = {
   created_at: string;
 };
 
+// Unified communications inbox (GET /admin/communications/inbox)
+export type AdminCommunicationsInboxItem = {
+  id: number;
+  customer_id?: number | null;
+  quote_request_id?: number | null;
+  customer_name?: string | null;
+  channel: string;
+  subject?: string | null;
+  preview?: string | null;
+  unread: boolean;
+  action_url: string;
+  created_at: string;
+};
+
 export type EmailTemplate = {
   key: string;
   label: string;

@@ -55,6 +55,7 @@ export const PATH_SECTION: Record<string, string> = {
   "/admin/logistics":       "logistics",
   "/admin/system-health":   "system_health",
   "/admin/crm":             "crm",
+  "/admin/inbox":           "crm",
   "/admin/marketing":       "marketing",
   "/admin/media":           "media",
 };
@@ -132,6 +133,9 @@ const PERMISSION_ROLES: Record<string, string[]> = {
   // Users / audit
   "users.manage":          ["super_admin", "admin"],
   "audit.view":            ["super_admin"],
+
+  // CRM communications (per-customer thread + unified inbox)
+  "crm.view":              ["super_admin", "admin", "order_manager", "sales_manager"],
 };
 
 /**

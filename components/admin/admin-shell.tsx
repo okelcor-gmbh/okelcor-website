@@ -35,6 +35,7 @@ import {
   ScanLine,
   BellRing,
   Bell,
+  Inbox,
   ClipboardCheck,
   UserCheck,
   Mail,
@@ -69,6 +70,7 @@ const NAV_GROUPS: readonly NavGroup[] = [
     items: [
       { label: "Dashboard",     href: "/admin",               icon: LayoutDashboard, section: "dashboard" },
       { label: "My Work",       href: "/admin/my-work",       icon: ClipboardCheck,  section: null },
+      { label: "Inbox",         href: "/admin/inbox",         icon: Inbox,           section: "crm" },
       { label: "Notifications", href: "/admin/notifications", icon: Bell,            section: null },
     ],
   },

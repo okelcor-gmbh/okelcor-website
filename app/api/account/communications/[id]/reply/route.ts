@@ -8,13 +8,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const token = req.cookies.get("customer_token")?.value;
   if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
-  const body = await req.json().catch(() => ({}));
 
   try {
+    const formData = await req.formData();
     const res = await fetch(`${API_URL}/auth/customer/communications/${id}/reply`, {
       method: "POST",
-      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify(body),
+      headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+      body: formData,
       cache: "no-store",
     });
     const json = await res.json().catch(() => ({}));
