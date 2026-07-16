@@ -8,7 +8,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { MessageSquare } from "lucide-react";
+import { Mail } from "lucide-react";
 
 const POLL_MS = 30_000;
 
@@ -34,7 +34,7 @@ export default function MessagesBell() {
 
   return (
     <Link href="/account/messages" aria-label="Messages" className="tesla-icon-btn relative">
-      <MessageSquare size={20} strokeWidth={1.9} />
+      <Mail size={20} strokeWidth={1.9} />
       {unreadCount > 0 && (
         <span className="absolute right-0.5 top-0.5 flex h-[16px] min-w-[16px] items-center justify-center rounded-full bg-[var(--primary)] px-0.5 text-[9px] font-bold text-white">
           {unreadCount > 99 ? "99+" : unreadCount}
