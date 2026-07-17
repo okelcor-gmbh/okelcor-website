@@ -1,6 +1,6 @@
 # Okelcor Website — Progress Tracker
 
-**Last updated:** 2026-07-17  
+**Last updated:** 2026-07-18  
 **Branch:** `main`  
 **Build status:** TypeScript 0 errors · ESLint clean · Production build passes
 
@@ -608,6 +608,25 @@ text routed through i18n (EN/DE/FR/ES, type-enforced).
 **New homepage components:** `home/hero-showcase`, `home/platform-showcase`, `home/fet-showcase`, `home/global-reach`, `home/fet-promo`, `home/scroll-progress`, `home/tyre-ring`, `ui/section-heading`.
 
 **Open polish (optional):** roll `.cta-press` across remaining body CTAs · adopt `<SectionHeading>` in remaining sections · lighten REX band for full-light consistency · trim/merge WhyOkelcor · self-host flag SVGs (currently jsDelivr Twemoji) · wire flag strip to a live aggregated top-countries endpoint.
+
+---
+
+### ✅ Admin Dashboard — Premium UI/UX Pass
+
+Researched Linear + Stripe Dashboard (chosen: Linear is this codebase's existing
+"restraint" touchstone, Stripe Dashboard's home screen — revenue/orders/customers/AOV/
+conversion — is the canonical reference for exactly this screen) and adapted their
+patterns to `/admin` and its 16 components in `components/admin/dashboard/`.
+
+| Feature | Notes |
+|---|---|
+| Color discipline fix | `hero-metrics.tsx` was the one file with arbitrary decorative per-card icon colors (blue/violet/emerald/amber/cyan, no semantic meaning) — replaced with a neutral `bg-[#f5f5f7]` icon chip everywhere except the Revenue card, which keeps the single `#E85C1A` accent chip. Every other card's color use (status badges, danger/warning/success chips, Sentry's brand purple, the multi-series traffic-sources pie chart) was already legitimate semantic/categorical signal and was left untouched |
+| Card chrome | `rounded-2xl bg-white shadow-sm` → `rounded-2xl border border-black/[0.06] bg-white` across all ~14 dashboard cards + the error boundary fallback — hairline border instead of a drop shadow reads as considered rather than templated |
+| Typography | Card titles `font-extrabold` → `font-bold`; `tabular-nums` added to every numeric value/delta/table cell across the folder (metric values, order totals, stock counts, view counts, funnel counts, Sentry stat pills, security counts, status-bar counts) |
+| Sparklines | New `components/admin/dashboard/sparkline.tsx` (minimal Recharts `AreaChart`, no axes/tooltip) wired into the Revenue, Orders, and Avg Order Value hero-metric cards, fed by 7-day series. `/api/admin/dashboard/stats` gained `ordersChart` + `aovChart` (additive fields, derived from the orders array it already fetches — no new backend call) alongside the existing `revenueChart` |
+| Chart polish (`revenue-chart.tsx`) | Dashed gridline → faint solid; gradient fade tightened from 95%→60% stop; tooltip shadow softened to match the hairline-border language used everywhere else |
+| Lint cleanup | Fixed a pre-existing `react-hooks/set-state-in-effect` violation present in ~11 of these files (fetch-on-mount pattern) with the same targeted disable-comment convention already used in `cart-context.tsx`/`compare-context.tsx`, while touching each file anyway for the visual pass |
+| Deferred (flagged, not built) | A functional Today/7D/30D time-range switcher (needs backend date-range support beyond today/yesterday) and a Cmd+K command bar (belongs at the `admin-shell.tsx` topbar level, spanning every admin page, not this page alone) |
 
 ---
 

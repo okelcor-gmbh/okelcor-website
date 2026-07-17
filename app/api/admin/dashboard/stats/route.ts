@@ -141,6 +141,25 @@ export async function GET() {
         };
       });
 
+  // Orders-count + AOV 7-day series — always computed from the same `orders`
+  // array (independent of whether the backend supplied its own revenue chart),
+  // feeding the hero-metric sparklines.
+  const ordersChart: { date: string; count: number }[] = [];
+  const aovChart: { date: string; value: number }[] = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - (6 - i));
+    const ds = dateStr(d);
+    const label = d.toLocaleDateString("en-GB", { month: "short", day: "numeric" });
+    const dayOrders = orders.filter(o => toDate(o.created_at) === ds);
+    const dayConfirmed = dayOrders.filter(isConfirmed);
+    ordersChart.push({ date: label, count: dayOrders.length });
+    aovChart.push({
+      date: label,
+      value: dayConfirmed.length > 0 ? Math.round((sum(dayConfirmed) / dayConfirmed.length) * 100) / 100 : 0,
+    });
+  }
+
   // Recent orders — last 8, include payment_status for confirm action
   const recentOrders = orders.slice(0, 8).map(o => ({
     id:             o.id,
@@ -202,6 +221,8 @@ export async function GET() {
     openQuotes,
     lowStockCount,
     revenueChart,
+    ordersChart,
+    aovChart,
     recentOrders,
     pendingQuotesList,
     lowStockList,

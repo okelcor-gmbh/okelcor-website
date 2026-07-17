@@ -24,7 +24,7 @@ const PIE_COLORS = ["#E85C1A", "#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ec4
 function DonutTooltip({ active, payload }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-xl border border-black/[0.08] bg-white px-3 py-2 shadow-lg">
+    <div className="rounded-xl border border-black/[0.08] bg-white px-3 py-2 shadow-sm">
       <p className="text-[0.78rem] font-semibold text-[#1a1a1a]">{payload[0]?.name}</p>
       <p className="text-[0.72rem] text-[#5c5e62]">{payload[0]?.value} visits</p>
     </div>
@@ -45,6 +45,7 @@ export default function LiveAnalytics() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount + poll, same pattern as cart-context.tsx
     refresh();
     const t = setInterval(refresh, REFRESH);
     return () => clearInterval(t);
@@ -56,10 +57,10 @@ export default function LiveAnalytics() {
     <div className="space-y-5">
 
       {/* Top Countries */}
-      <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
         <div className="flex items-center gap-2.5 border-b border-black/[0.06] px-5 py-4">
           <Globe size={15} className="text-[#5c5e62]" />
-          <p className="text-[0.9rem] font-extrabold text-[#1a1a1a]">Top Countries Today</p>
+          <p className="text-[0.9rem] font-bold text-[#1a1a1a]">Top Countries Today</p>
         </div>
         <div className="divide-y divide-black/[0.04]">
           {loading ? (
@@ -77,7 +78,7 @@ export default function LiveAnalytics() {
               <div key={c.code} className="flex items-center gap-3 px-5 py-2.5">
                 <span className="text-lg leading-none">{countryFlag(c.code)}</span>
                 <span className="flex-1 text-[0.82rem] text-[#1a1a1a]">{c.name}</span>
-                <span className="text-[0.8rem] font-semibold text-[#5c5e62]">{c.visits}</span>
+                <span className="text-[0.8rem] font-semibold tabular-nums text-[#5c5e62]">{c.visits}</span>
               </div>
             ))
           )}
@@ -85,11 +86,11 @@ export default function LiveAnalytics() {
       </div>
 
       {/* Top Pages */}
-      <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
         <div className="flex items-center justify-between border-b border-black/[0.06] px-5 py-4">
           <div className="flex items-center gap-2.5">
             <Eye size={15} className="text-[#5c5e62]" />
-            <p className="text-[0.9rem] font-extrabold text-[#1a1a1a]">Top Pages Today</p>
+            <p className="text-[0.9rem] font-bold text-[#1a1a1a]">Top Pages Today</p>
           </div>
           <span className="flex items-center gap-1.5 text-[0.68rem] font-bold uppercase tracking-wide text-emerald-600">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
@@ -111,7 +112,7 @@ export default function LiveAnalytics() {
               <div key={p.path} className="px-5 py-3">
                 <div className="mb-1.5 flex items-center justify-between">
                   <span className="max-w-[70%] truncate text-[0.8rem] text-[#1a1a1a]">{p.path || "/"}</span>
-                  <span className="text-[0.78rem] font-semibold text-[#5c5e62]">{p.views}</span>
+                  <span className="text-[0.78rem] font-semibold tabular-nums text-[#5c5e62]">{p.views}</span>
                 </div>
                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#f0f2f5]">
                   <div
@@ -126,9 +127,9 @@ export default function LiveAnalytics() {
       </div>
 
       {/* Traffic Sources Donut */}
-      <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
         <div className="border-b border-black/[0.06] px-5 py-4">
-          <p className="text-[0.9rem] font-extrabold text-[#1a1a1a]">Traffic Sources Today</p>
+          <p className="text-[0.9rem] font-bold text-[#1a1a1a]">Traffic Sources Today</p>
         </div>
         <div className="p-4">
           {loading ? (

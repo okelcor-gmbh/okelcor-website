@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip,
-  ResponsiveContainer, CartesianGrid, Legend,
+  ResponsiveContainer, CartesianGrid,
 } from "recharts";
 
 type ChartPoint = { date: string; confirmed: number; pending: number };
@@ -23,13 +23,13 @@ function CustomTooltip({ active, payload, label }: any) {
   const confirmed = payload.find((p: { dataKey: string }) => p.dataKey === "confirmed")?.value ?? 0;
   const pending   = payload.find((p: { dataKey: string }) => p.dataKey === "pending")?.value ?? 0;
   return (
-    <div className="rounded-xl border border-black/[0.08] bg-white px-3.5 py-2.5 shadow-lg">
+    <div className="rounded-xl border border-black/[0.08] bg-white px-3.5 py-2.5 shadow-sm">
       <p className="mb-1.5 text-[0.72rem] font-semibold text-[#5c5e62]">{label}</p>
       <div className="space-y-1">
         <div className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-[#E85C1A]" />
           <span className="text-[0.72rem] text-[#5c5e62]">Confirmed</span>
-          <span className="ml-auto text-[0.85rem] font-extrabold text-[#E85C1A]">
+          <span className="ml-auto text-[0.85rem] font-bold tabular-nums text-[#E85C1A]">
             €{Number(confirmed).toLocaleString("en-GB", { minimumFractionDigits: 2 })}
           </span>
         </div>
@@ -37,7 +37,7 @@ function CustomTooltip({ active, payload, label }: any) {
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-[#f4b08a]" />
             <span className="text-[0.72rem] text-[#5c5e62]">Pending</span>
-            <span className="ml-auto text-[0.82rem] font-semibold text-[#f4845a]">
+            <span className="ml-auto text-[0.82rem] font-semibold tabular-nums text-[#f4845a]">
               €{Number(pending).toLocaleString("en-GB", { minimumFractionDigits: 2 })}
             </span>
           </div>
@@ -72,26 +72,27 @@ export default function RevenueChart() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount + poll, same pattern as cart-context.tsx
     void refresh();
     const t = setInterval(() => void refresh(), 30_000);
     return () => clearInterval(t);
   }, [refresh]);
 
   return (
-    <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+    <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
       <div className="flex items-start justify-between border-b border-black/[0.06] px-5 py-4">
         <div>
-          <p className="text-[0.9rem] font-extrabold text-[#1a1a1a]">Revenue — Last 7 Days</p>
+          <p className="text-[0.9rem] font-bold text-[#1a1a1a]">Revenue — Last 7 Days</p>
           {!loading && (
             <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5">
-              <p className="text-[0.78rem] text-[#5c5e62]">
+              <p className="text-[0.78rem] tabular-nums text-[#5c5e62]">
                 Confirmed:{" "}
                 <strong className="text-[#1a1a1a]">
                   {fmtEur(totals.confirmed)}
                 </strong>
               </p>
               {totals.pending > 0 && (
-                <p className="text-[0.75rem] font-semibold text-[#E85C1A]">
+                <p className="text-[0.75rem] font-semibold tabular-nums text-[#E85C1A]">
                   + {fmtEur(totals.pending)} pending
                 </p>
               )}
@@ -116,14 +117,14 @@ export default function RevenueChart() {
               <defs>
                 <linearGradient id="confirmedGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%"  stopColor="#E85C1A" stopOpacity={0.20} />
-                  <stop offset="95%" stopColor="#E85C1A" stopOpacity={0} />
+                  <stop offset="60%" stopColor="#E85C1A" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="pendingGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%"  stopColor="#f4845a" stopOpacity={0.12} />
-                  <stop offset="95%" stopColor="#f4845a" stopOpacity={0} />
+                  <stop offset="60%" stopColor="#f4845a" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+              <CartesianGrid stroke="#f0f0f0" strokeOpacity={0.6} vertical={false} />
               <XAxis
                 dataKey="date"
                 tick={{ fontSize: 10, fill: "#9ca3af" }}

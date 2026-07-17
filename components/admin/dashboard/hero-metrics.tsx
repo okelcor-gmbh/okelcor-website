@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { TrendingUp, TrendingDown, Minus, ShoppingCart, Users, Zap, BarChart2, DollarSign, Activity, AlertCircle, RefreshCw } from "lucide-react";
 import { useCountUp } from "./count-up";
+import Sparkline from "./sparkline";
 
 type Metrics = {
   revenueToday:           number;
@@ -21,6 +22,9 @@ type Metrics = {
   aovPeriodLabel:         string | null;
   aovPaidOrdersCount:     number | null;
   aovManualOrdersCount:   number | null;
+  revenueSpark:           number[];
+  ordersSpark:            number[];
+  aovSpark:               number[];
 };
 
 function pctDelta(a: number, b: number): number | null {
@@ -34,7 +38,7 @@ function Trend({ current, prev }: { current: number; prev: number }) {
   const Icon  = delta === 0 ? Minus : delta > 0 ? TrendingUp : TrendingDown;
   const color = delta === 0 ? "text-[#9ca3af]" : delta > 0 ? "text-emerald-600" : "text-red-500";
   return (
-    <span className={`flex items-center gap-0.5 text-[0.72rem] font-semibold ${color}`}>
+    <span className={`flex items-center gap-0.5 text-[0.72rem] font-semibold tabular-nums ${color}`}>
       <Icon size={11} strokeWidth={2.5} />
       {delta >= 0 ? "+" : ""}{delta}% vs yesterday
     </span>
@@ -47,10 +51,11 @@ function fmtCurrency(n: number): string {
 
 function CardSkeleton() {
   return (
-    <div className="rounded-2xl bg-white p-5 shadow-sm">
-      <div className="mb-3 h-10 w-10 animate-pulse rounded-xl bg-[#e5e7eb]" />
-      <div className="h-3 w-20 animate-pulse rounded bg-[#e5e7eb]" />
-      <div className="mt-2 h-7 w-28 animate-pulse rounded bg-[#e5e7eb]" />
+    <div className="rounded-2xl border border-black/[0.06] bg-white p-5">
+      <div className="mb-3 h-10 w-10 animate-pulse rounded-xl bg-[#f0f0f0]" />
+      <div className="h-3 w-20 animate-pulse rounded bg-[#f0f0f0]" />
+      <div className="mt-2 h-7 w-28 animate-pulse rounded bg-[#f0f0f0]" />
+      <div className="mt-3 h-7 w-full animate-pulse rounded bg-[#f0f0f0]/70" />
     </div>
   );
 }
@@ -61,15 +66,17 @@ function RevenueTodayCard({
   confirmed,
   confirmedYesterday,
   pending,
+  sparkline,
 }: {
   confirmed:          number;
   confirmedYesterday: number;
   pending:            number;
+  sparkline:          number[];
 }) {
   const animated = useCountUp(Math.round(confirmed));
 
   return (
-    <div className="group flex flex-col gap-3 rounded-2xl bg-white p-5 shadow-sm transition hover:shadow-md">
+    <div className="group flex flex-col gap-3 rounded-2xl border border-black/[0.06] bg-white p-5 transition-colors hover:border-black/[0.14]">
       <div className="flex items-start justify-between">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E85C1A]">
           <DollarSign size={18} strokeWidth={1.8} className="text-white" />
@@ -78,17 +85,18 @@ function RevenueTodayCard({
       </div>
       <div>
         <p className="text-[0.68rem] font-bold uppercase tracking-[0.14em] text-[#5c5e62]">Revenue Today</p>
-        <p className="mt-0.5 text-2xl font-extrabold text-[#1a1a1a]">
+        <p className="mt-0.5 text-2xl font-bold tracking-tight tabular-nums text-[#1a1a1a]">
           {`€${animated >= 1000 ? (animated / 1000).toFixed(1) + "k" : animated.toFixed(2)}`}
         </p>
         {pending > 0 ? (
-          <p className="mt-0.5 text-[0.7rem] font-semibold text-[#E85C1A]">
+          <p className="mt-0.5 text-[0.7rem] font-semibold tabular-nums text-[#E85C1A]">
             + {fmtCurrency(pending)} pending
           </p>
         ) : (
           <p className="mt-0.5 text-[0.7rem] text-[#9ca3af]">confirmed only</p>
         )}
       </div>
+      {sparkline.length > 1 && <Sparkline data={sparkline} color="#E85C1A" />}
     </div>
   );
 }
@@ -100,28 +108,30 @@ function OrdersTodayCard({
   totalYesterday,
   confirmed,
   pending,
+  sparkline,
 }: {
   total:          number;
   totalYesterday: number;
   confirmed:      number;
   pending:        number;
+  sparkline:      number[];
 }) {
   const animated = useCountUp(total);
 
   return (
-    <div className="group flex flex-col gap-3 rounded-2xl bg-white p-5 shadow-sm transition hover:shadow-md">
+    <div className="group flex flex-col gap-3 rounded-2xl border border-black/[0.06] bg-white p-5 transition-colors hover:border-black/[0.14]">
       <div className="flex items-start justify-between">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500">
-          <ShoppingCart size={18} strokeWidth={1.8} className="text-white" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#f5f5f7]">
+          <ShoppingCart size={18} strokeWidth={1.8} className="text-[#5c5e62]" />
         </div>
         <Trend current={total} prev={totalYesterday} />
       </div>
       <div>
         <p className="text-[0.68rem] font-bold uppercase tracking-[0.14em] text-[#5c5e62]">Orders Today</p>
-        <p className="mt-0.5 text-2xl font-extrabold text-[#1a1a1a]">{animated.toLocaleString()}</p>
+        <p className="mt-0.5 text-2xl font-bold tracking-tight tabular-nums text-[#1a1a1a]">{animated.toLocaleString()}</p>
         {(confirmed > 0 || pending > 0) ? (
-          <p className="mt-0.5 text-[0.7rem] text-[#5c5e62]">
-            <span className="text-emerald-600 font-semibold">{confirmed} confirmed</span>
+          <p className="mt-0.5 text-[0.7rem] tabular-nums text-[#5c5e62]">
+            <span className="font-semibold text-emerald-600">{confirmed} confirmed</span>
             {pending > 0 && (
               <> · <span className="font-semibold text-[#E85C1A]">{pending} pending</span></>
             )}
@@ -130,6 +140,7 @@ function OrdersTodayCard({
           <p className="mt-0.5 text-[0.7rem] text-[#9ca3af]">no orders yet</p>
         )}
       </div>
+      {sparkline.length > 1 && <Sparkline data={sparkline} color="#9ca3af" />}
     </div>
   );
 }
@@ -137,29 +148,29 @@ function OrdersTodayCard({
 // ── Generic metric card ───────────────────────────────────────────────────────
 
 function MetricCard({
-  label, value, sub, note, icon: Icon, accent, trend, format = "number",
+  label, value, sub, note, icon: Icon, trend, format = "number", sparkline,
 }: {
-  label:   string;
-  value:   number;
-  sub?:    string;
-  note?:   string;
-  icon:    React.ElementType;
-  accent:  string;
-  trend?:  { current: number; prev: number };
-  format?: "currency" | "number" | "pct";
+  label:      string;
+  value:      number;
+  sub?:       string;
+  note?:      string;
+  icon:       React.ElementType;
+  trend?:     { current: number; prev: number };
+  format?:    "currency" | "number" | "pct";
+  sparkline?: number[];
 }) {
   const animated = useCountUp(value);
   return (
-    <div className="group flex flex-col gap-3 rounded-2xl bg-white p-5 shadow-sm transition hover:shadow-md">
+    <div className="group flex flex-col gap-3 rounded-2xl border border-black/[0.06] bg-white p-5 transition-colors hover:border-black/[0.14]">
       <div className="flex items-start justify-between">
-        <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${accent}`}>
-          <Icon size={18} strokeWidth={1.8} className="text-white" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#f5f5f7]">
+          <Icon size={18} strokeWidth={1.8} className="text-[#5c5e62]" />
         </div>
         {trend && <Trend current={trend.current} prev={trend.prev} />}
       </div>
       <div>
         <p className="text-[0.68rem] font-bold uppercase tracking-[0.14em] text-[#5c5e62]">{label}</p>
-        <p className="mt-0.5 text-2xl font-extrabold text-[#1a1a1a]">
+        <p className="mt-0.5 text-2xl font-bold tracking-tight tabular-nums text-[#1a1a1a]">
           {format === "currency"
             ? `€${animated >= 1000 ? (animated / 1000).toFixed(1) + "k" : animated.toLocaleString()}`
             : format === "pct"
@@ -169,6 +180,7 @@ function MetricCard({
         {sub && <p className="mt-0.5 text-[0.7rem] text-[#9ca3af]">{sub}</p>}
         {note && <p className="mt-0.5 text-[0.68rem] italic text-[#c0c3c8]">{note}</p>}
       </div>
+      {sparkline && sparkline.length > 1 && <Sparkline data={sparkline} color="#9ca3af" />}
     </div>
   );
 }
@@ -196,6 +208,9 @@ export default function HeroMetrics() {
       hasData.current = true;
       setFetchErr(false);
       setStale(false);
+      const revenueChart: { confirmed?: number }[] = Array.isArray(statsRes.revenueChart) ? statsRes.revenueChart : [];
+      const ordersChart:  { count?: number }[]      = Array.isArray(statsRes.ordersChart)  ? statsRes.ordersChart  : [];
+      const aovChart:     { value?: number }[]      = Array.isArray(statsRes.aovChart)     ? statsRes.aovChart     : [];
       setM({
         revenueToday:           statsRes.revenueToday           ?? 0,
         revenueYesterday:       statsRes.revenueYesterday       ?? 0,
@@ -214,6 +229,9 @@ export default function HeroMetrics() {
         aovPeriodLabel:         statsRes.aovPeriodLabel         ?? null,
         aovPaidOrdersCount:     statsRes.aovPaidOrdersCount     ?? null,
         aovManualOrdersCount:   statsRes.aovManualOrdersCount   ?? null,
+        revenueSpark:           revenueChart.map(p => Number(p.confirmed) || 0),
+        ordersSpark:            ordersChart.map(p => Number(p.count) || 0),
+        aovSpark:               aovChart.map(p => Number(p.value) || 0),
       });
     } else if (!hasData.current) {
       // Only mark error on first-load failure — background failure just keeps stale=true
@@ -223,6 +241,7 @@ export default function HeroMetrics() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount + poll, same pattern as cart-context.tsx
     void refresh(false);
     const t = setInterval(() => void refresh(true), REFRESH);
     return () => clearInterval(t);
@@ -240,7 +259,7 @@ export default function HeroMetrics() {
   // First load failed
   if (m === null && fetchErr) {
     return (
-      <div className="mb-6 flex items-center gap-3 rounded-2xl bg-white px-5 py-4 shadow-sm">
+      <div className="mb-6 flex items-center gap-3 rounded-2xl border border-black/[0.06] bg-white px-5 py-4">
         <AlertCircle size={18} className="shrink-0 text-[#9ca3af]" />
         <p className="text-[0.83rem] text-[#5c5e62]">Could not load dashboard metrics.</p>
         <button
@@ -262,6 +281,7 @@ export default function HeroMetrics() {
         confirmed={m?.revenueToday ?? 0}
         confirmedYesterday={m?.revenueYesterday ?? 0}
         pending={m?.pendingRevenueToday ?? 0}
+        sparkline={m?.revenueSpark ?? []}
       />
 
       <OrdersTodayCard
@@ -269,6 +289,7 @@ export default function HeroMetrics() {
         totalYesterday={m?.ordersYesterday ?? 0}
         confirmed={m?.ordersConfirmedToday ?? 0}
         pending={m?.ordersPendingToday ?? 0}
+        sparkline={m?.ordersSpark ?? []}
       />
 
       <MetricCard
@@ -276,7 +297,6 @@ export default function HeroMetrics() {
         value={m?.newCustomersToday ?? 0}
         sub="today"
         icon={Users}
-        accent="bg-violet-500"
         trend={{ current: m?.newCustomersToday ?? 0, prev: m?.newCustomersYesterday ?? 0 }}
       />
 
@@ -285,7 +305,6 @@ export default function HeroMetrics() {
         value={m?.activeSessionsNow ?? 0}
         sub="last 5 minutes"
         icon={Activity}
-        accent="bg-emerald-500"
       />
 
       <MetricCard
@@ -294,7 +313,6 @@ export default function HeroMetrics() {
         sub={m && m.sessionsToday > 0 ? `${m.sessionsToday} sessions today` : "from order analytics"}
         format="pct"
         icon={BarChart2}
-        accent="bg-amber-500"
       />
 
       <MetricCard
@@ -307,8 +325,8 @@ export default function HeroMetrics() {
         note={(m?.aovManualOrdersCount ?? 0) > 0 ? "includes manual/imported orders" : undefined}
         format="currency"
         icon={Zap}
-        accent="bg-cyan-500"
         trend={{ current: m?.avgOrderValueToday ?? 0, prev: m?.avgOrderValueYesterday ?? 0 }}
+        sparkline={m?.aovSpark ?? []}
       />
 
     </div>

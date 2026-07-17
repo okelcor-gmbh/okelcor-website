@@ -9,10 +9,10 @@ const CONVERSIONS = [
 
 export default function GoogleAdsCard() {
   return (
-    <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+    <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
       <div className="flex items-center justify-between border-b border-black/[0.06] px-5 py-4">
         <div>
-          <p className="text-[0.9rem] font-extrabold text-[#1a1a1a]">Google Ads</p>
+          <p className="text-[0.9rem] font-bold text-[#1a1a1a]">Google Ads</p>
           <p className="text-[0.72rem] text-[#5c5e62]">Customer ID: 597-727-6742</p>
         </div>
         <a

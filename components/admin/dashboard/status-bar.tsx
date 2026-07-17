@@ -42,6 +42,7 @@ export default function StatusBar() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount + poll, same pattern as cart-context.tsx
     refresh();
     const t = setInterval(() => { setStale(true); refresh(); }, REFRESH);
     return () => clearInterval(t);
@@ -79,7 +80,7 @@ export default function StatusBar() {
   ];
 
   return (
-    <div className={`mb-5 flex flex-wrap items-center gap-x-1 gap-y-2 rounded-2xl border border-black/[0.06] bg-white px-4 py-3 shadow-sm transition-opacity ${stale ? "opacity-60" : ""}`}>
+    <div className={`mb-5 flex flex-wrap items-center gap-x-1 gap-y-2 rounded-2xl border border-black/[0.06] bg-white px-4 py-3 transition-opacity ${stale ? "opacity-60" : ""}`}>
       {items.map((item) => (
         <Link
           key={item.href}
@@ -87,7 +88,7 @@ export default function StatusBar() {
           className="flex items-center gap-2 rounded-xl px-3 py-1.5 transition hover:bg-[#f5f5f7]"
         >
           <Dot color={item.dot} />
-          <span className={`flex items-center gap-1.5 text-[0.78rem] font-semibold ${item.color}`}>
+          <span className={`flex items-center gap-1.5 text-[0.78rem] font-semibold tabular-nums ${item.color}`}>
             {item.icon}
             {item.label}
           </span>

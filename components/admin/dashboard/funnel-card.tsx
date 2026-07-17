@@ -38,14 +38,15 @@ export default function FunnelCard() {
     setLoad(false);
   }, []);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount, same pattern as cart-context.tsx
   useEffect(() => { refresh(); }, [refresh]);
 
   const top = funnel?.[0]?.count ?? 0;
 
   return (
-    <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+    <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
       <div className="border-b border-black/[0.06] px-5 py-4">
-        <p className="text-[0.9rem] font-extrabold text-[#1a1a1a]">Conversion Funnel</p>
+        <p className="text-[0.9rem] font-bold text-[#1a1a1a]">Conversion Funnel</p>
         <p className="text-[0.72rem] text-[#5c5e62]">Today · sessions per stage</p>
       </div>
       <div className="p-5">
@@ -68,7 +69,7 @@ export default function FunnelCard() {
                   <span className="text-[0.8rem] font-semibold text-[#1a1a1a]">{step.step}</span>
                   <div className="flex items-center gap-2">
                     {i > 0 && <DropBadge from={funnel![i - 1].count} to={step.count} />}
-                    <span className="text-[0.83rem] font-bold text-[#1a1a1a]">{step.count}</span>
+                    <span className="text-[0.83rem] font-bold tabular-nums text-[#1a1a1a]">{step.count}</span>
                   </div>
                 </div>
                 <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-[#f0f2f5]">

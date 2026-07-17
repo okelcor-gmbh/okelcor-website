@@ -16,14 +16,15 @@ export default function LowStock() {
     setLoad(false);
   }, []);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount, same pattern as cart-context.tsx
   useEffect(() => { refresh(); }, [refresh]);
 
   return (
-    <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+    <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
       <div className="flex items-center justify-between border-b border-black/[0.06] px-5 py-4">
         <div className="flex items-center gap-2.5">
           <Package size={15} className="text-[#5c5e62]" />
-          <p className="text-[0.9rem] font-extrabold text-[#1a1a1a]">Low Stock Alerts</p>
+          <p className="text-[0.9rem] font-bold text-[#1a1a1a]">Low Stock Alerts</p>
         </div>
         <Link href="/admin/products" className="text-[0.75rem] font-semibold text-[#E85C1A] hover:underline">
           Manage →
@@ -56,7 +57,7 @@ export default function LowStock() {
               <div className="flex shrink-0 items-center gap-1.5">
                 {p.stock <= 5 && <AlertTriangle size={12} className="text-red-500" />}
                 <span
-                  className={`text-[0.82rem] font-bold ${p.stock <= 5 ? "text-red-600" : "text-amber-600"}`}
+                  className={`text-[0.82rem] font-bold tabular-nums ${p.stock <= 5 ? "text-red-600" : "text-amber-600"}`}
                 >
                   {p.stock} left
                 </span>

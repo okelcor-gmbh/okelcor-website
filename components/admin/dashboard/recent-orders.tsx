@@ -82,7 +82,7 @@ function Row({
           </button>
         )}
 
-        <p className="text-[0.85rem] font-bold text-[#1a1a1a]">
+        <p className="text-[0.85rem] font-bold tabular-nums text-[#1a1a1a]">
           €{Number(o.total).toFixed(2)}
         </p>
       </div>
@@ -137,14 +137,14 @@ export default function RecentOrders() {
   const pendingCount = orders?.filter(isPendingOrder).length ?? 0;
 
   return (
-    <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+    <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
       <div className="flex items-center justify-between border-b border-black/[0.06] px-5 py-4">
         <div className="flex items-center gap-2">
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
           </span>
-          <p className="text-[0.9rem] font-extrabold text-[#1a1a1a]">Recent Orders</p>
+          <p className="text-[0.9rem] font-bold text-[#1a1a1a]">Recent Orders</p>
           {pendingCount > 0 && (
             <span className="rounded-full bg-[#E85C1A] px-1.5 py-0.5 text-[0.65rem] font-bold text-white">
               {pendingCount} pending

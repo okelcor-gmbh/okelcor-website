@@ -29,7 +29,7 @@ export default class DashboardErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex min-h-[120px] flex-col items-center justify-center gap-3 rounded-2xl bg-white p-6 shadow-sm">
+        <div className="flex min-h-[120px] flex-col items-center justify-center gap-3 rounded-2xl border border-black/[0.06] bg-white p-6">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-red-50">
             <AlertTriangle size={16} strokeWidth={1.8} className="text-red-400" />
           </div>

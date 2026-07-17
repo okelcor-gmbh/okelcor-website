@@ -22,6 +22,7 @@ export default function SecurityAlertCard() {
     setLoad(false);
   }, []);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount, same pattern as cart-context.tsx
   useEffect(() => { refresh(); }, [refresh]);
 
   const items = [
@@ -52,11 +53,11 @@ export default function SecurityAlertCard() {
   ];
 
   return (
-    <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+    <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
       <div className="flex items-center justify-between border-b border-black/[0.06] px-5 py-4">
         <div className="flex items-center gap-2.5">
           <ShieldAlert size={15} className="text-[#5c5e62]" />
-          <p className="text-[0.9rem] font-extrabold text-[#1a1a1a]">Security Overview</p>
+          <p className="text-[0.9rem] font-bold text-[#1a1a1a]">Security Overview</p>
         </div>
         <Link href="/admin/security" className="text-[0.75rem] font-semibold text-[#E85C1A] hover:underline">
           View log →
@@ -81,7 +82,7 @@ export default function SecurityAlertCard() {
                 {loading ? (
                   <div className="mt-1 h-5 w-10 animate-pulse rounded bg-[#e5e7eb]" />
                 ) : (
-                  <p className={`text-[1.1rem] font-extrabold ${color}`}>{value}</p>
+                  <p className={`text-[1.1rem] font-bold tabular-nums ${color}`}>{value}</p>
                 )}
               </div>
             </div>

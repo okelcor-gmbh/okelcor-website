@@ -33,7 +33,7 @@ function StatPill({
 }) {
   return (
     <div className={`flex flex-col items-center rounded-xl px-3 py-2 ${urgent && (value ?? 0) > 0 ? "bg-red-50" : "bg-[#fafafa]"}`}>
-      <p className={`text-xl font-extrabold ${urgent && (value ?? 0) > 0 ? "text-red-600" : "text-[#1a1a1a]"}`}>
+      <p className={`text-xl font-bold tabular-nums ${urgent && (value ?? 0) > 0 ? "text-red-600" : "text-[#1a1a1a]"}`}>
         {value === null ? "—" : value.toLocaleString()}
       </p>
       <p className="text-[0.68rem] font-semibold uppercase tracking-[0.1em] text-[#5c5e62]">{label}</p>
@@ -56,6 +56,7 @@ export default function SentryCard() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount + poll, same pattern as cart-context.tsx
     void refresh();
     const t = setInterval(() => void refresh(), REFRESH);
     return () => clearInterval(t);
@@ -65,14 +66,14 @@ export default function SentryCard() {
     ?? `https://sentry.io/organizations/${process.env.NEXT_PUBLIC_SENTRY_ORG ?? "okelcor"}/issues/`;
 
   return (
-    <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+    <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-black/[0.06] px-5 py-4">
         <div className="flex items-center gap-2">
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#362d59]">
             <ShieldAlert size={14} strokeWidth={1.8} className="text-white" />
           </div>
-          <p className="text-[0.9rem] font-extrabold text-[#1a1a1a]">Error Monitoring</p>
+          <p className="text-[0.9rem] font-bold text-[#1a1a1a]">Error Monitoring</p>
           {!loading && data?.configured && (data?.unresolved ?? 0) === 0 && (
             <CheckCircle2 size={14} className="text-emerald-500" />
           )}
@@ -124,7 +125,7 @@ export default function SentryCard() {
               <p className="truncate text-[0.8rem] font-semibold text-[#1a1a1a]">
                 {data.topIssue.title}
               </p>
-              <p className="mt-0.5 text-[0.72rem] text-[#9ca3af]">
+              <p className="mt-0.5 text-[0.72rem] tabular-nums text-[#9ca3af]">
                 {data.topIssue.count.toLocaleString()} occurrences
               </p>
             </div>

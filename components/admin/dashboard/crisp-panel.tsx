@@ -91,14 +91,15 @@ export default function CrispPanel() {
     }
   }, []);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount, same pattern as cart-context.tsx
   useEffect(() => { refresh(); }, [refresh]);
 
   return (
-    <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+    <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
       <div className="flex items-center justify-between border-b border-black/[0.06] px-5 py-4">
         <div className="flex items-center gap-2.5">
           <MessageCircle size={15} className="text-[#5c5e62]" />
-          <p className="text-[0.9rem] font-extrabold text-[#1a1a1a]">Open Conversations</p>
+          <p className="text-[0.9rem] font-bold text-[#1a1a1a]">Open Conversations</p>
           <StatusDot status={status} />
         </div>
         <Link href="/admin/chats" className="text-[0.75rem] font-semibold text-[#E85C1A] hover:underline">

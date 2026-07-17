@@ -47,7 +47,7 @@ export default async function AdminDashboard() {
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-[#E85C1A]">Overview</p>
-          <h1 className="mt-0.5 text-2xl font-extrabold text-[#1a1a1a]">Dashboard</h1>
+          <h1 className="mt-0.5 text-2xl font-bold tracking-tight text-[#1a1a1a]">Dashboard</h1>
         </div>
         <div className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-[0.72rem] font-semibold text-emerald-700">
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />

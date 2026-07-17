@@ -22,16 +22,17 @@ export default function TopProducts() {
     setLoad(false);
   }, []);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount, same pattern as cart-context.tsx
   useEffect(() => { refresh(); }, [refresh]);
 
   const maxViews = products?.[0]?.views ?? 1;
 
   return (
-    <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+    <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
       <div className="flex items-center gap-2.5 border-b border-black/[0.06] px-5 py-4">
         <Flame size={15} className="text-[#E85C1A]" />
         <div>
-          <p className="text-[0.9rem] font-extrabold text-[#1a1a1a]">Top Products</p>
+          <p className="text-[0.9rem] font-bold text-[#1a1a1a]">Top Products</p>
           <p className="text-[0.68rem] text-[#9ca3af]">Most viewed · last 7 days</p>
         </div>
       </div>
@@ -59,7 +60,7 @@ export default function TopProducts() {
                     <p className="truncate text-[0.82rem] font-semibold text-[#1a1a1a]">{p.name}</p>
                     <p className="text-[0.7rem] text-[#9ca3af]">{p.brand}</p>
                   </div>
-                  <span className="shrink-0 text-[0.8rem] font-bold text-[#5c5e62]">{p.views} views</span>
+                  <span className="shrink-0 text-[0.8rem] font-bold tabular-nums text-[#5c5e62]">{p.views} views</span>
                 </div>
                 <div className="h-2 w-full overflow-hidden rounded-full bg-[#f0f2f5]">
                   <div
