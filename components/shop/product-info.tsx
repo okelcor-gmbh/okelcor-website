@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Minus, Plus, ShoppingCart, Check } from "lucide-react";
+import { Minus, Plus, ShoppingCart, Check, CheckCircle2, ShieldCheck, BadgeCheck, SearchCheck } from "lucide-react";
 import type { Product } from "./data";
 import { useCart } from "@/context/cart-context";
 import { useLanguage } from "@/context/language-context";
@@ -69,8 +69,13 @@ export default function ProductInfo({ product }: { product: Product }) {
       </p>
 
       {/* Stock status */}
-      {!inStock && (
-        <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-red-100 px-3 py-1 text-[0.78rem] font-bold text-red-600">
+      {inStock ? (
+        <span className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-[0.78rem] font-bold text-emerald-700">
+          <CheckCircle2 size={14} strokeWidth={2.2} />
+          {t.shop.info.inStock}
+        </span>
+      ) : (
+        <span className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full bg-red-100 px-3 py-1 text-[0.78rem] font-bold text-red-600">
           <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
           Out of Stock
         </span>
@@ -165,6 +170,22 @@ export default function ProductInfo({ product }: { product: Product }) {
             WhatsApp
           </a>
         </div>
+      </div>
+
+      {/* Trust — real, factual certifications (see footer) surfaced at the decision point */}
+      <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-black/[0.07] pt-5">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-black/[0.08] bg-white px-3 py-1.5 text-[0.7rem] font-bold text-[var(--foreground)]">
+          <ShieldCheck size={13} strokeWidth={2.2} className="text-[var(--primary)]" />
+          {t.shop.trust.iso}
+        </span>
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-black/[0.08] bg-white px-3 py-1.5 text-[0.7rem] font-bold text-[var(--foreground)]">
+          <BadgeCheck size={13} strokeWidth={2.2} className="text-[var(--primary)]" />
+          {t.shop.trust.rex}
+        </span>
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-black/[0.08] bg-white px-3 py-1.5 text-[0.7rem] font-bold text-[var(--foreground)]">
+          <SearchCheck size={13} strokeWidth={2.2} className="text-[var(--primary)]" />
+          {t.shop.trust.inspected}
+        </span>
       </div>
 
       {/* Description */}

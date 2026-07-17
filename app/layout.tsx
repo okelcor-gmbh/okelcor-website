@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { CartProvider } from "@/context/cart-context";
+import { CompareProvider } from "@/context/compare-context";
+import CompareBar from "@/components/shop/compare-bar";
+import CompareModal from "@/components/shop/compare-modal";
 import { LanguageProvider } from "@/context/language-context";
 import CartDrawer from "@/components/cart/cart-drawer";
 import CookieConsent from "@/components/cookie-consent";
@@ -125,14 +128,18 @@ export default async function RootLayout({
             <LanguageProvider>
               <SearchProvider>
                 <CartProvider>
+                <CompareProvider>
                   <AnnouncementBar />
                   {children}
                   <CartDrawer />
                   <SearchModal />
+                  <CompareBar />
+                  <CompareModal />
                   <CookieConsent />
                   <BackToTop />
                   <AnalyticsScript />
                   <CrispChat />
+                </CompareProvider>
                 </CartProvider>
               </SearchProvider>
             </LanguageProvider>

@@ -63,6 +63,8 @@
 | Rapid Specials campaign banner | `bfa332f` | |
 | VAT number validation (EU) | `51ef0e6` | |
 | Incoterms / FOB default | `bfa332f` | |
+| Tyre comparison tool | 2026-07-17 | Competitive research pass vs. Tire Rack / SimpleTire / ATD (ATDOnline). Select up to 4 products anywhere in the catalogue (`context/compare-context.tsx`, localStorage-persisted) → floating `CompareBar` → `CompareModal` side-by-side spec table (brand/size/spec/season/type/price/availability). Confirmed existing Cmd+K search (`components/search/search-modal.tsx`) already matches/beats SimpleTire's typeahead — untouched |
+| Trust signal upgrade | 2026-07-17 | Product card + detail page now show a real "✓ In Stock" line instead of only flagging the negative case; detail page surfaces the site's actual certifications (ISO 9001:2015, REX · DEREX76000242 — same facts as the footer) at the decision point via a new `trust` i18n block (EN/DE/FR/ES). Both features are backend-independent; `docs/BACKEND_NOTE_premium_ux.md` covers what would make them richer (real per-warehouse stock/ETA, used-tyre batch/condition traceability, saved fitments + one-click reorder) |
 
 ---
 

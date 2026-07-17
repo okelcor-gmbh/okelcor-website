@@ -66,11 +66,12 @@ export type Translations = {
     filter: { tyreType: string; brand: string; season: string };
     sort: { default: string; priceAsc: string; priceDesc: string };
     grid: { noProducts: string; noProductsHint: string };
-    card: { shipping: string; viewDetails: string; quote: string };
+    card: { shipping: string; viewDetails: string; quote: string; inStock: string };
     info: {
       quantity: string; addToCart: string; addedToCart: string;
-      requestQuote: string; shipping: string; share: string;
+      requestQuote: string; shipping: string; share: string; inStock: string;
     };
+    trust: { iso: string; rex: string; inspected: string };
     accordion: {
       sizePattern: string; loadSpeed: string;
       returnPolicy: string; disclaimer: string;
@@ -706,11 +707,12 @@ const en: Translations = {
     filter: { tyreType: "Tyre Type", brand: "Brand", season: "Season" },
     sort: { default: "Default", priceAsc: "Price: Low to High", priceDesc: "Price: High to Low" },
     grid: { noProducts: "No products found", noProductsHint: "Try adjusting or clearing your filters." },
-    card: { shipping: "Excl. tax · Free shipping", viewDetails: "View Details", quote: "Quote" },
+    card: { shipping: "Excl. tax · Free shipping", viewDetails: "View Details", quote: "Quote", inStock: "In Stock" },
     info: {
       quantity: "Quantity", addToCart: "Add to Cart", addedToCart: "Added to Cart",
-      requestQuote: "Request Quote", shipping: "Excluding sales tax · Free shipping", share: "Share",
+      requestQuote: "Request Quote", shipping: "Excluding sales tax · Free shipping", share: "Share", inStock: "In Stock — Ready to Order",
     },
+    trust: { iso: "ISO 9001:2015 Certified", rex: "REX Certified Sourcing", inspected: "Quality Inspected" },
     accordion: {
       sizePattern: "Size and Pattern", loadSpeed: "Load / Speed Index",
       returnPolicy: "Return Policy", disclaimer: "Disclaimer",
@@ -1219,11 +1221,12 @@ const de: Translations = {
     filter: { tyreType: "Reifentyp", brand: "Marke", season: "Saison" },
     sort: { default: "Standard", priceAsc: "Preis: aufsteigend", priceDesc: "Preis: absteigend" },
     grid: { noProducts: "Keine Produkte gefunden", noProductsHint: "Versuchen Sie, Ihre Filter anzupassen oder zu löschen." },
-    card: { shipping: "Zzgl. MwSt. · Kostenloser Versand", viewDetails: "Details ansehen", quote: "Angebot" },
+    card: { shipping: "Zzgl. MwSt. · Kostenloser Versand", viewDetails: "Details ansehen", quote: "Angebot", inStock: "Auf Lager" },
     info: {
       quantity: "Menge", addToCart: "In den Warenkorb", addedToCart: "Im Warenkorb",
-      requestQuote: "Angebot anfordern", shipping: "Zzgl. MwSt. · Kostenloser Versand", share: "Teilen",
+      requestQuote: "Angebot anfordern", shipping: "Zzgl. MwSt. · Kostenloser Versand", share: "Teilen", inStock: "Auf Lager — sofort bestellbar",
     },
+    trust: { iso: "ISO 9001:2015 zertifiziert", rex: "REX-zertifizierte Beschaffung", inspected: "Qualitätsgeprüft" },
     accordion: {
       sizePattern: "Größe und Profil", loadSpeed: "Last- / Geschwindigkeitsindex",
       returnPolicy: "Rückgaberecht", disclaimer: "Haftungsausschluss",
@@ -1732,11 +1735,12 @@ const fr: Translations = {
     filter: { tyreType: "Type de pneu", brand: "Marque", season: "Saison" },
     sort: { default: "Par défaut", priceAsc: "Prix : croissant", priceDesc: "Prix : décroissant" },
     grid: { noProducts: "Aucun produit trouvé", noProductsHint: "Essayez d'ajuster ou d'effacer vos filtres." },
-    card: { shipping: "HT · Livraison gratuite", viewDetails: "Voir les détails", quote: "Devis" },
+    card: { shipping: "HT · Livraison gratuite", viewDetails: "Voir les détails", quote: "Devis", inStock: "En stock" },
     info: {
       quantity: "Quantité", addToCart: "Ajouter au panier", addedToCart: "Ajouté au panier",
-      requestQuote: "Demander un devis", shipping: "Hors taxes · Livraison gratuite", share: "Partager",
+      requestQuote: "Demander un devis", shipping: "Hors taxes · Livraison gratuite", share: "Partager", inStock: "En stock — prêt à commander",
     },
+    trust: { iso: "Certifié ISO 9001:2015", rex: "Approvisionnement certifié REX", inspected: "Qualité contrôlée" },
     accordion: {
       sizePattern: "Taille et Profil", loadSpeed: "Indice de charge / vitesse",
       returnPolicy: "Politique de retour", disclaimer: "Avertissement",
@@ -2215,11 +2219,12 @@ const es: Translations = {
     filter: { tyreType: "Tipo de neumático", brand: "Marca", season: "Temporada" },
     sort: { default: "Relevancia", priceAsc: "Precio: menor a mayor", priceDesc: "Precio: mayor a menor" },
     grid: { noProducts: "No se encontraron productos", noProductsHint: "Intente ajustar los filtros o busque un término diferente." },
-    card: { shipping: "Envío disponible", viewDetails: "Ver detalles", quote: "Cotizar" },
+    card: { shipping: "Envío disponible", viewDetails: "Ver detalles", quote: "Cotizar", inStock: "En stock" },
     info: {
       quantity: "Cantidad", addToCart: "Añadir al carrito", addedToCart: "Añadido al carrito",
-      requestQuote: "Solicitar cotización", shipping: "Envío disponible", share: "Compartir",
+      requestQuote: "Solicitar cotización", shipping: "Envío disponible", share: "Compartir", inStock: "En stock — listo para pedir",
     },
+    trust: { iso: "Certificado ISO 9001:2015", rex: "Abastecimiento certificado REX", inspected: "Calidad inspeccionada" },
     accordion: {
       sizePattern: "Tamaño y patrón", loadSpeed: "Carga y velocidad",
       returnPolicy: "Política de devoluciones", disclaimer: "Aviso legal",

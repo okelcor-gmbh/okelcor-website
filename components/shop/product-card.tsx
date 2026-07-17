@@ -1,10 +1,12 @@
 ﻿"use client";
 
 import Link from "next/link";
+import { ArrowLeftRight, CheckCircle2 } from "lucide-react";
 import type { Product } from "./data";
 export type { Product } from "./data";
 import { useLanguage } from "@/context/language-context";
 import { useDepthTilt } from "@/hooks/useDepthTilt";
+import { useCompare } from "@/context/compare-context";
 
 const PLACEHOLDER = "/images/tyre-placeholder.svg";
 
@@ -53,9 +55,11 @@ export default function ProductCard({
 }) {
   const { t } = useLanguage();
   const cardRef = useDepthTilt<HTMLDivElement>({ maxRotate: 4, maxShift: 6, scale: 1.008 });
+  const { toggle, isComparing, isFull } = useCompare();
 
   const imageUrl = resolveImage(product);
   const { displayPrice, badge, showGuestNudge } = resolvePrice(product, customerType);
+  const comparing = isComparing(product.id);
 
   return (
     <div
@@ -81,6 +85,22 @@ export default function ProductCard({
             {activeCampaign.discount_pct}% OFF
           </span>
         )}
+
+        {/* Compare toggle */}
+        <button
+          type="button"
+          onClick={() => toggle(product)}
+          disabled={!comparing && isFull}
+          title={comparing ? "Remove from comparison" : isFull ? "Compare list full (max 4)" : "Add to comparison"}
+          className={`absolute bottom-2 left-2 flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-40 ${
+            comparing
+              ? "border-[var(--primary)] bg-[var(--primary)] text-white"
+              : "border-gray-200 bg-white/95 text-gray-500 hover:border-[var(--primary)]/40 hover:text-[var(--primary)]"
+          }`}
+        >
+          <ArrowLeftRight size={11} strokeWidth={2.2} />
+          {comparing ? "Comparing" : "Compare"}
+        </button>
       </div>
 
       {/* Content */}
@@ -120,6 +140,11 @@ export default function ProductCard({
           <p className="text-[1.25rem] font-extrabold tracking-tight text-[var(--foreground)]">
             €{displayPrice.toFixed(2)}
           </p>
+          {product.in_stock !== false && (
+            <p className="mt-0.5 flex items-center gap-1 text-[0.72rem] font-semibold text-emerald-600">
+              <CheckCircle2 size={12} strokeWidth={2.2} /> {t.shop.card.inStock}
+            </p>
+          )}
           <p className="text-[0.72rem] text-gray-400">{t.shop.card.shipping}</p>
           {showGuestNudge && (
             <Link
