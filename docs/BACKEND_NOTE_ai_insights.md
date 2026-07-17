@@ -1,19 +1,22 @@
 # Backend Note — AI-Generated Admin Insights ("what's going on" popups)
 
 **From:** Frontend · **Re:** automatic, natural-language insights on the admin dashboard
-**Status:** Frontend is fully built against this contract and live behind graceful
-degradation — `GET /api/admin/insights` currently returns an empty list, so nothing
-renders yet. The moment the endpoint below returns real data, the topbar bell badge,
-dropdown, and popup toasts all light up. No frontend deploy needed to activate.
+**Status:** Built end-to-end on both sides. Backend confirmed Gemini + a 15-minute
+scheduled job (`insights:generate`), and frontend is wired to the exact shape shipped
+(see "Backend response" below — reconciled 2026-07-18). **Not live in production yet**:
+`GEMINI_API_KEY` isn't set on the server, so `GET /admin/insights` currently returns
+`{ "data": [], "generated_at": null }` — the correct, expected empty state, not an
+error. The moment that key is added, the topbar bell badge, dropdown, and popup toasts
+start producing real data with zero further frontend or backend changes.
 
 ---
 
 ## The idea, in one sentence
 
-Instead of an admin having to glance at six different dashboard cards and
+Instead of an admin having to glance at several different dashboard cards and
 mentally connect them, a small AI job periodically reads the same numbers the
-dashboard already shows (revenue, orders, stock, security, traffic, quotes)
-and turns them into a handful of short, plain-English observations — e.g.
+dashboard already shows (revenue, orders, stock, security, quotes) and turns
+them into a handful of short, plain-English observations — e.g.
 *"Revenue is up 34% vs yesterday, driven mostly by 3 large TBR orders from
 Germany"* or *"Michelin 295/80R22.5 will likely stock out within ~4 days at
 the current order pace."* The frontend surfaces these as a small popup/toast
@@ -66,7 +69,7 @@ fit "free" as asked.
 
 ---
 
-## Proposed contract
+## Shipped contract (final — matches what's actually deployed)
 
 ```
 GET /admin/insights
@@ -76,13 +79,12 @@ GET /admin/insights
 {
   "data": [
     {
-      "id": "ins_20260718_0900_01",
-      "category": "revenue",        // revenue | orders | inventory | security | traffic | quotes
+      "id": "ins_20260718_090000_01",
+      "category": "revenue",        // revenue | orders | inventory | security | quotes — no "traffic" (see below)
       "severity": "positive",       // positive | info | warning | critical
       "headline": "Revenue up 34% vs yesterday",
-      "detail": "Driven mostly by **3 large TBR orders from Germany** (avg. €1,240 each).",
-      "suggestion": null,           // optional — see note below
-      "action_url": "/admin/orders?..."   // optional deep link, omit if none makes sense
+      "detail": "Driven mostly by 3 large TBR orders from Germany.",
+      "action_url": null           // string when a deep link makes sense, otherwise null
     }
   ],
   "generated_at": "2026-07-18T09:00:00Z",
@@ -90,72 +92,66 @@ GET /admin/insights
 }
 ```
 
-Two small additions since the frontend got built out:
+Two things proposed earlier were **not** built and have been removed from the
+frontend to match: a `**bold**` markdown-lite span in `detail`, and an
+optional `suggestion` field. Neither shipped — `detail` is plain text and
+there's no suggestion field. If either is wanted later it's a small additive
+change on both sides, not a redesign.
 
-- **`detail` supports one `**bold**` span** — wrap the single most important
-  clause in double-asterisks (plain markdown-lite, nothing fancier) and the
-  frontend renders it as emphasized text. Don't bold more than one clause per
-  sentence — this is meant to draw the eye to the one number/fact that
-  matters, not to format the whole sentence.
-- **`suggestion`** (optional, nullable) — a short, separate, actionable
-  one-liner distinct from `detail`'s observation, e.g. *"3 quotes have sat
-  unassigned for 2+ days — assigning them now would clear most of the
-  backlog."* Rendered as a small distinct callout in the dropdown (not the
-  popup toast, which stays compact). Omit or send `null` when there's nothing
-  actionable to add — not every insight needs one.
+No dismiss endpoint — the frontend tracks "seen"/dismissed insight IDs
+client-side (localStorage). No history/pagination endpoint either — backend
+does persist every 15-minute batch in a real table on their side, so a
+history endpoint is a small future addition if a proper history panel (not
+just locally-tracked seen IDs) is ever wanted.
 
-That's the only endpoint needed. No dismiss endpoint required — the frontend
-tracks "seen"/dismissed insight IDs client-side (localStorage), so dismissing
-one just hides it locally until the next generation cycle produces new ones.
-
-Degrades the same way every other optional integration in this app does:
-`data: []` (or a 404/501) until it's live — frontend shows nothing, no error.
+`data: []` / `generated_at: null` is the correct, expected state whenever
+`GEMINI_API_KEY` isn't set — not an error, and exactly what ships in
+production until that key is added.
 
 ---
 
-## Suggested source data per category (all already computed today)
+## Source data per category (backend-confirmed, final)
 
-| Category | Already-existing source |
+| Category | What it actually summarizes |
 |---|---|
-| Revenue / Orders | Same orders data behind `/admin/dashboard` (`revenue_today`, `orders_today_paid`, etc.) |
-| Inventory | Product `inventory` counts (same data behind the dashboard's low-stock list) |
-| Security | `/admin/security/summary` (locked accounts, failed attempts, suspicious accounts) |
-| Traffic | Whatever already feeds the PostHog-backed analytics cards (active sessions, top pages, traffic sources) |
-| Quotes | Open/new quote-request counts and categories |
+| Revenue / Orders | Today vs. yesterday revenue and order count, today's paid orders broken down by country and by tyre type (PCR/TBR/Used/OTR) |
+| Inventory | A real backend-computed stockout forecast (`current stock ÷ 7-day daily sell-through`) for any product within 10 days of stockout — Gemini restates this number in plain English, it never invents it |
+| Security | Today's failed logins, critical security events, permission-denied events, overall 2FA adoption rate |
+| Quotes | Today's new quote count, total open quotes, today's breakdown by tyre category |
 
-A 3–5 sentence-max prompt per cycle, feeding this condensed snapshot in and
-asking for 2–4 ranked insight objects back (most important first, capped so
-the popup never becomes a wall of text) is enough — this doesn't need
-conversation memory or multi-turn reasoning, just one summarization call per
-refresh cycle.
+**Traffic was dropped** — there's no PostHog integration on the Laravel side
+(analytics live entirely frontend-embedded), so there's no aggregate traffic
+data to feed this today. A separate proposal (PostHog personal API key + a
+new backend query layer) would be needed to add it back — not blocking this
+feature, noted for later.
 
 ---
 
-## What frontend has already built
+## What frontend has built
 
 `components/admin/insights-bell.tsx` — a distinct topbar bell (sparkle icon,
 own identity, not reused notification-bell styling) that:
 - Polls `/api/admin/insights` every 2 minutes.
 - Shows a badge + dropdown of current insights (severity-tinted icon chip,
-  category label, headline, detail, optional suggestion callout, optional
-  deep link, per-item dismiss + "Clear all").
+  category label, headline, detail, optional deep link, per-item dismiss +
+  "Clear all").
 - Slides in up to 2 popup toasts (top-right, auto-dismiss ~9s) for any
   insight not already seen in this browser (tracked in `localStorage`, so a
   given insight only ever toasts once per admin).
 
-Fully wired into `components/admin/admin-shell.tsx`. Nothing to do
-frontend-side once the endpoint ships — it'll just start rendering.
+Fully wired into `components/admin/admin-shell.tsx`, reconciled against the
+shipped contract above (category list trimmed to 5, `suggestion`/bold-span
+handling removed since neither exists). Nothing left to do frontend-side —
+it'll start rendering the moment `GEMINI_API_KEY` is set.
 
 ---
 
-## Please confirm
+## Backend response (2026-07-18) — resolved
 
-- Comfortable running a scheduled job (cron/queue, whatever's idiomatic on
-  the Laravel side) rather than generating on-demand per request — this is
-  the part that keeps it inside a free tier's rate limits regardless of
-  admin headcount.
-- Gemini vs. Groq — either is fine frontend-side, this is purely a backend
-  cost/ops call; just flag which one so this note can be updated.
-- Comfortable with the data-minimization rule above (aggregates only, no raw
-  PII in the prompt) — non-negotiable given this is an EU B2B company, but
-  worth an explicit yes before anything's wired up.
+- **Provider: Gemini**, confirmed — same free-tier reasoning as proposed.
+- **Scheduled job, confirmed** — `insights:generate` runs every 15 minutes
+  via Laravel's scheduler, independent of admin headcount.
+- **Data minimization: confirmed** — aggregates only, no customer/admin
+  names, emails, or addresses ever leave the server.
+- **Blocker to real output:** `GEMINI_API_KEY` not yet set in production.
+  Everything else (scheduled job, database table, endpoint) is live.

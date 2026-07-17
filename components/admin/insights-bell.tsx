@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Sparkles, X, ArrowRight } from "lucide-react";
+import { Sparkles, X } from "lucide-react";
 import type { AdminInsight } from "@/lib/admin-api";
 import { severityStyle, categoryLabel, renderInsightDetail } from "@/lib/admin-insights";
 
@@ -177,12 +177,6 @@ function InsightRow({
         <p className="mt-0.5 line-clamp-2 text-[0.76rem] leading-[1.5] text-[#5c5e62]">
           {renderInsightDetail(insight.detail)}
         </p>
-        {insight.suggestion && (
-          <div className="mt-2 flex items-start gap-1.5 rounded-lg bg-emerald-50 px-2.5 py-2">
-            <ArrowRight size={11} className="mt-0.5 shrink-0 text-emerald-600" />
-            <p className="text-[0.72rem] leading-[1.45] text-emerald-800">{insight.suggestion}</p>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -200,6 +200,24 @@
 
 ---
 
+### ✅ Admin Panel — AI Insights
+
+Idea: a Gemini-powered scheduled job (backend, every 15 min) summarizes the
+same aggregate numbers already behind the dashboard into a handful of short
+natural-language observations, surfaced as a topbar bell + popup toasts —
+"what's going on" without an admin having to piece it together from six cards.
+
+| Feature | Notes |
+|---|---|
+| `components/admin/insights-bell.tsx` | 2026-07-18 · Topbar sparkle-icon bell (own identity, distinct from the plain notifications bell) — badge + dropdown of current insights (severity-tinted chip, category, headline, deep link, dismiss/clear-all) plus up to 2 popup toasts (top-right, ~9s auto-dismiss) for anything not already seen in that browser, tracked client-side via `localStorage` (no dismiss endpoint exists or is needed) |
+| `lib/admin-insights.ts` + `lib/admin-api.ts` | Severity styles, category labels (`revenue`\|`orders`\|`inventory`\|`security`\|`quotes`), bold-span renderer (currently unused — backend's `detail` ships as plain text, kept as a harmless no-op passthrough in case that changes), `AdminInsight` types |
+| `/api/admin/insights` proxy | Degrades to `{ data: [], generated_at: null }` — which is also the exact real state today: backend's pipeline (scheduled job, DB table, endpoint) is live, but **`GEMINI_API_KEY` isn't set in production yet**, so it silently no-ops every cycle. Nothing left to do on either side — it activates the moment that key is added |
+| Traffic category | Proposed, not built — no PostHog integration exists on the Laravel side to summarize. Would need a separate proposal (PostHog personal API key + new backend query layer); not blocking |
+
+Full proposal history + backend's confirmed contract: `docs/BACKEND_NOTE_ai_insights.md`.
+
+---
+
 ### ✅ Shipment Tracking — Carrier-based (GLS/DHL/ocean freight) — frontend
 
 **Traccar/GPS own-fleet tracking was removed backend-side (2026-07-03; live, verified against
@@ -347,31 +365,6 @@ Extends the existing CRM-6 communication log with a **real send** path (manual "
 ---
 
 ## Pending — Backend Contracts
-
-### AI-Generated Admin Insights — Frontend Complete, Backend Pending
-
-Idea: a scheduled backend job periodically summarizes the same aggregate
-numbers already behind the dashboard (revenue, orders, stock, security,
-traffic, quotes) into a handful of short natural-language insights via a
-free-tier AI API (Gemini recommended, Groq as fallback — see note for why),
-served from one cached `GET /admin/insights` endpoint.
-
-**Frontend shipped** (2026-07-18): `components/admin/insights-bell.tsx` — a
-topbar sparkle-icon bell (own visual identity, distinct from the plain
-notifications bell) with a badge + dropdown of current insights (severity-
-tinted chip, category, headline, `**bold**`-parsed detail, optional
-"suggestion" callout, optional deep link, dismiss/clear-all) plus up to 2
-popup toasts (top-right, ~9s auto-dismiss) for anything not already seen in
-that browser (tracked client-side via `localStorage` — no dismiss endpoint
-needed). `lib/admin-insights.ts` (severity styles, category labels, bold-span
-renderer), `lib/admin-api.ts` (`AdminInsight` types), and
-`/api/admin/insights` (proxy, degrades to an empty list) round it out.
-Everything degrades silently today since the backend endpoint doesn't exist —
-lights up the moment it does, no frontend deploy required.
-
-**Full proposal, API choice reasoning, data-minimization rule, and contract:
-`docs/BACKEND_NOTE_ai_insights.md`.** Waiting on backend to confirm
-feasibility/API choice and build the one endpoint.
 
 ### Proposal → Proforma Gating — Needs `proposal_accepted_at` Surfaced on Order Payload
 

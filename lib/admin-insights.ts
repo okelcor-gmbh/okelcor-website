@@ -20,7 +20,7 @@ export function severityStyle(severity?: AdminInsightSeverity | null): SeverityS
 
 const CATEGORY_LABELS: Record<string, string> = {
   revenue: "Revenue", orders: "Orders", inventory: "Inventory",
-  security: "Security", traffic: "Traffic", quotes: "Quotes",
+  security: "Security", quotes: "Quotes",
 };
 
 export function categoryLabel(category: AdminInsightCategory): string {

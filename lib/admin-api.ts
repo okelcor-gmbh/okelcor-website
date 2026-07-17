@@ -442,7 +442,7 @@ export type AdminNotification = {
 // (GET /admin/insights) — see docs/BACKEND_NOTE_ai_insights.md for the full
 // proposal. Not live yet; frontend degrades to an empty list until it is.
 export type AdminInsightCategory =
-  | "revenue" | "orders" | "inventory" | "security" | "traffic" | "quotes" | string;
+  | "revenue" | "orders" | "inventory" | "security" | "quotes" | string;
 
 export type AdminInsightSeverity = "positive" | "info" | "warning" | "critical";
 
@@ -453,7 +453,6 @@ export type AdminInsight = {
   headline: string;
   /** May contain **bold** markdown-lite spans — render via renderInsightDetail(). */
   detail: string;
-  suggestion?: string | null;
   action_url?: string | null;
 };
 
