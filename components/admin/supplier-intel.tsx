@@ -22,13 +22,49 @@ interface EbayItem {
   url?:               string;
 }
 
-// API shape: { data: EbayItem[], meta: { total: number } }
+interface SupplierSummary {
+  count: number;
+  currency?: string | null;
+  min_price?: number | null;
+  max_price?: number | null;
+  avg_price?: number | null;
+}
+
+interface MarketplaceLinks {
+  alibaba?: string;
+  made_in_china?: string;
+}
+
+interface YourProduct {
+  id: number; sku: string; brand: string; name: string; size: string; type: string;
+  price: number; price_b2b?: number | null; price_b2c?: number | null;
+  price_vs_market_pct?: number | null;
+}
+
+// API shape: { data: EbayItem[], summary, marketplace_links, meta: { total: number }, note? }
 interface SupplierSearchResponse {
   data?: EbayItem[];
+  summary?: SupplierSummary;
+  marketplace_links?: MarketplaceLinks;
   meta?: { total?: number };
+  note?: string;
+  message?: string;
+}
+
+interface ForProductResponse extends SupplierSearchResponse {
+  your_product?: YourProduct;
 }
 
 type SearchState = "idle" | "loading" | "done" | "error";
+type ProductType = "pcr" | "tbr" | "used" | "otr";
+
+const TYPE_TABS: { value: ProductType | ""; label: string }[] = [
+  { value: "",    label: "All" },
+  { value: "pcr", label: "PCR" },
+  { value: "tbr", label: "TBR" },
+  { value: "used", label: "Used" },
+  { value: "otr", label: "OTR" },
+];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -48,7 +84,6 @@ function buildExternalUrl(base: string, query: string): string {
 }
 
 const EXTERNAL_LINKS = [
-  { label: "Made-in-China",  base: "https://www.made-in-china.com/multi-search/q=" },
   { label: "Global Sources", base: "https://www.globalsources.com/search?keyword=" },
   { label: "DHgate",         base: "https://www.dhgate.com/wholesale/search.do?searchkey=" },
 ];
@@ -137,9 +172,11 @@ function EbayCard({ item }: { item: EbayItem }) {
 function PriceStrip({
   okelcorPrice,
   lowestEbay,
+  priceVsMarketPct,
 }: {
   okelcorPrice: number | null;
   lowestEbay: number | null;
+  priceVsMarketPct?: number | null;
 }) {
   if (okelcorPrice == null && lowestEbay == null) return null;
 
@@ -208,6 +245,19 @@ function PriceStrip({
             </p>
           </div>
         )}
+        {priceVsMarketPct != null && (
+          <div className="flex min-w-[180px] flex-1 flex-col gap-0.5 px-5 py-4">
+            <p className="text-[0.68rem] font-bold uppercase tracking-wider text-[#5c5e62]">
+              vs. Market (eBay resale avg.)
+            </p>
+            <p className={`text-[1.35rem] font-extrabold ${priceVsMarketPct >= 0 ? "text-emerald-600" : "text-red-500"}`}>
+              {priceVsMarketPct >= 0 ? "+" : ""}{priceVsMarketPct.toFixed(1)}%
+            </p>
+            <p className="text-[0.7rem] text-[#9ca3af]">
+              Resale-price benchmark only — not a wholesale-cost analysis.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -215,31 +265,57 @@ function PriceStrip({
 
 // ── Main component ────────────────────────────────────────────────────────────
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
+
 export default function SupplierIntel({ products }: { products: AdminProduct[] }) {
   const [query,          setQuery]          = useState("");
   const [selectedId,     setSelectedId]     = useState<number | "">("");
+  const [typeFilter,     setTypeFilter]     = useState<ProductType | "">("");
   const [searchState,    setSearchState]    = useState<SearchState>("idle");
   const [ebayItems,      setEbayItems]      = useState<EbayItem[]>([]);
   const [ebayError,      setEbayError]      = useState<string | null>(null);
+  const [summary,        setSummary]        = useState<SupplierSummary | null>(null);
+  const [marketplaceLinks, setMarketplaceLinks] = useState<MarketplaceLinks | null>(null);
+  const [otrNote,        setOtrNote]        = useState<string | null>(null);
+  const [yourProduct,    setYourProduct]    = useState<YourProduct | null>(null);
   const [alibabaLoading, setAlibabaLoading] = useState(false);
+  const [micLoading,     setMicLoading]     = useState(false);
+  const [checkingMarket, setCheckingMarket] = useState(false);
 
   const selectedProduct = products.find((p) => p.id === selectedId) ?? null;
   const lowestEbayPrice = (() => {
+    if (summary?.min_price != null) return summary.min_price;
     const nums = ebayItems
       .map((i) => parseFloat(String(i.price ?? "")))
       .filter((n) => !isNaN(n));
     return nums.length > 0 ? Math.min(...nums) : null;
   })();
 
-  // Sync product dropdown → query input
+  function normalizeType(raw?: string): ProductType | "" {
+    const v = (raw ?? "").trim().toLowerCase();
+    return (["pcr", "tbr", "used", "otr"] as const).includes(v as ProductType) ? (v as ProductType) : "";
+  }
+
+  // Sync product dropdown → query input + type filter
   const handleProductSelect = (id: number | "") => {
     setSelectedId(id);
+    setYourProduct(null);
     if (id === "") return;
     const p = products.find((x) => x.id === id);
     if (p) {
       const q = [p.brand, p.size].filter(Boolean).join(" ").trim();
       setQuery(q);
+      setTypeFilter(normalizeType(p.type));
     }
+  };
+
+  const applyResult = (json: SupplierSearchResponse | ForProductResponse) => {
+    const items = (Array.isArray(json.data) ? json.data : []).slice(0, 20);
+    setEbayItems(items);
+    setSummary(json.summary ?? null);
+    setMarketplaceLinks(json.marketplace_links ?? null);
+    setOtrNote(json.note ?? null);
+    setSearchState("done");
   };
 
   const runSearch = useCallback(async () => {
@@ -249,10 +325,13 @@ export default function SupplierIntel({ products }: { products: AdminProduct[] }
     setSearchState("loading");
     setEbayItems([]);
     setEbayError(null);
+    setYourProduct(null);
 
     const token = await getAdminToken();
     try {
-      const url = `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1"}/admin/supplier/search?q=${encodeURIComponent(q)}`;
+      const params = new URLSearchParams({ q });
+      if (typeFilter) params.set("type", typeFilter);
+      const url = `${API_BASE}/admin/supplier/search?${params.toString()}`;
       const res = await fetch(url, {
         headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
         cache: "no-store",
@@ -265,22 +344,56 @@ export default function SupplierIntel({ products }: { products: AdminProduct[] }
       }
 
       const json = await res.json() as SupplierSearchResponse;
-      const items = (Array.isArray(json.data) ? json.data : []).slice(0, 20);
-      setEbayItems(items);
-      setSearchState("done");
+      applyResult(json);
     } catch {
       setEbayError("Could not reach the supplier search service.");
       setSearchState("error");
     }
-  }, [query]);
+  }, [query, typeFilter]);
+
+  const checkMarketForProduct = async (id: number) => {
+    setCheckingMarket(true);
+    setSearchState("loading");
+    setEbayItems([]);
+    setEbayError(null);
+    setYourProduct(null);
+
+    const token = await getAdminToken();
+    try {
+      const url = `${API_BASE}/admin/supplier/for-product/${id}`;
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+        cache: "no-store",
+      });
+
+      if (!res.ok) {
+        setEbayError("Could not check the market for this product — try again.");
+        setSearchState("error");
+        return;
+      }
+
+      const json = await res.json() as ForProductResponse;
+      setYourProduct(json.your_product ?? null);
+      applyResult(json);
+    } catch {
+      setEbayError("Could not reach the supplier search service.");
+      setSearchState("error");
+    } finally {
+      setCheckingMarket(false);
+    }
+  };
 
   const openAlibaba = async () => {
+    if (marketplaceLinks?.alibaba) {
+      window.open(marketplaceLinks.alibaba, "_blank", "noopener");
+      return;
+    }
     const q = query.trim();
     if (!q) return;
     setAlibabaLoading(true);
     const token = await getAdminToken();
     try {
-      const url = `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1"}/admin/supplier/alibaba-link?q=${encodeURIComponent(q)}`;
+      const url = `${API_BASE}/admin/supplier/alibaba-link?q=${encodeURIComponent(q)}`;
       const res = await fetch(url, {
         headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
         cache: "no-store",
@@ -297,6 +410,33 @@ export default function SupplierIntel({ products }: { products: AdminProduct[] }
     window.open(buildExternalUrl("https://www.alibaba.com/trade/search?SearchText=", q), "_blank", "noopener");
   };
 
+  const openMadeInChina = async () => {
+    if (marketplaceLinks?.made_in_china) {
+      window.open(marketplaceLinks.made_in_china, "_blank", "noopener");
+      return;
+    }
+    const q = query.trim();
+    if (!q) return;
+    setMicLoading(true);
+    const token = await getAdminToken();
+    try {
+      const url = `${API_BASE}/admin/supplier/made-in-china-link?q=${encodeURIComponent(q)}`;
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+        cache: "no-store",
+      });
+      if (res.ok) {
+        const json = await res.json() as { url?: string; data?: { url?: string } };
+        const link = json.url ?? json.data?.url;
+        if (link) { window.open(link, "_blank", "noopener"); return; }
+      }
+    } catch { /* fall through to default */ } finally {
+      setMicLoading(false);
+    }
+    // Fallback: construct Made-in-China search URL directly
+    window.open(buildExternalUrl("https://www.made-in-china.com/multi-search/q=", q), "_blank", "noopener");
+  };
+
   const isLoading = searchState === "loading";
 
   // ── Render ────────────────────────────────────────────────────────────────────
@@ -311,24 +451,55 @@ export default function SupplierIntel({ products }: { products: AdminProduct[] }
             Search
           </p>
 
+          {/* Type tabs — tunes size-pattern parsing on the backend */}
+          <div className="mb-3 flex flex-wrap gap-1.5">
+            {TYPE_TABS.map((tab) => (
+              <button
+                key={tab.value || "all"}
+                type="button"
+                onClick={() => setTypeFilter(tab.value)}
+                className={`rounded-full px-3 py-1 text-[0.75rem] font-semibold transition ${
+                  typeFilter === tab.value
+                    ? "bg-[#E85C1A] text-white"
+                    : "border border-black/[0.09] bg-white text-[#5c5e62] hover:border-[#E85C1A]/40 hover:text-[#E85C1A]"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
           {/* Product pre-fill dropdown */}
           {products.length > 0 && (
-            <div className="relative mb-3 max-w-sm">
-              <select
-                value={selectedId}
-                onChange={(e) =>
-                  handleProductSelect(e.target.value === "" ? "" : Number(e.target.value))
-                }
-                className="h-9 w-full appearance-none rounded-lg border border-black/[0.09] bg-[#fafafa] pl-3 pr-8 text-[0.8rem] text-[#374151] outline-none transition focus:border-[#E85C1A] focus:ring-1 focus:ring-[#E85C1A]/20"
-              >
-                <option value="">— Pre-fill from catalogue product —</option>
-                {products.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {[p.size, p.brand, p.name].filter(Boolean).join(" · ")}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown size={13} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[#9ca3af]" />
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <div className="relative max-w-sm flex-1">
+                <select
+                  value={selectedId}
+                  onChange={(e) =>
+                    handleProductSelect(e.target.value === "" ? "" : Number(e.target.value))
+                  }
+                  className="h-9 w-full appearance-none rounded-lg border border-black/[0.09] bg-[#fafafa] pl-3 pr-8 text-[0.8rem] text-[#374151] outline-none transition focus:border-[#E85C1A] focus:ring-1 focus:ring-[#E85C1A]/20"
+                >
+                  <option value="">— Pre-fill from catalogue product —</option>
+                  {products.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {[p.size, p.brand, p.name].filter(Boolean).join(" · ")}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown size={13} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[#9ca3af]" />
+              </div>
+              {selectedProduct && (
+                <button
+                  type="button"
+                  onClick={() => checkMarketForProduct(selectedProduct.id)}
+                  disabled={checkingMarket}
+                  className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-[#E85C1A]/30 bg-[#fff8f6] px-3 text-[0.8rem] font-semibold text-[#E85C1A] transition hover:bg-[#ffece6] disabled:opacity-50"
+                >
+                  {checkingMarket ? <Loader2 size={13} className="animate-spin" /> : <TrendingUp size={13} strokeWidth={2.2} />}
+                  Check market for this product
+                </button>
+              )}
             </div>
           )}
 
@@ -404,10 +575,33 @@ export default function SupplierIntel({ products }: { products: AdminProduct[] }
             <>
               {ebayItems.length === 0 ? (
                 <div className="rounded-xl border border-black/[0.06] bg-white px-5 py-8 text-center">
-                  <p className="text-[0.85rem] text-[#5c5e62]">No eBay results found for this query.</p>
+                  {otrNote ? (
+                    <>
+                      <p className="text-[0.85rem] font-semibold text-[#1a1a1a]">Not an eBay category</p>
+                      <p className="mt-1 text-[0.8rem] text-[#5c5e62]">{otrNote}</p>
+                      <p className="mt-1 text-[0.75rem] text-[#9ca3af]">Use the global B2B marketplace links instead →</p>
+                    </>
+                  ) : (
+                    <p className="text-[0.85rem] text-[#5c5e62]">No eBay results found for this query.</p>
+                  )}
                 </div>
               ) : (
                 <>
+                  {/* Summary stats */}
+                  {summary && summary.count > 0 && (
+                    <div className="grid grid-cols-3 gap-2 rounded-xl border border-black/[0.06] bg-white px-4 py-3">
+                      {[
+                        ["Results", String(summary.count)],
+                        ["Avg. Price", summary.avg_price != null ? `€${summary.avg_price.toFixed(2)}` : "—"],
+                        ["Range", summary.min_price != null && summary.max_price != null ? `€${summary.min_price.toFixed(0)}–${summary.max_price.toFixed(0)}` : "—"],
+                      ].map(([label, value]) => (
+                        <div key={label} className="text-center">
+                          <p className="text-[0.95rem] font-extrabold text-[#1a1a1a]">{value}</p>
+                          <p className="text-[0.65rem] uppercase tracking-wide text-[#9ca3af]">{label}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   <p className="text-[0.78rem] text-[#9ca3af]">
                     {ebayItems.length} result{ebayItems.length !== 1 ? "s" : ""} found
                   </p>
@@ -417,6 +611,24 @@ export default function SupplierIntel({ products }: { products: AdminProduct[] }
                     ))}
                   </div>
                 </>
+              )}
+
+              {/* Marketplace quick links — also returned inline with search results */}
+              {marketplaceLinks && (marketplaceLinks.alibaba || marketplaceLinks.made_in_china) && (
+                <div className="flex flex-wrap gap-2">
+                  {marketplaceLinks.alibaba && (
+                    <a href={marketplaceLinks.alibaba} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 rounded-full border border-black/[0.08] bg-white px-3 py-1.5 text-[0.75rem] font-semibold text-[#5c5e62] transition hover:border-[#FF6A00]/40 hover:text-[#FF6A00]">
+                      Alibaba <ExternalLink size={10} />
+                    </a>
+                  )}
+                  {marketplaceLinks.made_in_china && (
+                    <a href={marketplaceLinks.made_in_china} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 rounded-full border border-black/[0.08] bg-white px-3 py-1.5 text-[0.75rem] font-semibold text-[#5c5e62] transition hover:border-[#E85C1A]/40 hover:text-[#E85C1A]">
+                      Made-in-China <ExternalLink size={10} />
+                    </a>
+                  )}
+                </div>
               )}
             </>
           )}
@@ -445,13 +657,13 @@ export default function SupplierIntel({ products }: { products: AdminProduct[] }
             </div>
           </div>
 
-          {/* Alibaba search button */}
+          {/* Alibaba + Made-in-China search buttons */}
           <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white shadow-sm">
-            <div className="px-5 py-5">
+            <div className="flex flex-col gap-2.5 px-5 py-5">
               <button
                 type="button"
                 onClick={openAlibaba}
-                disabled={!query.trim() || alibabaLoading}
+                disabled={(!query.trim() && !marketplaceLinks?.alibaba) || alibabaLoading}
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#FF6A00] px-5 py-3 text-[0.88rem] font-semibold text-white transition hover:bg-[#e05e00] disabled:opacity-50"
               >
                 {alibabaLoading ? (
@@ -461,8 +673,21 @@ export default function SupplierIntel({ products }: { products: AdminProduct[] }
                 )}
                 Search on Alibaba.com
               </button>
-              <p className="mt-3 text-center text-[0.75rem] leading-relaxed text-[#9ca3af]">
-                Alibaba does not provide a direct API. Click above to search Alibaba.com with your query pre-filled.
+              <button
+                type="button"
+                onClick={openMadeInChina}
+                disabled={(!query.trim() && !marketplaceLinks?.made_in_china) || micLoading}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#E85C1A] px-5 py-3 text-[0.88rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-50"
+              >
+                {micLoading ? (
+                  <Loader2 size={15} className="animate-spin" />
+                ) : (
+                  <ExternalLink size={15} strokeWidth={2.2} />
+                )}
+                Search on Made-in-China.com
+              </button>
+              <p className="mt-1 text-center text-[0.75rem] leading-relaxed text-[#9ca3af]">
+                Neither marketplace provides a direct listings API. Buttons open a pre-filled search — Made-in-China is often the stronger channel for bulk TBR/OTR sourcing.
               </p>
             </div>
 
@@ -500,8 +725,9 @@ export default function SupplierIntel({ products }: { products: AdminProduct[] }
 
       {/* ── Price comparison strip ── */}
       <PriceStrip
-        okelcorPrice={selectedProduct ? Number(selectedProduct.price) : null}
+        okelcorPrice={yourProduct ? Number(yourProduct.price) : selectedProduct ? Number(selectedProduct.price) : null}
         lowestEbay={lowestEbayPrice}
+        priceVsMarketPct={yourProduct?.price_vs_market_pct ?? null}
       />
 
     </div>

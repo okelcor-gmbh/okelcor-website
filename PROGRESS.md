@@ -1,6 +1,6 @@
 # Okelcor Website — Progress Tracker
 
-**Last updated:** 2026-07-14  
+**Last updated:** 2026-07-17  
 **Branch:** `main`  
 **Build status:** TypeScript 0 errors · ESLint clean · Production build passes
 
@@ -187,6 +187,16 @@
 | Business policies fetch + display | `533e3af` | Copy policy IDs from panel |
 | eBay error 932 fix — quarantine `lib/ebay.ts` | `1a03d1b` | All actions via Laravel backend |
 | eBay 502 errors — surface real backend messages | `a4cb50a` | |
+
+---
+
+### ✅ Admin Panel — Supplier Intel
+
+| Feature | Commit | Notes |
+|---|---|---|
+| Supplier Intel — eBay market search + Alibaba link | early | `components/admin/supplier-intel.tsx` — direct-to-Laravel client calls (pre-existing pattern, preserved as-is rather than retrofitted to the API-proxy convention) |
+| Type-aware search + for-product flow | 2026-07-17 | Backend fixed the query builder: TBR's decimal rim sizes (`295/80R22.5`) and OTR sizes (`23.5R25`/`20.5-25`) weren't recognised by the old passenger-tyre-only regex, so those two categories returned poor/empty results; OTR isn't a real eBay category at all, so the eBay call is now skipped for it server-side with an explanatory `note`. Frontend: added PCR/TBR/Used/OTR type tabs wired to the new optional `type` param on `GET /admin/supplier/search` (omitting it still works exactly as before — additive only); new "Check market for this product" button calls `GET /admin/supplier/for-product/{id}` to search straight from a catalogue product instead of copy-pasting brand/size by hand; results now show a summary stats strip (count/avg/range) and an OTR-aware empty state instead of a generic "no results" one. `PriceStrip` gained a `price_vs_market_pct` cell, explicitly labelled "Resale-price benchmark only — not a wholesale-cost analysis" per backend's own caveat (eBay listings are retail, not Okelcor's wholesale cost) |
+| Made-in-China marketplace link | 2026-07-17 | New `GET /admin/supplier/made-in-china-link` (same shape as the existing `alibaba-link`) — second "Search on Made-in-China.com" button alongside the Alibaba one; both buttons now prefer the `marketplace_links` returned inline on the search response, falling back to the dedicated link endpoints only when that's absent |
 
 ---
 
