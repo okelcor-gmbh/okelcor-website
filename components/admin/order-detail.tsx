@@ -11,6 +11,7 @@ import { SITE_URL } from "@/lib/constants";
 import { updateOrderStatus, cancelOrder, deleteOrder, addShipmentEvent, updateShipmentEvent, deleteShipmentEvent } from "@/app/admin/orders/actions";
 import type { AdminOrderFull, AdminOrderItem, AdminOrderLog, ShipmentEvent } from "@/lib/admin-api";
 import { canDo } from "@/lib/admin-permissions";
+import { ORDER_CURRENCIES, formatMoney } from "@/lib/currency";
 import TradeDocumentsCard from "@/components/admin/trade-documents-card";
 import PaymentMilestonesCard from "@/components/admin/payment-milestones-card";
 import TrackShipmentControl from "@/components/admin/tracking/track-shipment-control";
@@ -495,6 +496,7 @@ export default function OrderDetail({
   const [carrierType,       setCarrierType]       = useState(order.carrier_type ?? "");
   const [trackingNumber,    setTrackingNumber]    = useState(order.tracking_number ?? "");
   const [estimatedDelivery, setEstimatedDelivery] = useState(toDateInputValue(order.estimated_delivery ?? order.eta));
+  const [currency,          setCurrency]          = useState(order.currency ?? "EUR");
 
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saved,     setSaved]     = useState(false);
@@ -895,7 +897,8 @@ export default function OrderDetail({
     carrier           !== (order.carrier ?? "")                                   ||
     carrierType       !== (order.carrier_type ?? "")                              ||
     trackingNumber    !== (order.tracking_number ?? "")                           ||
-    estimatedDelivery !== toDateInputValue(order.estimated_delivery ?? order.eta);
+    estimatedDelivery !== toDateInputValue(order.estimated_delivery ?? order.eta) ||
+    currency          !== (order.currency ?? "EUR");
 
   const handleSave = () => {
     setSaveError(null);
@@ -906,6 +909,7 @@ export default function OrderDetail({
         carrier_type:       carrierType       || undefined,
         tracking_number:    trackingNumber    || undefined,
         estimated_delivery: estimatedDelivery || undefined,
+        currency:           currency          || undefined,
       });
       if (result.error) {
         setSaveError(result.error);
@@ -1180,6 +1184,22 @@ export default function OrderDetail({
               </div>
 
               <div className="flex flex-col gap-1">
+                <span className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Currency</span>
+                <div className="relative">
+                  <select
+                    value={currency}
+                    onChange={(e) => setCurrency(e.target.value)}
+                    className="h-10 appearance-none rounded-xl border border-black/[0.09] bg-white pl-3.5 pr-9 text-[0.875rem] font-semibold text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+                  >
+                    {ORDER_CURRENCIES.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                  <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#5c5e62]" />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1">
                 <span className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Carrier</span>
                 <input
                   type="text"
@@ -1285,7 +1305,7 @@ export default function OrderDetail({
               <div className="mt-5 flex items-center justify-between rounded-xl bg-[#f5f5f5] px-4 py-3">
                 <span className="text-[0.83rem] font-semibold text-[#5c5e62]">Order Total</span>
                 <span className="text-[1.15rem] font-extrabold text-[#1a1a1a]">
-                  €{Number(order.total).toFixed(2)}
+                  {formatMoney(order.total, order.currency)}
                 </span>
               </div>
             </div>
@@ -1399,10 +1419,10 @@ export default function OrderDetail({
                           {item.quantity}
                         </td>
                         <td className="px-4 py-3 text-[0.875rem] text-[#1a1a1a]">
-                          €{Number(item.unit_price).toFixed(2)}
+                          {formatMoney(item.unit_price, order.currency)}
                         </td>
                         <td className="px-4 py-3 text-[0.875rem] font-semibold text-[#1a1a1a]">
-                          €{Number(item.subtotal).toFixed(2)}
+                          {formatMoney(item.subtotal, order.currency)}
                         </td>
                         <td className="px-4 py-3">
                           {canEditItems && (
@@ -1429,7 +1449,7 @@ export default function OrderDetail({
                         Total
                       </td>
                       <td className="px-4 py-3 text-[0.95rem] font-extrabold text-[#1a1a1a]">
-                        €{Number(order.total).toFixed(2)}
+                        {formatMoney(order.total, order.currency)}
                       </td>
                       <td />
                     </tr>
@@ -1681,6 +1701,7 @@ export default function OrderDetail({
             <PaymentMilestonesCard
               orderId={order.id}
               adminRole={adminRole}
+              currency={order.currency ?? "EUR"}
               initialStage={order.payment_stage}
               depositPercent={order.deposit_percent ?? null}
               depositAmount={order.deposit_amount ?? null}

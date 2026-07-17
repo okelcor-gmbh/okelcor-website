@@ -155,6 +155,8 @@ export type AdminOrder = {
   customer_name: string;
   customer_email: string;
   total: number;
+  /** ISO 4217 code — "EUR" (default) or "USD". Order-level; all item/milestone amounts share it. */
+  currency?: string | null;
   status: "pending" | "confirmed" | "awaiting_proforma" | "shipped" | "delivered" | "cancelled" | string;
   payment_method?: string;
   payment_status?: "paid" | "unpaid" | "refunded" | string;

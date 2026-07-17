@@ -6,6 +6,7 @@ import {
   Loader2, Mail, MailCheck, MailX, RotateCcw,
 } from "lucide-react";
 import { canDo } from "@/lib/admin-permissions";
+import { formatMoney } from "@/lib/currency";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -20,11 +21,6 @@ type PaymentStage =
 type EmailRecord = Record<PaymentStage, string | null>;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-function eur(amount?: number | null): string {
-  if (amount == null) return "—";
-  return new Intl.NumberFormat("en-DE", { style: "currency", currency: "EUR" }).format(amount);
-}
 
 function shortDate(iso?: string | null): string {
   if (!iso) return "—";
@@ -160,6 +156,7 @@ function ConfirmModal({
 export default function PaymentMilestonesCard({
   orderId,
   adminRole,
+  currency,
   initialStage,
   depositPercent,
   depositAmount,
@@ -177,6 +174,8 @@ export default function PaymentMilestonesCard({
 }: {
   orderId: number;
   adminRole: string;
+  /** ISO 4217 code — defaults to EUR when the order predates currency support. */
+  currency?: string | null;
   initialStage: PaymentStage;
   depositPercent?: number | null;
   depositAmount?: number | null;
@@ -347,7 +346,7 @@ export default function PaymentMilestonesCard({
       id: "deposit_requested",
       label: "Deposit Requested",
       sub: depositAmount != null
-        ? `${depositPercent ?? 50}% · ${eur(depositAmount)}`
+        ? `${depositPercent ?? 50}% · ${formatMoney(depositAmount, currency)}`
         : depositPercent != null ? `${depositPercent}%` : undefined,
     },
     {
@@ -363,7 +362,7 @@ export default function PaymentMilestonesCard({
     {
       id: "balance_due",
       label: "Balance Due",
-      sub: balanceAmount != null ? eur(balanceAmount) : undefined,
+      sub: balanceAmount != null ? formatMoney(balanceAmount, currency) : undefined,
       action: {
         label: "Mark Balance Due",
         modal: "balance_due",
@@ -504,7 +503,7 @@ export default function PaymentMilestonesCard({
       {modal === "deposit" && (
         <ConfirmModal
           title="Mark Deposit as Paid"
-          body={`Confirm that the deposit of ${eur(depositAmount)} has been received. The customer will be notified by email.`}
+          body={`Confirm that the deposit of ${formatMoney(depositAmount, currency)} has been received. The customer will be notified by email.`}
           noteLabel="Payment Reference"
           noteValue={note}
           onNoteChange={setNote}
@@ -521,7 +520,7 @@ export default function PaymentMilestonesCard({
       {modal === "balance_due" && (
         <ConfirmModal
           title="Mark Balance as Due"
-          body={`Notify the system that the balance of ${eur(balanceAmount)} is now due. The customer will be sent a balance-due notification email.`}
+          body={`Notify the system that the balance of ${formatMoney(balanceAmount, currency)} is now due. The customer will be sent a balance-due notification email.`}
           onConfirm={handleBalanceDue}
           onCancel={closeModal}
           loading={loading}
@@ -535,7 +534,7 @@ export default function PaymentMilestonesCard({
       {modal === "balance" && (
         <ConfirmModal
           title="Mark Balance as Paid"
-          body={`Confirm that the balance payment of ${eur(balanceAmount)} has been received. The customer will be notified by email.`}
+          body={`Confirm that the balance payment of ${formatMoney(balanceAmount, currency)} has been received. The customer will be notified by email.`}
           noteLabel="Payment Reference"
           noteValue={note}
           onNoteChange={setNote}

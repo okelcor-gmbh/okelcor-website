@@ -22,6 +22,7 @@ type ShipmentFields = {
   tracking_number?: string;
   estimated_delivery?: string;
   eta?: string;
+  currency?: string;
 };
 
 type ShipmentEventInput = {
@@ -80,6 +81,7 @@ export async function updateOrderStatus(
   if (shipment?.tracking_number?.trim())   body.tracking_number   = shipment.tracking_number.trim();
   if (shipment?.estimated_delivery)        body.estimated_delivery = shipment.estimated_delivery;
   if (shipment?.eta)                       body.eta               = shipment.eta;
+  if (shipment?.currency?.trim())          body.currency          = shipment.currency.trim();
 
   let res: Response;
   try {

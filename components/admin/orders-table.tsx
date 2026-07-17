@@ -7,6 +7,7 @@ import {
   Search, Eye, ChevronLeft, ChevronRight, X, ShoppingBag, ShoppingCart,
 } from "lucide-react";
 import type { AdminOrder } from "@/lib/admin-api";
+import { formatMoney } from "@/lib/currency";
 import EmptyState from "@/components/ui/empty-state";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -243,7 +244,7 @@ export default function OrdersTable({
                       </div>
                     </td>
                     <td className="px-4 py-3 text-[0.875rem] font-semibold text-[#1a1a1a]">
-                      €{Number(order.total).toFixed(2)}
+                      {formatMoney(order.total, order.currency)}
                     </td>
                     <td className="px-4 py-3 text-[0.83rem] text-[#5c5e62]">
                       {shortDate(order.created_at)}
