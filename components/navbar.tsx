@@ -469,10 +469,20 @@ export default function Navbar() {
                   <CircleHelp size={20} strokeWidth={1.9} />
                 </Link>
 
+                {/* Prominent search pill — xl+ only, keeps the icon-only trigger below that */}
                 <button
                   type="button"
                   onClick={openSearch}
-                  className="tesla-icon-btn"
+                  className="hidden max-w-[220px] items-center gap-2 rounded-full border border-black/[0.08] bg-black/[0.03] px-4 py-2 text-left text-[0.8rem] text-[var(--muted)] transition hover:border-black/15 hover:bg-black/[0.05] xl:flex"
+                  aria-label={t.search.ariaLabel}
+                >
+                  <Search size={15} strokeWidth={2} className="shrink-0" />
+                  <span className="truncate">{t.search.placeholder}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={openSearch}
+                  className="tesla-icon-btn xl:hidden"
                   aria-label={t.search.ariaLabel}
                 >
                   <Search size={20} strokeWidth={1.9} />

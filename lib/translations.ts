@@ -66,7 +66,7 @@ export type Translations = {
     filter: { tyreType: string; brand: string; season: string };
     sort: { default: string; priceAsc: string; priceDesc: string };
     grid: { noProducts: string; noProductsHint: string };
-    card: { shipping: string; viewDetails: string; quote: string; inStock: string };
+    card: { shipping: string; viewDetails: string; quote: string; inStock: string; showSpecs: string };
     info: {
       quantity: string; addToCart: string; addedToCart: string;
       requestQuote: string; shipping: string; share: string; inStock: string;
@@ -181,6 +181,8 @@ export type Translations = {
     emptyTitle: string;
     emptyBody: string;
     browseCatalogue: string;
+    shopByCategory: string;
+    categoryUsed: string;
     subtotal: string;
     item: string;
     items: string;
@@ -611,6 +613,8 @@ const en: Translations = {
     emptyTitle: "Your cart is empty",
     emptyBody: "Browse the catalogue and add tyres to get started.",
     browseCatalogue: "Browse Catalogue",
+    shopByCategory: "Or shop by category",
+    categoryUsed: "Used Tyres",
     subtotal: "Subtotal",
     item: "item",
     items: "items",
@@ -707,7 +711,7 @@ const en: Translations = {
     filter: { tyreType: "Tyre Type", brand: "Brand", season: "Season" },
     sort: { default: "Default", priceAsc: "Price: Low to High", priceDesc: "Price: High to Low" },
     grid: { noProducts: "No products found", noProductsHint: "Try adjusting or clearing your filters." },
-    card: { shipping: "Excl. tax · Free shipping", viewDetails: "View Details", quote: "Quote", inStock: "In Stock" },
+    card: { shipping: "Excl. tax · Free shipping", viewDetails: "View Details", quote: "Quote", inStock: "In Stock", showSpecs: "Show specs" },
     info: {
       quantity: "Quantity", addToCart: "Add to Cart", addedToCart: "Added to Cart",
       requestQuote: "Request Quote", shipping: "Excluding sales tax · Free shipping", share: "Share", inStock: "In Stock — Ready to Order",
@@ -1125,6 +1129,8 @@ const de: Translations = {
     emptyTitle: "Ihr Warenkorb ist leer",
     emptyBody: "Durchsuchen Sie den Katalog und fügen Sie Reifen hinzu.",
     browseCatalogue: "Katalog durchsuchen",
+    shopByCategory: "Oder nach Kategorie suchen",
+    categoryUsed: "Gebrauchtreifen",
     subtotal: "Zwischensumme",
     item: "Artikel",
     items: "Artikel",
@@ -1221,7 +1227,7 @@ const de: Translations = {
     filter: { tyreType: "Reifentyp", brand: "Marke", season: "Saison" },
     sort: { default: "Standard", priceAsc: "Preis: aufsteigend", priceDesc: "Preis: absteigend" },
     grid: { noProducts: "Keine Produkte gefunden", noProductsHint: "Versuchen Sie, Ihre Filter anzupassen oder zu löschen." },
-    card: { shipping: "Zzgl. MwSt. · Kostenloser Versand", viewDetails: "Details ansehen", quote: "Angebot", inStock: "Auf Lager" },
+    card: { shipping: "Zzgl. MwSt. · Kostenloser Versand", viewDetails: "Details ansehen", quote: "Angebot", inStock: "Auf Lager", showSpecs: "Details anzeigen" },
     info: {
       quantity: "Menge", addToCart: "In den Warenkorb", addedToCart: "Im Warenkorb",
       requestQuote: "Angebot anfordern", shipping: "Zzgl. MwSt. · Kostenloser Versand", share: "Teilen", inStock: "Auf Lager — sofort bestellbar",
@@ -1639,6 +1645,8 @@ const fr: Translations = {
     emptyTitle: "Votre panier est vide",
     emptyBody: "Parcourez le catalogue et ajoutez des pneus pour commencer.",
     browseCatalogue: "Parcourir le catalogue",
+    shopByCategory: "Ou par catégorie",
+    categoryUsed: "Pneus d'occasion",
     subtotal: "Sous-total",
     item: "article",
     items: "articles",
@@ -1735,7 +1743,7 @@ const fr: Translations = {
     filter: { tyreType: "Type de pneu", brand: "Marque", season: "Saison" },
     sort: { default: "Par défaut", priceAsc: "Prix : croissant", priceDesc: "Prix : décroissant" },
     grid: { noProducts: "Aucun produit trouvé", noProductsHint: "Essayez d'ajuster ou d'effacer vos filtres." },
-    card: { shipping: "HT · Livraison gratuite", viewDetails: "Voir les détails", quote: "Devis", inStock: "En stock" },
+    card: { shipping: "HT · Livraison gratuite", viewDetails: "Voir les détails", quote: "Devis", inStock: "En stock", showSpecs: "Voir les caractéristiques" },
     info: {
       quantity: "Quantité", addToCart: "Ajouter au panier", addedToCart: "Ajouté au panier",
       requestQuote: "Demander un devis", shipping: "Hors taxes · Livraison gratuite", share: "Partager", inStock: "En stock — prêt à commander",
@@ -2132,6 +2140,8 @@ const es: Translations = {
     emptyTitle: "Su carrito está vacío",
     emptyBody: "Explore nuestro catálogo de neumáticos y añada artículos a su carrito.",
     browseCatalogue: "Ver catálogo",
+    shopByCategory: "O compre por categoría",
+    categoryUsed: "Neumáticos usados",
     subtotal: "Subtotal",
     item: "artículo",
     items: "artículos",
@@ -2219,7 +2229,7 @@ const es: Translations = {
     filter: { tyreType: "Tipo de neumático", brand: "Marca", season: "Temporada" },
     sort: { default: "Relevancia", priceAsc: "Precio: menor a mayor", priceDesc: "Precio: mayor a menor" },
     grid: { noProducts: "No se encontraron productos", noProductsHint: "Intente ajustar los filtros o busque un término diferente." },
-    card: { shipping: "Envío disponible", viewDetails: "Ver detalles", quote: "Cotizar", inStock: "En stock" },
+    card: { shipping: "Envío disponible", viewDetails: "Ver detalles", quote: "Cotizar", inStock: "En stock", showSpecs: "Ver especificaciones" },
     info: {
       quantity: "Cantidad", addToCart: "Añadir al carrito", addedToCart: "Añadido al carrito",
       requestQuote: "Solicitar cotización", shipping: "Envío disponible", share: "Compartir", inStock: "En stock — listo para pedir",

@@ -223,13 +223,35 @@ export default function CartDrawer() {
             <p className="text-[0.88rem] text-[var(--muted)]">
               {ct.emptyBody}
             </p>
-            <button
-              type="button"
+            <Link
+              href="/shop"
               onClick={closeCart}
               className="mt-2 rounded-full bg-[var(--primary)] px-6 py-2.5 text-[0.88rem] font-semibold text-white transition hover:bg-[var(--primary-hover)]"
             >
               {ct.browseCatalogue}
-            </button>
+            </Link>
+
+            <div className="mt-5 w-full border-t border-black/[0.06] pt-5">
+              <p className="mb-3 text-[0.76rem] font-semibold uppercase tracking-wide text-[var(--muted)]">
+                {ct.shopByCategory}
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                {[
+                  ["/shop?type=USED", ct.categoryUsed],
+                  ["/shop?type=PCR", "PCR"],
+                  ["/shop?type=TBR", "TBR"],
+                ].map(([href, label]) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={closeCart}
+                    className="rounded-full border border-black/10 bg-white px-4 py-1.5 text-[0.8rem] font-semibold text-[var(--foreground)] transition hover:border-[var(--primary)]/40 hover:text-[var(--primary)]"
+                  >
+                    {label}
+                  </Link>
+                ))}
+              </div>
+            </div>
           </div>
         ) : (
           <div className="hide-scrollbar flex-1 overflow-y-auto px-5">
