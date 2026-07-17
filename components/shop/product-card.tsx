@@ -100,29 +100,14 @@ export default function ProductCard({
           <ArrowRight size={14} strokeWidth={2.4} />
         </Link>
 
-        {/* Brand + type badge + compare toggle */}
+        {/* Brand + type badge */}
         <div className="flex items-center justify-between gap-2">
           <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[var(--primary)]">
             {product.brand}
           </p>
-          <div className="flex shrink-0 items-center gap-1.5">
-            <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-[10px] font-semibold text-gray-500">
-              {product.type}
-            </span>
-            <button
-              type="button"
-              onClick={() => toggle(product)}
-              disabled={!comparing && isFull}
-              title={comparing ? "Remove from comparison" : isFull ? "Compare list full (max 4)" : "Add to comparison"}
-              className={`flex h-[19px] w-[19px] shrink-0 items-center justify-center rounded-full border transition disabled:cursor-not-allowed disabled:opacity-40 ${
-                comparing
-                  ? "border-[var(--primary)] bg-[var(--primary)] text-white"
-                  : "border-gray-200 bg-white text-gray-400 hover:border-[var(--primary)]/40 hover:text-[var(--primary)]"
-              }`}
-            >
-              <ArrowLeftRight size={10} strokeWidth={2.4} />
-            </button>
-          </div>
+          <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-[10px] font-semibold text-gray-500">
+            {product.type}
+          </span>
         </div>
 
         {/* Product name — max 2 lines */}
@@ -135,15 +120,31 @@ export default function ProductCard({
           {product.size}{product.spec ? ` · ${product.spec}` : ""}
         </p>
 
-        {/* Show specs disclosure */}
-        <button
-          type="button"
-          onClick={() => setShowSpecs((v) => !v)}
-          className="mt-1.5 flex items-center gap-1 text-[0.72rem] font-semibold text-gray-500 transition hover:text-[var(--foreground)]"
-        >
-          {t.shop.card.showSpecs}
-          <ChevronDown size={12} strokeWidth={2.4} className={`transition-transform ${showSpecs ? "rotate-180" : ""}`} />
-        </button>
+        {/* Show specs disclosure + compare toggle */}
+        <div className="mt-1.5 flex items-center justify-between gap-2">
+          <button
+            type="button"
+            onClick={() => setShowSpecs((v) => !v)}
+            className="flex items-center gap-1 text-[0.72rem] font-semibold text-gray-500 transition hover:text-[var(--foreground)]"
+          >
+            {t.shop.card.showSpecs}
+            <ChevronDown size={12} strokeWidth={2.4} className={`transition-transform ${showSpecs ? "rotate-180" : ""}`} />
+          </button>
+          <button
+            type="button"
+            onClick={() => toggle(product)}
+            disabled={!comparing && isFull}
+            title={isFull && !comparing ? "Compare list full (max 4)" : undefined}
+            className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-[0.72rem] font-semibold transition disabled:cursor-not-allowed disabled:opacity-40 ${
+              comparing
+                ? "border-[var(--primary)] bg-[var(--primary)] text-white"
+                : "border-gray-200 bg-white text-gray-500 hover:border-[var(--primary)]/40 hover:text-[var(--primary)]"
+            }`}
+          >
+            <ArrowLeftRight size={11} strokeWidth={2.4} />
+            {comparing ? t.shop.card.comparing : t.shop.card.compare}
+          </button>
+        </div>
         {showSpecs && (
           <div className="mt-2 divide-y divide-gray-100 rounded-lg border border-gray-100 bg-gray-50/60 px-3 text-[0.76rem]">
             {[

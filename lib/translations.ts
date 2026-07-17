@@ -66,7 +66,7 @@ export type Translations = {
     filter: { tyreType: string; brand: string; season: string };
     sort: { default: string; priceAsc: string; priceDesc: string };
     grid: { noProducts: string; noProductsHint: string };
-    card: { shipping: string; viewDetails: string; quote: string; inStock: string; showSpecs: string };
+    card: { shipping: string; viewDetails: string; quote: string; inStock: string; showSpecs: string; compare: string; comparing: string };
     info: {
       quantity: string; addToCart: string; addedToCart: string;
       requestQuote: string; shipping: string; share: string; inStock: string;
@@ -721,7 +721,7 @@ const en: Translations = {
     filter: { tyreType: "Tyre Type", brand: "Brand", season: "Season" },
     sort: { default: "Default", priceAsc: "Price: Low to High", priceDesc: "Price: High to Low" },
     grid: { noProducts: "No products found", noProductsHint: "Try adjusting or clearing your filters." },
-    card: { shipping: "Excl. tax · Free shipping", viewDetails: "View Details", quote: "Quote", inStock: "In Stock", showSpecs: "Show specs" },
+    card: { shipping: "Excl. tax · Free shipping", viewDetails: "View Details", quote: "Quote", inStock: "In Stock", showSpecs: "Show specs", compare: "Compare", comparing: "Comparing" },
     info: {
       quantity: "Quantity", addToCart: "Add to Cart", addedToCart: "Added to Cart",
       requestQuote: "Request Quote", shipping: "Excluding sales tax · Free shipping", share: "Share", inStock: "In Stock — Ready to Order",
@@ -1249,7 +1249,7 @@ const de: Translations = {
     filter: { tyreType: "Reifentyp", brand: "Marke", season: "Saison" },
     sort: { default: "Standard", priceAsc: "Preis: aufsteigend", priceDesc: "Preis: absteigend" },
     grid: { noProducts: "Keine Produkte gefunden", noProductsHint: "Versuchen Sie, Ihre Filter anzupassen oder zu löschen." },
-    card: { shipping: "Zzgl. MwSt. · Kostenloser Versand", viewDetails: "Details ansehen", quote: "Angebot", inStock: "Auf Lager", showSpecs: "Details anzeigen" },
+    card: { shipping: "Zzgl. MwSt. · Kostenloser Versand", viewDetails: "Details ansehen", quote: "Angebot", inStock: "Auf Lager", showSpecs: "Details anzeigen", compare: "Vergleichen", comparing: "Im Vergleich" },
     info: {
       quantity: "Menge", addToCart: "In den Warenkorb", addedToCart: "Im Warenkorb",
       requestQuote: "Angebot anfordern", shipping: "Zzgl. MwSt. · Kostenloser Versand", share: "Teilen", inStock: "Auf Lager — sofort bestellbar",
@@ -1777,7 +1777,7 @@ const fr: Translations = {
     filter: { tyreType: "Type de pneu", brand: "Marque", season: "Saison" },
     sort: { default: "Par défaut", priceAsc: "Prix : croissant", priceDesc: "Prix : décroissant" },
     grid: { noProducts: "Aucun produit trouvé", noProductsHint: "Essayez d'ajuster ou d'effacer vos filtres." },
-    card: { shipping: "HT · Livraison gratuite", viewDetails: "Voir les détails", quote: "Devis", inStock: "En stock", showSpecs: "Voir les caractéristiques" },
+    card: { shipping: "HT · Livraison gratuite", viewDetails: "Voir les détails", quote: "Devis", inStock: "En stock", showSpecs: "Voir les caractéristiques", compare: "Comparer", comparing: "En comparaison" },
     info: {
       quantity: "Quantité", addToCart: "Ajouter au panier", addedToCart: "Ajouté au panier",
       requestQuote: "Demander un devis", shipping: "Hors taxes · Livraison gratuite", share: "Partager", inStock: "En stock — prêt à commander",
@@ -2275,7 +2275,7 @@ const es: Translations = {
     filter: { tyreType: "Tipo de neumático", brand: "Marca", season: "Temporada" },
     sort: { default: "Relevancia", priceAsc: "Precio: menor a mayor", priceDesc: "Precio: mayor a menor" },
     grid: { noProducts: "No se encontraron productos", noProductsHint: "Intente ajustar los filtros o busque un término diferente." },
-    card: { shipping: "Envío disponible", viewDetails: "Ver detalles", quote: "Cotizar", inStock: "En stock", showSpecs: "Ver especificaciones" },
+    card: { shipping: "Envío disponible", viewDetails: "Ver detalles", quote: "Cotizar", inStock: "En stock", showSpecs: "Ver especificaciones", compare: "Comparar", comparing: "Comparando" },
     info: {
       quantity: "Cantidad", addToCart: "Añadir al carrito", addedToCart: "Añadido al carrito",
       requestQuote: "Solicitar cotización", shipping: "Envío disponible", share: "Compartir", inStock: "En stock — listo para pedir",
