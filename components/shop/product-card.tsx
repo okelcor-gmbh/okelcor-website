@@ -87,22 +87,6 @@ export default function ProductCard({
             {activeCampaign.discount_pct}% OFF
           </span>
         )}
-
-        {/* Compare toggle */}
-        <button
-          type="button"
-          onClick={() => toggle(product)}
-          disabled={!comparing && isFull}
-          title={comparing ? "Remove from comparison" : isFull ? "Compare list full (max 4)" : "Add to comparison"}
-          className={`absolute bottom-2 left-2 flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-40 ${
-            comparing
-              ? "border-[var(--primary)] bg-[var(--primary)] text-white"
-              : "border-gray-200 bg-white/95 text-gray-500 hover:border-[var(--primary)]/40 hover:text-[var(--primary)]"
-          }`}
-        >
-          <ArrowLeftRight size={11} strokeWidth={2.2} />
-          {comparing ? "Comparing" : "Compare"}
-        </button>
       </div>
 
       {/* Content */}
@@ -116,14 +100,29 @@ export default function ProductCard({
           <ArrowRight size={14} strokeWidth={2.4} />
         </Link>
 
-        {/* Brand + type badge */}
+        {/* Brand + type badge + compare toggle */}
         <div className="flex items-center justify-between gap-2">
           <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[var(--primary)]">
             {product.brand}
           </p>
-          <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-[10px] font-semibold text-gray-500">
-            {product.type}
-          </span>
+          <div className="flex shrink-0 items-center gap-1.5">
+            <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-[10px] font-semibold text-gray-500">
+              {product.type}
+            </span>
+            <button
+              type="button"
+              onClick={() => toggle(product)}
+              disabled={!comparing && isFull}
+              title={comparing ? "Remove from comparison" : isFull ? "Compare list full (max 4)" : "Add to comparison"}
+              className={`flex h-[19px] w-[19px] shrink-0 items-center justify-center rounded-full border transition disabled:cursor-not-allowed disabled:opacity-40 ${
+                comparing
+                  ? "border-[var(--primary)] bg-[var(--primary)] text-white"
+                  : "border-gray-200 bg-white text-gray-400 hover:border-[var(--primary)]/40 hover:text-[var(--primary)]"
+              }`}
+            >
+              <ArrowLeftRight size={10} strokeWidth={2.4} />
+            </button>
+          </div>
         </div>
 
         {/* Product name — max 2 lines */}

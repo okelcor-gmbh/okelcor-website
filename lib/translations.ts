@@ -316,6 +316,16 @@ export type Translations = {
     shipmentLabel: string; shipmentStatus: string; shipmentRoute: string;
   };
   globalReach: string;
+  howItWorks: {
+    eyebrow: string; heading: string; subheading: string;
+    steps: [
+      { title: string; desc: string },
+      { title: string; desc: string },
+      { title: string; desc: string },
+      { title: string; desc: string },
+    ];
+    cta: string;
+  };
 };
 
 // ─── English ──────────────────────────────────────────────────────────────────
@@ -832,6 +842,18 @@ const en: Translations = {
     shipmentRoute: "Hamburg → Lagos",
   },
   globalReach: "Sourced & delivered across 40+ countries",
+  howItWorks: {
+    eyebrow: "How It Works",
+    heading: "From inquiry to delivery",
+    subheading: "A structured process built for B2B buyers — every step confirmed in writing before the next one begins.",
+    steps: [
+      { title: "Request a Quote", desc: "Tell us your tyre requirements — size, category, and volume — and get a formal quote from our team." },
+      { title: "Review Your Proposal", desc: "Receive a detailed proposal with pricing and terms. Accept digitally or upload a signed copy." },
+      { title: "Confirm & Pay", desc: "Your order is confirmed with milestone payments — deposit, balance, and full trade documentation at each stage." },
+      { title: "Track Your Shipment", desc: "Follow your shipment from dispatch to delivery with carrier tracking and real-time status updates." },
+    ],
+    cta: "Request a Quote",
+  },
 };
 
 // ─── German ───────────────────────────────────────────────────────────────────
@@ -1348,6 +1370,18 @@ const de: Translations = {
     shipmentRoute: "Hamburg → Lagos",
   },
   globalReach: "Beschafft und geliefert in über 40 Länder",
+  howItWorks: {
+    eyebrow: "So funktioniert es",
+    heading: "Von der Anfrage bis zur Lieferung",
+    subheading: "Ein strukturierter Prozess für B2B-Käufer — jeder Schritt schriftlich bestätigt, bevor der nächste beginnt.",
+    steps: [
+      { title: "Angebot anfragen", desc: "Teilen Sie uns Ihren Reifenbedarf mit — Größe, Kategorie und Menge — und erhalten Sie ein formelles Angebot von unserem Team." },
+      { title: "Angebot prüfen", desc: "Erhalten Sie ein detailliertes Angebot mit Preisen und Konditionen. Digital annehmen oder unterschriebene Kopie hochladen." },
+      { title: "Bestätigen & bezahlen", desc: "Ihre Bestellung wird mit Zahlungsmeilensteinen bestätigt — Anzahlung, Restzahlung und vollständige Handelsdokumentation bei jedem Schritt." },
+      { title: "Sendung verfolgen", desc: "Verfolgen Sie Ihre Sendung vom Versand bis zur Lieferung mit Frachtführer-Tracking und Echtzeit-Statusupdates." },
+    ],
+    cta: "Angebot anfragen",
+  },
 };
 
 // ─── French ───────────────────────────────────────────────────────────────────
@@ -1864,6 +1898,18 @@ const fr: Translations = {
     shipmentRoute: "Hambourg → Lagos",
   },
   globalReach: "Sourcés et livrés dans plus de 40 pays",
+  howItWorks: {
+    eyebrow: "Comment ça marche",
+    heading: "De la demande à la livraison",
+    subheading: "Un processus structuré pour les acheteurs B2B — chaque étape confirmée par écrit avant de passer à la suivante.",
+    steps: [
+      { title: "Demander un devis", desc: "Indiquez-nous vos besoins en pneus — taille, catégorie et volume — et recevez un devis formel de notre équipe." },
+      { title: "Consulter votre proposition", desc: "Recevez une proposition détaillée avec tarifs et conditions. Acceptez en ligne ou téléversez une copie signée." },
+      { title: "Confirmer et payer", desc: "Votre commande est confirmée avec des paiements échelonnés — acompte, solde et documentation commerciale complète à chaque étape." },
+      { title: "Suivre votre envoi", desc: "Suivez votre envoi de l'expédition à la livraison grâce au suivi transporteur et aux mises à jour en temps réel." },
+    ],
+    cta: "Demander un devis",
+  },
 };
 
 // ─── Spanish ──────────────────────────────────────────────────────────────────
@@ -2350,6 +2396,18 @@ const es: Translations = {
     shipmentRoute: "Hamburgo → Lagos",
   },
   globalReach: "Suministrados y entregados en más de 40 países",
+  howItWorks: {
+    eyebrow: "Cómo funciona",
+    heading: "De la consulta a la entrega",
+    subheading: "Un proceso estructurado para compradores B2B — cada paso confirmado por escrito antes de comenzar el siguiente.",
+    steps: [
+      { title: "Solicite una cotización", desc: "Indíquenos sus necesidades de neumáticos — tamaño, categoría y volumen — y reciba una cotización formal de nuestro equipo." },
+      { title: "Revise su propuesta", desc: "Reciba una propuesta detallada con precios y condiciones. Acepte digitalmente o suba una copia firmada." },
+      { title: "Confirme y pague", desc: "Su pedido se confirma con pagos por hitos — depósito, saldo y documentación comercial completa en cada etapa." },
+      { title: "Siga su envío", desc: "Siga su envío desde el despacho hasta la entrega con seguimiento del transportista y actualizaciones en tiempo real." },
+    ],
+    cta: "Solicitar cotización",
+  },
 };
 
 // ─── Export ───────────────────────────────────────────────────────────────────

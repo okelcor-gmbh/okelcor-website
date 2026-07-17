@@ -19,6 +19,7 @@ import CategoriesSection from "@/components/home/categories-section";
 import BrandsSection from "@/components/home/brands-section";
 import PlatformShowcase from "@/components/home/platform-showcase";
 import FetShowcase from "@/components/home/fet-showcase";
+import HowItWorks from "@/components/home/how-it-works";
 import {
   CategoriesSkeleton,
   BrandsSkeleton,
@@ -79,6 +80,9 @@ export default function Home() {
 
       {/* Second product line */}
       <FetShowcase />
+
+      {/* How the ordering process works, before the final CTA */}
+      <HowItWorks />
 
       <CTASection />
       <Footer />
