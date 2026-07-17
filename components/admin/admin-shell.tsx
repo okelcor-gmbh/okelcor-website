@@ -46,6 +46,7 @@ import { logoutAdmin } from "@/app/admin/actions";
 import { canAccess, PATH_SECTION, ROLE_LABELS, ROLE_BADGE_COLORS } from "@/lib/admin-permissions";
 import CrispNotifier from "@/components/admin/crisp-notifier";
 import NotificationsBell from "@/components/admin/notifications-bell";
+import InsightsBell from "@/components/admin/insights-bell";
 
 // ── Navigation ────────────────────────────────────────────────────────────────
 // Grouped into labelled sections for a clean, scannable sidebar. Each group hides
@@ -511,6 +512,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
           {/* Right: notifications + role badge + avatar dropdown */}
           <div className="flex items-center gap-3">
+            <InsightsBell />
             <NotificationsBell />
 
             {role && (

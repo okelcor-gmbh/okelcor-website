@@ -348,6 +348,31 @@ Extends the existing CRM-6 communication log with a **real send** path (manual "
 
 ## Pending — Backend Contracts
 
+### AI-Generated Admin Insights — Frontend Complete, Backend Pending
+
+Idea: a scheduled backend job periodically summarizes the same aggregate
+numbers already behind the dashboard (revenue, orders, stock, security,
+traffic, quotes) into a handful of short natural-language insights via a
+free-tier AI API (Gemini recommended, Groq as fallback — see note for why),
+served from one cached `GET /admin/insights` endpoint.
+
+**Frontend shipped** (2026-07-18): `components/admin/insights-bell.tsx` — a
+topbar sparkle-icon bell (own visual identity, distinct from the plain
+notifications bell) with a badge + dropdown of current insights (severity-
+tinted chip, category, headline, `**bold**`-parsed detail, optional
+"suggestion" callout, optional deep link, dismiss/clear-all) plus up to 2
+popup toasts (top-right, ~9s auto-dismiss) for anything not already seen in
+that browser (tracked client-side via `localStorage` — no dismiss endpoint
+needed). `lib/admin-insights.ts` (severity styles, category labels, bold-span
+renderer), `lib/admin-api.ts` (`AdminInsight` types), and
+`/api/admin/insights` (proxy, degrades to an empty list) round it out.
+Everything degrades silently today since the backend endpoint doesn't exist —
+lights up the moment it does, no frontend deploy required.
+
+**Full proposal, API choice reasoning, data-minimization rule, and contract:
+`docs/BACKEND_NOTE_ai_insights.md`.** Waiting on backend to confirm
+feasibility/API choice and build the one endpoint.
+
 ### Proposal → Proforma Gating — Needs `proposal_accepted_at` Surfaced on Order Payload
 
 Backend note: for orders from an accepted CRM-7 proposal, admin should be able to generate/send the

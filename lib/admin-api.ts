@@ -438,6 +438,31 @@ export type AdminNotification = {
   created_at: string;
 };
 
+// AI-generated admin insights: periodic AI summary of dashboard activity
+// (GET /admin/insights) — see docs/BACKEND_NOTE_ai_insights.md for the full
+// proposal. Not live yet; frontend degrades to an empty list until it is.
+export type AdminInsightCategory =
+  | "revenue" | "orders" | "inventory" | "security" | "traffic" | "quotes" | string;
+
+export type AdminInsightSeverity = "positive" | "info" | "warning" | "critical";
+
+export type AdminInsight = {
+  id: string;
+  category: AdminInsightCategory;
+  severity: AdminInsightSeverity;
+  headline: string;
+  /** May contain **bold** markdown-lite spans — render via renderInsightDetail(). */
+  detail: string;
+  suggestion?: string | null;
+  action_url?: string | null;
+};
+
+export type AdminInsightsResponse = {
+  data: AdminInsight[];
+  generated_at?: string | null;
+  next_refresh_at?: string | null;
+};
+
 // CRM-3B: actionable work queue item (GET /admin/my-work)
 export type MyWorkType =
   | "assigned_lead"
