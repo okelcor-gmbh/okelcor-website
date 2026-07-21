@@ -732,6 +732,7 @@ export type MarketingContactStatus = "subscribed" | "unsubscribed" | "unknown";
 export type MarketingContact = {
   id: number;
   email: string;
+  market?: string | null;
   first_name?: string | null;
   last_name?: string | null;
   phone?: string | null;
@@ -766,6 +767,7 @@ export type MarketingContactImportResult = {
 export type BulkEmailStatus = "queued" | "sending" | "completed" | "failed";
 
 export type BulkEmailFilters = {
+  market?: string;
   company?: string;
   country?: string;
   status?: "subscribed" | "unknown";

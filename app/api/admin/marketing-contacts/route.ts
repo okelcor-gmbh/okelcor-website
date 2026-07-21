@@ -1,16 +1,26 @@
 /**
  * GET  /api/admin/marketing-contacts   — paginated contact list
- * POST /api/admin/marketing-contacts   — import CSV/TXT (multipart file)
+ * POST /api/admin/marketing-contacts   — either import CSV/TXT (multipart)
+ *                                         or create one contact (JSON body),
+ *                                         branched on Content-Type
  *
  * Proxies to:
- *   GET  /admin/marketing-contacts?status=&company=&country=&search=&per_page=&page=
- *   POST /admin/marketing-contacts/import   (multipart file field: "file")
+ *   GET  /admin/marketing-contacts?status=&company=&country=&market=&search=&per_page=&page=
+ *   POST /admin/marketing-contacts/import   (multipart: file, market)
+ *   POST /admin/marketing-contacts          (JSON: email, market, ...optional)
  *
- * The POST handler normalises the CSV before forwarding:
+ * The import path normalises the CSV before forwarding:
  *   1. Strips the UTF-8 BOM (ef bb bf / U+FEFF) that Excel/Wix sometimes prepend
  *   2. Trims leading/trailing whitespace from every header cell
  *   3. Maps alternative column names to the canonical Wix/backend names so that
  *      plain exports (e.g. "Company name", "Bussines type") land correctly
+ *
+ * `market` is required by the backend on import — a CSV import without one
+ * 422s. Note: the backend does NOT normalise (slugify) a market value that
+ * comes from inside the CSV's own market/region/segment column, only ones
+ * supplied directly (here, or via manual create/update) — so a CSV-embedded
+ * "Asia" and a manually-entered "asia" won't match each other server-side.
+ * Known backend gap, not something this proxy can fix.
  */
 
 import { cookies } from "next/headers";
@@ -93,7 +103,7 @@ export async function GET(req: NextRequest) {
   if (!tk) return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
 
   const incoming = req.nextUrl.searchParams;
-  const allowed = ["status", "company", "country", "search", "per_page", "page"] as const;
+  const allowed = ["status", "company", "country", "market", "search", "per_page", "page"] as const;
   const qs = new URLSearchParams();
   for (const key of allowed) {
     const v = incoming.get(key);
@@ -122,10 +132,35 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function POST(req: NextRequest) {
-  const tk = await getToken();
-  if (!tk) return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
+// JSON body → single manual contact create (backend's plain
+// POST /admin/marketing-contacts). Multipart → CSV import (below). One URL
+// on the frontend side; which backend endpoint it hits is an implementation
+// detail this proxy layer absorbs.
+async function postCreate(req: NextRequest, tk: string) {
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+  }
 
+  try {
+    const res = await fetch(`${BASE}/marketing-contacts`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${tk}`, "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    if (res.status === 401) return NextResponse.json({ error: "Session expired." }, { status: 401 });
+
+    const json = await res.json().catch(() => ({ error: "Unreadable response from server." }));
+    return NextResponse.json(json, { status: res.status });
+  } catch {
+    return NextResponse.json({ error: "Could not reach the API server." }, { status: 502 });
+  }
+}
+
+async function postImport(req: NextRequest, tk: string) {
   let formData: FormData;
   try {
     formData = await req.formData();
@@ -136,6 +171,13 @@ export async function POST(req: NextRequest) {
   const rawFile = formData.get("file");
   if (!rawFile || !(rawFile instanceof File)) {
     return NextResponse.json({ error: "No file provided." }, { status: 400 });
+  }
+
+  // Required by the backend now — a CSV import with no market silently
+  // 422s otherwise. The UI must always send one alongside the file.
+  const market = formData.get("market");
+  if (!market || typeof market !== "string") {
+    return NextResponse.json({ error: "A market must be selected before importing." }, { status: 400 });
   }
 
   const contentLength = Number(req.headers.get("content-length") ?? 0);
@@ -150,6 +192,7 @@ export async function POST(req: NextRequest) {
 
   const outForm = new FormData();
   outForm.append("file", normalisedFile);
+  outForm.append("market", market);
 
   try {
     const res = await fetch(`${BASE}/marketing-contacts/import`, {
@@ -175,4 +218,15 @@ export async function POST(req: NextRequest) {
   } catch {
     return NextResponse.json({ error: "Could not reach the API server." }, { status: 502 });
   }
+}
+
+export async function POST(req: NextRequest) {
+  const tk = await getToken();
+  if (!tk) return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
+
+  const contentType = req.headers.get("content-type") ?? "";
+  if (contentType.includes("application/json")) {
+    return postCreate(req, tk);
+  }
+  return postImport(req, tk);
 }

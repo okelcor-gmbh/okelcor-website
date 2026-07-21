@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
-  Upload, Search, Trash2, Users, CheckCircle2, XCircle,
+  Upload, Search, Trash2, Users, CheckCircle2, XCircle, Plus, Pencil,
   HelpCircle, AlertTriangle, RefreshCw, FileText, X, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import type { MarketingContact, MarketingContactStats, MarketingContactImportResult } from "@/lib/admin-api";
+import { MarketSelect, useMarketOptions, type MarketOption } from "./market-select";
 
 // ── Status helpers ────────────────────────────────────────────────────────────
 
@@ -58,9 +59,16 @@ function StatsCards({ stats, loading }: { stats: MarketingContactStats | null; l
 
 // ── Import card ───────────────────────────────────────────────────────────────
 
-function ImportCard({ onImported }: { onImported: () => void }) {
+function ImportCard({
+  markets,
+  onImported,
+}: {
+  markets: MarketOption[];
+  onImported: () => void;
+}) {
   const inputRef      = useRef<HTMLInputElement>(null);
   const [file, setFile]             = useState<File | null>(null);
+  const [market, setMarket]         = useState("");
   const [loading, setLoading]       = useState(false);
   const [result, setResult]         = useState<MarketingContactImportResult | null>(null);
   const [error, setError]           = useState<string | null>(null);
@@ -79,12 +87,17 @@ function ImportCard({ onImported }: { onImported: () => void }) {
 
   async function handleUpload() {
     if (!file) return;
+    if (!market.trim()) {
+      setError("Select (or create) a market before importing.");
+      return;
+    }
     setLoading(true);
     setError(null);
     setResult(null);
 
     const fd = new FormData();
     fd.append("file", file);
+    fd.append("market", market.trim());
 
     try {
       const res = await fetch("/api/admin/marketing-contacts", { method: "POST", body: fd });
@@ -137,6 +150,13 @@ function ImportCard({ onImported }: { onImported: () => void }) {
         />
       </div>
 
+      <div className="mt-3">
+        <label className="mb-1 block text-[0.78rem] font-semibold text-[#5c5e62]">
+          Market — every imported contact is tagged with this
+        </label>
+        <MarketSelect markets={markets} value={market} onChange={setMarket} mode="create" />
+      </div>
+
       {file && (
         <div className="mt-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-[0.83rem] text-[#171a20]">
@@ -155,7 +175,7 @@ function ImportCard({ onImported }: { onImported: () => void }) {
             <button
               type="button"
               onClick={handleUpload}
-              disabled={loading}
+              disabled={loading || !market.trim()}
               className="flex items-center gap-1.5 rounded-full bg-[#f4511e] px-4 py-1.5 text-[0.78rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-60"
             >
               {loading ? <RefreshCw size={12} className="animate-spin" /> : <Upload size={12} />}
@@ -197,12 +217,179 @@ function ImportCard({ onImported }: { onImported: () => void }) {
   );
 }
 
+// ── Add / edit contact modal ──────────────────────────────────────────────────
+
+type ContactFormValues = {
+  email: string;
+  market: string;
+  first_name: string;
+  last_name: string;
+  company: string;
+  country: string;
+  phone: string;
+};
+
+function ContactModal({
+  contact,
+  markets,
+  onClose,
+  onSaved,
+}: {
+  /** undefined = create; provided = edit */
+  contact?: MarketingContact;
+  markets: MarketOption[];
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const isEdit = !!contact;
+  const [values, setValues] = useState<ContactFormValues>({
+    email: contact?.email ?? "",
+    market: contact?.market ?? "",
+    first_name: contact?.first_name ?? "",
+    last_name: contact?.last_name ?? "",
+    company: contact?.company ?? "",
+    country: contact?.country ?? "",
+    phone: contact?.phone ?? "",
+  });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  function set<K extends keyof ContactFormValues>(key: K, v: string) {
+    setValues((prev) => ({ ...prev, [key]: v }));
+  }
+
+  async function handleSave() {
+    if (!values.email.trim()) {
+      setError("Email is required.");
+      return;
+    }
+    if (!values.market.trim()) {
+      setError("Market is required.");
+      return;
+    }
+
+    setSaving(true);
+    setError(null);
+
+    const body: Record<string, string> = { email: values.email.trim(), market: values.market.trim() };
+    if (values.first_name) body.first_name = values.first_name;
+    if (values.last_name) body.last_name = values.last_name;
+    if (values.company) body.company = values.company;
+    if (values.country) body.country = values.country;
+    if (values.phone) body.phone = values.phone;
+
+    try {
+      const url = isEdit ? `/api/admin/marketing-contacts/${contact!.id}` : "/api/admin/marketing-contacts";
+      const res = await fetch(url, {
+        method: isEdit ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(json.error ?? json.message ?? `Could not save (${res.status}).`);
+        return;
+      }
+      onSaved();
+      onClose();
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const inputClass =
+    "h-9 w-full rounded-lg border border-black/[0.10] bg-white px-3 text-[0.83rem] text-[#171a20] placeholder:text-[#8c8f94] focus:border-[#f4511e] focus:outline-none";
+  const labelClass = "mb-1 block text-[0.78rem] font-semibold text-[#5c5e62]";
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="w-full max-w-md rounded-2xl bg-white shadow-xl">
+        <div className="flex items-center justify-between border-b border-black/[0.06] px-5 py-4">
+          <h2 className="font-bold text-[#171a20]">{isEdit ? "Edit contact" : "Add contact"}</h2>
+          <button type="button" onClick={onClose} className="rounded-lg p-1.5 text-[#5c5e62] hover:bg-[#f0f2f5]">
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="space-y-3 p-5">
+          <div>
+            <label className={labelClass}>Email *</label>
+            <input
+              type="email"
+              value={values.email}
+              onChange={(e) => set("email", e.target.value)}
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className={labelClass}>Market *</label>
+            <MarketSelect markets={markets} value={values.market} onChange={(m) => set("market", m)} mode="create" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelClass}>First name</label>
+              <input value={values.first_name} onChange={(e) => set("first_name", e.target.value)} className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Last name</label>
+              <input value={values.last_name} onChange={(e) => set("last_name", e.target.value)} className={inputClass} />
+            </div>
+          </div>
+          <div>
+            <label className={labelClass}>Company</label>
+            <input value={values.company} onChange={(e) => set("company", e.target.value)} className={inputClass} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelClass}>Country</label>
+              <input value={values.country} onChange={(e) => set("country", e.target.value)} className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Phone</label>
+              <input value={values.phone} onChange={(e) => set("phone", e.target.value)} className={inputClass} />
+            </div>
+          </div>
+
+          {error && (
+            <div className="flex items-start gap-2 rounded-lg bg-red-50 p-3 text-[0.83rem] text-red-700">
+              <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+              {error}
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center justify-end gap-2 border-t border-black/[0.06] px-5 py-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full px-4 py-2 text-[0.83rem] font-semibold text-[#5c5e62] hover:bg-[#f0f2f5]"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saving}
+            className="flex items-center gap-1.5 rounded-full bg-[#f4511e] px-4 py-2 text-[0.83rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-60"
+          >
+            {saving ? <RefreshCw size={12} className="animate-spin" /> : null}
+            {saving ? "Saving…" : "Save"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Contacts table ────────────────────────────────────────────────────────────
 
 type Filters = {
   status: string;
   company: string;
   country: string;
+  market: string;
   search: string;
 };
 
@@ -214,11 +401,15 @@ export default function MarketingContactsPanel() {
   const [meta, setMeta]           = useState({ total: 0, current_page: 1, last_page: 1 });
   const [tableLoading, setTableLoading] = useState(true);
 
-  const [filters, setFilters]     = useState<Filters>({ status: "", company: "", country: "", search: "" });
+  const [filters, setFilters]     = useState<Filters>({ status: "", company: "", country: "", market: "", search: "" });
   const [page, setPage]           = useState(1);
 
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const { markets, refresh: refreshMarkets } = useMarketOptions();
+  const [modalContact, setModalContact] = useState<MarketingContact | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
 
   // ── Data fetchers ────────────────────────────────────────────────────────────
 
@@ -239,6 +430,7 @@ export default function MarketingContactsPanel() {
     if (f.status)  qs.set("status",  f.status);
     if (f.company) qs.set("company", f.company);
     if (f.country) qs.set("country", f.country);
+    if (f.market)  qs.set("market",  f.market);
     if (f.search)  qs.set("search",  f.search);
 
     try {
@@ -290,7 +482,44 @@ export default function MarketingContactsPanel() {
       <StatsCards stats={stats} loading={statsLoading} />
 
       {/* Import */}
-      <ImportCard onImported={() => { fetchStats(); fetchContacts(filters, page); }} />
+      <ImportCard
+        markets={markets}
+        onImported={() => { fetchStats(); fetchContacts(filters, page); refreshMarkets(); }}
+      />
+
+      {/* Market tabs */}
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={() => applyFilter("market", "")}
+          className={[
+            "rounded-full px-3 py-1.5 text-[0.78rem] font-semibold transition",
+            filters.market === "" ? "bg-[#171a20] text-white" : "bg-[#f0f2f5] text-[#5c5e62] hover:bg-[#e5e7eb]",
+          ].join(" ")}
+        >
+          All markets
+        </button>
+        {markets.map((m) => (
+          <button
+            key={m.market}
+            type="button"
+            onClick={() => applyFilter("market", m.market)}
+            className={[
+              "rounded-full px-3 py-1.5 text-[0.78rem] font-semibold capitalize transition",
+              filters.market === m.market ? "bg-[#171a20] text-white" : "bg-[#f0f2f5] text-[#5c5e62] hover:bg-[#e5e7eb]",
+            ].join(" ")}
+          >
+            {m.market} ({m.contact_count})
+          </button>
+        ))}
+        <button
+          type="button"
+          onClick={() => setShowAddModal(true)}
+          className="ml-auto flex items-center gap-1.5 rounded-full bg-[#f4511e] px-4 py-1.5 text-[0.78rem] font-semibold text-white transition hover:bg-[#df4618]"
+        >
+          <Plus size={14} /> Add contact
+        </button>
+      </div>
 
       {/* Filter bar */}
       <div className="flex flex-wrap items-center gap-2">
@@ -328,10 +557,10 @@ export default function MarketingContactsPanel() {
           onChange={(e) => applyFilter("country", e.target.value)}
           className="h-9 w-36 rounded-lg border border-black/[0.10] bg-white px-3 text-[0.83rem] text-[#171a20] placeholder:text-[#8c8f94] focus:border-[#f4511e] focus:outline-none"
         />
-        {(filters.status || filters.company || filters.country || filters.search) && (
+        {(filters.status || filters.company || filters.country || filters.market || filters.search) && (
           <button
             type="button"
-            onClick={() => { setFilters({ status: "", company: "", country: "", search: "" }); setPage(1); }}
+            onClick={() => { setFilters({ status: "", company: "", country: "", market: "", search: "" }); setPage(1); }}
             className="flex items-center gap-1 text-[0.78rem] text-[#5c5e62] hover:text-[#171a20]"
           >
             <X size={12} /> Clear
@@ -354,7 +583,7 @@ export default function MarketingContactsPanel() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-black/[0.06] bg-[#f5f5f5]">
-                {["Name", "Email", "Company", "Country", "Source", "Status", ""].map((h) => (
+                {["Name", "Email", "Company", "Country", "Market", "Source", "Status", ""].map((h) => (
                   <th key={h} className="px-4 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wide text-[#5c5e62]">
                     {h}
                   </th>
@@ -364,14 +593,14 @@ export default function MarketingContactsPanel() {
             <tbody className="divide-y divide-black/[0.04]">
               {tableLoading ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-[0.83rem] text-[#5c5e62]">
+                  <td colSpan={8} className="py-12 text-center text-[0.83rem] text-[#5c5e62]">
                     <RefreshCw size={16} className="mx-auto mb-2 animate-spin text-[#5c5e62]" />
                     Loading contacts…
                   </td>
                 </tr>
               ) : contacts.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-[0.83rem] text-[#5c5e62]">
+                  <td colSpan={8} className="py-12 text-center text-[0.83rem] text-[#5c5e62]">
                     <Users size={24} className="mx-auto mb-2 text-[#8c8f94]" />
                     No contacts found. Import a CSV to get started.
                   </td>
@@ -392,9 +621,18 @@ export default function MarketingContactsPanel() {
                     <td className="px-4 py-3 text-[0.83rem] text-[#171a20]">{c.email}</td>
                     <td className="px-4 py-3 text-[0.83rem] text-[#5c5e62]">{c.company ?? "—"}</td>
                     <td className="px-4 py-3 text-[0.83rem] text-[#5c5e62]">{c.country ?? "—"}</td>
+                    <td className="px-4 py-3 text-[0.83rem] capitalize text-[#5c5e62]">{c.market ?? "—"}</td>
                     <td className="px-4 py-3 text-[0.83rem] text-[#5c5e62]">{c.source ?? "—"}</td>
                     <td className="px-4 py-3"><StatusBadge status={c.status} /></td>
                     <td className="px-4 py-3 text-right">
+                      <button
+                        type="button"
+                        onClick={() => setModalContact(c)}
+                        title="Edit contact"
+                        className="invisible mr-1 rounded-lg p-1.5 text-[#5c5e62] transition hover:bg-[#f0f2f5] hover:text-[#171a20] group-hover:visible"
+                      >
+                        <Pencil size={14} />
+                      </button>
                       <button
                         type="button"
                         onClick={() => handleDelete(c.id)}
@@ -442,6 +680,22 @@ export default function MarketingContactsPanel() {
           </div>
         )}
       </div>
+
+      {showAddModal && (
+        <ContactModal
+          markets={markets}
+          onClose={() => setShowAddModal(false)}
+          onSaved={() => { fetchStats(); fetchContacts(filters, page); refreshMarkets(); }}
+        />
+      )}
+      {modalContact && (
+        <ContactModal
+          contact={modalContact}
+          markets={markets}
+          onClose={() => setModalContact(null)}
+          onSaved={() => { fetchStats(); fetchContacts(filters, page); refreshMarkets(); }}
+        />
+      )}
     </div>
   );
 }

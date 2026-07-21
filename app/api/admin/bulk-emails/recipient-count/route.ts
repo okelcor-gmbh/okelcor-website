@@ -1,6 +1,6 @@
 /**
  * GET /api/admin/bulk-emails/recipient-count
- * → GET /admin/bulk-emails/recipient-count?company=&country=&status=&search=
+ * → GET /admin/bulk-emails/recipient-count?company=&country=&market=&status=&search=
  * Returns: { count: number }
  */
 
@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
   if (!tk) return NextResponse.json({ count: 0 }, { status: 200 });
 
   const incoming = req.nextUrl.searchParams;
-  const allowed = ["company", "country", "status", "search"] as const;
+  const allowed = ["company", "country", "market", "status", "search"] as const;
   const qs = new URLSearchParams();
   for (const key of allowed) {
     const v = incoming.get(key);
