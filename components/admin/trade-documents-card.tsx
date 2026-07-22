@@ -53,6 +53,18 @@ const SHIPMENT_LABELS = [
   "Other",
 ];
 
+// The backend's actual upload `type` enum — separate from TYPE_LABEL above,
+// which uses "proforma_invoice" for a different (already-generated-document)
+// concept; the upload endpoint's value is the bare "proforma".
+const UPLOAD_TYPE_OPTIONS: { value: string; label: string }[] = [
+  { value: "shipment_document", label: "Shipment Document (default)" },
+  { value: "order_confirmation", label: "Order Confirmation" },
+  { value: "proforma", label: "Proforma Invoice" },
+  { value: "commercial_invoice", label: "Commercial Invoice" },
+  { value: "packing_list", label: "Packing List" },
+  { value: "delivery_note", label: "Delivery Note" },
+];
+
 const ALLOWED_EXTENSIONS = ["pdf", "jpg", "jpeg", "png", "xls", "xlsx", "csv"];
 const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10 MB
 
@@ -175,6 +187,7 @@ export default function TradeDocumentsCard({
   // Upload state
   const [showUpload,   setShowUpload]   = useState(false);
   const [uploadLabel,  setUploadLabel]  = useState("");
+  const [uploadType,   setUploadType]   = useState("shipment_document");
   const [uploadNotes,  setUploadNotes]  = useState("");
   const [uploadFile,   setUploadFile]   = useState<File | null>(null);
   const [uploading,    setUploading]    = useState(false);
@@ -324,6 +337,7 @@ export default function TradeDocumentsCard({
     const fd = new FormData();
     fd.append("file", uploadFile);
     fd.append("document_label", uploadLabel);
+    fd.append("type", uploadType);
     if (uploadNotes.trim()) fd.append("notes", uploadNotes.trim());
     try {
       const res  = await fetch(`/api/admin/orders/${orderId}/trade-documents/upload`, { method: "POST", body: fd });
@@ -332,6 +346,7 @@ export default function TradeDocumentsCard({
         setDocuments((prev) => [...prev, json.data!]);
         setShowUpload(false);
         setUploadLabel("");
+        setUploadType("shipment_document");
         setUploadNotes("");
         setUploadFile(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
@@ -743,6 +758,27 @@ export default function TradeDocumentsCard({
                     <option key={l} value={l}>{l}</option>
                   ))}
                 </select>
+              </div>
+
+              {/* File as — the actual document type this is filed under, separate
+                  from the free-text label above */}
+              <div>
+                <label className="mb-1 block text-[0.72rem] font-semibold text-[#5c5e62]">
+                  File as
+                </label>
+                <select
+                  value={uploadType}
+                  onChange={(e) => setUploadType(e.target.value)}
+                  className="w-full rounded-lg border border-black/[0.1] bg-white px-3 py-2 text-[0.85rem] text-[#1a1a1a] focus:border-[#E85C1A]/50 focus:outline-none focus:ring-2 focus:ring-[#E85C1A]/10"
+                >
+                  {UPLOAD_TYPE_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+                <p className="mt-1 text-[0.68rem] text-[#9ca3af]">
+                  Use this when filing an externally-produced document (e.g. from an
+                  accountant) as its real type instead of the generic bucket.
+                </p>
               </div>
 
               {/* Notes */}

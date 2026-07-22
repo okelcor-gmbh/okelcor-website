@@ -241,7 +241,7 @@ export default function PaymentMilestonesCard({
     setLoading(true);
     setError(null);
     try {
-      const res  = await fetch(`/api/admin/orders/${orderId}/payments/${endpoint}`, {
+      const res  = await fetch(`/api/admin/orders/${orderId}/payment-milestones/${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: body ? JSON.stringify(body) : undefined,
@@ -290,17 +290,17 @@ export default function PaymentMilestonesCard({
   }
 
   async function handleDepositPaid() {
-    const { ok, emailSent: es } = await callAction("mark-deposit-paid", note ? { note } : undefined);
+    const { ok, emailSent: es } = await callAction("deposit-paid", note ? { note } : undefined);
     if (ok) { setStage("deposit_paid"); setDepPaidAt(new Date().toISOString()); closeModal(); showActionToast(es); }
   }
 
   async function handleBalanceDue() {
-    const { ok, emailSent: es } = await callAction("mark-balance-due");
+    const { ok, emailSent: es } = await callAction("balance-due");
     if (ok) { setStage("balance_due"); closeModal(); showActionToast(es); }
   }
 
   async function handleBalancePaid() {
-    const { ok, emailSent: es } = await callAction("mark-balance-paid", note ? { note } : undefined);
+    const { ok, emailSent: es } = await callAction("balance-paid", note ? { note } : undefined);
     if (ok) { setStage("balance_paid"); setBalPaidAt(new Date().toISOString()); closeModal(); showActionToast(es); }
   }
 
@@ -312,7 +312,7 @@ export default function PaymentMilestonesCard({
   async function handleResendEmail(targetStage: PaymentStage) {
     setResendLoading(targetStage);
     try {
-      const res  = await fetch(`/api/admin/orders/${orderId}/payments/resend-milestone-email`, {
+      const res  = await fetch(`/api/admin/orders/${orderId}/payment-milestones/resend-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ stage: targetStage }),
@@ -376,7 +376,10 @@ export default function PaymentMilestonesCard({
       action: {
         label: "Mark Balance Paid",
         modal: "balance",
-        show: stageIdx === STAGE_INDEX.balance_due && canMarkPaid,
+        // Backend accepts this transition directly from deposit_paid too —
+        // lets an order manager handle "customer already paid in full"
+        // without a confusing forced intermediate balance_due step.
+        show: (stageIdx === STAGE_INDEX.balance_due || stageIdx === STAGE_INDEX.deposit_paid) && canMarkPaid,
       },
     },
     {

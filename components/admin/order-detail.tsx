@@ -18,7 +18,7 @@ import TrackShipmentControl from "@/components/admin/tracking/track-shipment-con
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-const ORDER_STATUSES = ["pending", "confirmed", "awaiting_proforma", "shipped", "delivered", "cancelled"] as const;
+const ORDER_STATUSES = ["pending", "confirmed", "awaiting_proforma", "processing", "shipped", "delivered", "cancelled"] as const;
 type OrderStatus = (typeof ORDER_STATUSES)[number];
 
 type TabId = "overview" | "payments" | "documents" | "logistics" | "compliance" | "activity";
@@ -31,6 +31,7 @@ const STATUS_STYLES: Record<string, string> = {
   pending:            "bg-amber-100 text-amber-700",
   confirmed:          "bg-blue-100 text-blue-700",
   awaiting_proforma:  "bg-indigo-100 text-indigo-700",
+  processing:         "bg-cyan-100 text-cyan-700",
   shipped:            "bg-purple-100 text-purple-700",
   delivered:          "bg-emerald-100 text-emerald-700",
   cancelled:          "bg-red-100 text-red-600",
@@ -40,6 +41,7 @@ const STATUS_LABEL: Record<string, string> = {
   pending:           "Pending",
   confirmed:         "Confirmed",
   awaiting_proforma: "Awaiting Proforma",
+  processing:        "Processing",
   shipped:           "Shipped",
   delivered:         "Delivered",
   cancelled:         "Cancelled",

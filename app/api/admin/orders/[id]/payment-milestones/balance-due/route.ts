@@ -11,23 +11,21 @@ async function adminToken() {
 }
 
 export async function POST(
-  req: NextRequest,
+  _req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const tk = await adminToken();
   if (!tk) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   const { id } = await params;
-  const text = await req.text();
 
   try {
-    const res = await fetch(`${BASE}/orders/${id}/payments/mark-deposit-paid`, {
+    const res = await fetch(`${BASE}/orders/${id}/payment-milestones/balance-due`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${tk}`,
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: text || undefined,
       cache: "no-store",
     });
     const body = await res.text();

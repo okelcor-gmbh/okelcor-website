@@ -20,7 +20,7 @@ export async function POST(
   const text = await req.text();
 
   try {
-    const res = await fetch(`${BASE}/orders/${id}/payments/resend-milestone-email`, {
+    const res = await fetch(`${BASE}/orders/${id}/payment-milestones/release-shipment`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${tk}`,
