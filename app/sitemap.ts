@@ -1,10 +1,14 @@
 import type { MetadataRoute } from "next";
-import { ALL_PRODUCTS } from "@/components/shop/data";
 import { ALL_ARTICLES } from "@/components/news/data";
+import { apiFetch, type ApiResponse } from "@/lib/api";
 
 const BASE_URL = "https://www.okelcor.com";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+// One catalogue row as the API's sitemap feed serves it: `handle` is the
+// SEO slug when the product has one, the id for legacy rows without.
+type SitemapProduct = { handle: string; updated_at?: string | null };
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
 
   // ── Static routes ──────────────────────────────────────────────────────────
@@ -74,12 +78,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   // ── Dynamic product routes ─────────────────────────────────────────────────
-  const productRoutes: MetadataRoute.Sitemap = ALL_PRODUCTS.map((product) => ({
-    url: `${BASE_URL}/shop/${product.id}`,
-    lastModified: now,
-    changeFrequency: "weekly" as const,
-    priority: 0.6,
-  }));
+  // The REAL catalogue with its SEO slugs, not the demo data — Google was
+  // being handed a dozen mock ids while 11k live products went unlisted.
+  let productRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const res: ApiResponse<SitemapProduct[]> = await apiFetch<SitemapProduct[]>(
+      "/products/sitemap",
+      { revalidate: 3600 }
+    );
+    productRoutes = (res.data ?? []).map((p) => ({
+      url: `${BASE_URL}/shop/${p.handle}`,
+      lastModified: p.updated_at ? new Date(p.updated_at) : now,
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
+    }));
+  } catch {
+    // An unreachable API must not take the whole sitemap down with it —
+    // the static and article routes still serve.
+  }
 
   // ── Dynamic article routes ─────────────────────────────────────────────────
   const articleRoutes: MetadataRoute.Sitemap = ALL_ARTICLES.map((article) => ({

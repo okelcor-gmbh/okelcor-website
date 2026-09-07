@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { type Product } from "./data";
+import { productPath, type Product } from "./data";
 
 /**
  * One tyre as a table row, the trade view. Heuver's webshop shows results
@@ -25,7 +25,7 @@ export default function ProductListRow({
 
   return (
     <Link
-      href={`/shop/${product.id}`}
+      href={productPath(product)}
       className="group grid grid-cols-[56px_1fr_auto] items-center gap-3 border-b border-black/10 bg-white px-3 py-2.5 transition-colors last:border-b-0 hover:bg-[#fafafa] sm:grid-cols-[56px_1.6fr_1fr_1fr_auto] sm:gap-4 sm:px-4"
     >
       <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded bg-[#f5f5f5]">

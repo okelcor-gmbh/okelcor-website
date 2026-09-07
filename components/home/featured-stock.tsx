@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { apiFetch, type ApiResponse } from "@/lib/api";
+import { productPath } from "@/components/shop/data";
 
 /**
  * Real tyres, ready to ship, with real prices. Every volume platform runs a
@@ -70,7 +71,7 @@ export default async function FeaturedStock() {
           {items.slice(0, 4).map((p) => (
             <Link
               key={p.id}
-              href={`/shop/${p.id}`}
+              href={productPath(p)}
               className="group rounded-lg border border-black/10 bg-white p-4 transition-shadow hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f4511e]"
             >
               <div className="relative mb-3 aspect-square overflow-hidden rounded-md bg-[#f5f5f5]">

@@ -41,6 +41,9 @@ function toProduct(p: any): Product {
   const allPaths = [rawPrimary, ...galleryPaths.filter((g) => g !== rawPrimary)].filter(Boolean);
   return {
     id:            p.id,
+    // Without this every card and row falls back to the id URL — the slug
+    // is the SEO address (Session 92), so it must survive the mapping.
+    slug:          p.slug         ?? null,
     brand:         p.brand        ?? "",
     name:          p.name         ?? "",
     size:          p.size         ?? "",
