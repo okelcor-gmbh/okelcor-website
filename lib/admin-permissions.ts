@@ -25,9 +25,9 @@ export const ROLE_ACCESS: Record<string, string[]> = {
   // order manager, who both keep the rest of the `finance` section (invoice
   // reconciliation, profitability, EC Invoices, the Sales & Orders board).
   // Keep the two apart: folding the board back under `finance` reopens it.
-  super_admin:     ["operations", "finance", "finance_snapshot", "dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "analytics", "behaviour", "chats", "security", "eu_declarations", "logistics", "system_health", "crm", "marketing", "partners", "staff_team", "claims"],
-  admin:           ["operations", "finance", "dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "analytics", "behaviour", "chats", "security", "eu_declarations", "logistics", "system_health", "crm", "marketing", "partners", "staff_team", "claims"],
-  order_manager:   ["dashboard", "orders", "quotes", "supplier", "eu_declarations", "logistics", "crm", "marketing", "partners", "behaviour", "operations", "finance", "staff_team", "claims"],
+  super_admin:     ["operations", "finance", "finance_snapshot", "dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "pricing", "analytics", "behaviour", "chats", "security", "eu_declarations", "logistics", "system_health", "crm", "marketing", "partners", "staff_team", "claims"],
+  admin:           ["operations", "finance", "dashboard", "products", "orders", "quotes", "articles", "hero_slides", "promotions", "fet", "brands", "categories", "media", "settings", "users", "supplier", "customers", "ebay", "pricing", "analytics", "behaviour", "chats", "security", "eu_declarations", "logistics", "system_health", "crm", "marketing", "partners", "staff_team", "claims"],
+  order_manager:   ["dashboard", "orders", "quotes", "supplier", "eu_declarations", "logistics", "crm", "marketing", "partners", "behaviour", "operations", "finance", "staff_team", "claims", "pricing"],
   // Reconciliation and the finance half of order sign-off. Deliberately narrow:
   // this role exists to hold one half of a separation of duties, so handing it
   // the rest of the panel would defeat the point of splitting it out.
@@ -41,7 +41,7 @@ export const ROLE_ACCESS: Record<string, string[]> = {
   // running e-mail campaigns. Nothing operational: no orders, quotes,
   // customers or finance. Settings included because the site-wide product
   // shipping/returns texts live there.
-  marketing:       ["dashboard", "products", "articles", "hero_slides", "promotions", "fet", "brands", "media", "settings", "marketing", "behaviour", "analytics"],
+  marketing:       ["dashboard", "products", "articles", "hero_slides", "promotions", "fet", "brands", "media", "settings", "marketing", "behaviour", "analytics", "pricing"],
   support:         ["dashboard", "orders", "quotes", "customers", "chats", "logistics", "claims"],
   editor:          ["dashboard", "articles", "hero_slides", "promotions", "fet", "media", "behaviour"],
   viewer:          ["dashboard", "analytics"],
@@ -80,6 +80,9 @@ export const SECTION_PERMISSION: Record<string, string> = {
   partners:        "partners.view",
   supplier:        "supplier.view",
   ebay:            "ebay.manage",
+  // Tier pricing: its own section because its audience (order_manager and
+  // marketing included) is wider than the eBay tools'.
+  pricing:         "pricing.manage",
   eu_declarations: "eu_declarations.manage",
   media:           "media.upload",
   articles:        "articles.manage",
@@ -149,9 +152,7 @@ export const PATH_SECTION: Record<string, string> = {
   // Before "/admin/ebay": startsWith() matching, first entry wins.
   "/admin/ebay-audit":      "ebay",
   "/admin/ebay":            "ebay",
-  // Tyre Pricing (tier formula) — backend gate is pricing.manage, held by
-  // exactly the roles that hold ebay.manage, so it rides the ebay section.
-  "/admin/pricing":         "ebay",
+  "/admin/pricing":         "pricing",
   // Listed before "/admin/analytics": PATH_SECTION is matched with startsWith()
   // and the first entry wins, so the broader prefix must come second.
   "/admin/analytics/behaviour": "behaviour",
@@ -289,6 +290,10 @@ const PERMISSION_ROLES: Record<string, string[]> = {
 
   // eBay
   "ebay.manage": ["super_admin", "admin"],
+
+  // Tier pricing (Tyre100 cost × tier margin) — widened on the user's ask:
+  // the order manager and marketing run the repricing day to day.
+  "pricing.manage": ["super_admin", "admin", "order_manager", "marketing"],
 
   // Carrier shipment tracking (GET /admin/orders/{id}/shipment-tracking)
   "tracking.view":         ["super_admin", "admin", "order_manager", "sales_manager"],

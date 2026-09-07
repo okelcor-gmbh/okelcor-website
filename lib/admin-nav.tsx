@@ -115,7 +115,7 @@ export const NAV_GROUPS: readonly NavGroup[] = [
     items: [
       { label: "eBay", href: "/admin/ebay", icon: ShoppingBag, section: "ebay" , keywords: "listings marketplace sync" },
       { label: "eBay Price Audit", href: "/admin/ebay-audit", icon: TrendingUp, section: "ebay" , keywords: "margin loss fees cost pricing market insight audit" },
-      { label: "Tyre Pricing", href: "/admin/pricing", icon: Calculator, section: "ebay" , keywords: "tier margin tyre100 supplier premium midrange budget stripe formula reprice" },
+      { label: "Tyre Pricing", href: "/admin/pricing", icon: Calculator, section: "pricing" , keywords: "tier margin tyre100 supplier premium midrange budget stripe formula reprice" },
     ],
   },
   {
