@@ -14,7 +14,7 @@ import {
   RefreshCw, Search, TrendingUp, X,
 } from "lucide-react";
 import {
-  getAudit, applyPrice, getMarket, getMarketByQuery, syncLive,
+  getAudit, applyPrice, adoptEbayPrice, adoptAllEbayPrices, getMarket, getMarketByQuery, syncLive,
   type AuditRow, type AuditMeta, type AuditVerdict, type MarketComparison, type UnmatchedListing,
 } from "@/app/admin/ebay-audit/actions";
 
@@ -28,7 +28,7 @@ const VERDICT_UI: Record<AuditVerdict, { label: string; cls: string }> = {
   missing_cost: { label: "No cost",      cls: "bg-gray-200 text-gray-600" },
 };
 
-type Filter = "all" | AuditVerdict;
+type Filter = "all" | "drift" | AuditVerdict;
 
 export default function EbayAuditBoard() {
   const [rows, setRows]         = useState<AuditRow[]>([]);
@@ -45,6 +45,7 @@ export default function EbayAuditBoard() {
   const [uMarkets, setUMarkets]     = useState<Record<string, MarketComparison | "loading" | "error">>({});
   const [priceDrafts, setPriceDrafts] = useState<Record<number, string>>({});
   const [applying, setApplying]     = useState<number | null>(null);
+  const [adopting, setAdopting]     = useState<number | "all" | null>(null);
   const [syncing, setSyncing]       = useState(false);
 
   const load = useCallback(() => {
@@ -63,7 +64,7 @@ export default function EbayAuditBoard() {
   const visible = useMemo(() => {
     const term = q.trim().toLowerCase();
     return rows
-      .filter((r) => filter === "all" || r.verdict === filter)
+      .filter((r) => filter === "all" || (filter === "drift" ? r.price_drift !== null : r.verdict === filter))
       .filter((r) => !term ||
         `${r.sku ?? ""} ${r.brand ?? ""} ${r.name} ${r.size ?? ""}`.toLowerCase().includes(term))
       // Worst first: losses by biggest bleed, then thin, then missing cost.
@@ -93,6 +94,31 @@ export default function EbayAuditBoard() {
         market = { ...market, vs_market_pct: Math.round(((l.price - market.avg_price) / market.avg_price) * 1000) / 10 };
       }
       setUMarkets((m) => ({ ...m, [l.sku]: market ?? "error" }));
+    });
+  };
+
+  // eBay's live price becomes the website price — one row, or every drifted one.
+  const doAdopt = (row: AuditRow) => {
+    if (row.live?.price == null) return;
+    if (!window.confirm(`Set the WEBSITE price of ${row.sku ?? row.name} to eBay's ${fmt(row.live.price)} €? (eBay itself is untouched.)`)) return;
+    setAdopting(row.id);
+    startTransition(async () => {
+      const res = await adoptEbayPrice(row.id);
+      setAdopting(null);
+      setNotice(res.error ?? res.message ?? "Website price updated.");
+      if (!res.error) load();
+    });
+  };
+
+  const doAdoptAll = () => {
+    const n = meta?.counts.price_drift ?? 0;
+    if (!window.confirm(`Set the WEBSITE price to eBay's live price for all ${n} drifted product(s)? (eBay itself is untouched.)`)) return;
+    setAdopting("all");
+    startTransition(async () => {
+      const res = await adoptAllEbayPrices();
+      setAdopting(null);
+      setNotice(res.error ?? res.message ?? "Website prices updated.");
+      if (!res.error) load();
     });
   };
 
@@ -201,17 +227,29 @@ export default function EbayAuditBoard() {
           {counts.price_drift > 0 && <span>{counts.price_drift} price(s) differ on eBay</span>}
           {counts.live_missing > 0 && <span>· {counts.live_missing} marked listed but NOT on eBay</span>}
           {counts.unmatched > 0 && <span>· {counts.unmatched} live listing(s) unknown to the catalogue (below)</span>}
+          {counts.price_drift > 0 && (
+            <button type="button" disabled={adopting === "all"} onClick={doAdoptAll}
+              title="eBay's live price becomes the website price for every drifted product — eBay itself is untouched"
+              className="ml-auto flex items-center gap-1.5 rounded-full bg-amber-600 px-3.5 py-1.5 text-[0.72rem] font-bold text-white transition hover:bg-amber-700 disabled:opacity-60">
+              {adopting === "all" && <Loader2 size={12} className="animate-spin" />}
+              Adopt all eBay prices ({counts.price_drift})
+            </button>
+          )}
         </div>
       )}
 
       {/* Filters */}
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        {(["all", "loss", "thin", "missing_cost", "healthy"] as Filter[]).map((f) => (
+        {(["all", "loss", "thin", "missing_cost", "healthy", "drift"] as Filter[]).map((f) => (
           <button key={f} type="button" onClick={() => setFilter(f)}
             className={`rounded-full px-3.5 py-1.5 text-[0.75rem] font-bold transition ${
               filter === f ? "bg-[#1a1a1a] text-white" : "bg-white text-[#5c5e62] ring-1 ring-black/[0.08] hover:bg-[#f0f2f5]"
             }`}>
-            {f === "all" ? `All (${rows.length})` : `${VERDICT_UI[f].label} (${counts?.[f === "missing_cost" ? "missing_cost" : f] ?? 0})`}
+            {f === "all"
+              ? `All (${rows.length})`
+              : f === "drift"
+              ? `Differs from eBay (${counts?.price_drift ?? 0})`
+              : `${VERDICT_UI[f].label} (${counts?.[f === "missing_cost" ? "missing_cost" : f] ?? 0})`}
           </button>
         ))}
         <div className="relative ml-auto">
@@ -267,9 +305,16 @@ export default function EbayAuditBoard() {
                             <span className="ml-1 rounded-full bg-gray-200 px-1.5 py-0.5 text-[0.6rem] font-bold uppercase text-gray-600">{r.live.status}</span>
                           )}
                           {r.price_drift !== null && (
-                            <p className="text-[0.65rem] text-red-600" title="eBay's live price differs from the panel price">
-                              panel: {fmt(r.db_price)} ({r.price_drift > 0 ? "+" : ""}{fmt(r.price_drift)})
-                            </p>
+                            <>
+                              <p className="text-[0.65rem] text-red-600" title="eBay's live price differs on the website">
+                                website: {fmt(r.db_price)} ({r.price_drift > 0 ? "+" : ""}{fmt(r.price_drift)})
+                              </p>
+                              <button type="button" disabled={adopting === r.id} onClick={() => doAdopt(r)}
+                                title="Set the website price to eBay's live price — eBay itself is untouched"
+                                className="mt-0.5 rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[0.62rem] font-bold text-amber-700 transition hover:bg-amber-100 disabled:opacity-50">
+                                {adopting === r.id ? "…" : "Use eBay price"}
+                              </button>
+                            </>
                           )}
                           {!r.live && !r.live_missing && (
                             <p className="text-[0.62rem] text-[#c2c6cc]">panel price — no snapshot</p>
@@ -417,7 +462,8 @@ export default function EbayAuditBoard() {
         <span>
           Fees are modelled ({meta ? `${meta.fee_model.fee_percent}% + ${fmt(meta.fee_model.fee_fixed)} € per sale` : "…"}) — verify against a real eBay
           payout statement and correct EBAY_FEE_PERCENT / EBAY_FEE_FIXED if it differs. &ldquo;Apply&rdquo; changes the price on the website AND the live eBay
-          listing together, and every change is logged. Rows without a cost price cannot be judged — fill in cost prices to complete the audit.
+          listing together; &ldquo;Use eBay price&rdquo; / &ldquo;Adopt all&rdquo; go the other way — eBay&apos;s live price becomes the website price and eBay is untouched.
+          Every change is logged. Rows without a cost price cannot be judged — fill in cost prices to complete the audit.
         </span>
       </p>
       <p className="mt-1 flex items-start gap-2 text-[0.72rem] text-[#9ca3af]">

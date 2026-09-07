@@ -123,6 +123,30 @@ export async function applyPrice(id: number, price: number): Promise<{ error?: s
 }
 
 /**
+ * The reverse of applyPrice: eBay's live price becomes the WEBSITE price.
+ * No eBay call — eBay already shows this price; only the panel was behind.
+ */
+export async function adoptEbayPrice(id: number): Promise<{ error?: string; message?: string }> {
+  const { json, error } = await authedFetch(`/admin/ebay/audit/${id}/adopt-ebay-price`, { method: "POST" });
+  if (error || !json) return { error };
+  return { message: typeof json.message === "string" ? json.message : undefined };
+}
+
+/** Bulk sweep: every listed product whose live eBay price differs from the website. */
+export async function adoptAllEbayPrices(): Promise<{ error?: string; message?: string; updated?: number }> {
+  const { json, error } = await authedFetch("/admin/ebay/audit/adopt-ebay-prices", {
+    method: "POST",
+    body: JSON.stringify({ all_drifted: true }),
+  });
+  if (error || !json) return { error };
+  const meta = json.meta as { updated_count?: number } | undefined;
+  return {
+    message: typeof json.message === "string" ? json.message : undefined,
+    updated: meta?.updated_count,
+  };
+}
+
+/**
  * Market comparison by free-text query — for the eBay listings that have no
  * product record (hand-made on ebay.de), searched by their own listing
  * title. Reuses the supplier-intel search, whose tyre-query cleaner copes
