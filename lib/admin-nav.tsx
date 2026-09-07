@@ -4,7 +4,7 @@ import {
   Zap, MessageSquare, ShieldAlert, FileCheck, Truck, Activity, ScanLine,
   BellRing, Bell, Inbox, ClipboardCheck, UserCheck, Mail, Send, Images,
   Handshake, ReceiptText, LayoutGrid, LineChart, Search, BadgeCheck,
-  MessagesSquare, Globe2, Scale, LifeBuoy,
+  MessagesSquare, Globe2, Scale, LifeBuoy, Calculator,
 } from "lucide-react";
 
 /**
@@ -115,6 +115,7 @@ export const NAV_GROUPS: readonly NavGroup[] = [
     items: [
       { label: "eBay", href: "/admin/ebay", icon: ShoppingBag, section: "ebay" , keywords: "listings marketplace sync" },
       { label: "eBay Price Audit", href: "/admin/ebay-audit", icon: TrendingUp, section: "ebay" , keywords: "margin loss fees cost pricing market insight audit" },
+      { label: "Tyre Pricing", href: "/admin/pricing", icon: Calculator, section: "ebay" , keywords: "tier margin tyre100 supplier premium midrange budget stripe formula reprice" },
     ],
   },
   {

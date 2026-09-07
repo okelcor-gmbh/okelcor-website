@@ -25,7 +25,9 @@ export type AuditRow = {
   live: { price: number | null; currency: string | null; status: string; quantity: number | null; listing_id: string | null } | null;
   /** A live snapshot exists but this "listed" product is not on eBay. */
   live_missing: boolean;
-  /** live price − panel price, when they disagree. */
+  /** What the offer SHOULD cost: the tier formula (Tyre100 cost × margin × 9.5% eBay uplift) when cost + tier exist, else the website price. */
+  expected_ebay_price: number;
+  /** live price − expected eBay price, when they disagree. */
   price_drift: number | null;
   cost_price: number | null;
   price_b2b: number | null;
@@ -120,30 +122,6 @@ export async function applyPrice(id: number, price: number): Promise<{ error?: s
   });
   if (error || !json) return { error };
   return { message: typeof json.message === "string" ? json.message : undefined };
-}
-
-/**
- * The reverse of applyPrice: eBay's live price becomes the WEBSITE price.
- * No eBay call — eBay already shows this price; only the panel was behind.
- */
-export async function adoptEbayPrice(id: number): Promise<{ error?: string; message?: string }> {
-  const { json, error } = await authedFetch(`/admin/ebay/audit/${id}/adopt-ebay-price`, { method: "POST" });
-  if (error || !json) return { error };
-  return { message: typeof json.message === "string" ? json.message : undefined };
-}
-
-/** Bulk sweep: every listed product whose live eBay price differs from the website. */
-export async function adoptAllEbayPrices(): Promise<{ error?: string; message?: string; updated?: number }> {
-  const { json, error } = await authedFetch("/admin/ebay/audit/adopt-ebay-prices", {
-    method: "POST",
-    body: JSON.stringify({ all_drifted: true }),
-  });
-  if (error || !json) return { error };
-  const meta = json.meta as { updated_count?: number } | undefined;
-  return {
-    message: typeof json.message === "string" ? json.message : undefined,
-    updated: meta?.updated_count,
-  };
 }
 
 /**

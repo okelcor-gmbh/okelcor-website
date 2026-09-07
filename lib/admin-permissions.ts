@@ -149,6 +149,9 @@ export const PATH_SECTION: Record<string, string> = {
   // Before "/admin/ebay": startsWith() matching, first entry wins.
   "/admin/ebay-audit":      "ebay",
   "/admin/ebay":            "ebay",
+  // Tyre Pricing (tier formula) — backend gate is pricing.manage, held by
+  // exactly the roles that hold ebay.manage, so it rides the ebay section.
+  "/admin/pricing":         "ebay",
   // Listed before "/admin/analytics": PATH_SECTION is matched with startsWith()
   // and the first entry wins, so the broader prefix must come second.
   "/admin/analytics/behaviour": "behaviour",
