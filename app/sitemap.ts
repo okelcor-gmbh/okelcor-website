@@ -8,6 +8,11 @@ const BASE_URL = "https://www.okelcor.com";
 // SEO slug when the product has one, the id for legacy rows without.
 type SitemapProduct = { handle: string; updated_at?: string | null };
 
+// Regenerate hourly. Without this the sitemap is baked once at build time —
+// and a build that ran while the API was mid-deploy bakes an EMPTY product
+// list that stays empty until the next deploy.
+export const revalidate = 3600;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
 
