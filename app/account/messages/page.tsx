@@ -3,8 +3,6 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
 import MessagesCenter from "@/components/account/messages-center";
 import { getCustomerFromCookie } from "@/lib/get-customer";
 
@@ -22,10 +20,9 @@ export default async function MessagesPage() {
   if (!customer) redirect("/login?redirect=/account/messages");
 
   return (
-    <main className="min-h-screen bg-[#f5f5f5]">
-      <Navbar />
+    <div>
 
-      <div className="tesla-shell pb-16 pt-[96px]">
+      <div className="">
         {/* Breadcrumb */}
         <Link
           href="/account"
@@ -45,8 +42,6 @@ export default async function MessagesPage() {
 
         <MessagesCenter />
       </div>
-
-      <Footer />
-    </main>
+    </div>
   );
 }

@@ -3,8 +3,6 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ChevronRight, Eye, EyeOff, CheckCircle2, XCircle } from "lucide-react";
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
 import { useCustomerAuth } from "@/context/CustomerAuthContext";
 import { COUNTRIES } from "@/lib/countries";
 
@@ -228,20 +226,18 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-[#f5f5f5]">
-        <Navbar />
-        <div className="flex min-h-screen items-center justify-center">
+      <div>
+        <div className="flex min-h-[40vh] items-center justify-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--primary)] border-t-transparent" />
         </div>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#f5f5f5]">
-      <Navbar />
+    <div>
 
-      <div className="tesla-shell pb-16 pt-[96px]">
+      <div className="">
 
         {/* Breadcrumb */}
         <nav className="mb-6 flex items-center gap-1.5 text-[0.82rem] text-[var(--muted)]">
@@ -419,7 +415,6 @@ export default function ProfilePage() {
       </div>
 
       {toast && <Toast message={toast.message} type={toast.type} />}
-      <Footer />
-    </main>
+    </div>
   );
 }

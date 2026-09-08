@@ -2,8 +2,6 @@ import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronRight, Package, CreditCard, Landmark } from "lucide-react";
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
 import { getCustomerFromCookie } from "@/lib/get-customer";
 import type { ShipmentEvent, TradeDocument } from "@/lib/admin-api";
 
@@ -161,10 +159,9 @@ export default async function OrdersPage() {
   const orders = await fetchOrders(token, customer.email);
 
   return (
-    <main className="min-h-screen bg-[#f5f5f5]">
-      <Navbar />
+    <div>
 
-      <div className="tesla-shell pb-16 pt-[88px] sm:pt-[96px]">
+      <div className="">
 
         {/* Page header */}
         <div className="mb-6 sm:mb-8">
@@ -368,8 +365,6 @@ export default async function OrdersPage() {
           </div>
         )}
       </div>
-
-      <Footer />
-    </main>
+    </div>
   );
 }

@@ -2,8 +2,6 @@ import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronLeft, Clock, Receipt } from "lucide-react";
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
 import InvoiceDownloadButton from "@/components/account/invoice-download-button";
 import OrderTracking from "@/components/account/order-tracking";
 import OrderPaymentCard from "@/components/account/order-payment-card";
@@ -169,9 +167,8 @@ export default async function OrderDetailPage({ params }: Props) {
   const order = await fetchOrder(ref, token);
   if (!order) {
     return (
-      <main className="min-h-screen bg-[#f5f5f5]">
-        <Navbar />
-        <div className="tesla-shell pb-16 pt-[88px] sm:pt-[96px]">
+      <div>
+        <div className="">
           <Link
             href="/account/orders"
             className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-black/[0.08] bg-white px-4 py-2 text-[0.82rem] font-semibold text-[var(--foreground)] transition hover:bg-[#f0f0f0] sm:mb-6 sm:text-[0.85rem]"
@@ -189,8 +186,7 @@ export default async function OrderDetailPage({ params }: Props) {
             </p>
           </div>
         </div>
-        <Footer />
-      </main>
+      </div>
     );
   }
 
@@ -202,10 +198,9 @@ export default async function OrderDetailPage({ params }: Props) {
   }
 
   return (
-    <main className="min-h-screen bg-[#f5f5f5]">
-      <Navbar />
+    <div>
 
-      <div className="tesla-shell pb-16 pt-[88px] sm:pt-[96px]">
+      <div className="">
 
         {/* Breadcrumb */}
         <nav className="mb-4 flex items-center gap-1.5 text-[0.8rem] text-[var(--muted)] sm:mb-6 sm:text-[0.82rem]">
@@ -469,8 +464,6 @@ export default async function OrderDetailPage({ params }: Props) {
 
         </div>
       </div>
-
-      <Footer />
-    </main>
+    </div>
   );
 }

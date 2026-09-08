@@ -3,8 +3,6 @@ import { cookies } from "next/headers";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronRight, Receipt, CheckCircle2, Clock, AlertCircle } from "lucide-react";
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
 import InvoiceDownloadButton from "@/components/account/invoice-download-button";
 import { getCustomerFromCookie } from "@/lib/get-customer";
 
@@ -97,10 +95,9 @@ export default async function InvoicesPage() {
     : "Your paid orders will appear here.";
 
   return (
-    <main className="min-h-screen bg-[#f5f5f5]">
-      <Navbar />
+    <div>
 
-      <div className="tesla-shell pb-16 pt-[96px]">
+      <div className="">
 
         {/* Breadcrumb */}
         <nav className="mb-6 flex items-center gap-1.5 text-[0.8rem] text-[var(--muted)]">
@@ -202,8 +199,6 @@ export default async function InvoicesPage() {
           </div>
         ) : null}
       </div>
-
-      <Footer />
-    </main>
+    </div>
   );
 }

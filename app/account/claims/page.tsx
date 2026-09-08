@@ -3,8 +3,6 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
 import ClaimsPanel from "@/components/account/claims-panel";
 import { getCustomerFromCookie } from "@/lib/get-customer";
 
@@ -33,10 +31,9 @@ export default async function ClaimsPage({ searchParams }: { searchParams: Searc
   const { order, new: openNew } = await searchParams;
 
   return (
-    <main className="min-h-screen bg-[#f5f5f5]">
-      <Navbar />
+    <div>
 
-      <div className="tesla-shell pb-16 pt-[96px]">
+      <div className="">
         <nav className="mb-6 flex items-center gap-1.5 text-[0.82rem] text-[var(--muted)]">
           <Link href="/account" className="transition hover:text-[var(--primary)]">My Account</Link>
           <ChevronRight size={13} strokeWidth={2.2} />
@@ -54,8 +51,6 @@ export default async function ClaimsPage({ searchParams }: { searchParams: Searc
 
         <ClaimsPanel prefillOrder={order ?? null} openForm={Boolean(order || openNew)} />
       </div>
-
-      <Footer />
-    </main>
+    </div>
   );
 }

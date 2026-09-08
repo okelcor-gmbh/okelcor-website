@@ -3,8 +3,6 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
 import NotificationsCenter from "@/components/account/notifications-center";
 import { getCustomerFromCookie } from "@/lib/get-customer";
 
@@ -22,10 +20,9 @@ export default async function NotificationsPage() {
   if (!customer) redirect("/login?redirect=/account/notifications");
 
   return (
-    <main className="min-h-screen bg-[#f5f5f5]">
-      <Navbar />
+    <div>
 
-      <div className="tesla-shell pb-16 pt-[96px]">
+      <div className="">
         {/* Breadcrumb */}
         <Link
           href="/account"
@@ -47,8 +44,6 @@ export default async function NotificationsPage() {
 
         <NotificationsCenter />
       </div>
-
-      <Footer />
-    </main>
+    </div>
   );
 }

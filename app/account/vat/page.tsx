@@ -2,8 +2,6 @@
 
 import Link from "next/link";
 import { ChevronRight, ShieldCheck, CheckCircle2, AlertCircle, Clock, ExternalLink } from "lucide-react";
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
 import { useCustomerAuth } from "@/context/CustomerAuthContext";
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -13,22 +11,20 @@ export default function VATStatusPage() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-[#f5f5f5]">
-        <Navbar />
-        <div className="flex min-h-screen items-center justify-center">
+      <div>
+        <div className="flex min-h-[40vh] items-center justify-center">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--primary)] border-t-transparent" />
         </div>
-      </main>
+      </div>
     );
   }
 
   const hasVat = !!customer?.vat_number;
 
   return (
-    <main className="min-h-screen bg-[#f5f5f5]">
-      <Navbar />
+    <div>
 
-      <div className="tesla-shell pb-16 pt-[96px]">
+      <div className="">
 
         {/* Breadcrumb */}
         <nav className="mb-6 flex items-center gap-1.5 text-[0.8rem] text-[var(--muted)]">
@@ -143,8 +139,6 @@ export default function VATStatusPage() {
 
         </div>
       </div>
-
-      <Footer />
-    </main>
+    </div>
   );
 }

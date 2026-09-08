@@ -6,8 +6,6 @@ import {
   ChevronLeft, ChevronRight, MessageSquare,
   Package, CheckCircle2, ArrowRight, Paperclip,
 } from "lucide-react";
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
 import OrderPaymentCard from "@/components/account/order-payment-card";
 import QuoteAcceptanceActions from "@/components/account/quote-acceptance-actions";
 import { getCustomerFromCookie } from "@/lib/get-customer";
@@ -251,10 +249,9 @@ export default async function QuoteDetailPage({ params }: Props) {
       : undefined;
 
   return (
-    <main className="min-h-screen bg-[#f5f5f5]">
-      <Navbar />
+    <div>
 
-      <div className="tesla-shell pb-16 pt-[96px]">
+      <div className="">
 
         {/* Breadcrumb */}
         <nav className="mb-6 flex items-center gap-1.5 text-[0.8rem] text-[var(--muted)]">
@@ -702,8 +699,6 @@ export default async function QuoteDetailPage({ params }: Props) {
 
         </div>
       </div>
-
-      <Footer />
-    </main>
+    </div>
   );
 }

@@ -3,8 +3,6 @@ import { cookies } from "next/headers";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronRight, FileText, ArrowRight, MessageSquare } from "lucide-react";
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
 import { getCustomerFromCookie } from "@/lib/get-customer";
 
 export const metadata: Metadata = {
@@ -169,10 +167,9 @@ export default async function QuotesPage() {
   const quotes = await fetchQuotes(token);
 
   return (
-    <main className="min-h-screen bg-[#f5f5f5]">
-      <Navbar />
+    <div>
 
-      <div className="tesla-shell pb-16 pt-[96px]">
+      <div className="">
 
         {/* Breadcrumb */}
         <nav className="mb-6 flex items-center gap-1.5 text-[0.8rem] text-[var(--muted)]">
@@ -341,8 +338,6 @@ export default async function QuotesPage() {
           </div>
         )}
       </div>
-
-      <Footer />
-    </main>
+    </div>
   );
 }
