@@ -1,10 +1,14 @@
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import {
   adminApiFetch,
   AdminUnauthorizedError,
   type AdminProduct,
 } from "@/lib/admin-api";
+import { canAccessSection } from "@/lib/admin-permissions";
+import PageHeader from "@/components/admin/page-header";
 import DashboardErrorBoundary from "@/components/admin/dashboard/dashboard-error-boundary";
+import YourDesk       from "@/components/admin/dashboard/your-desk";
 import StatusBar      from "@/components/admin/dashboard/status-bar";
 import HeroMetrics    from "@/components/admin/dashboard/hero-metrics";
 import RevenueChart   from "@/components/admin/dashboard/revenue-chart";
@@ -30,93 +34,144 @@ export default async function AdminDashboard() {
     if (e instanceof AdminUnauthorizedError) redirect("/admin/login");
   }
 
+  // The dashboard shows a role what that role can actually open — the same
+  // gate the sidebar uses, so a content editor is not greeted by empty
+  // finance widgets and permission errors dressed up as cards.
+  const cookieStore = await cookies();
+  const role  = cookieStore.get("admin_role")?.value ?? "";
+  const perms = cookieStore.get("admin_perms")?.value;
+  const permissions = perms ? decodeURIComponent(perms).split(",").filter(Boolean) : null;
+
+  const can = (section: string) => !role || canAccessSection(role, section, permissions);
+
+  const showOps       = can("orders");
+  const showFinance   = can("finance");
+  const showQuotes    = can("quotes");
+  const showProducts  = can("products");
+  const showChats     = can("chats");
+  const showAnalytics = can("analytics");
+  const showBehaviour = can("behaviour");
+  const showSecurity  = can("security");
+  const showSystem    = can("system_health");
+
+  const midColumn    = showBehaviour;
+  const rightColumn  = showQuotes || showProducts || showChats;
+  const leftColumn   = showFinance || showOps;
+
   return (
     <div className="min-h-screen bg-[#f5f5f7] p-4 md:p-6 lg:p-8">
 
       {/* Suspicious activity banner — hidden when no alerts */}
-      <DashboardErrorBoundary label="Suspicious activity banner">
-        <SuspiciousBanner />
-      </DashboardErrorBoundary>
+      {showSecurity && (
+        <DashboardErrorBoundary label="Suspicious activity banner">
+          <SuspiciousBanner />
+        </DashboardErrorBoundary>
+      )}
 
-      {/* Live status bar */}
-      <DashboardErrorBoundary label="Status bar">
-        <StatusBar />
-      </DashboardErrorBoundary>
+      {/* Live status bar — pending orders / open quotes / stock / visitors */}
+      {showOps && (
+        <DashboardErrorBoundary label="Status bar">
+          <StatusBar />
+        </DashboardErrorBoundary>
+      )}
 
-      {/* Page heading */}
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">Overview</p>
-          <h1 className="mt-0.5 text-2xl font-bold tracking-tight text-[#1a1a1a]">Dashboard</h1>
-        </div>
+      <PageHeader eyebrow="Overview" title="Dashboard">
         <div className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-[0.72rem] font-semibold text-emerald-700">
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
           Live · auto-refreshes every 30s
         </div>
-      </div>
+      </PageHeader>
 
-      {/* Hero metric cards */}
-      <DashboardErrorBoundary label="Hero metrics">
-        <HeroMetrics />
+      {/* What is on YOUR plate — every role has one of these */}
+      <DashboardErrorBoundary label="Your desk">
+        <YourDesk />
       </DashboardErrorBoundary>
 
-      {/* Main 3-column operational grid */}
+      {/* Hero metric cards */}
+      {showOps && (
+        <DashboardErrorBoundary label="Hero metrics">
+          <HeroMetrics />
+        </DashboardErrorBoundary>
+      )}
+
+      {/* Main operational grid — columns render only when the role can use them */}
       <div className="grid gap-5 lg:grid-cols-3">
 
-        {/* ── Left column ─────────────────────────────────── */}
-        <div className="space-y-5">
-          <DashboardErrorBoundary label="Revenue chart">
-            <RevenueChart />
-          </DashboardErrorBoundary>
-          <DashboardErrorBoundary label="Recent orders">
-            <RecentOrders />
-          </DashboardErrorBoundary>
-        </div>
+        {leftColumn && (
+          <div className="space-y-5">
+            {showFinance && (
+              <DashboardErrorBoundary label="Revenue chart">
+                <RevenueChart />
+              </DashboardErrorBoundary>
+            )}
+            {showOps && (
+              <DashboardErrorBoundary label="Recent orders">
+                <RecentOrders />
+              </DashboardErrorBoundary>
+            )}
+          </div>
+        )}
 
-        {/* ── Middle column ───────────────────────────────── */}
-        <div className="space-y-5">
-          <DashboardErrorBoundary label="Live analytics">
-            <LiveAnalytics />
-          </DashboardErrorBoundary>
-        </div>
+        {midColumn && (
+          <div className="space-y-5">
+            <DashboardErrorBoundary label="Live analytics">
+              <LiveAnalytics />
+            </DashboardErrorBoundary>
+          </div>
+        )}
 
-        {/* ── Right column ────────────────────────────────── */}
-        <div className="space-y-5">
-          <DashboardErrorBoundary label="Pending quotes">
-            <PendingQuotes />
-          </DashboardErrorBoundary>
-          <DashboardErrorBoundary label="Low stock">
-            <LowStock />
-          </DashboardErrorBoundary>
-          <DashboardErrorBoundary label="Conversations">
-            <CrispPanel />
-          </DashboardErrorBoundary>
-        </div>
+        {rightColumn && (
+          <div className="space-y-5">
+            {showQuotes && (
+              <DashboardErrorBoundary label="Pending quotes">
+                <PendingQuotes />
+              </DashboardErrorBoundary>
+            )}
+            {showProducts && (
+              <DashboardErrorBoundary label="Low stock">
+                <LowStock />
+              </DashboardErrorBoundary>
+            )}
+            {showChats && (
+              <DashboardErrorBoundary label="Conversations">
+                <CrispPanel />
+              </DashboardErrorBoundary>
+            )}
+          </div>
+        )}
 
       </div>
 
-      {/* Bottom row */}
-      <div className="mt-5 grid gap-5 lg:grid-cols-3">
-        <DashboardErrorBoundary label="Google Ads">
-          <GoogleAdsCard />
-        </DashboardErrorBoundary>
-        <DashboardErrorBoundary label="Funnel">
-          <FunnelCard />
-        </DashboardErrorBoundary>
-        <DashboardErrorBoundary label="Top products">
-          <TopProducts />
-        </DashboardErrorBoundary>
-      </div>
+      {/* Marketing / analytics row */}
+      {showAnalytics && (
+        <div className="mt-5 grid gap-5 lg:grid-cols-3">
+          <DashboardErrorBoundary label="Google Ads">
+            <GoogleAdsCard />
+          </DashboardErrorBoundary>
+          <DashboardErrorBoundary label="Funnel">
+            <FunnelCard />
+          </DashboardErrorBoundary>
+          <DashboardErrorBoundary label="Top products">
+            <TopProducts />
+          </DashboardErrorBoundary>
+        </div>
+      )}
 
       {/* Security overview + Sentry */}
-      <div className="mt-5 grid gap-5 lg:grid-cols-3">
-        <DashboardErrorBoundary label="Security alerts">
-          <SecurityAlertCard />
-        </DashboardErrorBoundary>
-        <DashboardErrorBoundary label="Sentry">
-          <SentryCard />
-        </DashboardErrorBoundary>
-      </div>
+      {(showSecurity || showSystem) && (
+        <div className="mt-5 grid gap-5 lg:grid-cols-3">
+          {showSecurity && (
+            <DashboardErrorBoundary label="Security alerts">
+              <SecurityAlertCard />
+            </DashboardErrorBoundary>
+          )}
+          {showSystem && (
+            <DashboardErrorBoundary label="Sentry">
+              <SentryCard />
+            </DashboardErrorBoundary>
+          )}
+        </div>
+      )}
 
     </div>
   );

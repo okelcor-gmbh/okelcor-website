@@ -26,6 +26,15 @@ export type WhatsNewEntry = {
 
 export const WHATS_NEW: WhatsNewEntry[] = [
   {
+    id: "2026-09-08-role-aware-dashboard",
+    date: "2026-09-08",
+    title: "The dashboard knows your role — and your desk",
+    brief:
+      "The dashboard now shows only the widgets your role can actually open, and a new “Your desk” strip at the top counts everything assigned to you — leads, follow-ups, finance items, claims and to-dos — linking straight into My Work.",
+    href: "/admin",
+    section: null,
+  },
+  {
     id: "2026-09-08-customer-portal",
     date: "2026-09-08",
     title: "The customer portal, redesigned",
