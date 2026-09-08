@@ -228,7 +228,7 @@ export default function TierPricingBoard() {
               <span className="mb-1 block font-extrabold">3 · Check the new prices</span>
               <strong>Price now</strong> = what the site charges today. <strong>New website price</strong> =
               cost + margin + {model.stripe_fee_percent}% card fee. <strong>New eBay price</strong> = cost + margin
-              + {model.ebay_uplift_percent}% eBay charges (no card fee there). The Change column shows the difference.
+              + {model.ebay_uplift_percent}% eBay charges (no card fee there — the LIVE eBay price is audited on the eBay Price Audit page). <strong>Change</strong> = New website price minus Price now: red/negative means Apply would LOWER the site price by that amount.
             </li>
             <li className="rounded-lg bg-white p-3.5 ring-1 ring-black/[0.05]">
               <span className="mb-1 block font-extrabold">4 · Apply</span>
@@ -309,7 +309,7 @@ export default function TierPricingBoard() {
                 <th className="px-3 py-2.5 text-right font-bold" title="What the website charges right now">Price now</th>
                 <th className="px-3 py-2.5 text-right font-bold" title="What the website WILL charge after Apply: cost + margin + card fee">New website price</th>
                 <th className="px-3 py-2.5 text-right font-bold" title="What the eBay listing will be pushed at: cost + margin + eBay charges">New eBay price</th>
-                <th className="px-3 py-2.5 text-right font-bold">Change</th>
+                <th className="px-3 py-2.5 text-right font-bold" title="New website price minus Price now. Negative (red) = the site price would DROP by this much when you Apply; positive (green) = it would rise. Blank = already matching.">Change</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-black/[0.04]">
