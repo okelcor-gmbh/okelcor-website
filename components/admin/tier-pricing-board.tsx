@@ -12,7 +12,7 @@
 
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import {
-  AlertCircle, AlertTriangle, Calculator, Loader2, RefreshCw, Search, X,
+  AlertCircle, AlertTriangle, BookOpen, Calculator, Loader2, RefreshCw, Search, X,
 } from "lucide-react";
 import {
   getPricingPreview, setTier, applyPricing,
@@ -43,6 +43,18 @@ export default function TierPricingBoard() {
   const [selected, setSelected]   = useState<Set<number>>(new Set());
   const [busyRow, setBusyRow]     = useState<number | null>(null);
   const [applyingAll, setApplyingAll] = useState(false);
+
+  // Step-by-step guide — open by default until this person closes it once.
+  const [guideOpen, setGuideOpen] = useState(true);
+  useEffect(() => {
+    try { if (localStorage.getItem("tier_pricing_guide_seen") === "1") setGuideOpen(false); } catch {}
+  }, []);
+  const toggleGuide = () => {
+    setGuideOpen((v) => {
+      try { localStorage.setItem("tier_pricing_guide_seen", "1"); } catch {}
+      return !v;
+    });
+  };
 
   // Brand sweep controls
   const [sweepBrand, setSweepBrand] = useState("");
@@ -156,9 +168,7 @@ export default function TierPricingBoard() {
           <div>
             <h1 className="text-[1.15rem] font-extrabold text-[#1a1a1a]">Tyre Pricing</h1>
             <p className="text-[0.8rem] text-[#6b7280]">
-              {model
-                ? `Tyre100 cost × margin (Premium ${model.margins.premium}% / Mid ${model.margins.midrange}% / Budget ${model.margins.budget}%) → website +${model.stripe_fee_percent}% Stripe · eBay +${model.ebay_uplift_percent}% instead`
-                : "Tyre100 cost × tier margin, per channel"}
+              Give each brand a tier, check the new prices, apply. eBay prices itself on the next push.
             </p>
           </div>
         </div>
@@ -181,6 +191,10 @@ export default function TierPricingBoard() {
             className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[0.8rem] font-semibold text-[#1a1a1a] ring-1 ring-black/[0.08] transition hover:bg-[#f0f2f5]">
             <RefreshCw size={13} /> Refresh
           </button>
+          <button type="button" onClick={toggleGuide}
+            className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[0.8rem] font-semibold text-[#1a1a1a] ring-1 ring-black/[0.08] transition hover:bg-[#f0f2f5]">
+            <BookOpen size={13} /> How this works
+          </button>
         </div>
       </div>
 
@@ -188,6 +202,40 @@ export default function TierPricingBoard() {
         <div className="mb-4 flex items-center justify-between rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-[0.83rem] text-blue-800">
           <span className="min-w-0 break-words">{notice}</span>
           <button type="button" onClick={() => setNotice(null)}><X size={13} /></button>
+        </div>
+      )}
+
+      {/* Step-by-step guide — written for the person doing it, not the developer */}
+      {guideOpen && model && (
+        <div className="mb-5 rounded-xl border border-[#f4511e]/20 bg-[#fff8f5] p-5">
+          <p className="mb-3 text-[0.72rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">
+            How pricing works — 4 steps
+          </p>
+          <ol className="grid gap-3 text-[0.83rem] leading-relaxed text-[#1a1a1a] md:grid-cols-2 xl:grid-cols-4">
+            <li className="rounded-lg bg-white p-3.5 ring-1 ring-black/[0.05]">
+              <span className="mb-1 block font-extrabold">1 · Cost price in</span>
+              Every product needs its <strong>Tyre100 cost</strong> (what we pay the supplier).
+              It comes in with the product CSV import — rows without it show under
+              &ldquo;No Tyre100 cost&rdquo; and are never repriced.
+            </li>
+            <li className="rounded-lg bg-white p-3.5 ring-1 ring-black/[0.05]">
+              <span className="mb-1 block font-extrabold">2 · Pick the tier</span>
+              Use &ldquo;Assign a whole brand&rdquo; below. <strong>Premium {model.margins.premium}%</strong> (Michelin,
+              Continental…), <strong>Mid-range {model.margins.midrange}%</strong> (Hankook, Falken…),
+              <strong> Budget {model.margins.budget}%</strong> (Rapid and other value brands). The tier is the profit margin.
+            </li>
+            <li className="rounded-lg bg-white p-3.5 ring-1 ring-black/[0.05]">
+              <span className="mb-1 block font-extrabold">3 · Check the new prices</span>
+              <strong>Price now</strong> = what the site charges today. <strong>New website price</strong> =
+              cost + margin + {model.stripe_fee_percent}% card fee. <strong>New eBay price</strong> = cost + margin
+              + {model.ebay_uplift_percent}% eBay charges (no card fee there). The Change column shows the difference.
+            </li>
+            <li className="rounded-lg bg-white p-3.5 ring-1 ring-black/[0.05]">
+              <span className="mb-1 block font-extrabold">4 · Apply</span>
+              &ldquo;Apply formula to all&rdquo; writes the New website price to the site. eBay listings take their
+              eBay price automatically the next time they are pushed or updated — nothing to type there.
+            </li>
+          </ol>
         </div>
       )}
 
@@ -257,10 +305,10 @@ export default function TierPricingBoard() {
                 </th>
                 <th className="px-3 py-2.5 font-bold">Product</th>
                 <th className="px-3 py-2.5 font-bold">Tier</th>
-                <th className="px-3 py-2.5 text-right font-bold">Tyre100 cost</th>
-                <th className="px-3 py-2.5 text-right font-bold">Current site</th>
-                <th className="px-3 py-2.5 text-right font-bold">→ Website</th>
-                <th className="px-3 py-2.5 text-right font-bold">→ eBay</th>
+                <th className="px-3 py-2.5 text-right font-bold" title="What we pay the supplier — imported with the product CSV">Tyre100 cost</th>
+                <th className="px-3 py-2.5 text-right font-bold" title="What the website charges right now">Price now</th>
+                <th className="px-3 py-2.5 text-right font-bold" title="What the website WILL charge after Apply: cost + margin + card fee">New website price</th>
+                <th className="px-3 py-2.5 text-right font-bold" title="What the eBay listing will be pushed at: cost + margin + eBay charges">New eBay price</th>
                 <th className="px-3 py-2.5 text-right font-bold">Change</th>
               </tr>
             </thead>
@@ -312,9 +360,9 @@ export default function TierPricingBoard() {
       <p className="mt-4 flex items-start gap-2 text-[0.72rem] text-[#9ca3af]">
         <AlertCircle size={13} className="mt-0.5 shrink-0" />
         <span>
-          &ldquo;Tyre100 cost&rdquo; is the product&apos;s cost price (import it with the product CSV). Applying writes the → Website price to the site;
-          the → eBay price is NOT pushed from here — every eBay list/update automatically carries it, so re-push listings (eBay page → update, or
-          list new products) after repricing. Margins and fees are configurable in .env without a deploy.
+          &ldquo;Tyre100 cost&rdquo; is the supplier price (imported with the product CSV). &ldquo;Apply&rdquo; writes the New website price to the site.
+          The New eBay price is NOT pushed from here — every eBay list/update carries it automatically, so re-push listings from the eBay page
+          after repricing. Margins and fees are configurable without a deploy.
         </span>
       </p>
     </div>

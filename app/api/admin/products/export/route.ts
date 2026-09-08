@@ -26,6 +26,9 @@ export async function GET(request: NextRequest) {
   if (segment === "b2b" || segment === "b2c") {
     exportUrl.searchParams.set("segment", segment);
   }
+  // Forward brand filter for single-brand exports (scripted-edit round-trip)
+  const brand = request.nextUrl.searchParams.get("brand");
+  if (brand) exportUrl.searchParams.set("brand", brand);
 
   let res: Response;
   try {

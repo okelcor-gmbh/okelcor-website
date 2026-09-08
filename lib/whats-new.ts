@@ -26,6 +26,24 @@ export type WhatsNewEntry = {
 
 export const WHATS_NEW: WhatsNewEntry[] = [
   {
+    id: "2026-09-09-tier-pricing-guide",
+    date: "2026-09-09",
+    title: "Tyre Pricing, explained in plain words",
+    brief:
+      "The pricing page now opens with a 4-step guide (cost in → pick tier → check new prices → apply) and clearer columns: “Price now” is what the site charges today, “New website price” and “New eBay price” are what the formula will set. Tier assignments were reset so pricing starts fresh.",
+    href: "/admin/pricing",
+    section: "pricing",
+  },
+  {
+    id: "2026-09-09-brand-csv-export",
+    date: "2026-09-09",
+    title: "Export one brand's products for scripted editing",
+    brief:
+      "A brand dropdown next to Export CSV downloads just that brand (e.g. all Michelin). Edit the file in Python — keep the sku column untouched — and import it back: rows update by SKU. Full column guide in docs/PRODUCT_CSV_ROUND_TRIP.md.",
+    href: "/admin/products",
+    section: "products",
+  },
+  {
     id: "2026-09-08-console-ui",
     date: "2026-09-08",
     title: "The panel becomes an operations console",

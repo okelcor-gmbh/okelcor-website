@@ -47,6 +47,22 @@ export default function CsvActions({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [exporting, setExporting]     = useState(false);
+  const [brand, setBrand]             = useState("");
+  const [brands, setBrands]           = useState<string[]>([]);
+
+  // Brand list for scoped exports — light fetch, fails silently to "all".
+  useEffect(() => {
+    let active = true;
+    fetch("/api/shop/brands", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        if (!active || !j) return;
+        const list = Array.isArray(j.data) ? j.data : [];
+        setBrands(list.map((b: { name?: string } | string) => (typeof b === "string" ? b : b.name ?? "")).filter(Boolean).sort());
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
   const [exportError, setExportError] = useState<string | null>(null);
   const [modal, setModal]             = useState<ModalState>({ phase: "idle" });
   const [deleteAll, setDeleteAll]     = useState<DeleteAllState>({ phase: "idle" });
@@ -88,9 +104,11 @@ export default function CsvActions({
     setExportError(null);
 
     try {
-      const url = currentView !== "all"
-        ? `/api/admin/products/export?segment=${currentView}`
-        : "/api/admin/products/export";
+      const params = new URLSearchParams();
+      if (currentView !== "all") params.set("segment", currentView);
+      if (brand) params.set("brand", brand);
+      const qs = params.toString();
+      const url = `/api/admin/products/export${qs ? `?${qs}` : ""}`;
 
       const res = await fetch(url);
 
@@ -194,6 +212,19 @@ export default function CsvActions({
         {/* Export error inline */}
         {exportError && (
           <span className="text-[0.78rem] font-medium text-red-500">{exportError}</span>
+        )}
+
+        {/* Brand scope for the export — "all brands" by default */}
+        {brands.length > 0 && (
+          <select
+            value={brand}
+            onChange={(e) => setBrand(e.target.value)}
+            aria-label="Limit the export to one brand"
+            className="h-[42px] rounded-full border border-black/10 bg-white px-3 text-[0.82rem] font-semibold text-[#5c5e62] outline-none transition focus:border-[#f4511e]"
+          >
+            <option value="">All brands</option>
+            {brands.map((b) => <option key={b} value={b}>{b}</option>)}
+          </select>
         )}
 
         <button
