@@ -84,7 +84,7 @@ function ClientDetail({
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 sm:p-8">
-      <div className="w-full max-w-3xl rounded-2xl bg-white p-5">
+      <div className="w-full max-w-3xl rounded-xl bg-white p-5">
         <div className="mb-3 flex items-start gap-2">
           <button
             type="button" onClick={onClose}
@@ -275,20 +275,20 @@ export default function OperationsClients({
       )}
 
       {unavailable ? (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-[0.83rem] text-amber-900">
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-[0.83rem] text-amber-900">
           <p className="font-semibold">Not available on this server yet.</p>
           <p className="mt-0.5">{unavailable}</p>
         </div>
       ) : loading ? (
-        <div className="flex items-center gap-2 rounded-2xl border border-black/[0.06] bg-white p-8 text-[0.83rem] text-[#5c5e62]">
+        <div className="flex items-center gap-2 rounded-xl border border-black/[0.06] bg-white p-8 text-[0.83rem] text-[#5c5e62]">
           <Loader2 size={14} className="animate-spin" /> Loading clients…
         </div>
       ) : rows.length === 0 ? (
-        <div className="rounded-2xl border border-black/[0.06] bg-white p-8 text-center text-[0.83rem] text-[#8c8f94]">
+        <div className="rounded-xl border border-black/[0.06] bg-white p-8 text-center text-[0.83rem] text-[#8c8f94]">
           No clients in this period.
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
+        <div className="overflow-hidden rounded-xl border border-black/[0.06] bg-white">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px]">
               <thead>

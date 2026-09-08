@@ -59,7 +59,7 @@ export default async function AdminDashboard() {
   const leftColumn   = showFinance || showOps;
 
   return (
-    <div className="min-h-screen bg-[#f5f5f7] p-4 md:p-6 lg:p-8">
+    <div className="min-h-screen p-4 md:p-6 lg:p-8">
 
       {/* Suspicious activity banner — hidden when no alerts */}
       {showSecurity && (

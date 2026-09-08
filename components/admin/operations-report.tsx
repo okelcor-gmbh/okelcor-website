@@ -256,11 +256,11 @@ export default function OperationsReportPanel({
 
   useEffect(() => { void load(); }, [load]);
 
-  const panel = "rounded-2xl border border-black/[0.06] bg-white p-4";
+  const panel = "rounded-xl border border-black/[0.06] bg-white p-4";
 
   if (unavailable) {
     return (
-      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-[0.83rem] text-amber-900">
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-[0.83rem] text-amber-900">
         <p className="font-semibold">Not available on this server yet.</p>
         <p className="mt-0.5">{unavailable}</p>
       </div>
@@ -269,7 +269,7 @@ export default function OperationsReportPanel({
 
   if (loading || !report) {
     return (
-      <div className="flex items-center gap-2 rounded-2xl border border-black/[0.06] bg-white p-8 text-[0.83rem] text-[#5c5e62]">
+      <div className="flex items-center gap-2 rounded-xl border border-black/[0.06] bg-white p-8 text-[0.83rem] text-[#5c5e62]">
         <Loader2 size={14} className="animate-spin" /> Building the report…
       </div>
     );
@@ -449,7 +449,7 @@ export default function OperationsReportPanel({
 
       {/* The table twin, so no value is reachable only by hovering. */}
       {showTable && (
-        <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
+        <div className="overflow-hidden rounded-xl border border-black/[0.06] bg-white">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[600px]">
               <thead>

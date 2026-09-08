@@ -149,22 +149,22 @@ export default function ProfitabilityPanel({
           </div>
 
           {unavailable ? (
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-[0.83rem] text-amber-900">
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-[0.83rem] text-amber-900">
               <p className="font-semibold">Not available on this server yet.</p>
               <p className="mt-0.5">{unavailable}</p>
             </div>
           ) : loading ? (
-            <div className="flex items-center gap-2 rounded-2xl border border-black/[0.06] bg-white p-8 text-[0.83rem] text-[#5c5e62]">
+            <div className="flex items-center gap-2 rounded-xl border border-black/[0.06] bg-white p-8 text-[0.83rem] text-[#5c5e62]">
               <Loader2 size={14} className="animate-spin" /> Loading…
             </div>
           ) : rows.length === 0 ? (
-            <div className="rounded-2xl border border-black/[0.06] bg-white p-8 text-center text-[0.83rem] text-[#8c8f94]">
+            <div className="rounded-xl border border-black/[0.06] bg-white p-8 text-center text-[0.83rem] text-[#8c8f94]">
               {verified !== "all" || hasRevenue !== "all"
                 ? "Nothing matches these filters in this period."
                 : "No confirmed orders in this period."}
             </div>
           ) : (
-            <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
+            <div className="overflow-hidden rounded-xl border border-black/[0.06] bg-white">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[980px]">
                   <thead>
@@ -280,7 +280,7 @@ function Dashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 rounded-2xl border border-black/[0.06] bg-white p-8 text-[0.83rem] text-[#5c5e62]">
+      <div className="flex items-center gap-2 rounded-xl border border-black/[0.06] bg-white p-8 text-[0.83rem] text-[#5c5e62]">
         <Loader2 size={14} className="animate-spin" /> Loading…
       </div>
     );
@@ -288,7 +288,7 @@ function Dashboard() {
 
   if (unavailable || !data) {
     return (
-      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-[0.83rem] text-amber-900">
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-[0.83rem] text-amber-900">
         <p className="font-semibold">Not available on this server yet.</p>
         <p className="mt-0.5">{unavailable}</p>
       </div>
@@ -302,7 +302,7 @@ function Dashboard() {
     Profit: m.profit_eur,
   }));
 
-  const tile = "rounded-2xl border border-black/[0.06] bg-white p-4";
+  const tile = "rounded-xl border border-black/[0.06] bg-white p-4";
   const tileLabel = "text-[0.68rem] font-bold uppercase tracking-wider text-[#8c8f94]";
   const tileValue = "mt-1 text-[1.25rem] font-bold tabular-nums text-[#171a20]";
 
@@ -331,7 +331,7 @@ function Dashboard() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-black/[0.06] bg-white p-4">
+      <div className="rounded-xl border border-black/[0.06] bg-white p-4">
         <p className="mb-3 text-[0.72rem] font-bold uppercase tracking-wider text-[#5c5e62]">
           Revenue vs profit, {data.year} (EUR)
         </p>
@@ -349,7 +349,7 @@ function Dashboard() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
+      <div className="overflow-hidden rounded-xl border border-black/[0.06] bg-white">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[860px]">
             <thead>

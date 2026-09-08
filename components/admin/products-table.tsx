@@ -130,7 +130,7 @@ function ConfirmDeleteModal({
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-[420px] rounded-2xl bg-white p-8 shadow-2xl">
+      <div className="w-full max-w-[420px] rounded-xl bg-white p-8 shadow-2xl">
         <div className="mb-5 flex items-start justify-between">
           <div className="flex h-11 w-11 items-center justify-center rounded-full bg-red-100">
             <Trash2 size={18} className="text-red-600" />
@@ -376,7 +376,7 @@ export default function ProductsTable({
       {/* Bulk out-of-stock confirm modal */}
       {confirmBulkOutOfStock && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-[420px] rounded-2xl bg-white p-8 shadow-2xl">
+          <div className="w-full max-w-[420px] rounded-xl bg-white p-8 shadow-2xl">
             <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-full bg-amber-100">
               <AlertTriangle size={18} className="text-amber-600" />
             </div>
@@ -407,7 +407,7 @@ export default function ProductsTable({
       {/* Bulk in-stock confirm modal */}
       {confirmBulkInStock && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-[420px] rounded-2xl bg-white p-8 shadow-2xl">
+          <div className="w-full max-w-[420px] rounded-xl bg-white p-8 shadow-2xl">
             <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-full bg-blue-100">
               <PackageCheck size={18} className="text-blue-600" />
             </div>
@@ -437,7 +437,7 @@ export default function ProductsTable({
 
       {confirmBulkAudience && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-[440px] rounded-2xl bg-white p-8 shadow-2xl">
+          <div className="w-full max-w-[440px] rounded-xl bg-white p-8 shadow-2xl">
             <h3 className="text-[1rem] font-extrabold text-[#1a1a1a]">Change who these are listed for?</h3>
             <p className="mt-2 text-[0.875rem] leading-6 text-[#5c5e62]">
               This sets{" "}
@@ -587,7 +587,7 @@ export default function ProductsTable({
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl bg-white shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[780px] text-left">
             <thead>

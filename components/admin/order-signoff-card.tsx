@@ -242,7 +242,7 @@ export default function OrderSignoffCard({
   }
 
   return (
-    <div className="rounded-2xl border border-black/[0.06] bg-white p-5">
+    <div className="rounded-xl border border-black/[0.06] bg-white p-5">
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <h3 className="text-[0.95rem] font-bold text-[#171a20]">Order confirmation sign-off</h3>
         <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[0.7rem] font-bold ${style.chip}`}>
@@ -343,7 +343,7 @@ export default function OrderSignoffCard({
       {/* ── Sign dialog ── */}
       {signing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-5">
+          <div className="w-full max-w-md rounded-xl bg-white p-5">
             <div className="mb-2 flex items-center gap-2">
               <h4 className="text-[0.95rem] font-bold text-[#171a20]">
                 Sign as {signing.label}
@@ -387,7 +387,7 @@ export default function OrderSignoffCard({
       {/* ── Withdraw dialog ── */}
       {withdrawing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-5">
+          <div className="w-full max-w-md rounded-xl bg-white p-5">
             <div className="mb-2 flex items-center gap-2">
               <h4 className="text-[0.95rem] font-bold text-[#171a20]">
                 Withdraw the {withdrawing.label} signature

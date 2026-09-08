@@ -139,7 +139,7 @@ export default function TodoBoard({ initialTodo }: { initialTodo: number | null 
 
   if (loading && !meta) {
     return (
-      <div className="flex items-center gap-2 rounded-2xl border border-black/[0.06] bg-white p-8 text-[0.83rem] text-[#5c5e62]">
+      <div className="flex items-center gap-2 rounded-xl border border-black/[0.06] bg-white p-8 text-[0.83rem] text-[#5c5e62]">
         <Loader2 size={14} className="animate-spin" /> Loading…
       </div>
     );
@@ -147,7 +147,7 @@ export default function TodoBoard({ initialTodo }: { initialTodo: number | null 
 
   if (unavailable) {
     return (
-      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-[0.83rem] text-amber-900">
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-[0.83rem] text-amber-900">
         <p className="font-semibold">Not available on this server yet.</p>
         <p className="mt-0.5">{unavailable}</p>
       </div>
@@ -216,7 +216,7 @@ export default function TodoBoard({ initialTodo }: { initialTodo: number | null 
       </div>
 
       {todos.length === 0 ? (
-        <div className="rounded-2xl border border-black/[0.06] bg-white p-8 text-center text-[0.83rem] text-[#8c8f94]">
+        <div className="rounded-xl border border-black/[0.06] bg-white p-8 text-center text-[0.83rem] text-[#8c8f94]">
           {department
             ? `Nothing from ${department}${scope === "done" ? " is finished" : " on this list"}.`
             : scope === "done" ? "Nothing finished yet."
@@ -224,7 +224,7 @@ export default function TodoBoard({ initialTodo }: { initialTodo: number | null 
             : "Nothing on the list — add the first to-do."}
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
+        <div className="overflow-hidden rounded-xl border border-black/[0.06] bg-white">
           <ul className="divide-y divide-black/[0.05]">
             {todos.map((todo) => (
               <li key={todo.id}
@@ -398,7 +398,7 @@ function TodoForm({
   }
 
   return (
-    <form onSubmit={submit} className="space-y-3 rounded-2xl border border-black/[0.06] bg-white p-4">
+    <form onSubmit={submit} className="space-y-3 rounded-xl border border-black/[0.06] bg-white p-4">
       <p className="text-[0.72rem] font-bold uppercase tracking-wider text-[#5c5e62]">
         {editing ? "Edit to-do" : "New to-do"}
       </p>

@@ -28,7 +28,7 @@ export default function TopProducts() {
   const maxViews = products?.[0]?.views ?? 1;
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
+    <div className="overflow-hidden rounded-xl border border-black/[0.06] bg-white">
       <div className="flex items-center gap-2.5 border-b border-black/[0.06] px-5 py-4">
         <Flame size={15} className="text-[#f4511e]" />
         <div>

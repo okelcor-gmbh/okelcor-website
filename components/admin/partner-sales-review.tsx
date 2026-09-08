@@ -195,7 +195,7 @@ export default function PartnerSalesReview() {
       {totals.length > 0 && (
         <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {totals.map((t) => (
-            <div key={t.currency} className="rounded-2xl border border-black/[0.06] bg-white p-4">
+            <div key={t.currency} className="rounded-xl border border-black/[0.06] bg-white p-4">
               <p className="text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[#9ca3af]">{t.currency}</p>
               <p className="mt-1 text-[1.4rem] font-extrabold tabular-nums text-[#1a1a1a]">
                 {money(t.total, t.currency)}
@@ -216,13 +216,13 @@ export default function PartnerSalesReview() {
       {rows === null ? (
         <p className="py-8 text-center text-[0.9rem] text-[#5c5e62]">Loading…</p>
       ) : rows.length === 0 ? (
-        <div className="rounded-2xl border border-black/[0.06] bg-white py-12 text-center">
+        <div className="rounded-xl border border-black/[0.06] bg-white py-12 text-center">
           <Filter size={26} className="mx-auto text-[#9ca3af]" strokeWidth={1.6} />
           <p className="mt-3 text-[0.95rem] font-semibold text-[#1a1a1a]">No sales in this range</p>
           <p className="mt-1 text-[0.85rem] text-[#5c5e62]">Try a wider date range or a different partner.</p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-black/[0.06] bg-white">
+        <div className="overflow-x-auto rounded-xl border border-black/[0.06] bg-white">
           <table className="w-full min-w-[820px] text-left text-[0.85rem]">
             <thead className="border-b border-black/[0.06] text-[0.72rem] uppercase tracking-[0.1em] text-[#9ca3af]">
               <tr>

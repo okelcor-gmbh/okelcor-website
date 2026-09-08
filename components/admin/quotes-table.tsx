@@ -370,7 +370,7 @@ export default function QuotesTable({
       </div>
 
       {/* ── Table ── */}
-      <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl bg-white shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[1100px] text-left">
             <thead>

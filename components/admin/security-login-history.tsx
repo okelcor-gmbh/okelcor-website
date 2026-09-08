@@ -148,7 +148,7 @@ export default function SecurityLoginHistory() {
   };
 
   return (
-    <div className="mb-6 overflow-hidden rounded-2xl bg-white shadow-sm">
+    <div className="mb-6 overflow-hidden rounded-xl bg-white shadow-sm">
       {/* Header */}
       <div className="flex flex-wrap items-center gap-3 border-b border-black/[0.06] px-5 py-4">
         <History size={15} className="text-[#5c5e62]" />

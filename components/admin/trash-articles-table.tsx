@@ -39,7 +39,7 @@ export default function TrashArticlesTable({ articles }: { articles: AdminArticl
 
   if (articles.length === 0) {
     return (
-      <div className="flex items-center justify-center rounded-2xl bg-white py-16 shadow-sm">
+      <div className="flex items-center justify-center rounded-xl bg-white py-16 shadow-sm">
         <div className="text-center">
           <p className="text-[0.95rem] font-semibold text-[#1a1a1a]">Trash is empty</p>
           <p className="mt-1 text-[0.83rem] text-[#5c5e62]">Deleted articles will appear here.</p>
@@ -57,7 +57,7 @@ export default function TrashArticlesTable({ articles }: { articles: AdminArticl
         </div>
       )}
 
-      <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl bg-white shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[600px] text-left">
             <thead>

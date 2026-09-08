@@ -18,7 +18,7 @@ export default function SuspiciousBanner() {
   if (data.suspicious_accounts === 0 && data.locked_today === 0) return null;
 
   return (
-    <div className="mb-5 flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 px-5 py-3.5">
+    <div className="mb-5 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-5 py-3.5">
       <ShieldAlert size={18} className="shrink-0 text-red-600" />
       <div className="min-w-0 flex-1">
         <p className="text-[0.875rem] font-bold text-red-800">

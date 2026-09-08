@@ -597,7 +597,7 @@ export default function FinanceSnapshotBoard() {
           });
 
           return (
-            <div key={cat} className="flex min-h-[220px] flex-col rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/[0.06]">
+            <div key={cat} className="flex min-h-[220px] flex-col rounded-xl bg-white p-4 shadow-sm ring-1 ring-black/[0.06]">
               <div className="mb-1 flex items-start justify-between gap-2">
                 <span className="rounded-lg bg-[#1a1a1a] px-2.5 py-1 text-[0.68rem] font-extrabold uppercase tracking-wide text-white">{cat}</span>
                 <div className="text-right">
@@ -642,7 +642,7 @@ export default function FinanceSnapshotBoard() {
       </div>
 
       {/* ── Liquidity working ── */}
-      <div className="mt-6 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/[0.06]">
+      <div className="mt-6 overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-black/[0.06]">
         <div className="bg-[#1a1a1a] px-4 py-3 text-center text-[0.8rem] font-extrabold uppercase tracking-wide text-white">
           Finance Liquidity Working
         </div>
@@ -982,7 +982,7 @@ function Modal({ title, wide, onClose, children }: { title: string; wide?: boole
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 print:hidden">
       <div role="presentation" className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className={`relative flex max-h-[85vh] w-full flex-col rounded-2xl bg-white shadow-xl ${wide ? "max-w-4xl" : "max-w-md"}`}>
+      <div className={`relative flex max-h-[85vh] w-full flex-col rounded-xl bg-white shadow-xl ${wide ? "max-w-4xl" : "max-w-md"}`}>
         <div className="flex items-center justify-between border-b border-black/[0.06] px-6 py-4">
           <h2 className="text-[0.95rem] font-extrabold text-[#1a1a1a]">{title}</h2>
           <button type="button" onClick={onClose} className="flex h-7 w-7 items-center justify-center rounded-lg text-[#5c5e62] transition hover:bg-[#f0f2f5]">

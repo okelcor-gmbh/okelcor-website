@@ -38,7 +38,7 @@ function Card({
 }) {
   return (
     <section
-      className={`rounded-2xl border bg-white ${
+      className={`rounded-xl border bg-white ${
         tone === "primary" ? "border-[#f4511e]/25 shadow-sm" : "border-black/[0.06]"
       }`}
     >

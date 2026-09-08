@@ -83,7 +83,7 @@ export default function CampaignScoreboard() {
           <h2 className="mb-2.5 text-[0.875rem] font-extrabold text-[#1a1a1a]">Marketers</h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {marketers.map((m, i) => (
-              <div key={m.name} className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/[0.06]">
+              <div key={m.name} className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-black/[0.06]">
                 <div className="flex items-center justify-between">
                   <p className="text-[0.9rem] font-extrabold text-[#1a1a1a]">{i === 0 && "🏆 "}{m.name}</p>
                   <span className={`rounded-full px-2.5 py-0.5 text-[0.8rem] font-extrabold ${scoreCls(m.score)}`}>{m.score}</span>
@@ -104,7 +104,7 @@ export default function CampaignScoreboard() {
 
       {/* Campaigns */}
       <h2 className="mb-2.5 text-[0.875rem] font-extrabold text-[#1a1a1a]">Campaigns</h2>
-      <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/[0.06]">
+      <div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-black/[0.06]">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[820px] text-left text-[0.8rem]">
             <thead>

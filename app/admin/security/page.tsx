@@ -349,11 +349,11 @@ export default function SecurityPage() {
 
 
   return (
-    <div className="min-h-screen bg-[#f5f5f7] p-4 md:p-6 lg:p-8">
+    <div className="min-h-screen p-4 md:p-6 lg:p-8">
 
       {/* Toast */}
       {toast && (
-        <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-2.5 rounded-2xl px-4 py-3 text-[0.82rem] font-semibold shadow-lg ${
+        <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-2.5 rounded-xl px-4 py-3 text-[0.82rem] font-semibold shadow-lg ${
           toast.variant === "success" ? "bg-emerald-600 text-white"
           : toast.variant === "warning" ? "bg-amber-500 text-white"
           : "bg-red-600 text-white"
@@ -368,7 +368,7 @@ export default function SecurityPage() {
       {/* 2FA Notice Confirmation Modal */}
       {showNoticeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
             <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-amber-100">
               <Mail size={20} className="text-amber-600" />
             </div>
@@ -437,7 +437,7 @@ export default function SecurityPage() {
 
       {/* require_2fa alert */}
       {requireTwoFa && (
-        <div className="mb-5 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4">
+        <div className="mb-5 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
           <Info size={16} className="mt-0.5 shrink-0 text-amber-600" />
           <div>
             <p className="text-[0.85rem] font-bold text-amber-900">Two-factor authentication required</p>
@@ -453,7 +453,7 @@ export default function SecurityPage() {
 
       {/* 2FA Adoption Table (super_admin only) */}
       {can("security.manage") && (
-        <div className="mb-6 overflow-hidden rounded-2xl bg-white shadow-sm">
+        <div className="mb-6 overflow-hidden rounded-xl bg-white shadow-sm">
           <div className="flex items-center gap-2.5 border-b border-black/[0.06] px-5 py-4">
             <ShieldCheck size={15} className="text-[#5c5e62]" />
             <p className="text-[0.9rem] font-extrabold text-[#1a1a1a]">2FA Adoption</p>
@@ -557,7 +557,7 @@ export default function SecurityPage() {
 
       {/* Suspicious accounts alert */}
       {!summary?._unavailable && (summary?.suspicious_accounts ?? 0) > 0 && (
-        <div className="mb-5 flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 px-5 py-3.5">
+        <div className="mb-5 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-5 py-3.5">
           <AlertTriangle size={16} className="shrink-0 text-red-600" />
           <p className="flex-1 text-[0.82rem] font-semibold text-red-800">
             {summary!.suspicious_accounts} account{summary!.suspicious_accounts !== 1 ? "s" : ""} flagged for suspicious activity — review and take action below.
@@ -573,7 +573,7 @@ export default function SecurityPage() {
       )}
 
       {/* Events Log Card */}
-      <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl bg-white shadow-sm">
 
         {/* Card header */}
         <div className="flex items-center justify-between border-b border-black/[0.06] px-5 py-4">
@@ -746,7 +746,7 @@ export default function SecurityPage() {
       </div>
 
       {/* Backend rules reference card */}
-      <div className="mt-5 rounded-2xl border border-dashed border-[#e5e7eb] bg-white px-6 py-5">
+      <div className="mt-5 rounded-xl border border-dashed border-[#e5e7eb] bg-white px-6 py-5">
         <p className="mb-3 text-[0.78rem] font-extrabold uppercase tracking-wide text-[#5c5e62]">Auto-Protection Rules (Backend)</p>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 text-[0.75rem] text-[#5c5e62]">
           <div className="flex items-start gap-2.5">

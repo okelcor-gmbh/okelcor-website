@@ -572,7 +572,7 @@ export default function TradeDocumentsCard({
 
   return (
     <>
-      <div className="rounded-2xl bg-white p-6 shadow-sm">
+      <div className="rounded-xl bg-white p-6 shadow-sm">
 
         {/* ── Header ── */}
         <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
@@ -1022,7 +1022,7 @@ export default function TradeDocumentsCard({
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
           onClick={(e) => { if (e.target === e.currentTarget) { setOverrideModalOpen(false); setOverrideConfirmed(false); } }}
         >
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
             <p className="mb-1 text-[0.75rem] font-bold uppercase tracking-[0.15em] text-amber-700">
               Override Acceptance Gate
             </p>
@@ -1075,7 +1075,7 @@ export default function TradeDocumentsCard({
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
           onClick={(e) => { if (e.target === e.currentTarget && !sendModal.loading) setSendModal(null); }}
         >
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
 
             {/* Modal header */}
             <div className="mb-5 flex items-start justify-between gap-3">
@@ -1170,7 +1170,7 @@ export default function TradeDocumentsCard({
       {/* ── Payment-stage gate: confirm + reason, never a dead end ── */}
       {gateBlock && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-5">
+          <div className="w-full max-w-md rounded-xl bg-white p-5">
             <div className="mb-2 flex items-start gap-2">
               <ShieldAlert size={18} className="mt-0.5 shrink-0 text-amber-600" />
               <div className="min-w-0">

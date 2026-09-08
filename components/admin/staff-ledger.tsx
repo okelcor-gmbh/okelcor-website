@@ -197,7 +197,7 @@ export default function StaffLedger({ initialAdminUserId }: { initialAdminUserId
         <div className="grid gap-4 lg:grid-cols-2">
 
           {/* Recorded — solid panel, the system's own observation */}
-          <div className="rounded-2xl border border-black/[0.08] bg-white p-5">
+          <div className="rounded-xl border border-black/[0.08] bg-white p-5">
             <div className="flex items-center gap-2">
               <BadgeCheck size={15} className="text-emerald-600" />
               <h2 className="text-[0.83rem] font-bold uppercase tracking-wider text-[#171a20]">
@@ -231,7 +231,7 @@ export default function StaffLedger({ initialAdminUserId }: { initialAdminUserId
 
           {/* Self-reported — dashed, so the difference is legible at a glance
               rather than only in a label somebody has to read */}
-          <div className="rounded-2xl border border-dashed border-black/20 bg-[#fcfcfd] p-5">
+          <div className="rounded-xl border border-dashed border-black/20 bg-[#fcfcfd] p-5">
             <div className="flex items-center gap-2">
               <PenLine size={15} className="text-[#f4511e]" />
               <h2 className="text-[0.83rem] font-bold uppercase tracking-wider text-[#171a20]">
@@ -376,7 +376,7 @@ function ActivityFeed({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="overflow-hidden rounded-2xl border border-black/[0.08] bg-white">
+      <div className="overflow-hidden rounded-xl border border-black/[0.08] bg-white">
         <ul className="divide-y divide-black/[0.06]">
           {rows.map((a) => (
             <li key={a.id} className="flex items-start gap-3 px-4 py-3">
@@ -573,7 +573,7 @@ function ContributionList({
           {rows.map((row) => (
             <li
               key={row.id}
-              className="rounded-2xl border border-dashed border-black/20 bg-[#fcfcfd] p-4"
+              className="rounded-xl border border-dashed border-black/20 bg-[#fcfcfd] p-4"
             >
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="min-w-0">
@@ -688,7 +688,7 @@ function ContributionList({
 // ── bits ─────────────────────────────────────────────────────────────────────
 
 function Panel({ children }: { children: React.ReactNode }) {
-  return <div className="rounded-2xl border border-black/[0.08] bg-white p-5">{children}</div>;
+  return <div className="rounded-xl border border-black/[0.08] bg-white p-5">{children}</div>;
 }
 
 function Figure({ value, label, hint }: { value: number; label: string; hint?: string }) {

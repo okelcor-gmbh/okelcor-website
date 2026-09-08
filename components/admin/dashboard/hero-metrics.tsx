@@ -51,7 +51,7 @@ function fmtCurrency(n: number): string {
 
 function CardSkeleton() {
   return (
-    <div className="rounded-2xl border border-black/[0.06] bg-white p-5">
+    <div className="rounded-xl border border-black/[0.06] bg-white p-5">
       <div className="mb-3 h-10 w-10 animate-pulse rounded-xl bg-[#f0f0f0]" />
       <div className="h-3 w-20 animate-pulse rounded bg-[#f0f0f0]" />
       <div className="mt-2 h-7 w-28 animate-pulse rounded bg-[#f0f0f0]" />
@@ -76,7 +76,7 @@ function RevenueTodayCard({
   const animated = useCountUp(Math.round(confirmed));
 
   return (
-    <div className="group flex flex-col gap-3 rounded-2xl border border-black/[0.06] bg-white p-5 transition-colors hover:border-black/[0.14]">
+    <div className="group flex flex-col gap-3 rounded-xl border border-black/[0.06] bg-white p-5 transition-colors hover:border-black/[0.14]">
       <div className="flex items-start justify-between">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#f4511e]">
           <DollarSign size={18} strokeWidth={1.8} className="text-white" />
@@ -119,7 +119,7 @@ function OrdersTodayCard({
   const animated = useCountUp(total);
 
   return (
-    <div className="group flex flex-col gap-3 rounded-2xl border border-black/[0.06] bg-white p-5 transition-colors hover:border-black/[0.14]">
+    <div className="group flex flex-col gap-3 rounded-xl border border-black/[0.06] bg-white p-5 transition-colors hover:border-black/[0.14]">
       <div className="flex items-start justify-between">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#f5f5f7]">
           <ShoppingCart size={18} strokeWidth={1.8} className="text-[#5c5e62]" />
@@ -161,7 +161,7 @@ function MetricCard({
 }) {
   const animated = useCountUp(value);
   return (
-    <div className="group flex flex-col gap-3 rounded-2xl border border-black/[0.06] bg-white p-5 transition-colors hover:border-black/[0.14]">
+    <div className="group flex flex-col gap-3 rounded-xl border border-black/[0.06] bg-white p-5 transition-colors hover:border-black/[0.14]">
       <div className="flex items-start justify-between">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#f5f5f7]">
           <Icon size={18} strokeWidth={1.8} className="text-[#5c5e62]" />
@@ -259,7 +259,7 @@ export default function HeroMetrics() {
   // First load failed
   if (m === null && fetchErr) {
     return (
-      <div className="mb-6 flex items-center gap-3 rounded-2xl border border-black/[0.06] bg-white px-5 py-4">
+      <div className="mb-6 flex items-center gap-3 rounded-xl border border-black/[0.06] bg-white px-5 py-4">
         <AlertCircle size={18} className="shrink-0 text-[#9ca3af]" />
         <p className="text-[0.83rem] text-[#5c5e62]">Could not load dashboard metrics.</p>
         <button

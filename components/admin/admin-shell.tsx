@@ -160,7 +160,7 @@ function Sidebar({
     .filter((group) => group.items.length > 0);
 
   return (
-    <div className="flex h-full flex-col border-r border-white/[0.06] bg-[#161616]">
+    <div className="flex h-full flex-col border-r border-white/[0.06] bg-[#101216]">
       {/* Logo */}
       <div className={[
         "flex h-16 shrink-0 items-center border-b border-white/[0.08]",
@@ -451,7 +451,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         className={[
           "fixed inset-y-0 left-0 z-30 transition-all duration-300 ease-in-out lg:relative lg:z-auto lg:translate-x-0",
           sidebarOpen ? "translate-x-0" : "-translate-x-full",
-          sidebarCollapsed ? "w-[64px]" : "w-60",
+          sidebarCollapsed ? "w-[64px]" : "w-64",
         ].join(" ")}
       >
         <Sidebar
@@ -507,7 +507,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         )}
 
         {/* Top bar */}
-        <header className="flex h-16 shrink-0 items-center justify-between border-b border-black/[0.07] bg-white px-4 lg:px-6">
+        <header className="flex h-16 shrink-0 items-center justify-between border-b border-black/[0.07] bg-white/95 px-4 backdrop-blur lg:px-6">
 
           {/* Left: hamburger (mobile) + page title / breadcrumb */}
           <div className="flex items-center gap-3">
@@ -569,7 +569,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
               </button>
 
               {dropdownOpen && (
-                <div className="absolute right-0 top-10 z-50 w-52 overflow-hidden rounded-2xl border border-black/[0.08] bg-white shadow-lg">
+                <div className="absolute right-0 top-10 z-50 w-52 overflow-hidden rounded-xl border border-black/[0.08] bg-white shadow-lg">
                   <div className="border-b border-black/[0.06] px-4 py-3">
                     <p className="truncate text-[0.83rem] font-semibold text-[#1a1a1a]">
                       {displayName || adminName || "Admin"}
@@ -613,9 +613,13 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           </div>
         </header>
 
-        {/* Page content */}
-        <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-          {children}
+        {/* Page content — one canvas for every page, composed on ultra-wide
+            monitors instead of sprawling to the bezel (the console rule:
+            the work surface gets the pixels, but text lines stay readable). */}
+        <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-[#f6f7f9]">
+          <div className="mx-auto w-full max-w-[1600px]">
+            {children}
+          </div>
         </main>
 
       </div>

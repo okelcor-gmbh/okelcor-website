@@ -227,7 +227,7 @@ export default function QuoteConvertModal({ quote, onClose, onSuccess }: Props) 
         if (e.target === e.currentTarget && !isPending) onClose();
       }}
     >
-      <div className="relative w-full max-w-3xl rounded-2xl bg-white shadow-2xl">
+      <div className="relative w-full max-w-3xl rounded-xl bg-white shadow-2xl">
 
         {/* Header */}
         <div className="flex items-center justify-between border-b border-black/[0.07] px-6 py-5">

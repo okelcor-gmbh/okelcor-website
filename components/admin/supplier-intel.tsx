@@ -198,7 +198,7 @@ function PriceStrip({
     : "text-[#5c5e62]";
 
   return (
-    <div className="mt-6 overflow-hidden rounded-2xl border border-black/[0.06] bg-white shadow-sm">
+    <div className="mt-6 overflow-hidden rounded-xl border border-black/[0.06] bg-white shadow-sm">
       <div className="border-b border-black/[0.06] px-5 py-3">
         <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
           Price Comparison
@@ -445,7 +445,7 @@ export default function SupplierIntel({ products }: { products: AdminProduct[] }
     <div className="flex flex-col gap-6">
 
       {/* ── Search bar ── */}
-      <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-black/[0.06] bg-white shadow-sm">
         <div className="border-b border-black/[0.06] px-5 py-4">
           <p className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
             Search
@@ -658,7 +658,7 @@ export default function SupplierIntel({ products }: { products: AdminProduct[] }
           </div>
 
           {/* Alibaba + Made-in-China search buttons */}
-          <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white shadow-sm">
+          <div className="overflow-hidden rounded-xl border border-black/[0.06] bg-white shadow-sm">
             <div className="flex flex-col gap-2.5 px-5 py-5">
               <button
                 type="button"

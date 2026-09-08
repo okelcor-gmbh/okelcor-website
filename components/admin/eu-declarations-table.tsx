@@ -186,7 +186,7 @@ export default function EuDeclarationsTable({ declarations }: Props) {
       </div>
 
       {/* ── Filter bar ────────────────────────────────────────────────────────── */}
-      <div className="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-4 shadow-sm">
+      <div className="flex flex-wrap items-center gap-3 rounded-xl bg-white p-4 shadow-sm">
 
         {/* Search */}
         <div className="relative min-w-[200px] flex-1">
@@ -251,7 +251,7 @@ export default function EuDeclarationsTable({ declarations }: Props) {
       </div>
 
       {/* ── Table / Empty states ──────────────────────────────────────────────── */}
-      <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl bg-white shadow-sm">
 
         {filtered.length === 0 ? (
           /* Empty state */

@@ -93,7 +93,7 @@ function ConfirmModal({
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
       onClick={(e) => { if (e.target === e.currentTarget && !loading) onCancel(); }}
     >
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
         <p className="mb-4 text-[0.875rem] font-bold text-[#1a1a1a]">{title}</p>
         {warning && (
           <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[0.83rem] text-amber-800">
@@ -618,7 +618,7 @@ export default function PaymentMilestonesCard({
 
   return (
     <>
-      <div className="rounded-2xl bg-white p-6 shadow-sm">
+      <div className="rounded-xl bg-white p-6 shadow-sm">
         {/* Header */}
         <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
           <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">

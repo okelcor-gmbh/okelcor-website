@@ -44,7 +44,7 @@ export default function FunnelCard() {
   const top = funnel?.[0]?.count ?? 0;
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
+    <div className="overflow-hidden rounded-xl border border-black/[0.06] bg-white">
       <div className="border-b border-black/[0.06] px-5 py-4">
         <p className="text-[0.9rem] font-bold text-[#1a1a1a]">Conversion Funnel</p>
         <p className="text-[0.72rem] text-[#5c5e62]">Today · sessions per stage</p>

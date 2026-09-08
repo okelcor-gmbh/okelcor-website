@@ -203,7 +203,7 @@ export default function TierPricingBoard() {
       )}
 
       {/* Brand sweep */}
-      <div className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl bg-white px-4 py-3 shadow-sm ring-1 ring-black/[0.06]">
+      <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl bg-white px-4 py-3 shadow-sm ring-1 ring-black/[0.06]">
         <span className="text-[0.78rem] font-bold text-[#1a1a1a]">Assign a whole brand:</span>
         <select value={sweepBrand} onChange={(e) => setSweepBrand(e.target.value)}
           className="h-8 rounded-lg border border-black/[0.09] bg-white px-2 text-[0.78rem] outline-none focus:border-[#f4511e]">
@@ -245,7 +245,7 @@ export default function TierPricingBoard() {
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/[0.06]">
+      <div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-black/[0.06]">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[1000px] text-left text-[0.78rem]">
             <thead>
@@ -323,7 +323,7 @@ export default function TierPricingBoard() {
 
 function SummaryCard({ label, value, sub, accent }: { label: string; value: number; sub?: string; accent?: string }) {
   return (
-    <div className="rounded-2xl bg-white px-4 py-3.5 shadow-sm ring-1 ring-black/[0.06]">
+    <div className="rounded-xl bg-white px-4 py-3.5 shadow-sm ring-1 ring-black/[0.06]">
       <p className="mb-1 text-[0.65rem] font-bold uppercase tracking-[0.15em] text-[#9ca3af]">{label}</p>
       <p className={`text-[1.35rem] font-extrabold leading-none ${accent ?? "text-[#1a1a1a]"}`}>{value}</p>
       {sub && <p className="mt-1 text-[0.68rem] text-[#9ca3af]">{sub}</p>}

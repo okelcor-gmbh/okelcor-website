@@ -348,7 +348,7 @@ export default function TwoFactorSetup({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="w-full max-w-[460px] rounded-2xl bg-white shadow-2xl">
+      <div className="w-full max-w-[460px] rounded-xl bg-white shadow-2xl">
 
         {/* Header */}
         <div className="flex items-center justify-between border-b border-black/[0.07] px-6 py-4">

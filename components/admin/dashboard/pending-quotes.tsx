@@ -36,7 +36,7 @@ export default function PendingQuotes() {
   useEffect(() => { refresh(); }, [refresh]);
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
+    <div className="overflow-hidden rounded-xl border border-black/[0.06] bg-white">
       <div className="flex items-center justify-between border-b border-black/[0.06] px-5 py-4">
         <div className="flex items-center gap-2.5">
           <FileText size={15} className="text-[#5c5e62]" />

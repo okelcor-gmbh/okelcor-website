@@ -68,7 +68,7 @@ function BrandCard({
   };
 
   return (
-    <div className="relative flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm">
+    <div className="relative flex flex-col overflow-hidden rounded-xl bg-white shadow-sm">
       {/* Logo area */}
       <div className="flex h-36 items-center justify-center bg-[#f5f5f5] p-4">
         {brand.logo_url ? (
@@ -172,7 +172,7 @@ function BrandCard({
 
       {/* Delete confirmation overlay */}
       {confirmDelete && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-2xl bg-white/95 p-5 text-center backdrop-blur-sm">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-xl bg-white/95 p-5 text-center backdrop-blur-sm">
           <p className="text-[0.83rem] font-semibold text-[#1a1a1a]">Delete <span className="text-[#f4511e]">{brand.name}</span>?</p>
           <p className="text-[0.75rem] text-[#5c5e62]">This removes the brand and its logo.</p>
           <div className="flex gap-2">
@@ -239,7 +239,7 @@ function AddBrandCard({ onAdded }: { onAdded: () => void }) {
   };
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-2xl border-2 border-dashed border-black/[0.1] bg-white shadow-sm">
+    <div className="flex flex-col overflow-hidden rounded-xl border-2 border-dashed border-black/[0.1] bg-white shadow-sm">
       {/* Logo preview / picker */}
       <div
         className="flex h-36 cursor-pointer flex-col items-center justify-center gap-2 bg-[#f9f9f9] transition hover:bg-[#f0f2f5]"

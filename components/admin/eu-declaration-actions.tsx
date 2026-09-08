@@ -109,7 +109,7 @@ export default function EuDeclarationActions({ id, initialStatus, initialAcknowl
   const canAcknowledge = !isAcknowledged && status === "signed";
 
   return (
-    <div className={`flex flex-col gap-4 rounded-2xl border px-5 py-5 ${BANNER[effectiveStatus]}`}>
+    <div className={`flex flex-col gap-4 rounded-xl border px-5 py-5 ${BANNER[effectiveStatus]}`}>
 
       {/* Status badge + label */}
       <div className="flex items-center gap-3">

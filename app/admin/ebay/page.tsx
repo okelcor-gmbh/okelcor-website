@@ -256,7 +256,7 @@ function ReadinessPanel({
   const allPass   = !loading && failCount === 0 && warnCount === 0 && passCount > 0;
 
   return (
-    <div className="mb-6 overflow-hidden rounded-2xl bg-white shadow-sm">
+    <div className="mb-6 overflow-hidden rounded-xl bg-white shadow-sm">
       {/* Header toggle */}
       <button
         type="button"
@@ -503,7 +503,7 @@ function StatCards({
   const displayListed = ebayCount !== null ? ebayCount : listedCount;
   return (
     <div className="mb-6 grid gap-4 sm:grid-cols-3">
-      <div className="flex items-center gap-4 rounded-2xl bg-white p-5 shadow-sm">
+      <div className="flex items-center gap-4 rounded-xl bg-white p-5 shadow-sm">
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-green-500">
           <ShoppingBag size={20} strokeWidth={1.8} className="text-white" />
         </div>
@@ -520,7 +520,7 @@ function StatCards({
           )}
         </div>
       </div>
-      <div className="flex items-center gap-4 rounded-2xl bg-white p-5 shadow-sm">
+      <div className="flex items-center gap-4 rounded-xl bg-white p-5 shadow-sm">
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#f4511e]">
           <ShoppingBag size={20} strokeWidth={1.8} className="text-white" />
         </div>
@@ -529,7 +529,7 @@ function StatCards({
           <p className="mt-0.5 text-2xl font-extrabold text-[#1a1a1a]">{totalCount - listedCount}</p>
         </div>
       </div>
-      <div className="flex items-center gap-4 rounded-2xl bg-white p-5 shadow-sm">
+      <div className="flex items-center gap-4 rounded-xl bg-white p-5 shadow-sm">
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-500">
           <ShoppingBag size={20} strokeWidth={1.8} className="text-white" />
         </div>
@@ -552,12 +552,12 @@ function ConnectionCard({
   if (!loading && status === null) return null;
 
   if (loading) {
-    return <div className="mb-6 h-[76px] animate-pulse overflow-hidden rounded-2xl bg-white shadow-sm" />;
+    return <div className="mb-6 h-[76px] animate-pulse overflow-hidden rounded-xl bg-white shadow-sm" />;
   }
 
   if (status?.connected) {
     return (
-      <div className="mb-6 flex items-center justify-between gap-4 overflow-hidden rounded-2xl bg-white shadow-sm">
+      <div className="mb-6 flex items-center justify-between gap-4 overflow-hidden rounded-xl bg-white shadow-sm">
         <div className="flex items-center gap-3 border-l-4 border-green-500 px-5 py-4">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-green-100">
             <CheckCircle2 size={18} className="text-green-600" />
@@ -596,7 +596,7 @@ function ConnectionCard({
 
   const missing = status?.missing_config ?? [];
   return (
-    <div className="mb-6 overflow-hidden rounded-2xl bg-white shadow-sm">
+    <div className="mb-6 overflow-hidden rounded-xl bg-white shadow-sm">
       <div className="flex items-center justify-between gap-4 border-l-4 border-amber-400 px-5 py-4">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50">
@@ -850,7 +850,7 @@ function EbayOrdersPanel({ canManage }: { canManage: boolean }) {
       </div>
 
       {/* ── Table ── */}
-      <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl bg-white shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[900px] text-left">
             <thead>
@@ -1504,7 +1504,7 @@ export default function EbayPage() {
       {/* ── Confirm per-row update modal ──────────────────────────────────── */}
       {confirmUpdate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-[420px] rounded-2xl bg-white p-8 shadow-2xl">
+          <div className="w-full max-w-[420px] rounded-xl bg-white p-8 shadow-2xl">
             <div className="mb-5 flex items-start justify-between">
               <div className="flex h-11 w-11 items-center justify-center rounded-full bg-blue-100">
                 <Upload size={18} className="text-blue-600" />
@@ -1546,7 +1546,7 @@ export default function EbayPage() {
       {/* ── Confirm bulk update modal ─────────────────────────────────────── */}
       {confirmBulkUpdate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-[420px] rounded-2xl bg-white p-8 shadow-2xl">
+          <div className="w-full max-w-[420px] rounded-xl bg-white p-8 shadow-2xl">
             <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-full bg-blue-100">
               <Upload size={18} className="text-blue-600" />
             </div>
@@ -1874,7 +1874,7 @@ export default function EbayPage() {
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl bg-white shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[1100px] text-left">
             <thead>

@@ -60,7 +60,7 @@ export default function YourDesk() {
   return (
     <Link
       href="/admin/my-work"
-      className="group mb-5 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl border border-[#f4511e]/20 bg-[#fff3ee] px-4 py-3 transition hover:border-[#f4511e]/40"
+      className="group mb-5 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-[#f4511e]/20 bg-[#fff3ee] px-4 py-3 transition hover:border-[#f4511e]/40"
     >
       <span className="flex items-center gap-2 text-[0.83rem] font-extrabold text-[#1a1a1a]">
         <ClipboardCheck size={15} strokeWidth={2.2} className="text-[#f4511e]" />

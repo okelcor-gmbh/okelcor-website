@@ -147,7 +147,7 @@ export default function StaffTeamReport() {
             />
           </div>
 
-          <div className="overflow-hidden rounded-2xl border border-black/[0.08] bg-white">
+          <div className="overflow-hidden rounded-xl border border-black/[0.08] bg-white">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[640px] border-collapse">
                 <thead>
@@ -223,7 +223,7 @@ export default function StaffTeamReport() {
           {/* Rendered from the payload rather than written into the page — the
               same words travel in the e-mailed digest, and a caveat that only
               exists on one of the two is a caveat half the readers never see. */}
-          <div className="rounded-2xl border-l-[3px] border-[#f4511e] bg-[#fffaf3] p-4">
+          <div className="rounded-xl border-l-[3px] border-[#f4511e] bg-[#fffaf3] p-4">
             <p className="mb-2 flex items-center gap-1.5 text-[0.68rem] font-bold uppercase tracking-wider text-[#8a5a2b]">
               <Info size={12} /> Before reading anything into the numbers
             </p>
@@ -240,12 +240,12 @@ export default function StaffTeamReport() {
 }
 
 function Panel({ children }: { children: React.ReactNode }) {
-  return <div className="rounded-2xl border border-black/[0.08] bg-white p-5">{children}</div>;
+  return <div className="rounded-xl border border-black/[0.08] bg-white p-5">{children}</div>;
 }
 
 function Stat({ value, label, hint }: { value: string | number; label: string; hint?: string }) {
   return (
-    <div className="rounded-2xl border border-black/[0.08] bg-white p-4">
+    <div className="rounded-xl border border-black/[0.08] bg-white p-4">
       <p className="text-[1.5rem] font-bold leading-none tabular-nums text-[#171a20]">{value}</p>
       <p className="mt-1.5 text-[0.72rem] font-medium uppercase tracking-wider text-[#5c5e62]">{label}</p>
       {hint && <p className="mt-1 text-[0.72rem] text-amber-700">{hint}</p>}

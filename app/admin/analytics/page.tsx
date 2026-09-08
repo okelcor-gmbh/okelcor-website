@@ -113,7 +113,7 @@ function StatCard({
   label: string; value: string; icon: React.ElementType; accent: string; sub?: string;
 }) {
   return (
-    <div className="flex items-center gap-5 rounded-2xl bg-white p-6 shadow-sm">
+    <div className="flex items-center gap-5 rounded-xl bg-white p-6 shadow-sm">
       <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${accent}`}>
         <Icon size={20} strokeWidth={1.8} className="text-white" />
       </div>
@@ -149,7 +149,7 @@ function SectionCard({ title, icon: Icon, children, muted = false }: {
   title: string; icon: React.ElementType; children: React.ReactNode; muted?: boolean;
 }) {
   return (
-    <div className={`overflow-hidden rounded-2xl shadow-sm ${muted ? "border border-black/[0.06] bg-white/70" : "bg-white"}`}>
+    <div className={`overflow-hidden rounded-xl shadow-sm ${muted ? "border border-black/[0.06] bg-white/70" : "bg-white"}`}>
       <div className="flex items-center gap-2.5 border-b border-black/[0.06] px-5 py-4">
         <Icon size={15} className={muted ? "text-[#8c8f94]" : "text-[#5c5e62]"} />
         <p className={`text-[0.9rem] font-extrabold ${muted ? "text-[#5c5e62]" : "text-[#1a1a1a]"}`}>{title}</p>
@@ -210,7 +210,7 @@ function Sparkline({ data, field, color = "#f4511e" }: {
 
 function NotConfigured() {
   return (
-    <div className="rounded-2xl border border-amber-200 bg-amber-50 px-6 py-8 text-center">
+    <div className="rounded-xl border border-amber-200 bg-amber-50 px-6 py-8 text-center">
       <AlertCircle size={32} className="mx-auto mb-3 text-amber-500" />
       <p className="text-[0.95rem] font-extrabold text-[#1a1a1a]">Google Analytics not configured</p>
       <p className="mt-2 text-[0.83rem] leading-6 text-[#5c5e62]">
@@ -241,7 +241,7 @@ function GoogleAdsPanel() {
   const configured = !!adsId;
 
   return (
-    <div className="mb-8 overflow-hidden rounded-2xl bg-white shadow-sm">
+    <div className="mb-8 overflow-hidden rounded-xl bg-white shadow-sm">
       <div className="flex items-center justify-between border-b border-black/[0.06] px-5 py-4">
         <div className="flex items-center gap-2.5">
           <Tag size={15} className="text-[#5c5e62]" />
@@ -442,7 +442,7 @@ export default async function AnalyticsPage() {
 
         {/* Trend chart */}
         {currTrend.length > 0 && (
-          <div className="mb-6 overflow-hidden rounded-2xl bg-white shadow-sm">
+          <div className="mb-6 overflow-hidden rounded-xl bg-white shadow-sm">
             <div className="flex items-center justify-between border-b border-black/[0.06] px-5 py-4">
               <p className="text-[0.9rem] font-extrabold text-[#1a1a1a]">Sessions Trend</p>
               <BarChart2 size={15} className="text-[#5c5e62]" />
@@ -510,14 +510,14 @@ export default async function AnalyticsPage() {
       {/* ════════════════════════════════════════════════════════════════════════
           SECTION 2 — POSTHOG  (real-time, client-side)
       ═══════════════════════════════════════════════════════════════════════════ */}
-      <div className="mb-10 rounded-2xl border border-[#1d4ed8]/15 bg-[#f5f8ff] p-6">
+      <div className="mb-10 rounded-xl border border-[#1d4ed8]/15 bg-[#f5f8ff] p-6">
         <PostHogPanel />
       </div>
 
       {/* ════════════════════════════════════════════════════════════════════════
           SECTION 3 — PREVIOUS SITE  (okelcor.de) — archived
       ═══════════════════════════════════════════════════════════════════════════ */}
-      <div className="rounded-2xl border border-black/[0.07] bg-[#f7f8f9] p-6">
+      <div className="rounded-xl border border-black/[0.07] bg-[#f7f8f9] p-6">
 
         {/* Section label */}
         <div className="mb-5 flex items-center gap-3">
@@ -562,7 +562,7 @@ export default async function AnalyticsPage() {
 
         {/* Trend chart */}
         {prevTrend.length > 0 && (
-          <div className="mb-6 overflow-hidden rounded-2xl border border-black/[0.06] bg-white/80">
+          <div className="mb-6 overflow-hidden rounded-xl border border-black/[0.06] bg-white/80">
             <div className="flex items-center justify-between border-b border-black/[0.06] px-5 py-4">
               <p className="text-[0.9rem] font-extrabold text-[#5c5e62]">Sessions Trend (all time)</p>
               <BarChart2 size={15} className="text-[#8c8f94]" />

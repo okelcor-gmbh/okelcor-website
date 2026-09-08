@@ -80,7 +80,7 @@ export default async function EditProductPage({ params }: Props) {
 
       <div className="flex flex-col gap-6">
         {/* Product form */}
-        <div className="rounded-2xl bg-white p-6 shadow-sm md:p-8">
+        <div className="rounded-xl bg-white p-6 shadow-sm md:p-8">
           <ProductForm mode="edit" product={product} specSheet={specSheet} />
         </div>
 

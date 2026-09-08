@@ -149,7 +149,7 @@ export default function PostHogPanel() {
 
       {/* Not configured */}
       {notConfigured && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-6 py-8 text-center">
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-6 py-8 text-center">
           <AlertCircle size={32} className="mx-auto mb-3 text-amber-500" />
           <p className="text-[0.95rem] font-extrabold text-[#1a1a1a]">PostHog not configured</p>
           <p className="mt-2 text-[0.83rem] leading-6 text-[#5c5e62]">
@@ -187,7 +187,7 @@ export default function PostHogPanel() {
           {/* Stat cards */}
           <div className="mb-6 grid gap-4 sm:grid-cols-3">
             {/* Active users now */}
-            <div className="flex items-center gap-5 rounded-2xl bg-white p-6 shadow-sm">
+            <div className="flex items-center gap-5 rounded-xl bg-white p-6 shadow-sm">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#1d4ed8]">
                 <Users size={20} strokeWidth={1.8} className="text-white" />
               </div>
@@ -203,7 +203,7 @@ export default function PostHogPanel() {
             </div>
 
             {/* Sessions today */}
-            <div className="flex items-center gap-5 rounded-2xl bg-white p-6 shadow-sm">
+            <div className="flex items-center gap-5 rounded-xl bg-white p-6 shadow-sm">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-violet-500">
                 <TrendingUp size={20} strokeWidth={1.8} className="text-white" />
               </div>
@@ -223,7 +223,7 @@ export default function PostHogPanel() {
             </div>
 
             {/* Sessions yesterday */}
-            <div className="flex items-center gap-5 rounded-2xl bg-white p-6 shadow-sm">
+            <div className="flex items-center gap-5 rounded-xl bg-white p-6 shadow-sm">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#6b7280]">
                 <Clock size={20} strokeWidth={1.8} className="text-white" />
               </div>
@@ -242,7 +242,7 @@ export default function PostHogPanel() {
           <div className="grid gap-6 lg:grid-cols-2">
 
             {/* Top pages today */}
-            <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+            <div className="overflow-hidden rounded-xl bg-white shadow-sm">
               <div className="flex items-center gap-2.5 border-b border-black/[0.06] px-5 py-4">
                 <Eye size={15} className="text-[#5c5e62]" />
                 <p className="text-[0.9rem] font-extrabold text-[#1a1a1a]">Top Pages Today</p>
@@ -274,7 +274,7 @@ export default function PostHogPanel() {
             </div>
 
             {/* Live events feed */}
-            <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+            <div className="overflow-hidden rounded-xl bg-white shadow-sm">
               <div className="flex items-center justify-between border-b border-black/[0.06] px-5 py-4">
                 <div className="flex items-center gap-2.5">
                   <Activity size={15} className="text-[#5c5e62]" />

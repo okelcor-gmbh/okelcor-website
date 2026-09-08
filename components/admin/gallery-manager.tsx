@@ -77,7 +77,7 @@ export default function GalleryManager({ productId, images }: Props) {
   };
 
   return (
-    <div className="rounded-2xl bg-white p-6 shadow-sm">
+    <div className="rounded-xl bg-white p-6 shadow-sm">
       <div className="mb-5 flex items-center justify-between">
         <div>
           <p className="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">

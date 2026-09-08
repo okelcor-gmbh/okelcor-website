@@ -53,7 +53,7 @@ export default function SignatureEditor({ initialHtml }: Props) {
   }
 
   return (
-    <div className="rounded-2xl bg-white p-6 shadow-sm">
+    <div className="rounded-xl bg-white p-6 shadow-sm">
       <div className="mb-4 flex items-center gap-2">
         <PenLine size={14} className="text-[#5c5e62]" />
         <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#5c5e62]">My E-mail Signature</p>

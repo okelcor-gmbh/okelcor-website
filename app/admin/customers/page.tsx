@@ -228,7 +228,7 @@ function ConfirmModal({
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-7 shadow-2xl">
+      <div className="w-full max-w-sm rounded-xl bg-white p-7 shadow-2xl">
         <p className="text-[1rem] font-extrabold text-[#1a1a1a]">{title}</p>
         <p className="mt-2 text-[0.83rem] leading-relaxed text-[#5c5e62]">{body}</p>
         <div className="mt-6 flex gap-3">
@@ -424,7 +424,7 @@ export default function CustomersPage() {
       )}
 
       {/* ── Import card ── */}
-      <div className="mb-6 rounded-2xl bg-white p-6 shadow-sm">
+      <div className="mb-6 rounded-xl bg-white p-6 shadow-sm">
         <div className="mb-4 flex items-start gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#f4511e]">
             <FileText size={18} strokeWidth={1.8} className="text-white" />
@@ -482,7 +482,7 @@ export default function CustomersPage() {
       )}
 
       {/* ── Customers table ── */}
-      <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl bg-white shadow-sm">
 
         {/* Filters row */}
         <div className="border-b border-black/[0.06] px-5 py-3">

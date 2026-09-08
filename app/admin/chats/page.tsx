@@ -19,7 +19,7 @@ export default async function AdminChatsPage() {
   return (
     <div className="flex h-full flex-col">
       {!crispConfigured && (
-        <div className="m-6 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-[0.875rem] text-amber-800">
+        <div className="m-6 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 text-[0.875rem] text-amber-800">
           <strong>Crisp API not configured.</strong> Add{" "}
           <code className="rounded bg-amber-100 px-1">CRISP_IDENTIFIER</code> and{" "}
           <code className="rounded bg-amber-100 px-1">CRISP_KEY</code> to your{" "}

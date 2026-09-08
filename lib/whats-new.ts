@@ -26,6 +26,14 @@ export type WhatsNewEntry = {
 
 export const WHATS_NEW: WhatsNewEntry[] = [
   {
+    id: "2026-09-08-console-ui",
+    date: "2026-09-08",
+    title: "The panel becomes an operations console",
+    brief:
+      "A design pass across the whole admin: crisper panels, one shared canvas that stays composed on wide monitors, a refined dark rail matching the new login, and one brand orange everywhere. Same places, same buttons — just sharper.",
+    section: null,
+  },
+  {
     id: "2026-09-08-role-aware-dashboard",
     date: "2026-09-08",
     title: "The dashboard knows your role — and your desk",

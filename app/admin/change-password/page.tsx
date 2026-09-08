@@ -105,7 +105,7 @@ export default function ChangePasswordPage() {
           </div>
         </div>
 
-        <div className="rounded-2xl bg-white p-6 shadow-sm">
+        <div className="rounded-xl bg-white p-6 shadow-sm">
           <p className="mb-5 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#5c5e62]">
             Set New Password
           </p>

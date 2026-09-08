@@ -118,7 +118,7 @@ function PromotionForm({
     onChange({ ...form, [k]: v });
 
   return (
-    <div className="mb-6 rounded-2xl border border-black/[0.08] bg-white p-6">
+    <div className="mb-6 rounded-xl border border-black/[0.08] bg-white p-6">
       <h3 className="mb-4 text-[0.9rem] font-bold text-[#1a1a1a]">
         {editing ? "Edit Promotion" : "New Promotion"}
       </h3>
@@ -444,7 +444,7 @@ function PromotionRow({
 
   return (
     <div className={[
-      "rounded-2xl border bg-white p-5 transition",
+      "rounded-xl border bg-white p-5 transition",
       promo.is_active && !expired
         ? "border-[#f4511e]/30 shadow-sm"
         : "border-black/[0.08]",
@@ -764,7 +764,7 @@ export default function PromotionsManager({
 
       {/* Promotion list */}
       {initial.length === 0 && !formOpen && (
-        <div className="rounded-2xl border border-dashed border-black/[0.12] bg-white px-6 py-12 text-center">
+        <div className="rounded-xl border border-dashed border-black/[0.12] bg-white px-6 py-12 text-center">
           <p className="text-[0.875rem] text-[#9ca3af]">
             No promotions yet. Create one to display a banner on the shop page.
           </p>

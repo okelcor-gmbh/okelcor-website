@@ -189,7 +189,7 @@ export default function EbayLogsPanel({ canManage }: { canManage: boolean }) {
   // ── Render ──────────────────────────────────────────────────────────────────
 
   return (
-    <div className="mt-6 overflow-hidden rounded-2xl bg-white shadow-sm">
+    <div className="mt-6 overflow-hidden rounded-xl bg-white shadow-sm">
 
       {/* Panel toggle header */}
       <button

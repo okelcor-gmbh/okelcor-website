@@ -277,7 +277,7 @@ export default function TwoFactorStatus() {
 
   return (
     <>
-      <div className="mb-6 rounded-2xl bg-white p-6 shadow-sm">
+      <div className="mb-6 rounded-xl bg-white p-6 shadow-sm">
         <div className="mb-4 flex items-center justify-between">
           <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
             Two-Factor Authentication

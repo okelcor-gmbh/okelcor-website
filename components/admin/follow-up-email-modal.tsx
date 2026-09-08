@@ -70,7 +70,7 @@ export default function FollowUpEmailModal({ quoteId, recipientName, recipientEm
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <div className="w-full max-w-lg rounded-2xl bg-white p-7 shadow-2xl">
+      <div className="w-full max-w-lg rounded-xl bg-white p-7 shadow-2xl">
         {/* Header */}
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>

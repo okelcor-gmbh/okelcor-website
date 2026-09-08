@@ -191,7 +191,7 @@ function GroupCard({ group }: { group: HealthGroup }) {
   const icon    = GROUP_ICON[group.group.toLowerCase()] ?? <Server size={14} strokeWidth={1.8} />;
 
   return (
-    <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/[0.06]">
+    <div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-black/[0.06]">
       {/* Group header */}
       <div className="flex items-center gap-2.5 border-b border-black/[0.06] px-4 py-3">
         <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${STATUS_PILL[overall]} bg-opacity-40`}>
@@ -229,7 +229,7 @@ function SummaryCard({
   accent?: string;
 }) {
   return (
-    <div className="rounded-2xl bg-white px-5 py-4 shadow-sm ring-1 ring-black/[0.06]">
+    <div className="rounded-xl bg-white px-5 py-4 shadow-sm ring-1 ring-black/[0.06]">
       <p className="mb-1 text-[0.7rem] font-bold uppercase tracking-[0.18em] text-[#9ca3af]">{label}</p>
       <p className={`text-[1.45rem] font-extrabold leading-none ${accent ?? "text-[#1a1a1a]"}`}>{value}</p>
       {sub && <p className="mt-1 text-[0.72rem] text-[#9ca3af]">{sub}</p>}
@@ -240,7 +240,7 @@ function SummaryCard({
 function ErrorsTable({ errors }: { errors: ErrorEntry[] }) {
   if (errors.length === 0) {
     return (
-      <div className="rounded-2xl bg-white px-6 py-8 text-center shadow-sm ring-1 ring-black/[0.06]">
+      <div className="rounded-xl bg-white px-6 py-8 text-center shadow-sm ring-1 ring-black/[0.06]">
         <CheckCircle2 size={28} className="mx-auto mb-2 text-emerald-400" strokeWidth={1.5} />
         <p className="text-[0.85rem] font-semibold text-[#374151]">No recent errors</p>
         <p className="mt-0.5 text-[0.75rem] text-[#9ca3af]">Your application is running cleanly.</p>
@@ -249,7 +249,7 @@ function ErrorsTable({ errors }: { errors: ErrorEntry[] }) {
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/[0.06]">
+    <div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-black/[0.06]">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[640px] text-left text-[0.8rem]">
           <thead>
@@ -403,10 +403,10 @@ export default function SystemHealthPage() {
           <Skeleton className="h-9 w-36 rounded-full" />
         </div>
         <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-20 rounded-2xl" />)}
+          {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-20 rounded-xl" />)}
         </div>
         <div className="grid gap-4 md:grid-cols-2">
-          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-48 rounded-2xl" />)}
+          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-48 rounded-xl" />)}
         </div>
       </div>
     );
@@ -473,7 +473,7 @@ export default function SystemHealthPage() {
 
       {/* Overall status banner */}
       {report && (
-        <div className={`mb-6 flex items-center gap-3 rounded-2xl px-5 py-3.5 ring-1 ${overallUi.ring}`}>
+        <div className={`mb-6 flex items-center gap-3 rounded-xl px-5 py-3.5 ring-1 ${overallUi.ring}`}>
           <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${overallUi.dot}`} />
           <span className={`text-[0.9rem] font-bold ${overallUi.text}`}>{overallUi.label}</span>
           {report.generated_at && (
@@ -535,7 +535,7 @@ export default function SystemHealthPage() {
         </>
       ) : (
         !loading && (
-          <div className="mb-8 rounded-2xl bg-white px-6 py-8 text-center shadow-sm ring-1 ring-black/[0.06]">
+          <div className="mb-8 rounded-xl bg-white px-6 py-8 text-center shadow-sm ring-1 ring-black/[0.06]">
             <Activity size={28} className="mx-auto mb-2 text-[#d1d5db]" strokeWidth={1.5} />
             <p className="text-[0.85rem] font-semibold text-[#374151]">No health checks returned</p>
             <p className="mt-0.5 text-[0.75rem] text-[#9ca3af]">The backend health endpoint may not be fully implemented yet.</p>
@@ -549,7 +549,7 @@ export default function SystemHealthPage() {
           <h2 className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.18em] text-[#9ca3af]">
             Issues Requiring Attention
           </h2>
-          <div className="mb-8 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/[0.06]">
+          <div className="mb-8 overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-black/[0.06]">
             {report.groups
               .flatMap((g) =>
                 g.checks

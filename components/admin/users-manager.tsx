@@ -329,7 +329,7 @@ export default function UsersManager({ users: initialUsers }: { users: AdminUser
       )}
 
       {/* Table */}
-      <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl bg-white shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px] text-left">
             <thead>
@@ -469,7 +469,7 @@ export default function UsersManager({ users: initialUsers }: { users: AdminUser
           />
 
           {/* Panel */}
-          <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+          <div className="relative w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
             <div className="mb-5 flex items-center justify-between">
               <h2 className="text-[0.95rem] font-extrabold text-[#1a1a1a]">
                 {modalMode === "create" ? "Add New User" : "Edit User"}
@@ -582,7 +582,7 @@ export default function UsersManager({ users: initialUsers }: { users: AdminUser
             onClick={() => setPermsUser(null)}
           />
 
-          <div className="relative flex max-h-[85vh] w-full max-w-lg flex-col rounded-2xl bg-white shadow-xl">
+          <div className="relative flex max-h-[85vh] w-full max-w-lg flex-col rounded-xl bg-white shadow-xl">
             {/* Header */}
             <div className="flex items-start justify-between border-b border-black/[0.06] px-6 py-5">
               <div>

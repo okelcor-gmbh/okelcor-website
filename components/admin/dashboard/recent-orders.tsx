@@ -137,7 +137,7 @@ export default function RecentOrders() {
   const pendingCount = orders?.filter(isPendingOrder).length ?? 0;
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
+    <div className="overflow-hidden rounded-xl border border-black/[0.06] bg-white">
       <div className="flex items-center justify-between border-b border-black/[0.06] px-5 py-4">
         <div className="flex items-center gap-2">
           <span className="relative flex h-2 w-2">

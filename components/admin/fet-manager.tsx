@@ -90,7 +90,7 @@ function EngineForm({
   const set = (k: keyof EngineForm, v: string) => onChange({ ...form, [k]: v });
 
   return (
-    <div className="mb-6 rounded-2xl border border-black/[0.08] bg-white p-6">
+    <div className="mb-6 rounded-xl border border-black/[0.08] bg-white p-6">
       <h3 className="mb-4 text-[0.9rem] font-bold text-[#1a1a1a]">
         {editing ? "Edit Engine Model" : "Add Engine Model"}
       </h3>
@@ -456,7 +456,7 @@ export default function FetManager({
 
       {/* Table */}
       {filtered.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-black/[0.12] bg-white px-6 py-12 text-center">
+        <div className="rounded-xl border border-dashed border-black/[0.12] bg-white px-6 py-12 text-center">
           <p className="text-[0.875rem] text-[#9ca3af]">
             {initial.length === 0
               ? "No engine models yet. Add them individually or ask the backend team to import the PDF data."
@@ -464,7 +464,7 @@ export default function FetManager({
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-black/[0.08] bg-white">
+        <div className="overflow-hidden rounded-xl border border-black/[0.08] bg-white">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[700px] text-[0.82rem]">
               <thead>

@@ -114,7 +114,7 @@ export default function PartnersManager() {
       {orgs === null ? (
         <p className="py-8 text-center text-[0.9rem] text-[#5c5e62]">Loading…</p>
       ) : orgs.length === 0 ? (
-        <div className="rounded-2xl border border-black/[0.06] bg-white py-12 text-center">
+        <div className="rounded-xl border border-black/[0.06] bg-white py-12 text-center">
           <Building2 size={28} className="mx-auto text-[#9ca3af]" strokeWidth={1.6} />
           <p className="mt-3 text-[0.95rem] font-semibold text-[#1a1a1a]">No partners yet</p>
           <p className="mx-auto mt-1 max-w-sm text-[0.85rem] text-[#5c5e62]">
@@ -125,7 +125,7 @@ export default function PartnersManager() {
       ) : (
         <div className="space-y-2">
           {orgs.map((o) => (
-            <div key={o.id} className="rounded-2xl border border-black/[0.06] bg-white">
+            <div key={o.id} className="rounded-xl border border-black/[0.06] bg-white">
               <button
                 type="button"
                 onClick={() => setExpanded(expanded === o.id ? null : o.id)}
@@ -211,7 +211,7 @@ function CreatePartnerForm({ onDone, onCancel }: { onDone: () => void; onCancel:
   }
 
   return (
-    <form onSubmit={submit} className="mb-4 rounded-2xl border border-black/[0.06] bg-white p-5">
+    <form onSubmit={submit} className="mb-4 rounded-xl border border-black/[0.06] bg-white p-5">
       <p className="mb-4 text-[0.95rem] font-bold text-[#1a1a1a]">New partner</p>
 
       <div className="grid gap-4 sm:grid-cols-2">

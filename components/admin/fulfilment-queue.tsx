@@ -42,7 +42,7 @@ function Section({
   const td = "px-3 py-2.5 text-[0.8rem] text-[#171a20]";
 
   return (
-    <section className={`overflow-hidden rounded-2xl border bg-white ${
+    <section className={`overflow-hidden rounded-xl border bg-white ${
       accent ? "border-[#f4511e]/30" : "border-black/[0.06]"
     }`}>
       <div className="flex flex-wrap items-center gap-2 border-b border-black/[0.06] px-4 py-3">

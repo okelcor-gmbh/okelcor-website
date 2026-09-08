@@ -182,7 +182,7 @@ export default function OperationsBoard({
 
   return (
     <div className="space-y-3">
-      <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
+      <div className="overflow-hidden rounded-xl border border-black/[0.06] bg-white">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[820px]">
             <thead>
@@ -291,7 +291,7 @@ export default function OperationsBoard({
       </div>
 
       {Object.keys(defs).length > 0 && (
-        <div className="rounded-2xl border border-black/[0.06] bg-white">
+        <div className="rounded-xl border border-black/[0.06] bg-white">
           <button
             type="button"
             onClick={() => setShowDefs((v) => !v)}

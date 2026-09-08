@@ -84,7 +84,7 @@ export default function AccessRequestsTable({ refreshKey = 0, onPendingCount }: 
   ];
 
   return (
-    <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+    <div className="overflow-hidden rounded-xl bg-white shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-black/[0.06] px-5 py-3">
         <div className="flex items-center gap-2.5">
           <KeyRound size={15} className="text-[#5c5e62]" />

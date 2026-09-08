@@ -85,7 +85,7 @@ export default function ClaimsQueue({ initialClaim }: { initialClaim: number | n
 
   if (unavailable) {
     return (
-      <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl bg-white shadow-sm">
         <EmptyState
           icon={LifeBuoy}
           heading="The claims queue is not available yet"
@@ -164,7 +164,7 @@ export default function ClaimsQueue({ initialClaim }: { initialClaim: number | n
 
       {/* ── The queue ─────────────────────────────────────────────────────── */}
       {claims.length === 0 ? (
-        <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+        <div className="overflow-hidden rounded-xl bg-white shadow-sm">
           <EmptyState
             icon={LifeBuoy}
             heading={tab === "open" ? "No open claims" : "Nothing here"}
@@ -176,7 +176,7 @@ export default function ClaimsQueue({ initialClaim }: { initialClaim: number | n
           />
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+        <div className="overflow-hidden rounded-xl bg-white shadow-sm">
           <ul className="divide-y divide-black/[0.05]">
             {claims.map((c) => (
               <ClaimRow
@@ -213,7 +213,7 @@ function StatCard({ label, value, hint, highlight = false }: {
   label: string; value: string; hint?: string; highlight?: boolean;
 }) {
   return (
-    <div className="rounded-2xl bg-white p-4 shadow-sm">
+    <div className="rounded-xl bg-white p-4 shadow-sm">
       <p className="text-[0.68rem] font-bold uppercase tracking-wider text-[#8c8f94]">{label}</p>
       <p className={`mt-1 text-[1.35rem] font-extrabold ${highlight ? "text-[#f4511e]" : "text-[#171a20]"}`}>
         {value}
@@ -509,7 +509,7 @@ function NewClaimModal({ meta, onClose, onSaved }: {
     >
       <form
         onSubmit={submit}
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-5 shadow-xl"
+        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white p-5 shadow-xl"
       >
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-[1rem] font-extrabold text-[#171a20]">Log a claim</h2>

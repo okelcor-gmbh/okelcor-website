@@ -179,7 +179,7 @@ export default function MarketIntelligence() {
               </span>
             </h2>
 
-            <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
+            <div className="overflow-hidden rounded-xl border border-black/[0.06] bg-white">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[860px] text-left">
                   <thead>
@@ -212,7 +212,7 @@ export default function MarketIntelligence() {
           </section>
 
           {report.unmeasured.length > 0 && (
-            <section className="rounded-2xl border border-black/[0.06] bg-white p-5">
+            <section className="rounded-xl border border-black/[0.06] bg-white p-5">
               <h2 className="flex items-center gap-2 text-[0.875rem] font-bold text-[#1a1a1a]">
                 <Info size={15} className="text-[#5c5e62]" /> Not measured yet
               </h2>
@@ -242,7 +242,7 @@ export default function MarketIntelligence() {
           )}
 
           {report.unrecognised.length > 0 && (
-            <section className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
+            <section className="rounded-xl border border-amber-200 bg-amber-50 p-5">
               <h2 className="flex items-center gap-2 text-[0.875rem] font-bold text-amber-900">
                 <AlertTriangle size={15} /> Countries we could not read
               </h2>
@@ -264,7 +264,7 @@ export default function MarketIntelligence() {
             </section>
           )}
 
-          <section className="rounded-2xl border border-black/[0.06] bg-[#fafafa] p-5">
+          <section className="rounded-xl border border-black/[0.06] bg-[#fafafa] p-5">
             <h2 className="flex items-center gap-2 text-[0.8rem] font-bold text-[#5c5e62]">
               <Info size={14} /> What this report cannot tell you
             </h2>
@@ -288,7 +288,7 @@ function OpportunityCard({ market }: { market: MarketRow }) {
   const tone = SIGNAL_TONE[market.signal];
 
   return (
-    <article className="rounded-2xl border border-[#f4511e]/25 bg-white p-5 shadow-sm">
+    <article className="rounded-xl border border-[#f4511e]/25 bg-white p-5 shadow-sm">
       <div className="flex items-start gap-3">
         <span className="text-[1.4rem] leading-none">{flag(market.country_code)}</span>
         <div className="min-w-0 flex-1">
@@ -465,7 +465,7 @@ function Notice({
   const Icon = tone === "info" ? Info : tone === "warn" ? AlertTriangle : AlertCircle;
 
   return (
-    <div className={`flex items-start gap-3 rounded-2xl border p-5 ${cls}`}>
+    <div className={`flex items-start gap-3 rounded-xl border p-5 ${cls}`}>
       <Icon size={17} className="mt-[2px] shrink-0" />
       <div>
         <p className="text-[0.875rem] font-bold">{title}</p>

@@ -65,7 +65,7 @@ export default async function BrandContentPage({ params }: Props) {
         </p>
       </div>
 
-      <div className="rounded-2xl bg-white p-6 shadow-sm md:p-8">
+      <div className="rounded-xl bg-white p-6 shadow-sm md:p-8">
         <BrandContentForm brand={brand} specSheet={specSheet} />
       </div>
     </div>

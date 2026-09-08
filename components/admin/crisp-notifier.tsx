@@ -175,7 +175,7 @@ function ToastCard({
       `}</style>
 
       <div
-        className="relative flex w-[300px] items-start gap-3 overflow-hidden rounded-2xl border border-black/[0.07] bg-white p-4 shadow-[0_8px_32px_rgba(0,0,0,0.14)]"
+        className="relative flex w-[300px] items-start gap-3 overflow-hidden rounded-xl border border-black/[0.07] bg-white p-4 shadow-[0_8px_32px_rgba(0,0,0,0.14)]"
         style={{ animation: "crispSlideIn 0.25s ease-out forwards" }}
       >
         {/* Orange left accent stripe */}

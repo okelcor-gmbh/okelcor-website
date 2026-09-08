@@ -222,7 +222,7 @@ export default function InDesignImport({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-6">
-      <div className="flex h-full max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl">
+      <div className="flex h-full max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-xl bg-white shadow-xl">
 
         {/* ── Header ── */}
         <div className="flex shrink-0 items-center gap-3 border-b border-black/[0.07] px-5 py-4">

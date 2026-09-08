@@ -188,7 +188,7 @@ function SlideForm({
   };
 
   return (
-    <div className="rounded-2xl border border-[#f4511e]/20 bg-white p-6 shadow-sm">
+    <div className="rounded-xl border border-[#f4511e]/20 bg-white p-6 shadow-sm">
       <p className="mb-5 text-[0.7rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">
         {isEdit ? "Edit Slide" : "New Slide"}
       </p>
@@ -488,7 +488,7 @@ function SlideRow({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-4 rounded-2xl bg-white p-4 shadow-sm">
+      <div className="flex items-center gap-4 rounded-xl bg-white p-4 shadow-sm">
         {/* Thumbnail */}
         <div className="relative flex h-16 w-[5.5rem] shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#f5f5f5]">
           {isVideo ? (
@@ -617,7 +617,7 @@ export default function HeroSlidesManager({ slides }: { slides: AdminHeroSlide[]
 
       {/* Slides list */}
       {slides.length === 0 && !isFormOpen ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-black/[0.08] bg-white py-16 text-center">
+        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-black/[0.08] bg-white py-16 text-center">
           <p className="text-[0.875rem] font-semibold text-[#5c5e62]">No slides yet</p>
           <p className="mt-1 text-[0.78rem] text-[#aaa]">Add your first slide above</p>
         </div>

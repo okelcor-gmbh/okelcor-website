@@ -150,7 +150,7 @@ export default function StaffContributionForm({
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 sm:p-8">
-      <form onSubmit={submit} className="w-full max-w-xl rounded-2xl bg-white p-5">
+      <form onSubmit={submit} className="w-full max-w-xl rounded-xl bg-white p-5">
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
             <h3 className="text-[1rem] font-bold text-[#171a20]">

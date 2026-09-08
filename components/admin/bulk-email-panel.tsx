@@ -643,7 +643,7 @@ function CampaignHistory({
       {/* Preview modal */}
       {preview && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="relative max-h-[80vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-xl">
+          <div className="relative max-h-[80vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white shadow-xl">
             <div className="sticky top-0 flex items-center justify-between border-b border-black/[0.06] bg-white px-5 py-4">
               <div>
                 <p className="font-bold text-[#171a20]">{preview.subject}</p>

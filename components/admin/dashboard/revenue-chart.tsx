@@ -79,7 +79,7 @@ export default function RevenueChart() {
   }, [refresh]);
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
+    <div className="overflow-hidden rounded-xl border border-black/[0.06] bg-white">
       <div className="flex items-start justify-between border-b border-black/[0.06] px-5 py-4">
         <div>
           <p className="text-[0.9rem] font-bold text-[#1a1a1a]">Revenue — Last 7 Days</p>

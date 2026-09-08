@@ -60,7 +60,7 @@ function StatCard({ icon: Icon, label, value, tone }: {
   icon: React.ElementType; label: string; value: number | null; tone: string;
 }) {
   return (
-    <div className="rounded-2xl bg-white p-5 shadow-sm">
+    <div className="rounded-xl bg-white p-5 shadow-sm">
       <div className="flex items-center justify-between">
         <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${tone}`}>
           <Icon size={17} strokeWidth={1.9} />
@@ -82,7 +82,7 @@ function RejectModal({ name, busy, onConfirm, onCancel }: {
   const [reason, setReason] = useState("");
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-7 shadow-2xl">
+      <div className="w-full max-w-sm rounded-xl bg-white p-7 shadow-2xl">
         <p className="text-[1rem] font-extrabold text-[#1a1a1a]">Reject buyer application</p>
         <p className="mt-1 text-[0.83rem] text-[#5c5e62]">Rejecting <span className="font-semibold">{name}</span>. The reason is recorded on the timeline.</p>
         <textarea
@@ -286,7 +286,7 @@ export default function CustomerApprovalsPage() {
       {view === "requests" ? (
         <AccessRequestsTable onPendingCount={(n) => setCounts((c) => ({ ...c, requests: n }))} />
       ) : (
-        <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+        <div className="overflow-hidden rounded-xl bg-white shadow-sm">
           {/* Filters */}
           <div className="border-b border-black/[0.06] px-5 py-3">
             <div className="mb-2.5 flex flex-wrap gap-1">

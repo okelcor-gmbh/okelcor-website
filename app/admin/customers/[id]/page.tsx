@@ -143,7 +143,7 @@ function OrderStatusBadge({ status, paymentStatus }: { status: string; paymentSt
 
 function SectionCard({ title, icon: Icon, action, children }: { title: string; icon: React.ElementType; action?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+    <div className="overflow-hidden rounded-xl bg-white shadow-sm">
       <div className="flex items-center justify-between gap-2.5 border-b border-black/[0.06] px-5 py-4">
         <div className="flex items-center gap-2.5">
           <Icon size={15} className="text-[#5c5e62]" />
@@ -201,7 +201,7 @@ function ConfirmModal({ title, body, confirmLabel, danger = false, reason, onRea
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-7 shadow-2xl">
+      <div className="w-full max-w-sm rounded-xl bg-white p-7 shadow-2xl">
         <p className="text-[1rem] font-extrabold text-[#1a1a1a]">{title}</p>
         <p className="mt-2 text-[0.83rem] leading-relaxed text-[#5c5e62]">{body}</p>
         {needsReason && (

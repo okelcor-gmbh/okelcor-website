@@ -73,7 +73,7 @@ export default function StaffMessageThread({ messageId }: { messageId: number })
 
   if (loadError || !root) {
     return (
-      <div className="rounded-2xl bg-white p-10 text-center shadow-sm">
+      <div className="rounded-xl bg-white p-10 text-center shadow-sm">
         <MailWarning size={30} className="mx-auto text-[#9ca3af]" />
         <p className="mt-3 text-[0.9rem] font-semibold text-[#1a1a1a]">
           {loadError ?? "Message not found."}
@@ -100,7 +100,7 @@ export default function StaffMessageThread({ messageId }: { messageId: number })
         <ArrowLeft size={14} /> All messages
       </Link>
 
-      <div className="mb-5 rounded-2xl bg-white p-6 shadow-sm">
+      <div className="mb-5 rounded-xl bg-white p-6 shadow-sm">
         <h1 className="text-[1.15rem] font-extrabold text-[#1a1a1a]">{root.subject}</h1>
         {root.is_forward && root.forwarded_from?.action_url && (
           <Link
@@ -127,7 +127,7 @@ function MessageCard({ message }: { message: StaffMessage }) {
   const failed = message.recipients.filter((r) => r.email_status === "failed");
 
   return (
-    <article className="rounded-2xl bg-white p-6 shadow-sm">
+    <article className="rounded-xl bg-white p-6 shadow-sm">
       <header className="flex flex-wrap items-baseline gap-x-2 gap-y-1 border-b border-black/[0.06] pb-3">
         <span className="text-[0.875rem] font-bold text-[#1a1a1a]">{message.sender.name}</span>
         {message.sent_by_me && (
@@ -238,7 +238,7 @@ function ReplyBox({ parentId, onSent }: { parentId: number; onSent: () => void }
   }
 
   return (
-    <form onSubmit={submit} className="mt-5 rounded-2xl bg-white p-6 shadow-sm">
+    <form onSubmit={submit} className="mt-5 rounded-xl bg-white p-6 shadow-sm">
       <p className="mb-3 flex items-center gap-2 text-[0.8rem] font-bold text-[#1a1a1a]">
         <CornerUpLeft size={14} className="text-[#f4511e]" /> Reply
       </p>

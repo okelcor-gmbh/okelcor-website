@@ -41,7 +41,7 @@ function MetricCard({
 }) {
   return (
     <div
-      className={`flex items-center gap-4 rounded-2xl bg-white px-5 py-4 shadow-sm ${
+      className={`flex items-center gap-4 rounded-xl bg-white px-5 py-4 shadow-sm ${
         highlight ? "ring-1 ring-red-200" : ""
       }`}
     >

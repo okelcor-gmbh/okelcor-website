@@ -17,9 +17,9 @@ export default async function AdminUnauthorizedPage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#f5f5f7] px-6 py-12 text-center">
-      <div className="w-full max-w-md rounded-2xl bg-white p-10 shadow-sm">
+      <div className="w-full max-w-md rounded-xl bg-white p-10 shadow-sm">
 
-        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50">
+        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-xl bg-red-50">
           <ShieldOff size={28} strokeWidth={1.6} className="text-red-500" />
         </div>
 

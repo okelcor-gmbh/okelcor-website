@@ -141,7 +141,7 @@ export default function CommandPalette({ role }: { role: string }) {
       role="presentation"
     >
       <div
-        className="w-full max-w-xl overflow-hidden rounded-2xl bg-white shadow-2xl"
+        className="w-full max-w-xl overflow-hidden rounded-xl bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"

@@ -223,7 +223,7 @@ function SummaryCard({
   accent: string;
 }) {
   return (
-    <div className="flex items-center gap-4 rounded-2xl border border-black/[0.07] bg-white p-5">
+    <div className="flex items-center gap-4 rounded-xl border border-black/[0.07] bg-white p-5">
       <div
         className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${accent}`}
       >
@@ -534,7 +534,7 @@ export default function LogisticsDashboard({ adminRole }: { adminRole: string })
       )}
 
       {/* Filter bar */}
-      <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-black/[0.07] bg-white p-4">
+      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-black/[0.07] bg-white p-4">
 
         <select
           value={filterSource}
@@ -661,7 +661,7 @@ export default function LogisticsDashboard({ adminRole }: { adminRole: string })
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-2xl border border-black/[0.07] bg-white">
+      <div className="overflow-hidden rounded-xl border border-black/[0.07] bg-white">
 
         {loading && !data && (
           <div className="flex items-center justify-center gap-2 py-20 text-[0.83rem] text-[#5c5e62]">

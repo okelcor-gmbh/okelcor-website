@@ -107,7 +107,7 @@ export default function ProductMixBoard() {
 
       {/* The answer, in words */}
       {verdict && (
-        <div className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-3.5 text-[0.85rem] font-semibold text-emerald-800">
+        <div className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-3.5 text-[0.85rem] font-semibold text-emerald-800">
           {verdict}
         </div>
       )}
@@ -115,7 +115,7 @@ export default function ProductMixBoard() {
       {/* Condition cards */}
       <div className="mb-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {[{ label: "Used tyres", row: used }, { label: "New tyres", row: knew }].map(({ label, row }) => (
-          <div key={label} className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-black/[0.06]">
+          <div key={label} className="rounded-xl bg-white p-5 shadow-sm ring-1 ring-black/[0.06]">
             <p className="mb-2 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#9ca3af]">{label}</p>
             {row ? (
               <>
@@ -133,7 +133,7 @@ export default function ProductMixBoard() {
             )}
           </div>
         ))}
-        <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-black/[0.06]">
+        <div className="rounded-xl bg-white p-5 shadow-sm ring-1 ring-black/[0.06]">
           <p className="mb-2 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#9ca3af]">Data quality</p>
           <p className="text-[0.83rem] text-[#5c5e62]">
             {unknown ? `${unknown.units} sold tyre(s) matched no product — condition unknown.` : "Every sold line matched a product."}
@@ -152,7 +152,7 @@ export default function ProductMixBoard() {
             <h2 className="text-[0.875rem] font-extrabold text-[#1a1a1a]">Bundle suggestions</h2>
             <span className="text-[0.72rem] text-[#9ca3af]">sizes repeat buyers keep reordering, in the country where the demand lives</span>
           </div>
-          <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/[0.06]">
+          <div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-black/[0.06]">
             <ul className="divide-y divide-black/[0.05]">
               {data.bundles.map((b, i) => (
                 <li key={i} className="flex flex-wrap items-center gap-3 px-4 py-3">
@@ -168,7 +168,7 @@ export default function ProductMixBoard() {
 
       {/* Top sizes */}
       <h2 className="mb-2.5 text-[0.875rem] font-extrabold text-[#1a1a1a]">Top selling sizes</h2>
-      <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/[0.06]">
+      <div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-black/[0.06]">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[760px] text-left text-[0.8rem]">
             <thead>

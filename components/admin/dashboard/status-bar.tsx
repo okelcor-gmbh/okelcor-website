@@ -80,7 +80,7 @@ export default function StatusBar() {
   ];
 
   return (
-    <div className={`mb-5 flex flex-wrap items-center gap-x-1 gap-y-2 rounded-2xl border border-black/[0.06] bg-white px-4 py-3 transition-opacity ${stale ? "opacity-60" : ""}`}>
+    <div className={`mb-5 flex flex-wrap items-center gap-x-1 gap-y-2 rounded-xl border border-black/[0.06] bg-white px-4 py-3 transition-opacity ${stale ? "opacity-60" : ""}`}>
       {items.map((item) => (
         <Link
           key={item.href}

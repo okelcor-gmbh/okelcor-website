@@ -99,7 +99,7 @@ export default function MyWork({
 
   if (items.length === 0) {
     return (
-      <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl bg-white shadow-sm">
         <EmptyState
           icon={ClipboardCheck}
           heading="Nothing on your plate"
@@ -123,7 +123,7 @@ export default function MyWork({
                 {sectionItems.length}
               </span>
             </div>
-            <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+            <div className="overflow-hidden rounded-xl bg-white shadow-sm">
               <ul className="divide-y divide-black/[0.05]">
                 {sectionItems.map((item, idx) => (
                   <WorkRow

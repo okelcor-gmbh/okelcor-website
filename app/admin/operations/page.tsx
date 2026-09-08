@@ -57,7 +57,7 @@ export default async function AdminOperationsPage({ searchParams }: { searchPara
       ) : (
         // Deployed ahead of the migrations by design. An empty grid would read
         // as "no orders this month", which is a different and wrong statement.
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-[0.85rem] text-amber-900">
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 text-[0.85rem] text-amber-900">
           <p className="font-semibold">The operations board isn&apos;t available on this server yet.</p>
           <p className="mt-1">
             This screen is deployed ahead of the API that feeds it. Nothing is wrong with your

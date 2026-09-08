@@ -121,7 +121,7 @@ export default function LiquidityLadder() {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 rounded-2xl border border-black/[0.06] bg-white p-8 text-[0.83rem] text-[#5c5e62]">
+      <div className="flex items-center gap-2 rounded-xl border border-black/[0.06] bg-white p-8 text-[0.83rem] text-[#5c5e62]">
         <Loader2 size={14} className="animate-spin" /> Loading…
       </div>
     );
@@ -129,7 +129,7 @@ export default function LiquidityLadder() {
 
   if (unavailable) {
     return (
-      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-[0.83rem] text-amber-900">
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-[0.83rem] text-amber-900">
         <p className="font-semibold">Not available on this server yet.</p>
         <p className="mt-0.5">{unavailable}</p>
       </div>
@@ -139,7 +139,7 @@ export default function LiquidityLadder() {
   return (
     <div className="space-y-4">
       {error && (
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-3 text-[0.83rem] text-red-700">{error}</div>
+        <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-[0.83rem] text-red-700">{error}</div>
       )}
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
@@ -149,7 +149,7 @@ export default function LiquidityLadder() {
           return (
             <div
               key={w.week_key}
-              className={`rounded-2xl border bg-white p-4 ${
+              className={`rounded-xl border bg-white p-4 ${
                 w.is_current ? "border-[#f4511e]/40 ring-1 ring-[#f4511e]/20" : "border-black/[0.06]"
               }`}
             >
@@ -241,7 +241,7 @@ export default function LiquidityLadder() {
         projected close where none is entered.
       </p>
 
-      <div className="rounded-2xl border border-black/[0.06] bg-white">
+      <div className="rounded-xl border border-black/[0.06] bg-white">
         <button
           type="button"
           onClick={() => void loadHistory()}

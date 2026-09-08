@@ -255,7 +255,7 @@ export default function EcInvoiceList({
 
   if (loading && !meta) {
     return (
-      <div className="flex items-center gap-2 rounded-2xl border border-black/[0.06] bg-white p-8 text-[0.83rem] text-[#5c5e62]">
+      <div className="flex items-center gap-2 rounded-xl border border-black/[0.06] bg-white p-8 text-[0.83rem] text-[#5c5e62]">
         <Loader2 size={14} className="animate-spin" /> Loading…
       </div>
     );
@@ -263,7 +263,7 @@ export default function EcInvoiceList({
 
   if (unavailable) {
     return (
-      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-[0.83rem] text-amber-900">
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-[0.83rem] text-amber-900">
         <p className="font-semibold">Not available on this server yet.</p>
         <p className="mt-0.5">{unavailable}</p>
       </div>
@@ -275,7 +275,7 @@ export default function EcInvoiceList({
   return (
     <div className="space-y-4">
       {/* ── Meta strip: VAT, period, filing status, outputs ─────────────── */}
-      <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-black/[0.06] bg-white p-4">
+      <div className="flex flex-wrap items-end gap-3 rounded-xl border border-black/[0.06] bg-white p-4">
         <div className="min-w-[200px]">
           <label className={LABEL}>Taxpayer VAT ID (USt-IdNr.)</label>
           <div className="flex items-center gap-1.5">
@@ -358,11 +358,11 @@ export default function EcInvoiceList({
 
       {/* ── The ZM table ────────────────────────────────────────────────── */}
       {groups.length === 0 ? (
-        <div className="rounded-2xl border border-black/[0.06] bg-white p-8 text-center text-[0.83rem] text-[#8c8f94]">
+        <div className="rounded-xl border border-black/[0.06] bg-white p-8 text-center text-[0.83rem] text-[#8c8f94]">
           Nothing in {periodLabel(period)} yet — add a country / customer group to start the list. EU supplies feed the ZM; non-EU exports are tracked right beside them.
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
+        <div className="overflow-hidden rounded-xl border border-black/[0.06] bg-white">
           <table className="w-full">
             <thead>
               <tr className="border-b border-black/[0.06] bg-[#fafafa]">
@@ -407,7 +407,7 @@ export default function EcInvoiceList({
       {xmlOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div role="presentation" className="absolute inset-0 bg-black/50" onClick={() => setXmlOpen(false)} />
-          <div className="relative flex max-h-[85vh] w-full max-w-3xl flex-col rounded-2xl bg-white shadow-xl">
+          <div className="relative flex max-h-[85vh] w-full max-w-3xl flex-col rounded-xl bg-white shadow-xl">
             <div className="flex items-center justify-between border-b border-black/[0.06] px-6 py-4">
               <h2 className="text-[0.95rem] font-extrabold text-[#1a1a1a]">
                 ELSTER XML payload — {periodLabel(period)}
@@ -682,7 +682,7 @@ function GroupForm({
   }
 
   return (
-    <form onSubmit={submit} className="space-y-3 rounded-2xl border border-black/[0.06] bg-white p-4">
+    <form onSubmit={submit} className="space-y-3 rounded-xl border border-black/[0.06] bg-white p-4">
       <p className="text-[0.72rem] font-bold uppercase tracking-wider text-[#5c5e62]">
         New country transaction group — {periodLabel(period)}
       </p>

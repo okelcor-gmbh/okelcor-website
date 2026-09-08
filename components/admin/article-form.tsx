@@ -388,7 +388,7 @@ export default function ArticleForm(props: Props) {
       )}
 
       {/* ── Global settings ── */}
-      <div className="rounded-2xl bg-white p-6 shadow-sm">
+      <div className="rounded-xl bg-white p-6 shadow-sm">
         <p className="mb-5 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#5c5e62]">
           Global Settings
         </p>
@@ -531,7 +531,7 @@ export default function ArticleForm(props: Props) {
       </div>
 
       {/* ── Locale tabs ── */}
-      <div className="rounded-2xl bg-white p-6 shadow-sm">
+      <div className="rounded-xl bg-white p-6 shadow-sm">
         {/* Tab bar */}
         <div className="mb-6 flex gap-2 border-b border-black/[0.06] pb-0">
           {tabs.map(({ locale, label, required }) => {

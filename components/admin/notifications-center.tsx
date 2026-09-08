@@ -132,7 +132,7 @@ export default function NotificationsCenter() {
       </div>
 
       {/* List */}
-      <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl bg-white shadow-sm">
         {loading ? (
           <div className="flex justify-center py-16">
             <Loader2 size={22} className="animate-spin text-[#f4511e]" />

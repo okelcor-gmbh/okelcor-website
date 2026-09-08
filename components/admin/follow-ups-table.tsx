@@ -68,7 +68,7 @@ function CompleteModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+      <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl">
         <div className="mb-4 flex items-start justify-between gap-3">
           <p className="text-[0.95rem] font-extrabold text-[#1a1a1a]">Complete Follow-up</p>
           <button type="button" onClick={onCancel}><X size={16} className="text-[#9ca3af]" /></button>
@@ -121,7 +121,7 @@ function RescheduleModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+      <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl">
         <div className="mb-4 flex items-start justify-between gap-3">
           <p className="text-[0.95rem] font-extrabold text-[#1a1a1a]">Reschedule Follow-up</p>
           <button type="button" onClick={onCancel}><X size={16} className="text-[#9ca3af]" /></button>
@@ -215,7 +215,7 @@ export default function FollowUpsTable({ initialFilter = "all" }: { initialFilte
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl bg-white shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[920px] text-left">
             <thead>

@@ -157,7 +157,7 @@ function ComplianceStrip({ declaration }: { declaration: EuDeclarationFull }) {
   const l = URGENCY_LABEL[urgency];
 
   return (
-    <div className={`grid grid-cols-2 gap-px overflow-hidden rounded-2xl border lg:grid-cols-4 ${c.strip}`}>
+    <div className={`grid grid-cols-2 gap-px overflow-hidden rounded-xl border lg:grid-cols-4 ${c.strip}`}>
 
       {/* Days Pending */}
       <div className="flex flex-col gap-1 bg-white/70 px-5 py-4">
@@ -282,7 +282,7 @@ export default async function EuDeclarationDetailPage({ params }: Props) {
       <div className="grid gap-6 lg:grid-cols-2">
 
         {/* Order & Customer */}
-        <div className="rounded-2xl bg-white p-6 shadow-sm">
+        <div className="rounded-xl bg-white p-6 shadow-sm">
           <p className="mb-5 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
             Order &amp; Customer
           </p>
@@ -309,7 +309,7 @@ export default async function EuDeclarationDetailPage({ params }: Props) {
         </div>
 
         {/* Certificate details — form fields submitted by the customer */}
-        <div className="rounded-2xl bg-white p-6 shadow-sm">
+        <div className="rounded-xl bg-white p-6 shadow-sm">
           <p className="mb-5 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
             Certificate Details
           </p>
@@ -339,7 +339,7 @@ export default async function EuDeclarationDetailPage({ params }: Props) {
       </div>
 
       {/* Row 2: Representative & Signature */}
-      <div className="rounded-2xl bg-white p-6 shadow-sm">
+      <div className="rounded-xl bg-white p-6 shadow-sm">
         <p className="mb-5 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
           Representative &amp; Signature
         </p>
@@ -363,7 +363,7 @@ export default async function EuDeclarationDetailPage({ params }: Props) {
 
       {/* Notes */}
       {(declaration.notes || declaration.admin_notes) && (
-        <div className="rounded-2xl bg-white p-6 shadow-sm">
+        <div className="rounded-xl bg-white p-6 shadow-sm">
           <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
             Notes
           </p>

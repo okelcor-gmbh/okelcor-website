@@ -135,7 +135,7 @@ function Bubble({ msg }: { msg: Message }) {
         {isOperator ? "A" : (msg.user.nickname?.[0] ?? "V").toUpperCase()}
       </div>
       <div className={`max-w-[72%] ${isOperator ? "items-end" : "items-start"} flex flex-col gap-0.5`}>
-        <div className={`rounded-2xl px-4 py-2.5 text-[0.85rem] leading-relaxed ${
+        <div className={`rounded-xl px-4 py-2.5 text-[0.85rem] leading-relaxed ${
           isOperator
             ? "rounded-tr-sm bg-[#f4511e] text-white"
             : "rounded-tl-sm bg-[#f0f2f5] text-[#1a1a1a]"

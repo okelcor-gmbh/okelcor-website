@@ -130,7 +130,7 @@ export default function ForwardToColleagueModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-8">
-      <div className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
+      <div className="relative w-full max-w-lg overflow-hidden rounded-xl bg-white shadow-2xl">
         <button
           type="button" onClick={onClose} aria-label="Close"
           className="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full text-[#9ca3af] transition hover:bg-[#f0f2f5] hover:text-[#1a1a1a]"

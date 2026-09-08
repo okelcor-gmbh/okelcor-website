@@ -358,7 +358,7 @@ export default function QuoteItemsCard({ quoteId, onItemsChange }: Props) {
   // ── Render ────────────────────────────────────────────────────────────────────
 
   return (
-    <div id="quote-items" className="rounded-2xl bg-white p-6 shadow-sm">
+    <div id="quote-items" className="rounded-xl bg-white p-6 shadow-sm">
       {/* Header */}
       <div className="mb-4 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">

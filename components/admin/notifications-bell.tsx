@@ -109,7 +109,7 @@ export default function NotificationsBell() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-11 z-50 w-80 overflow-hidden rounded-2xl border border-black/[0.08] bg-white shadow-lg">
+        <div className="absolute right-0 top-11 z-50 w-80 overflow-hidden rounded-xl border border-black/[0.08] bg-white shadow-lg">
           <div className="flex items-center justify-between border-b border-black/[0.06] px-4 py-3">
             <p className="text-[0.83rem] font-bold text-[#1a1a1a]">Notifications</p>
             {unreadCount > 0 && (

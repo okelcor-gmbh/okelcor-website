@@ -116,7 +116,7 @@ export default function OrderProfitabilityCard({
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 rounded-2xl bg-white p-8 text-[0.83rem] text-[#5c5e62] shadow-sm">
+      <div className="flex items-center gap-2 rounded-xl bg-white p-8 text-[0.83rem] text-[#5c5e62] shadow-sm">
         <Loader2 size={14} className="animate-spin" /> Loading…
       </div>
     );
@@ -124,7 +124,7 @@ export default function OrderProfitabilityCard({
 
   if (unavailable || !data) {
     return (
-      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-[0.83rem] text-amber-900">
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-[0.83rem] text-amber-900">
         <p className="font-semibold">Not available on this server yet.</p>
         <p className="mt-0.5">{unavailable}</p>
       </div>
@@ -150,7 +150,7 @@ export default function OrderProfitabilityCard({
       )}
 
       {/* ── The bottom line ─────────────────────────────────────────────── */}
-      <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-black/[0.06]">
+      <div className="rounded-xl bg-white p-5 shadow-sm ring-1 ring-black/[0.06]">
         <p className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
           Profitability
         </p>
@@ -225,7 +225,7 @@ export default function OrderProfitabilityCard({
       </div>
 
       {/* ── Revenue invoice ─────────────────────────────────────────────── */}
-      <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-black/[0.06]">
+      <div className="rounded-xl bg-white p-5 shadow-sm ring-1 ring-black/[0.06]">
         <div className="mb-3 flex items-center justify-between">
           <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
             Revenue invoice
@@ -299,7 +299,7 @@ export default function OrderProfitabilityCard({
       </div>
 
       {/* ── Costs ───────────────────────────────────────────────────────── */}
-      <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-black/[0.06]">
+      <div className="rounded-xl bg-white p-5 shadow-sm ring-1 ring-black/[0.06]">
         <div className="mb-3 flex items-center justify-between">
           <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
             Supplier invoices &amp; fees

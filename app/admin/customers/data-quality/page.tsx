@@ -75,7 +75,7 @@ export default async function DataQualityPage() {
       )}
 
       {!hasSummary && (
-        <div className="mb-6 rounded-2xl border border-black/[0.07] bg-white px-5 py-4 text-[0.83rem] text-[#9ca3af]">
+        <div className="mb-6 rounded-xl border border-black/[0.07] bg-white px-5 py-4 text-[0.83rem] text-[#9ca3af]">
           Summary data unavailable — backend endpoint not yet deployed. Issues table is still functional.
         </div>
       )}

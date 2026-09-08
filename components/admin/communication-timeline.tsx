@@ -220,7 +220,7 @@ export default function CommunicationTimeline({ context, entityId, compact = fal
 
       {/* Add entry form */}
       {showForm && (
-        <form onSubmit={handleSubmit} className="mb-4 rounded-2xl border border-black/[0.08] bg-[#fafafa] p-4">
+        <form onSubmit={handleSubmit} className="mb-4 rounded-xl border border-black/[0.08] bg-[#fafafa] p-4">
           <div className="grid grid-cols-2 gap-3 mb-3">
             <div>
               <label className="mb-1 block text-[0.7rem] font-semibold uppercase tracking-wide text-[#9ca3af]">Type</label>

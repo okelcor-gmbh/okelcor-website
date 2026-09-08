@@ -111,7 +111,7 @@ export default function InsightsBell() {
         </button>
 
         {open && (
-          <div className="absolute right-0 top-11 z-50 w-80 overflow-hidden rounded-2xl border border-black/[0.08] bg-white shadow-lg">
+          <div className="absolute right-0 top-11 z-50 w-80 overflow-hidden rounded-xl border border-black/[0.08] bg-white shadow-lg">
             <div className="flex items-center justify-between border-b border-black/[0.06] px-4 py-3">
               <p className="text-[0.83rem] font-bold text-[#1a1a1a]">Insights</p>
               {visible.length > 0 && (
@@ -244,7 +244,7 @@ function InsightToast({
       `}</style>
 
       <div
-        className="relative flex w-[320px] items-start gap-3 overflow-hidden rounded-2xl border border-black/[0.08] bg-white p-4 shadow-[0_12px_32px_rgba(0,0,0,0.14)]"
+        className="relative flex w-[320px] items-start gap-3 overflow-hidden rounded-xl border border-black/[0.08] bg-white p-4 shadow-[0_12px_32px_rgba(0,0,0,0.14)]"
         style={{ animation: "insightSlideIn 0.25s ease-out forwards" }}
       >
         <div className={`absolute left-0 top-0 h-full w-1 ${sev.bar}`} />

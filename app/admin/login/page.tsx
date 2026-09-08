@@ -74,7 +74,7 @@ function PasswordForm({
   };
 
   return (
-    <div className="rounded-2xl bg-white p-8 shadow-2xl shadow-black/40">
+    <div className="rounded-xl bg-white p-8 shadow-2xl shadow-black/40">
       {error && <ErrorAlert message={error} />}
 
       <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
@@ -162,7 +162,7 @@ function TwoFactorChallenge({
   };
 
   return (
-    <div className="rounded-2xl bg-white p-8 shadow-2xl shadow-black/40">
+    <div className="rounded-xl bg-white p-8 shadow-2xl shadow-black/40">
       <div className="mb-5 text-center">
         <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#f4511e]/10">
           <svg className="h-6 w-6 text-[#f4511e]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -303,7 +303,7 @@ function MandatoryTwoFactorSetupFlow() {
 
   if (loadingQr) {
     return (
-      <div className="rounded-2xl bg-white p-8 shadow-2xl shadow-black/40 text-center">
+      <div className="rounded-xl bg-white p-8 shadow-2xl shadow-black/40 text-center">
         <Spinner />
         <p className="mt-3 text-[0.83rem] text-[#5c5e62]">Loading authenticator setup…</p>
       </div>
@@ -313,7 +313,7 @@ function MandatoryTwoFactorSetupFlow() {
   // ── Step: Codes saved confirmation ────────────────────────────────────────
   if (step === "codes") {
     return (
-      <div className="rounded-2xl bg-white p-8 shadow-2xl shadow-black/40">
+      <div className="rounded-xl bg-white p-8 shadow-2xl shadow-black/40">
         <div className="mb-5 text-center">
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
             <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -352,7 +352,7 @@ function MandatoryTwoFactorSetupFlow() {
 
   // ── Step: Scan QR / enter code ────────────────────────────────────────────
   return (
-    <div className="rounded-2xl bg-white p-8 shadow-2xl shadow-black/40">
+    <div className="rounded-xl bg-white p-8 shadow-2xl shadow-black/40">
       <div className="mb-5 text-center">
         <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#f4511e]/10">
           <svg className="h-6 w-6 text-[#f4511e]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>

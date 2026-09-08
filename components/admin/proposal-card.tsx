@@ -273,7 +273,7 @@ export default function ProposalCard({ quote, onStatusChange, items, itemCount }
 
   return (
     <>
-      <div className="rounded-2xl bg-white p-6 shadow-sm">
+      <div className="rounded-xl bg-white p-6 shadow-sm">
         <div className="mb-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
@@ -619,7 +619,7 @@ export default function ProposalCard({ quote, onStatusChange, items, itemCount }
       {/* ── Void modal ── */}
       {showVoidModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-sm rounded-2xl bg-white p-7 shadow-2xl">
+          <div className="w-full max-w-sm rounded-xl bg-white p-7 shadow-2xl">
             <div className="mb-4 flex items-start justify-between gap-4">
               <div>
                 <p className="text-[1rem] font-extrabold text-[#1a1a1a]">Void Proposal</p>

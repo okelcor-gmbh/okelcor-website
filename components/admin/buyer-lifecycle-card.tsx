@@ -149,7 +149,7 @@ export default function BuyerLifecycleCard({ customerId, lifecycle, access, onPa
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+    <div className="overflow-hidden rounded-xl bg-white shadow-sm">
       <div className="flex items-center gap-2.5 border-b border-black/[0.06] px-5 py-4">
         <UserCheck size={15} className="text-[#5c5e62]" />
         <p className="text-[0.9rem] font-extrabold text-[#1a1a1a]">Buyer Lifecycle</p>

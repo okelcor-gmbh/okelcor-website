@@ -86,7 +86,7 @@ function InfoRow({ label, value, fallback }: { label: string; value?: string | n
 
 function SectionCard({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="rounded-2xl bg-white p-6 shadow-sm">
+    <div className="rounded-xl bg-white p-6 shadow-sm">
       <p className="mb-5 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">{title}</p>
       {children}
     </div>
@@ -414,7 +414,7 @@ export default function QuoteDetail({
       <div className="flex flex-col gap-6">
 
         {/* ── Quote Status card ── */}
-        <div className="rounded-2xl bg-white p-6 shadow-sm">
+        <div className="rounded-xl bg-white p-6 shadow-sm">
           <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
             Quote Status
           </p>
@@ -472,7 +472,7 @@ export default function QuoteDetail({
           const hasQualityData = score != null || (flags && flags.length > 0) || reviewStatus;
           if (!hasQualityData) return null;
           return (
-            <div className="rounded-2xl bg-white p-6 shadow-sm">
+            <div className="rounded-xl bg-white p-6 shadow-sm">
               <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
                 Quality Review
               </p>
@@ -557,7 +557,7 @@ export default function QuoteDetail({
         })()}
 
         {/* ── CRM-3: Lead Qualification card ── */}
-        <div className="rounded-2xl bg-white p-6 shadow-sm">
+        <div className="rounded-xl bg-white p-6 shadow-sm">
           <div className="mb-4 flex items-center justify-between gap-4">
             <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
               Lead Qualification
@@ -758,7 +758,7 @@ export default function QuoteDetail({
         {/* ── Convert to Customer modal ── */}
         {showConvertToCustomer && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-            <div className="w-full max-w-md rounded-2xl bg-white p-7 shadow-2xl">
+            <div className="w-full max-w-md rounded-xl bg-white p-7 shadow-2xl">
               <div className="mb-5 flex items-start justify-between gap-4">
                 <div>
                   <p className="text-[1rem] font-extrabold text-[#1a1a1a]">Convert Lead to Customer</p>
@@ -944,7 +944,7 @@ export default function QuoteDetail({
         />
 
         {/* ── Order Conversion card ── */}
-        <div className="rounded-2xl bg-white p-6 shadow-sm">
+        <div className="rounded-xl bg-white p-6 shadow-sm">
           <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
             Order Conversion
           </p>
@@ -1061,7 +1061,7 @@ export default function QuoteDetail({
           const isExisting = qr.lead_existing_customer as boolean | undefined;
           if (!customerId && !isExisting) return null;
           return (
-            <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+            <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-5">
               <AlertCircle size={16} className="mt-0.5 shrink-0 text-amber-600" />
               <div className="flex-1 min-w-0">
                 <p className="text-[0.875rem] font-semibold text-amber-800">

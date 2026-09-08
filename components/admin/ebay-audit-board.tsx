@@ -195,7 +195,7 @@ export default function EbayAuditBoard() {
 
       {/* Reconciliation vs the live snapshot */}
       {counts && meta?.live.fetched_at && (counts.price_drift > 0 || counts.live_missing > 0 || counts.unmatched > 0) && (
-        <div className="mb-5 flex flex-wrap items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-[0.8rem] text-amber-800">
+        <div className="mb-5 flex flex-wrap items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[0.8rem] text-amber-800">
           <AlertTriangle size={14} className="shrink-0 text-amber-500" />
           <span className="font-bold">eBay disagrees with the panel:</span>
           {counts.price_drift > 0 && <span>{counts.price_drift} price(s) differ on eBay</span>}
@@ -226,7 +226,7 @@ export default function EbayAuditBoard() {
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/[0.06]">
+      <div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-black/[0.06]">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[1080px] text-left text-[0.78rem]">
             <thead>
@@ -357,7 +357,7 @@ export default function EbayAuditBoard() {
           <h2 className="mb-2 text-[0.8rem] font-extrabold text-[#1a1a1a]">
             On eBay, but not in the panel ({meta.unmatched_listings.length})
           </h2>
-          <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/[0.06]">
+          <div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-black/[0.06]">
             <table className="w-full text-left text-[0.78rem]">
               <thead>
                 <tr className="border-b border-black/[0.08] bg-[#f8f9fa] text-[#6b7280]">
@@ -435,7 +435,7 @@ export default function EbayAuditBoard() {
 
 function SummaryCard({ label, value, sub, accent }: { label: string; value: number; sub?: string; accent?: string }) {
   return (
-    <div className="rounded-2xl bg-white px-4 py-3.5 shadow-sm ring-1 ring-black/[0.06]">
+    <div className="rounded-xl bg-white px-4 py-3.5 shadow-sm ring-1 ring-black/[0.06]">
       <p className="mb-1 text-[0.65rem] font-bold uppercase tracking-[0.15em] text-[#9ca3af]">{label}</p>
       <p className={`text-[1.35rem] font-extrabold leading-none ${accent ?? "text-[#1a1a1a]"}`}>{value}</p>
       {sub && <p className="mt-1 text-[0.68rem] text-[#9ca3af]">{sub}</p>}

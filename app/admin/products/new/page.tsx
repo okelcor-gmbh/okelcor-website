@@ -29,7 +29,7 @@ export default async function NewProductPage() {
       </div>
 
       {/* Form card */}
-      <div className="rounded-2xl bg-white p-6 shadow-sm md:p-8">
+      <div className="rounded-xl bg-white p-6 shadow-sm md:p-8">
         <ProductForm mode="create" specSheet={specSheet} />
       </div>
     </div>

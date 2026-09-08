@@ -282,7 +282,7 @@ function SettingsGroup({
   };
 
   return (
-    <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+    <div className="overflow-hidden rounded-xl bg-white shadow-sm">
       {/* Header */}
       <div className="border-b border-black/[0.06] px-6 py-4">
         <p className="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">

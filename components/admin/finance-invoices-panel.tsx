@@ -115,7 +115,7 @@ function Reconciliation({ from, to, channel }: { from: string; to: string; chann
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 rounded-2xl border border-black/[0.06] bg-white p-8 text-[0.83rem] text-[#5c5e62]">
+      <div className="flex items-center gap-2 rounded-xl border border-black/[0.06] bg-white p-8 text-[0.83rem] text-[#5c5e62]">
         <Loader2 size={14} className="animate-spin" /> Comparing the two systems…
       </div>
     );
@@ -123,7 +123,7 @@ function Reconciliation({ from, to, channel }: { from: string; to: string; chann
 
   if (error || !rec) {
     return (
-      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-[0.83rem] text-amber-900">
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-[0.83rem] text-amber-900">
         {error ?? "No reconciliation available."}
       </div>
     );
@@ -131,14 +131,14 @@ function Reconciliation({ from, to, channel }: { from: string; to: string; chann
 
   if (rec.available === false) {
     return (
-      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-[0.83rem] text-amber-900">
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-[0.83rem] text-amber-900">
         <p className="font-semibold">Finance invoice recording isn&apos;t switched on yet.</p>
         <p className="mt-0.5">{rec.reason ?? "There is nothing to compare against until it is."}</p>
       </div>
     );
   }
 
-  const section = "rounded-2xl border border-black/[0.06] bg-white overflow-hidden";
+  const section = "rounded-xl border border-black/[0.06] bg-white overflow-hidden";
   const th = "px-3 py-2 text-left text-[0.68rem] font-bold uppercase tracking-wider text-[#5c5e62]";
   const td = "px-3 py-2 text-[0.8rem] text-[#171a20]";
 
@@ -342,7 +342,7 @@ function InvoiceForm({
   const err = (k: string) => fieldErrors[k]?.[0];
 
   return (
-    <form onSubmit={submit} className="rounded-2xl border border-black/[0.06] bg-white p-4">
+    <form onSubmit={submit} className="rounded-xl border border-black/[0.06] bg-white p-4">
       <div className="mb-3 flex items-center gap-2">
         <h3 className="text-[0.9rem] font-bold text-[#171a20]">
           {editing ? `Edit ${editing.external_number}` : "Record a finance invoice"}
@@ -675,22 +675,22 @@ export default function FinanceInvoicesPanel({
           )}
 
           {unavailable ? (
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-[0.83rem] text-amber-900">
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-[0.83rem] text-amber-900">
               <p className="font-semibold">Not available on this server yet.</p>
               <p className="mt-0.5">{unavailable}</p>
             </div>
           ) : loading ? (
-            <div className="flex items-center gap-2 rounded-2xl border border-black/[0.06] bg-white p-8 text-[0.83rem] text-[#5c5e62]">
+            <div className="flex items-center gap-2 rounded-xl border border-black/[0.06] bg-white p-8 text-[0.83rem] text-[#5c5e62]">
               <Loader2 size={14} className="animate-spin" /> Loading…
             </div>
           ) : rows.length === 0 ? (
-            <div className="rounded-2xl border border-black/[0.06] bg-white p-8 text-center text-[0.83rem] text-[#8c8f94]">
+            <div className="rounded-xl border border-black/[0.06] bg-white p-8 text-center text-[0.83rem] text-[#8c8f94]">
               {system !== "all" || hasFile !== "all"
                 ? "Nothing matches these filters in this period."
                 : "Nothing recorded for this period yet."}
             </div>
           ) : (
-            <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
+            <div className="overflow-hidden rounded-xl border border-black/[0.06] bg-white">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[760px]">
                   <thead>

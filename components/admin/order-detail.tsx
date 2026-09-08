@@ -232,7 +232,7 @@ function ShipmentEventManager({
   const cancelForm = () => { setAdding(false); setEditingId(null); setForm(EMPTY_FORM); setError(null); };
 
   return (
-    <div className="rounded-2xl bg-white p-6 shadow-sm">
+    <div className="rounded-xl bg-white p-6 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
         <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
           Shipment Events
@@ -378,7 +378,7 @@ function LogEntry({ log }: { log: AdminOrderLog }) {
 
 function ActivityLog({ logs }: { logs?: AdminOrderLog[] }) {
   return (
-    <div className="rounded-2xl bg-white p-6 shadow-sm">
+    <div className="rounded-xl bg-white p-6 shadow-sm">
       <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
         Activity Log
       </p>
@@ -1051,7 +1051,7 @@ export default function OrderDetail({
       {/* ══════════════════════════════════════════════════════════════════════
           WORKFLOW COMMAND CENTER
       ══════════════════════════════════════════════════════════════════════ */}
-      <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl bg-white shadow-sm">
 
         {/* Header row */}
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-black/[0.06] px-5 py-4">
@@ -1165,7 +1165,7 @@ export default function OrderDetail({
       {/* ══════════════════════════════════════════════════════════════════════
           TAB NAVIGATION
       ══════════════════════════════════════════════════════════════════════ */}
-      <div className="flex gap-1 overflow-x-auto rounded-2xl bg-white p-1.5 shadow-sm [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <div className="flex gap-1 overflow-x-auto rounded-xl bg-white p-1.5 shadow-sm [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {TAB_LABELS.filter((tab) => tab.id !== "finance" || canDo(adminRole, "finance.view")).map((tab) => (
           <button
             key={tab.id}
@@ -1191,7 +1191,7 @@ export default function OrderDetail({
       {activeTab === "overview" && (
         <>
           {/* Status + Shipment update card */}
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
+          <div className="rounded-xl bg-white p-6 shadow-sm">
             <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
               Order Status &amp; Shipment
             </p>
@@ -1313,7 +1313,7 @@ export default function OrderDetail({
 
           {/* Two-column: customer info + order summary */}
           <div className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-2xl bg-white p-6 shadow-sm">
+            <div className="rounded-xl bg-white p-6 shadow-sm">
               <p className="mb-5 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
                 Customer Details
               </p>
@@ -1333,7 +1333,7 @@ export default function OrderDetail({
               )}
             </div>
 
-            <div className="rounded-2xl bg-white p-6 shadow-sm">
+            <div className="rounded-xl bg-white p-6 shadow-sm">
               <div className="mb-5 flex items-center justify-between gap-3">
                 <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
                   Order Summary
@@ -1363,7 +1363,7 @@ export default function OrderDetail({
 
           {/* eBay source panel — only for eBay-sourced orders */}
           {order.source === "ebay" && (
-            <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+            <div className="overflow-hidden rounded-xl bg-white shadow-sm">
               <div className="flex items-center gap-3 border-b border-black/[0.06] border-l-4 border-l-green-500 px-6 py-4">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-green-100">
                   <ShoppingBag size={15} strokeWidth={2} className="text-green-700" />
@@ -1412,7 +1412,7 @@ export default function OrderDetail({
           )}
 
           {/* Order items */}
-          <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+          <div className="overflow-hidden rounded-xl bg-white shadow-sm">
             <div className="flex items-center justify-between gap-3 border-b border-black/[0.06] px-6 py-4">
               <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
                 Order Items
@@ -1510,7 +1510,7 @@ export default function OrderDetail({
           </div>
 
           {/* Order Actions */}
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
+          <div className="rounded-xl bg-white p-6 shadow-sm">
             <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#5c5e62]">
               Order Actions
             </p>
@@ -1596,7 +1596,7 @@ export default function OrderDetail({
         <>
           {/* Financial Lock Banner */}
           {isLocked && !revisionRequired && (
-            <div className="flex items-start gap-3.5 rounded-2xl border border-indigo-200 bg-indigo-50 px-5 py-4">
+            <div className="flex items-start gap-3.5 rounded-xl border border-indigo-200 bg-indigo-50 px-5 py-4">
               <Lock size={16} className="mt-0.5 shrink-0 text-indigo-500" strokeWidth={2} />
               <div className="min-w-0 flex-1">
                 <p className="text-[0.83rem] font-bold text-indigo-800">Financials Locked</p>
@@ -1612,7 +1612,7 @@ export default function OrderDetail({
 
           {/* Pending Financial Revision Card */}
           {revisionRequired && (
-            <div className="rounded-2xl border border-orange-200 bg-orange-50 p-5">
+            <div className="rounded-xl border border-orange-200 bg-orange-50 p-5">
               <div className="flex items-start gap-3.5">
                 <FileWarning size={16} className="mt-0.5 shrink-0 text-orange-500" strokeWidth={2} />
                 <div className="min-w-0 flex-1">
@@ -1660,7 +1660,7 @@ export default function OrderDetail({
 
           {/* Customer Acceptance Status Card */}
           {order.customer_acceptance_status != null && (
-            <div className="rounded-2xl border bg-white p-5 shadow-sm">
+            <div className="rounded-xl border bg-white p-5 shadow-sm">
               <div className="flex items-center gap-2 mb-3">
                 <UserCheck size={14} className="shrink-0 text-[#f4511e]" strokeWidth={2} />
                 <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
@@ -1776,7 +1776,7 @@ export default function OrderDetail({
 
           {/* Mark payment received (shortcut from payments tab) */}
           {canMarkPaidByHand && (
-            <div className="rounded-2xl bg-white p-5 shadow-sm">
+            <div className="rounded-xl bg-white p-5 shadow-sm">
               <p className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#5c5e62]">
                 Payment Receipt
               </p>
@@ -1839,7 +1839,7 @@ export default function OrderDetail({
       {activeTab === "compliance" && (
         <>
           {order.declaration_required != null ? (
-            <div className="rounded-2xl bg-white p-6 shadow-sm">
+            <div className="rounded-xl bg-white p-6 shadow-sm">
               <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
                 EU Entry Certificate
               </p>
@@ -1888,7 +1888,7 @@ export default function OrderDetail({
               </div>
             </div>
           ) : (
-            <div className="rounded-2xl bg-white p-6 shadow-sm">
+            <div className="rounded-xl bg-white p-6 shadow-sm">
               <p className="text-[0.875rem] text-[#5c5e62]">
                 No EU entry certificate requirement has been set for this order.
               </p>
@@ -1911,7 +1911,7 @@ export default function OrderDetail({
       {/* Mark payment as received modal */}
       {markPaidOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
             <p className="mb-1 text-[0.75rem] font-bold uppercase tracking-[0.15em] text-emerald-700">
               Mark Payment as Received
             </p>
@@ -1992,7 +1992,7 @@ export default function OrderDetail({
       {/* Delete confirmation modal */}
       {deleteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
             <p className="mb-1 text-[0.75rem] font-bold uppercase tracking-[0.15em] text-red-600">
               Delete Order
             </p>
@@ -2047,7 +2047,7 @@ export default function OrderDetail({
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
           onClick={(e) => { if (e.target === e.currentTarget && !itemModalLoading) closeItemModal(); }}
         >
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
             <p className="mb-5 text-[0.75rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
               {itemModalMode === "add" ? "Add Item" : "Edit Item"}
             </p>
@@ -2127,7 +2127,7 @@ export default function OrderDetail({
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
           onClick={(e) => { if (e.target === e.currentTarget && !deleteItemLoading) { setDeleteItemTarget(null); setDeleteItemReason(""); setDeleteItemError(null); } }}
         >
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
             <p className="mb-1 text-[0.75rem] font-bold uppercase tracking-[0.15em] text-red-600">
               Remove Item
             </p>
@@ -2171,7 +2171,7 @@ export default function OrderDetail({
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
           onClick={(e) => { if (e.target === e.currentTarget && !revisionLoading) closeRevisionModal(); }}
         >
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
+          <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl">
             <p className="mb-1 text-[0.75rem] font-bold uppercase tracking-[0.15em] text-indigo-600">
               Request Financial Revision
             </p>
@@ -2298,7 +2298,7 @@ export default function OrderDetail({
       {/* Approve Revision Modal */}
       {approveModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
             <p className="mb-1 text-[0.75rem] font-bold uppercase tracking-[0.15em] text-emerald-700">
               Approve Financial Revision
             </p>

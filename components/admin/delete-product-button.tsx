@@ -41,7 +41,7 @@ export default function DeleteProductButton({ productId, productName }: Props) {
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-[420px] rounded-2xl bg-white p-8 shadow-2xl">
+          <div className="w-full max-w-[420px] rounded-xl bg-white p-8 shadow-2xl">
             <div className="mb-5 flex items-start justify-between">
               <div className="flex h-11 w-11 items-center justify-center rounded-full bg-red-100">
                 <Trash2 size={18} className="text-red-600" />

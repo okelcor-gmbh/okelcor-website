@@ -113,7 +113,7 @@ export default function MediaPickerModal({ onSelect, onClose, defaultCollection 
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
-      <div className="flex h-[90vh] w-full max-w-4xl flex-col rounded-2xl bg-white shadow-2xl">
+      <div className="flex h-[90vh] w-full max-w-4xl flex-col rounded-xl bg-white shadow-2xl">
         {/* Header */}
         <div className="flex flex-shrink-0 items-center justify-between border-b border-black/[0.07] px-5 py-4">
           <p className="text-sm font-bold uppercase tracking-widest text-[#5c5e62]">Browse Media Library</p>
