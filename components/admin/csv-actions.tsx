@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Download, Upload, X, CheckCircle2, AlertCircle, Loader2, Trash2 } from "lucide-react";
+import { Download, Upload, X, CheckCircle2, AlertCircle, Loader2, Trash2, BookOpen } from "lucide-react";
+import CsvGuideModal from "@/components/admin/csv-guide-modal";
 import { deleteAllProducts } from "@/app/admin/products/actions";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -48,6 +49,7 @@ export default function CsvActions({
 
   const [exporting, setExporting]     = useState(false);
   const [brand, setBrand]             = useState("");
+  const [guideOpen, setGuideOpen]     = useState(false);
   const [brands, setBrands]           = useState<string[]>([]);
 
   // Brand list for scoped exports — light fetch, fails silently to "all".
@@ -213,6 +215,17 @@ export default function CsvActions({
         {exportError && (
           <span className="text-[0.78rem] font-medium text-red-500">{exportError}</span>
         )}
+
+        {/* The guide, where the buttons are — read before you export */}
+        <button
+          type="button"
+          onClick={() => setGuideOpen(true)}
+          className={outlineBtnCls}
+          title="How the export → edit → import loop works, and which columns are safe to touch"
+        >
+          <BookOpen size={15} strokeWidth={2} />
+          Read before export
+        </button>
 
         {/* Brand scope for the export — "all brands" by default */}
         {brands.length > 0 && (
@@ -687,6 +700,8 @@ export default function CsvActions({
           </div>
         </>
       )}
+
+      {guideOpen && <CsvGuideModal onClose={() => setGuideOpen(false)} />}
     </>
   );
 }
