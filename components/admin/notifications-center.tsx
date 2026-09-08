@@ -34,7 +34,7 @@ const SEVERITY_OPTIONS: { value: AdminNotificationSeverity | ""; label: string }
 ];
 
 const SELECT_CLS =
-  "h-10 rounded-xl border border-black/[0.09] bg-white px-3 text-[0.83rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10";
+  "h-10 rounded-xl border border-black/[0.09] bg-white px-3 text-[0.83rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10";
 
 export default function NotificationsCenter() {
   const [items, setItems] = useState<AdminNotification[]>([]);
@@ -101,8 +101,8 @@ export default function NotificationsCenter() {
           className={[
             "h-10 rounded-xl px-4 text-[0.8rem] font-semibold transition",
             unreadOnly
-              ? "bg-[#E85C1A] text-white"
-              : "border border-black/[0.09] bg-white text-[#5c5e62] hover:border-[#E85C1A] hover:text-[#E85C1A]",
+              ? "bg-[#f4511e] text-white"
+              : "border border-black/[0.09] bg-white text-[#5c5e62] hover:border-[#f4511e] hover:text-[#f4511e]",
           ].join(" ")}
         >
           Unread only
@@ -124,7 +124,7 @@ export default function NotificationsCenter() {
           type="button"
           disabled={!hasUnread}
           onClick={markAllRead}
-          className="ml-auto flex h-10 items-center gap-1.5 rounded-xl border border-black/[0.09] bg-white px-4 text-[0.8rem] font-semibold text-[#5c5e62] transition hover:border-[#E85C1A] hover:text-[#E85C1A] disabled:cursor-not-allowed disabled:opacity-40"
+          className="ml-auto flex h-10 items-center gap-1.5 rounded-xl border border-black/[0.09] bg-white px-4 text-[0.8rem] font-semibold text-[#5c5e62] transition hover:border-[#f4511e] hover:text-[#f4511e] disabled:cursor-not-allowed disabled:opacity-40"
         >
           <CheckCheck size={14} strokeWidth={2} />
           Mark all read
@@ -135,7 +135,7 @@ export default function NotificationsCenter() {
       <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
         {loading ? (
           <div className="flex justify-center py-16">
-            <Loader2 size={22} className="animate-spin text-[#E85C1A]" />
+            <Loader2 size={22} className="animate-spin text-[#f4511e]" />
           </div>
         ) : items.length === 0 ? (
           <EmptyState
@@ -163,7 +163,7 @@ export default function NotificationsCenter() {
             type="button"
             disabled={page <= 1}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
-            className="flex h-9 items-center gap-1 rounded-lg border border-black/[0.09] bg-white px-3 text-[0.8rem] font-semibold text-[#5c5e62] transition hover:border-[#E85C1A] hover:text-[#E85C1A] disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex h-9 items-center gap-1 rounded-lg border border-black/[0.09] bg-white px-3 text-[0.8rem] font-semibold text-[#5c5e62] transition hover:border-[#f4511e] hover:text-[#f4511e] disabled:cursor-not-allowed disabled:opacity-40"
           >
             <ChevronLeft size={14} /> Prev
           </button>
@@ -172,7 +172,7 @@ export default function NotificationsCenter() {
             type="button"
             disabled={page >= lastPage}
             onClick={() => setPage((p) => Math.min(lastPage, p + 1))}
-            className="flex h-9 items-center gap-1 rounded-lg border border-black/[0.09] bg-white px-3 text-[0.8rem] font-semibold text-[#5c5e62] transition hover:border-[#E85C1A] hover:text-[#E85C1A] disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex h-9 items-center gap-1 rounded-lg border border-black/[0.09] bg-white px-3 text-[0.8rem] font-semibold text-[#5c5e62] transition hover:border-[#f4511e] hover:text-[#f4511e] disabled:cursor-not-allowed disabled:opacity-40"
           >
             Next <ChevronRight size={14} />
           </button>
@@ -199,7 +199,7 @@ function NotificationRow({
   const sev = severityStyle(notification.severity);
 
   return (
-    <li className={["flex items-start gap-3 px-4 py-4 transition hover:bg-[#fafafa]", unread ? "bg-[#E85C1A]/[0.03]" : ""].join(" ")}>
+    <li className={["flex items-start gap-3 px-4 py-4 transition hover:bg-[#fafafa]", unread ? "bg-[#f4511e]/[0.03]" : ""].join(" ")}>
       <span className={["mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border", sev.chip].join(" ")}>
         <NotifIcon type={notification.type} size={15} strokeWidth={1.9} className={sev.icon} />
       </span>
@@ -216,7 +216,7 @@ function NotificationRow({
             <Link
               href={link}
               onClick={() => unread && onRead(notification.id)}
-              className="text-[0.76rem] font-semibold text-[#E85C1A] transition hover:underline"
+              className="text-[0.76rem] font-semibold text-[#f4511e] transition hover:underline"
             >
               Open →
             </Link>

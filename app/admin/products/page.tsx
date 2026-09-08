@@ -70,7 +70,7 @@ export default async function AdminProductsPage({
       {/* Header */}
       <div className="mb-4 flex items-start justify-between gap-4">
         <div>
-          <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#E85C1A]">
+          <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">
             Catalogue
           </p>
           <p className="mt-0.5 text-[0.875rem] text-[#5c5e62]">
@@ -90,7 +90,7 @@ export default async function AdminProductsPage({
           </Link>
           <Link
             href="/admin/products/new"
-            className="flex items-center gap-2 rounded-full bg-[#E85C1A] px-5 py-2.5 text-[0.875rem] font-semibold text-white transition hover:bg-[#d14f14]"
+            className="flex items-center gap-2 rounded-full bg-[#f4511e] px-5 py-2.5 text-[0.875rem] font-semibold text-white transition hover:bg-[#df4618]"
           >
             <Plus size={16} strokeWidth={2.5} />
             Add Product

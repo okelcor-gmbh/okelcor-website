@@ -256,7 +256,7 @@ export default async function EuDeclarationDetailPage({ params }: Props) {
           <ChevronLeft size={14} strokeWidth={2.2} />
           EU Declarations
         </Link>
-        <p className="text-[0.7rem] font-bold uppercase tracking-[0.2em] text-[#E85C1A]">
+        <p className="text-[0.7rem] font-bold uppercase tracking-[0.2em] text-[#f4511e]">
           Compliance
         </p>
         <h1 className="text-[1.35rem] font-extrabold tracking-tight text-[#1a1a1a]">
@@ -283,7 +283,7 @@ export default async function EuDeclarationDetailPage({ params }: Props) {
 
         {/* Order & Customer */}
         <div className="rounded-2xl bg-white p-6 shadow-sm">
-          <p className="mb-5 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+          <p className="mb-5 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
             Order &amp; Customer
           </p>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -292,7 +292,7 @@ export default async function EuDeclarationDetailPage({ params }: Props) {
               <p className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Order Ref</p>
               <Link
                 href={`/admin/orders/${declaration.order_ref}`}
-                className="font-mono text-[0.875rem] font-semibold text-[#E85C1A] hover:underline"
+                className="font-mono text-[0.875rem] font-semibold text-[#f4511e] hover:underline"
               >
                 {declaration.order_ref}
               </Link>
@@ -310,7 +310,7 @@ export default async function EuDeclarationDetailPage({ params }: Props) {
 
         {/* Certificate details — form fields submitted by the customer */}
         <div className="rounded-2xl bg-white p-6 shadow-sm">
-          <p className="mb-5 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+          <p className="mb-5 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
             Certificate Details
           </p>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -340,7 +340,7 @@ export default async function EuDeclarationDetailPage({ params }: Props) {
 
       {/* Row 2: Representative & Signature */}
       <div className="rounded-2xl bg-white p-6 shadow-sm">
-        <p className="mb-5 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+        <p className="mb-5 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
           Representative &amp; Signature
         </p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -364,7 +364,7 @@ export default async function EuDeclarationDetailPage({ params }: Props) {
       {/* Notes */}
       {(declaration.notes || declaration.admin_notes) && (
         <div className="rounded-2xl bg-white p-6 shadow-sm">
-          <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+          <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
             Notes
           </p>
           <div className="flex flex-col gap-4">

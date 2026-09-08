@@ -156,7 +156,7 @@ function EbayCard({ item }: { item: EbayItem }) {
               href={item.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex shrink-0 items-center gap-1 rounded-lg bg-[#E85C1A] px-3 py-1.5 text-[0.72rem] font-semibold text-white transition hover:bg-[#d14f14]"
+              className="flex shrink-0 items-center gap-1 rounded-lg bg-[#f4511e] px-3 py-1.5 text-[0.72rem] font-semibold text-white transition hover:bg-[#df4618]"
             >
               View <ExternalLink size={10} strokeWidth={2.2} />
             </a>
@@ -200,7 +200,7 @@ function PriceStrip({
   return (
     <div className="mt-6 overflow-hidden rounded-2xl border border-black/[0.06] bg-white shadow-sm">
       <div className="border-b border-black/[0.06] px-5 py-3">
-        <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+        <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
           Price Comparison
         </p>
       </div>
@@ -447,7 +447,7 @@ export default function SupplierIntel({ products }: { products: AdminProduct[] }
       {/* ── Search bar ── */}
       <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white shadow-sm">
         <div className="border-b border-black/[0.06] px-5 py-4">
-          <p className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+          <p className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
             Search
           </p>
 
@@ -460,8 +460,8 @@ export default function SupplierIntel({ products }: { products: AdminProduct[] }
                 onClick={() => setTypeFilter(tab.value)}
                 className={`rounded-full px-3 py-1 text-[0.75rem] font-semibold transition ${
                   typeFilter === tab.value
-                    ? "bg-[#E85C1A] text-white"
-                    : "border border-black/[0.09] bg-white text-[#5c5e62] hover:border-[#E85C1A]/40 hover:text-[#E85C1A]"
+                    ? "bg-[#f4511e] text-white"
+                    : "border border-black/[0.09] bg-white text-[#5c5e62] hover:border-[#f4511e]/40 hover:text-[#f4511e]"
                 }`}
               >
                 {tab.label}
@@ -478,7 +478,7 @@ export default function SupplierIntel({ products }: { products: AdminProduct[] }
                   onChange={(e) =>
                     handleProductSelect(e.target.value === "" ? "" : Number(e.target.value))
                   }
-                  className="h-9 w-full appearance-none rounded-lg border border-black/[0.09] bg-[#fafafa] pl-3 pr-8 text-[0.8rem] text-[#374151] outline-none transition focus:border-[#E85C1A] focus:ring-1 focus:ring-[#E85C1A]/20"
+                  className="h-9 w-full appearance-none rounded-lg border border-black/[0.09] bg-[#fafafa] pl-3 pr-8 text-[0.8rem] text-[#374151] outline-none transition focus:border-[#f4511e] focus:ring-1 focus:ring-[#f4511e]/20"
                 >
                   <option value="">— Pre-fill from catalogue product —</option>
                   {products.map((p) => (
@@ -494,7 +494,7 @@ export default function SupplierIntel({ products }: { products: AdminProduct[] }
                   type="button"
                   onClick={() => checkMarketForProduct(selectedProduct.id)}
                   disabled={checkingMarket}
-                  className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-[#E85C1A]/30 bg-[#fff8f6] px-3 text-[0.8rem] font-semibold text-[#E85C1A] transition hover:bg-[#ffece6] disabled:opacity-50"
+                  className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-[#f4511e]/30 bg-[#fff8f6] px-3 text-[0.8rem] font-semibold text-[#f4511e] transition hover:bg-[#ffece6] disabled:opacity-50"
                 >
                   {checkingMarket ? <Loader2 size={13} className="animate-spin" /> : <TrendingUp size={13} strokeWidth={2.2} />}
                   Check market for this product
@@ -513,14 +513,14 @@ export default function SupplierIntel({ products }: { products: AdminProduct[] }
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && runSearch()}
                 placeholder="e.g. 205/55R16 Michelin"
-                className="h-10 w-full rounded-lg border border-black/[0.09] bg-[#fafafa] pl-9 pr-3 text-[0.88rem] text-[#1a1a1a] outline-none placeholder:text-[#9ca3af] transition focus:border-[#E85C1A] focus:bg-white focus:ring-1 focus:ring-[#E85C1A]/20"
+                className="h-10 w-full rounded-lg border border-black/[0.09] bg-[#fafafa] pl-9 pr-3 text-[0.88rem] text-[#1a1a1a] outline-none placeholder:text-[#9ca3af] transition focus:border-[#f4511e] focus:bg-white focus:ring-1 focus:ring-[#f4511e]/20"
               />
             </div>
             <button
               type="button"
               onClick={runSearch}
               disabled={!query.trim() || isLoading}
-              className="flex h-10 items-center gap-2 rounded-lg bg-[#E85C1A] px-5 text-[0.85rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-50"
+              className="flex h-10 items-center gap-2 rounded-lg bg-[#f4511e] px-5 text-[0.85rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50"
             >
               {isLoading ? (
                 <Loader2 size={14} className="animate-spin" />
@@ -624,7 +624,7 @@ export default function SupplierIntel({ products }: { products: AdminProduct[] }
                   )}
                   {marketplaceLinks.made_in_china && (
                     <a href={marketplaceLinks.made_in_china} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 rounded-full border border-black/[0.08] bg-white px-3 py-1.5 text-[0.75rem] font-semibold text-[#5c5e62] transition hover:border-[#E85C1A]/40 hover:text-[#E85C1A]">
+                      className="flex items-center gap-1.5 rounded-full border border-black/[0.08] bg-white px-3 py-1.5 text-[0.75rem] font-semibold text-[#5c5e62] transition hover:border-[#f4511e]/40 hover:text-[#f4511e]">
                       Made-in-China <ExternalLink size={10} />
                     </a>
                   )}
@@ -677,7 +677,7 @@ export default function SupplierIntel({ products }: { products: AdminProduct[] }
                 type="button"
                 onClick={openMadeInChina}
                 disabled={(!query.trim() && !marketplaceLinks?.made_in_china) || micLoading}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#E85C1A] px-5 py-3 text-[0.88rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#f4511e] px-5 py-3 text-[0.88rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50"
               >
                 {micLoading ? (
                   <Loader2 size={15} className="animate-spin" />
@@ -704,7 +704,7 @@ export default function SupplierIntel({ products }: { products: AdminProduct[] }
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => { if (!query.trim()) e.preventDefault(); }}
-                    className="flex items-center justify-between rounded-lg border border-black/[0.07] px-4 py-2.5 text-[0.82rem] font-medium text-[#1a1a1a] transition hover:border-[#E85C1A]/40 hover:bg-[#fff8f6] hover:text-[#E85C1A]"
+                    className="flex items-center justify-between rounded-lg border border-black/[0.07] px-4 py-2.5 text-[0.82rem] font-medium text-[#1a1a1a] transition hover:border-[#f4511e]/40 hover:bg-[#fff8f6] hover:text-[#f4511e]"
                   >
                     <span>Search on {label}</span>
                     <ExternalLink size={12} strokeWidth={2} className="shrink-0 text-[#9ca3af]" />

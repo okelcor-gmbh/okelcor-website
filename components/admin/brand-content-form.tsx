@@ -9,7 +9,7 @@ import type { AdminBrand } from "@/lib/admin-api";
 import ArticleRichEditor from "@/components/admin/article-rich-editor";
 
 const inputCls =
-  "w-full rounded-xl border border-black/[0.09] bg-white px-4 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10";
+  "w-full rounded-xl border border-black/[0.09] bg-white px-4 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10";
 
 const labelCls = "mb-1.5 block text-[0.78rem] font-semibold text-[#1a1a1a]";
 
@@ -24,7 +24,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
-    <p className="col-span-full text-[0.7rem] font-bold uppercase tracking-[0.18em] text-[#E85C1A]">
+    <p className="col-span-full text-[0.7rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">
       {children}
     </p>
   );
@@ -217,7 +217,7 @@ export default function BrandContentForm({
         <button
           type="submit"
           disabled={isPending}
-          className="flex h-[46px] items-center justify-center rounded-full bg-[#E85C1A] px-8 text-[0.9rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-60"
+          className="flex h-[46px] items-center justify-center rounded-full bg-[#f4511e] px-8 text-[0.9rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-60"
         >
           {isPending ? "Saving…" : "Save Brand Content"}
         </button>

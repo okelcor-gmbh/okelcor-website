@@ -27,7 +27,7 @@ export default async function SupplierPage() {
   return (
     <div className="p-6 md:p-8">
       <div className="mb-7">
-        <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#E85C1A]">
+        <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">
           Intelligence
         </p>
         <p className="mt-0.5 text-[1rem] font-extrabold text-[#1a1a1a]">

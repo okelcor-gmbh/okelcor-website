@@ -116,7 +116,7 @@ export default function AccessProfileModal({
                   value={p.key}
                   checked={selected === p.key}
                   onChange={() => setSelected(p.key)}
-                  className="mt-0.5 accent-[#E85C1A]"
+                  className="mt-0.5 accent-[#f4511e]"
                 />
                 <div>
                   <p className="flex items-center gap-1.5 text-[0.875rem] font-semibold text-[#1a1a1a]">
@@ -171,7 +171,7 @@ export default function AccessProfileModal({
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
                 placeholder="Reason for this access change…"
-                className="w-full resize-none rounded-xl border border-black/[0.09] bg-white px-3 py-2 text-[0.83rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#E85C1A]/40 focus:ring-2 focus:ring-[#E85C1A]/10"
+                className="w-full resize-none rounded-xl border border-black/[0.09] bg-white px-3 py-2 text-[0.83rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#f4511e]/40 focus:ring-2 focus:ring-[#f4511e]/10"
               />
             </div>
           </div>
@@ -192,7 +192,7 @@ export default function AccessProfileModal({
             disabled={applying}
             onClick={() => onApply(selected, notes.trim())}
             className={`flex flex-1 h-11 items-center justify-center gap-2 rounded-full text-[0.875rem] font-semibold text-white transition disabled:opacity-50 ${
-              profile.tone === "danger" ? "bg-red-600 hover:bg-red-700" : "bg-[#E85C1A] hover:bg-[#d44d10]"
+              profile.tone === "danger" ? "bg-red-600 hover:bg-red-700" : "bg-[#f4511e] hover:bg-[#d44d10]"
             }`}
           >
             {applying ? <Loader2 size={15} className="animate-spin" /> : <Check size={15} />}

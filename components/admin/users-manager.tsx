@@ -46,7 +46,7 @@ function initials(name: string): string {
 }
 
 const inputCls =
-  "h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10";
+  "h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10";
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -256,7 +256,7 @@ export default function UsersManager({ users: initialUsers }: { users: AdminUser
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#E85C1A]">
+          <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">
             Admin Users
           </p>
           <p className="mt-0.5 text-[0.875rem] text-[#5c5e62]">
@@ -266,7 +266,7 @@ export default function UsersManager({ users: initialUsers }: { users: AdminUser
         <button
           type="button"
           onClick={openCreate}
-          className="flex items-center gap-2 rounded-full bg-[#E85C1A] px-4 py-2 text-[0.83rem] font-semibold text-white transition hover:bg-[#d44f12]"
+          className="flex items-center gap-2 rounded-full bg-[#f4511e] px-4 py-2 text-[0.83rem] font-semibold text-white transition hover:bg-[#df4618]"
         >
           <Plus size={14} />
           Add User
@@ -360,7 +360,7 @@ export default function UsersManager({ users: initialUsers }: { users: AdminUser
                     {/* Name */}
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-2.5">
-                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#E85C1A] text-[0.65rem] font-extrabold text-white">
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f4511e] text-[0.65rem] font-extrabold text-white">
                           {initials(user.name)}
                         </div>
                         <span className="text-[0.875rem] font-medium text-[#1a1a1a]">
@@ -425,7 +425,7 @@ export default function UsersManager({ users: initialUsers }: { users: AdminUser
                             type="button"
                             onClick={() => openEdit(user)}
                             title="Edit user"
-                            className="flex h-7 w-7 items-center justify-center rounded-lg border border-black/[0.09] text-[#5c5e62] transition hover:border-[#E85C1A] hover:text-[#E85C1A]"
+                            className="flex h-7 w-7 items-center justify-center rounded-lg border border-black/[0.09] text-[#5c5e62] transition hover:border-[#f4511e] hover:text-[#f4511e]"
                           >
                             <Pencil size={13} />
                           </button>
@@ -434,7 +434,7 @@ export default function UsersManager({ users: initialUsers }: { users: AdminUser
                               type="button"
                               onClick={() => openPermissions(user)}
                               title="Edit permissions"
-                              className="flex h-7 w-7 items-center justify-center rounded-lg border border-black/[0.09] text-[#5c5e62] transition hover:border-[#E85C1A] hover:text-[#E85C1A]"
+                              className="flex h-7 w-7 items-center justify-center rounded-lg border border-black/[0.09] text-[#5c5e62] transition hover:border-[#f4511e] hover:text-[#f4511e]"
                             >
                               <KeyRound size={13} />
                             </button>
@@ -552,7 +552,7 @@ export default function UsersManager({ users: initialUsers }: { users: AdminUser
                 <button
                   type="submit"
                   disabled={saving}
-                  className="h-9 flex-1 rounded-full bg-[#E85C1A] text-[0.83rem] font-semibold text-white transition hover:bg-[#d44f12] disabled:opacity-60"
+                  className="h-9 flex-1 rounded-full bg-[#f4511e] text-[0.83rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-60"
                 >
                   {saving
                     ? "Saving…"
@@ -647,7 +647,7 @@ export default function UsersManager({ users: initialUsers }: { users: AdminUser
                                 type="checkbox"
                                 checked={checked}
                                 onChange={() => togglePerm(p.key)}
-                                className="h-4 w-4 shrink-0 accent-[#E85C1A]"
+                                className="h-4 w-4 shrink-0 accent-[#f4511e]"
                               />
                               <span className="flex-1 font-mono text-[0.78rem] text-[#374151]">{p.key}</span>
                               {isGrant && (
@@ -675,7 +675,7 @@ export default function UsersManager({ users: initialUsers }: { users: AdminUser
                 type="button"
                 onClick={savePermissions}
                 disabled={permsSaving || !catalog}
-                className="h-9 flex-1 rounded-full bg-[#E85C1A] text-[0.83rem] font-semibold text-white transition hover:bg-[#d44f12] disabled:opacity-60"
+                className="h-9 flex-1 rounded-full bg-[#f4511e] text-[0.83rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-60"
               >
                 {permsSaving ? "Saving…" : "Save Permissions"}
               </button>

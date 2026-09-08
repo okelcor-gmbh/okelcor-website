@@ -120,7 +120,7 @@ function EventForm({
   error: string | null;
   saveLabel: string;
 }) {
-  const inp = "h-9 rounded-lg border border-black/[0.09] bg-white px-3 text-[0.83rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10";
+  const inp = "h-9 rounded-lg border border-black/[0.09] bg-white px-3 text-[0.83rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10";
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-black/[0.09] bg-[#fafafa] p-4">
       <div className="grid grid-cols-2 gap-3">
@@ -152,7 +152,7 @@ function EventForm({
       )}
       <div className="flex items-center gap-2">
         <button type="button" onClick={onSave} disabled={saving || !data.date || !data.status_label}
-          className="h-8 rounded-full bg-[#E85C1A] px-5 text-[0.78rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-50">
+          className="h-8 rounded-full bg-[#f4511e] px-5 text-[0.78rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50">
           {saving ? "Saving…" : saveLabel}
         </button>
         <button type="button" onClick={onCancel} disabled={saving}
@@ -234,13 +234,13 @@ function ShipmentEventManager({
   return (
     <div className="rounded-2xl bg-white p-6 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
-        <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+        <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
           Shipment Events
         </p>
         {!adding && editingId === null && (
           <button type="button"
             onClick={() => { setAdding(true); setForm(EMPTY_FORM); setError(null); }}
-            className="inline-flex items-center gap-1.5 rounded-full border border-[#E85C1A]/30 bg-[#fff5f2] px-3 py-1.5 text-[0.75rem] font-semibold text-[#E85C1A] transition hover:bg-[#fff0ea]">
+            className="inline-flex items-center gap-1.5 rounded-full border border-[#f4511e]/30 bg-[#fff5f2] px-3 py-1.5 text-[0.75rem] font-semibold text-[#f4511e] transition hover:bg-[#fff0ea]">
             <Plus size={13} strokeWidth={2.2} />
             Add Event
           </button>
@@ -277,10 +277,10 @@ function ShipmentEventManager({
                     saving={saving} error={error} saveLabel="Save Changes" />
                 ) : (
                   <div className="flex items-start gap-3">
-                    <span className={`mt-[7px] h-2.5 w-2.5 shrink-0 rounded-full ${isLatest ? "bg-[#E85C1A]" : "bg-black/20"}`} />
+                    <span className={`mt-[7px] h-2.5 w-2.5 shrink-0 rounded-full ${isLatest ? "bg-[#f4511e]" : "bg-black/20"}`} />
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-baseline gap-x-2">
-                        <span className={`text-[0.875rem] font-semibold ${isLatest ? "text-[#E85C1A]" : "text-[#1a1a1a]"}`}>
+                        <span className={`text-[0.875rem] font-semibold ${isLatest ? "text-[#f4511e]" : "text-[#1a1a1a]"}`}>
                           {ev.status_label}
                         </span>
                         <span className="text-[0.75rem] text-[#5c5e62]">{shortDateOnly(ev.event_date ?? undefined)}</span>
@@ -298,7 +298,7 @@ function ShipmentEventManager({
                     <div className="flex shrink-0 items-center gap-1">
                       <button type="button" onClick={() => startEdit(ev)}
                         disabled={!!editingId || adding || deletingId !== null}
-                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-black/[0.08] bg-white text-[#5c5e62] transition hover:border-[#E85C1A]/30 hover:text-[#E85C1A] disabled:opacity-40"
+                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-black/[0.08] bg-white text-[#5c5e62] transition hover:border-[#f4511e]/30 hover:text-[#f4511e] disabled:opacity-40"
                         title="Edit event">
                         <Pencil size={12} strokeWidth={2} />
                       </button>
@@ -335,7 +335,7 @@ function LogEntry({ log }: { log: AdminOrderLog }) {
   const hasChange = log.old_value != null || log.new_value != null;
   return (
     <li className="relative pl-6">
-      <span className="absolute left-0 top-[5px] flex h-3 w-3 items-center justify-center rounded-full border-2 border-[#E85C1A] bg-white" />
+      <span className="absolute left-0 top-[5px] flex h-3 w-3 items-center justify-center rounded-full border-2 border-[#f4511e] bg-white" />
 
       <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
         <span className="text-[0.83rem] font-semibold text-[#1a1a1a]">
@@ -379,7 +379,7 @@ function LogEntry({ log }: { log: AdminOrderLog }) {
 function ActivityLog({ logs }: { logs?: AdminOrderLog[] }) {
   return (
     <div className="rounded-2xl bg-white p-6 shadow-sm">
-      <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+      <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
         Activity Log
       </p>
 
@@ -1056,8 +1056,8 @@ export default function OrderDetail({
         {/* Header row */}
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-black/[0.06] px-5 py-4">
           <div className="flex items-center gap-2.5">
-            <Activity size={14} strokeWidth={2} className="text-[#E85C1A]" />
-            <p className="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-[#E85C1A]">
+            <Activity size={14} strokeWidth={2} className="text-[#f4511e]" />
+            <p className="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">
               Command Center
             </p>
           </div>
@@ -1192,7 +1192,7 @@ export default function OrderDetail({
         <>
           {/* Status + Shipment update card */}
           <div className="rounded-2xl bg-white p-6 shadow-sm">
-            <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+            <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
               Order Status &amp; Shipment
             </p>
 
@@ -1221,7 +1221,7 @@ export default function OrderDetail({
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value as OrderStatus)}
-                    className="h-10 appearance-none rounded-xl border border-black/[0.09] bg-white pl-3.5 pr-9 text-[0.875rem] font-semibold text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+                    className="h-10 appearance-none rounded-xl border border-black/[0.09] bg-white pl-3.5 pr-9 text-[0.875rem] font-semibold text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
                   >
                     {ORDER_STATUSES.map((s) => (
                       <option key={s} value={s}>
@@ -1239,7 +1239,7 @@ export default function OrderDetail({
                   <select
                     value={currency}
                     onChange={(e) => setCurrency(e.target.value)}
-                    className="h-10 appearance-none rounded-xl border border-black/[0.09] bg-white pl-3.5 pr-9 text-[0.875rem] font-semibold text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+                    className="h-10 appearance-none rounded-xl border border-black/[0.09] bg-white pl-3.5 pr-9 text-[0.875rem] font-semibold text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
                   >
                     {ORDER_CURRENCIES.map((c) => (
                       <option key={c} value={c}>{c}</option>
@@ -1256,7 +1256,7 @@ export default function OrderDetail({
                   value={carrier}
                   onChange={(e) => setCarrier(e.target.value)}
                   placeholder="e.g. DHL Freight"
-                  className="h-10 w-40 rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+                  className="h-10 w-40 rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
                 />
               </div>
 
@@ -1266,7 +1266,7 @@ export default function OrderDetail({
                   <select
                     value={carrierType}
                     onChange={(e) => setCarrierType(e.target.value)}
-                    className="h-10 appearance-none rounded-xl border border-black/[0.09] bg-white pl-3.5 pr-9 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+                    className="h-10 appearance-none rounded-xl border border-black/[0.09] bg-white pl-3.5 pr-9 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
                   >
                     <option value="">— select —</option>
                     <option value="truck">Truck Freight</option>
@@ -1286,7 +1286,7 @@ export default function OrderDetail({
                   value={trackingNumber}
                   onChange={(e) => setTrackingNumber(e.target.value)}
                   placeholder="Ref or waybill number"
-                  className="h-10 w-44 rounded-xl border border-black/[0.09] bg-white px-3.5 font-mono text-[0.875rem] text-[#1a1a1a] outline-none placeholder:font-sans placeholder:text-[#aaa] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+                  className="h-10 w-44 rounded-xl border border-black/[0.09] bg-white px-3.5 font-mono text-[0.875rem] text-[#1a1a1a] outline-none placeholder:font-sans placeholder:text-[#aaa] transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
                 />
               </div>
 
@@ -1296,7 +1296,7 @@ export default function OrderDetail({
                   type="date"
                   value={estimatedDelivery}
                   onChange={(e) => setEstimatedDelivery(e.target.value)}
-                  className="h-10 rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+                  className="h-10 rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
                 />
               </div>
 
@@ -1304,7 +1304,7 @@ export default function OrderDetail({
                 type="button"
                 onClick={handleSave}
                 disabled={isPending || !isDirty}
-                className="h-10 self-end rounded-full bg-[#E85C1A] px-6 text-[0.875rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-50"
+                className="h-10 self-end rounded-full bg-[#f4511e] px-6 text-[0.875rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50"
               >
                 {isPending ? "Saving…" : "Save"}
               </button>
@@ -1314,7 +1314,7 @@ export default function OrderDetail({
           {/* Two-column: customer info + order summary */}
           <div className="grid gap-6 lg:grid-cols-2">
             <div className="rounded-2xl bg-white p-6 shadow-sm">
-              <p className="mb-5 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+              <p className="mb-5 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
                 Customer Details
               </p>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -1335,7 +1335,7 @@ export default function OrderDetail({
 
             <div className="rounded-2xl bg-white p-6 shadow-sm">
               <div className="mb-5 flex items-center justify-between gap-3">
-                <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+                <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
                   Order Summary
                 </p>
                 {canDo(adminRole, "tracking.view") && (
@@ -1414,7 +1414,7 @@ export default function OrderDetail({
           {/* Order items */}
           <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
             <div className="flex items-center justify-between gap-3 border-b border-black/[0.06] px-6 py-4">
-              <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+              <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
                 Order Items
               </p>
               {canEditItems && (
@@ -1662,8 +1662,8 @@ export default function OrderDetail({
           {order.customer_acceptance_status != null && (
             <div className="rounded-2xl border bg-white p-5 shadow-sm">
               <div className="flex items-center gap-2 mb-3">
-                <UserCheck size={14} className="shrink-0 text-[#E85C1A]" strokeWidth={2} />
-                <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+                <UserCheck size={14} className="shrink-0 text-[#f4511e]" strokeWidth={2} />
+                <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
                   Customer Acceptance
                 </p>
               </div>
@@ -1840,7 +1840,7 @@ export default function OrderDetail({
         <>
           {order.declaration_required != null ? (
             <div className="rounded-2xl bg-white p-6 shadow-sm">
-              <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+              <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
                 EU Entry Certificate
               </p>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -1869,7 +1869,7 @@ export default function OrderDetail({
                       {order.declaration_id != null ? (
                         <a
                           href={`/admin/eu-declarations/${order.declaration_id}`}
-                          className="font-mono text-[0.875rem] font-semibold text-[#E85C1A] hover:underline"
+                          className="font-mono text-[0.875rem] font-semibold text-[#f4511e] hover:underline"
                         >
                           #{order.declaration_id}
                         </a>
@@ -2048,7 +2048,7 @@ export default function OrderDetail({
           onClick={(e) => { if (e.target === e.currentTarget && !itemModalLoading) closeItemModal(); }}
         >
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-            <p className="mb-5 text-[0.75rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+            <p className="mb-5 text-[0.75rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
               {itemModalMode === "add" ? "Add Item" : "Edit Item"}
             </p>
 
@@ -2057,35 +2057,35 @@ export default function OrderDetail({
                 <p className="mb-1.5 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Product Name *</p>
                 <input type="text" value={itemName} onChange={(e) => setItemName(e.target.value)}
                   placeholder="205/55 R16"
-                  className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10" />
+                  className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <p className="mb-1.5 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Brand</p>
                   <input type="text" value={itemBrand} onChange={(e) => setItemBrand(e.target.value)}
-                    className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10" />
+                    className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10" />
                 </div>
                 <div>
                   <p className="mb-1.5 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">SKU</p>
                   <input type="text" value={itemSku} onChange={(e) => setItemSku(e.target.value)}
-                    className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 font-mono text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10" />
+                    className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 font-mono text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10" />
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <div>
                   <p className="mb-1.5 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Size</p>
                   <input type="text" value={itemSize} onChange={(e) => setItemSize(e.target.value)}
-                    className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10" />
+                    className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10" />
                 </div>
                 <div>
                   <p className="mb-1.5 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Unit Price *</p>
                   <input type="number" min="0" step="0.01" value={itemUnitPrice} onChange={(e) => setItemUnitPrice(e.target.value)}
-                    className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10" />
+                    className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10" />
                 </div>
                 <div>
                   <p className="mb-1.5 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Qty *</p>
                   <input type="number" min="1" value={itemQuantity} onChange={(e) => setItemQuantity(e.target.value)}
-                    className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10" />
+                    className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10" />
                 </div>
               </div>
               <div>
@@ -2095,7 +2095,7 @@ export default function OrderDetail({
                 <textarea value={itemReason} onChange={(e) => setItemReason(e.target.value)}
                   placeholder="e.g. Wrong price was quoted at entry — corrected to the agreed €75/unit."
                   rows={2}
-                  className="w-full resize-none rounded-xl border border-black/[0.09] bg-white px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10" />
+                  className="w-full resize-none rounded-xl border border-black/[0.09] bg-white px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10" />
                 <p className="mt-1 text-[0.7rem] text-[#9ca3af]">Written to the order&apos;s audit log.</p>
               </div>
 
@@ -2112,7 +2112,7 @@ export default function OrderDetail({
                   Cancel
                 </button>
                 <button type="button" onClick={submitItemModal} disabled={itemModalLoading || !itemReason.trim()}
-                  className="h-9 rounded-full bg-[#E85C1A] px-5 text-[0.83rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-50">
+                  className="h-9 rounded-full bg-[#f4511e] px-5 text-[0.83rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50">
                   {itemModalLoading ? "Saving…" : itemModalMode === "add" ? "Add Item" : "Save Changes"}
                 </button>
               </div>

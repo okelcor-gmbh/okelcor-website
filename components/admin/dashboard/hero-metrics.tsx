@@ -78,7 +78,7 @@ function RevenueTodayCard({
   return (
     <div className="group flex flex-col gap-3 rounded-2xl border border-black/[0.06] bg-white p-5 transition-colors hover:border-black/[0.14]">
       <div className="flex items-start justify-between">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E85C1A]">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#f4511e]">
           <DollarSign size={18} strokeWidth={1.8} className="text-white" />
         </div>
         <Trend current={confirmed} prev={confirmedYesterday} />
@@ -89,14 +89,14 @@ function RevenueTodayCard({
           {`€${animated >= 1000 ? (animated / 1000).toFixed(1) + "k" : animated.toFixed(2)}`}
         </p>
         {pending > 0 ? (
-          <p className="mt-0.5 text-[0.7rem] font-semibold tabular-nums text-[#E85C1A]">
+          <p className="mt-0.5 text-[0.7rem] font-semibold tabular-nums text-[#f4511e]">
             + {fmtCurrency(pending)} pending
           </p>
         ) : (
           <p className="mt-0.5 text-[0.7rem] text-[#9ca3af]">confirmed only</p>
         )}
       </div>
-      {sparkline.length > 1 && <Sparkline data={sparkline} color="#E85C1A" />}
+      {sparkline.length > 1 && <Sparkline data={sparkline} color="#f4511e" />}
     </div>
   );
 }
@@ -133,7 +133,7 @@ function OrdersTodayCard({
           <p className="mt-0.5 text-[0.7rem] tabular-nums text-[#5c5e62]">
             <span className="font-semibold text-emerald-600">{confirmed} confirmed</span>
             {pending > 0 && (
-              <> · <span className="font-semibold text-[#E85C1A]">{pending} pending</span></>
+              <> · <span className="font-semibold text-[#f4511e]">{pending} pending</span></>
             )}
           </p>
         ) : (
@@ -265,7 +265,7 @@ export default function HeroMetrics() {
         <button
           type="button"
           onClick={() => void refresh(false)}
-          className="ml-auto flex items-center gap-1.5 text-[0.78rem] font-semibold text-[#E85C1A] hover:underline"
+          className="ml-auto flex items-center gap-1.5 text-[0.78rem] font-semibold text-[#f4511e] hover:underline"
         >
           <RefreshCw size={12} />
           Retry

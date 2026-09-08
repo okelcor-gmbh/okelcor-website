@@ -244,7 +244,7 @@ export default function CustomerApprovalsPage() {
   return (
     <div className="p-6 md:p-8">
       <div className="mb-7">
-        <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#E85C1A]">Buyer Lifecycle</p>
+        <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">Buyer Lifecycle</p>
         <h1 className="mt-1 text-[1.3rem] font-extrabold text-[#1a1a1a]">Customer Approvals</h1>
         <p className="mt-1 text-[0.875rem] text-[#5c5e62]">Approve buyers, set tiers, and manage access requests.</p>
       </div>
@@ -264,7 +264,7 @@ export default function CustomerApprovalsPage() {
             className={`rounded-full px-4 py-2 text-[0.83rem] font-semibold transition ${view === key ? "bg-[#1a1a1a] text-white" : "border border-black/[0.1] text-[#5c5e62] hover:bg-[#f0f2f5]"}`}>
             {label}
             {key === "requests" && counts.requests ? (
-              <span className="ml-1.5 rounded-full bg-[#E85C1A] px-1.5 py-0.5 text-[0.65rem] font-extrabold text-white">{counts.requests}</span>
+              <span className="ml-1.5 rounded-full bg-[#f4511e] px-1.5 py-0.5 text-[0.65rem] font-extrabold text-white">{counts.requests}</span>
             ) : null}
           </button>
         ))}
@@ -292,7 +292,7 @@ export default function CustomerApprovalsPage() {
             <div className="mb-2.5 flex flex-wrap gap-1">
               {QUEUES.map(({ key, label }) => (
                 <button key={key} type="button" onClick={() => setQueue(key)}
-                  className={`rounded-full px-3 py-1 text-[0.75rem] font-semibold transition ${queue === key ? "bg-[#E85C1A] text-white" : "text-[#5c5e62] hover:bg-[#f0f2f5]"}`}>
+                  className={`rounded-full px-3 py-1 text-[0.75rem] font-semibold transition ${queue === key ? "bg-[#f4511e] text-white" : "text-[#5c5e62] hover:bg-[#f0f2f5]"}`}>
                   {label}
                 </button>
               ))}
@@ -300,12 +300,12 @@ export default function CustomerApprovalsPage() {
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex flex-wrap gap-2">
                 <select value={risk} onChange={(e) => setRisk(e.target.value)}
-                  className="h-8 rounded-lg border border-black/[0.09] bg-white px-2.5 text-[0.75rem] text-[#1a1a1a] outline-none focus:border-[#E85C1A]">
+                  className="h-8 rounded-lg border border-black/[0.09] bg-white px-2.5 text-[0.75rem] text-[#1a1a1a] outline-none focus:border-[#f4511e]">
                   <option value="">All risk</option>
                   {RISK_LEVELS.map((r) => <option key={r} value={r}>{RISK_LEVEL_LABELS[r]}</option>)}
                 </select>
                 <select value={tier} onChange={(e) => setTier(e.target.value)}
-                  className="h-8 rounded-lg border border-black/[0.09] bg-white px-2.5 text-[0.75rem] text-[#1a1a1a] outline-none focus:border-[#E85C1A]">
+                  className="h-8 rounded-lg border border-black/[0.09] bg-white px-2.5 text-[0.75rem] text-[#1a1a1a] outline-none focus:border-[#f4511e]">
                   <option value="">All tiers</option>
                   {BUYER_TIERS.map((t) => <option key={t} value={t}>{BUYER_TIER_LABELS[t]}</option>)}
                 </select>
@@ -313,7 +313,7 @@ export default function CustomerApprovalsPage() {
               <div className="relative">
                 <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#aaa]" />
                 <input type="search" placeholder="Name, email, company…" value={search} onChange={(e) => setSearch(e.target.value)}
-                  className="h-8 w-60 rounded-xl border border-black/[0.09] bg-[#fafafa] pl-8 pr-3 text-[0.8rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10" />
+                  className="h-8 w-60 rounded-xl border border-black/[0.09] bg-[#fafafa] pl-8 pr-3 text-[0.8rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10" />
               </div>
             </div>
           </div>
@@ -335,7 +335,7 @@ export default function CustomerApprovalsPage() {
                     <p className="mt-1 font-mono text-[0.72rem] text-[#d1d5db]">Backend: GET /admin/customer-approvals</p>
                   </td></tr>
                 ) : loading ? (
-                  <tr><td colSpan={10} className="px-5 py-12 text-center"><Loader2 size={20} className="mx-auto animate-spin text-[#E85C1A]" /></td></tr>
+                  <tr><td colSpan={10} className="px-5 py-12 text-center"><Loader2 size={20} className="mx-auto animate-spin text-[#f4511e]" /></td></tr>
                 ) : rows.length === 0 ? (
                   <tr><td colSpan={10} className="px-5 py-12 text-center text-[0.875rem] text-[#5c5e62]">No customers in this queue.</td></tr>
                 ) : (

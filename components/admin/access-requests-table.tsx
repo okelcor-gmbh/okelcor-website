@@ -93,7 +93,7 @@ export default function AccessRequestsTable({ refreshKey = 0, onPendingCount }: 
         <div className="flex gap-1">
           {TABS.map(({ key, label }) => (
             <button key={key} type="button" onClick={() => setStatusTab(key)}
-              className={`rounded-full px-3 py-1 text-[0.75rem] font-semibold transition ${statusTab === key ? "bg-[#E85C1A] text-white" : "text-[#5c5e62] hover:bg-[#f0f2f5]"}`}>
+              className={`rounded-full px-3 py-1 text-[0.75rem] font-semibold transition ${statusTab === key ? "bg-[#f4511e] text-white" : "text-[#5c5e62] hover:bg-[#f0f2f5]"}`}>
               {label}
             </button>
           ))}
@@ -113,7 +113,7 @@ export default function AccessRequestsTable({ refreshKey = 0, onPendingCount }: 
           <p className="mt-1 font-mono text-[0.72rem] text-[#d1d5db]">Backend: GET /admin/customer-access-requests</p>
         </div>
       ) : loading ? (
-        <div className="flex justify-center py-10"><Loader2 size={20} className="animate-spin text-[#E85C1A]" /></div>
+        <div className="flex justify-center py-10"><Loader2 size={20} className="animate-spin text-[#f4511e]" /></div>
       ) : rows.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-10">
           <Inbox size={24} className="text-[#d1d5db]" />
@@ -151,7 +151,7 @@ export default function AccessRequestsTable({ refreshKey = 0, onPendingCount }: 
                   <td className="px-5 py-3 text-[0.78rem] text-[#5c5e62]">{fmtDT(r.created_at)}</td>
                   <td className="px-5 py-3">
                     {busyId === r.id ? (
-                      <Loader2 size={15} className="animate-spin text-[#E85C1A]" />
+                      <Loader2 size={15} className="animate-spin text-[#f4511e]" />
                     ) : (
                       <div className="flex items-center gap-1.5">
                         {r.status === "pending" && (

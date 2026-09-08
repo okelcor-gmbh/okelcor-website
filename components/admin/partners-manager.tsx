@@ -22,7 +22,7 @@ import type { PartnerOrganisation, PartnerUser } from "@/lib/admin-api";
 import { useAdminPermissions } from "@/hooks/use-admin-permissions";
 
 const FIELD =
-  "w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-[0.88rem] outline-none transition focus:border-[#E85C1A]/50 focus:ring-2 focus:ring-[#E85C1A]/10";
+  "w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-[0.88rem] outline-none transition focus:border-[#f4511e]/50 focus:ring-2 focus:ring-[#f4511e]/10";
 const LABEL = "mb-1 block text-[0.75rem] font-semibold text-[#5c5e62]";
 
 /** Markets Okelcor sells into. Dial codes drive the phone prefix. */
@@ -94,7 +94,7 @@ export default function PartnersManager() {
           <button
             type="button"
             onClick={() => setCreating((v) => !v)}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#E85C1A] px-4 py-2 text-[0.85rem] font-semibold text-white transition hover:bg-[#d04d15]"
+            className="inline-flex items-center gap-2 rounded-lg bg-[#f4511e] px-4 py-2 text-[0.85rem] font-semibold text-white transition hover:bg-[#d04d15]"
           >
             <Plus size={15} /> Add partner
           </button>
@@ -131,7 +131,7 @@ export default function PartnersManager() {
                 onClick={() => setExpanded(expanded === o.id ? null : o.id)}
                 className="flex w-full items-center gap-3 px-5 py-4 text-left"
               >
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#E85C1A]/10 text-[#E85C1A]">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#f4511e]/10 text-[#f4511e]">
                   <Building2 size={17} strokeWidth={2} />
                 </span>
                 <div className="min-w-0 flex-1">
@@ -284,7 +284,7 @@ function CreatePartnerForm({ onDone, onCancel }: { onDone: () => void; onCancel:
 
       <div className="mt-5 flex gap-2">
         <button type="submit" disabled={!valid || busy}
-          className="rounded-lg bg-[#E85C1A] px-4 py-2 text-[0.85rem] font-semibold text-white transition hover:bg-[#d04d15] disabled:opacity-40">
+          className="rounded-lg bg-[#f4511e] px-4 py-2 text-[0.85rem] font-semibold text-white transition hover:bg-[#d04d15] disabled:opacity-40">
           {busy ? "Creating…" : "Create partner"}
         </button>
         <button type="button" onClick={onCancel}

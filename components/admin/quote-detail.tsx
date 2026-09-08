@@ -87,7 +87,7 @@ function InfoRow({ label, value, fallback }: { label: string; value?: string | n
 function SectionCard({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className="rounded-2xl bg-white p-6 shadow-sm">
-      <p className="mb-5 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">{title}</p>
+      <p className="mb-5 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">{title}</p>
       {children}
     </div>
   );
@@ -415,7 +415,7 @@ export default function QuoteDetail({
 
         {/* ── Quote Status card ── */}
         <div className="rounded-2xl bg-white p-6 shadow-sm">
-          <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+          <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
             Quote Status
           </p>
 
@@ -442,7 +442,7 @@ export default function QuoteDetail({
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as QuoteStatus)}
-                className="h-10 appearance-none rounded-xl border border-black/[0.09] bg-white pl-3.5 pr-9 text-[0.875rem] font-semibold text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+                className="h-10 appearance-none rounded-xl border border-black/[0.09] bg-white pl-3.5 pr-9 text-[0.875rem] font-semibold text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
               >
                 {QUOTE_STATUSES.map((s) => (
                   <option key={s} value={s} className="capitalize">
@@ -457,7 +457,7 @@ export default function QuoteDetail({
               type="button"
               onClick={handleSave}
               disabled={isPending || !isDirty}
-              className="h-10 rounded-full bg-[#E85C1A] px-6 text-[0.875rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-50"
+              className="h-10 rounded-full bg-[#f4511e] px-6 text-[0.875rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50"
             >
               {isPending ? "Saving…" : "Save Status"}
             </button>
@@ -473,7 +473,7 @@ export default function QuoteDetail({
           if (!hasQualityData) return null;
           return (
             <div className="rounded-2xl bg-white p-6 shadow-sm">
-              <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+              <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
                 Quality Review
               </p>
 
@@ -559,7 +559,7 @@ export default function QuoteDetail({
         {/* ── CRM-3: Lead Qualification card ── */}
         <div className="rounded-2xl bg-white p-6 shadow-sm">
           <div className="mb-4 flex items-center justify-between gap-4">
-            <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+            <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
               Lead Qualification
             </p>
             {/* Quick actions */}
@@ -630,7 +630,7 @@ export default function QuoteDetail({
                   const name = adminUsers.find((u) => u.id === id)?.name ?? "";
                   setPipeline((p) => ({ ...p, assigned_to: id, assigned_to_name: name }));
                 }}
-                className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+                className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
               >
                 <option value="">— Unassigned —</option>
                 {adminUsers.map((u) => (
@@ -652,7 +652,7 @@ export default function QuoteDetail({
                 type="datetime-local"
                 value={pipeline.follow_up_at ? pipeline.follow_up_at.slice(0, 16) : ""}
                 onChange={(e) => setPipeline((p) => ({ ...p, follow_up_at: e.target.value ? `${e.target.value}:00Z` : "" }))}
-                className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+                className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
               />
             </div>
 
@@ -665,7 +665,7 @@ export default function QuoteDetail({
               <select
                 value={pipeline.lead_priority}
                 onChange={(e) => setPipeline((p) => ({ ...p, lead_priority: e.target.value }))}
-                className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+                className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
               >
                 <option value="low">Low</option>
                 <option value="normal">Normal</option>
@@ -683,7 +683,7 @@ export default function QuoteDetail({
               <select
                 value={pipeline.lead_customer_type}
                 onChange={(e) => setPipeline((p) => ({ ...p, lead_customer_type: e.target.value }))}
-                className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+                className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
               >
                 <option value="unknown">Unknown</option>
                 <option value="private_buyer">Private Buyer</option>
@@ -702,7 +702,7 @@ export default function QuoteDetail({
               <select
                 value={pipeline.qualification_status}
                 onChange={(e) => setPipeline((p) => ({ ...p, qualification_status: e.target.value }))}
-                className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+                className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
               >
                 <option value="new">New</option>
                 <option value="needs_review">Needs Review</option>
@@ -726,7 +726,7 @@ export default function QuoteDetail({
                 placeholder="Brief reason for status change…"
                 value={pipeline.qualification_reason}
                 onChange={(e) => setPipeline((p) => ({ ...p, qualification_reason: e.target.value }))}
-                className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3 text-[0.875rem] text-[#1a1a1a] outline-none transition placeholder:text-[#aaa] focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+                className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3 text-[0.875rem] text-[#1a1a1a] outline-none transition placeholder:text-[#aaa] focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
               />
             </div>
 
@@ -740,7 +740,7 @@ export default function QuoteDetail({
                 placeholder="Internal notes — not visible to the customer…"
                 value={pipeline.internal_notes}
                 onChange={(e) => setPipeline((p) => ({ ...p, internal_notes: e.target.value }))}
-                className="w-full resize-none rounded-xl border border-black/[0.09] bg-white px-3 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition placeholder:text-[#aaa] focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+                className="w-full resize-none rounded-xl border border-black/[0.09] bg-white px-3 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition placeholder:text-[#aaa] focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
               />
             </div>
           </div>
@@ -800,7 +800,7 @@ export default function QuoteDetail({
                         {convertConflict.customer_id && (
                           <Link
                             href={`/admin/customers/${convertConflict.customer_id}`}
-                            className="flex items-center justify-center gap-2 rounded-full bg-[#E85C1A] px-6 py-2.5 text-[0.875rem] font-semibold text-white transition hover:bg-[#d14f14]"
+                            className="flex items-center justify-center gap-2 rounded-full bg-[#f4511e] px-6 py-2.5 text-[0.875rem] font-semibold text-white transition hover:bg-[#df4618]"
                             onClick={() => setShowConvertToCustomer(false)}
                           >
                             <ExternalLink size={14} />
@@ -837,7 +837,7 @@ export default function QuoteDetail({
                       {convertConflict.customer_id && (
                         <Link
                           href={`/admin/customers/${convertConflict.customer_id}`}
-                          className="flex items-center justify-center gap-2 rounded-full bg-[#E85C1A] px-6 py-2.5 text-[0.875rem] font-semibold text-white transition hover:bg-[#d14f14]"
+                          className="flex items-center justify-center gap-2 rounded-full bg-[#f4511e] px-6 py-2.5 text-[0.875rem] font-semibold text-white transition hover:bg-[#df4618]"
                           onClick={() => setShowConvertToCustomer(false)}
                         >
                           <ExternalLink size={14} />
@@ -873,7 +873,7 @@ export default function QuoteDetail({
                   </div>
                   {convertResult.customer_id && (
                     <Link href={`/admin/customers/${convertResult.customer_id}`}
-                      className="flex items-center justify-center gap-2 rounded-full bg-[#E85C1A] px-6 py-2.5 text-[0.875rem] font-semibold text-white transition hover:bg-[#d14f14]"
+                      className="flex items-center justify-center gap-2 rounded-full bg-[#f4511e] px-6 py-2.5 text-[0.875rem] font-semibold text-white transition hover:bg-[#df4618]"
                       onClick={() => setShowConvertToCustomer(false)}>
                       <ExternalLink size={14} />
                       View Customer Profile
@@ -890,10 +890,10 @@ export default function QuoteDetail({
                     <p className="mb-2 text-[0.75rem] font-bold uppercase tracking-[0.08em] text-[#5c5e62]">Onboarding Action</p>
                     <div className="flex flex-col gap-2">
                       {(["invite", "approve", "pending_review"] as const).map((action) => (
-                        <label key={action} className="flex cursor-pointer items-start gap-3 rounded-xl border border-black/[0.08] px-4 py-3 transition hover:border-[#E85C1A]/40 has-[:checked]:border-[#E85C1A] has-[:checked]:bg-orange-50/40">
+                        <label key={action} className="flex cursor-pointer items-start gap-3 rounded-xl border border-black/[0.08] px-4 py-3 transition hover:border-[#f4511e]/40 has-[:checked]:border-[#f4511e] has-[:checked]:bg-orange-50/40">
                           <input type="radio" name="convertAction" value={action} checked={convertAction === action}
                             onChange={() => setConvertAction(action)}
-                            className="mt-0.5 accent-[#E85C1A]" />
+                            className="mt-0.5 accent-[#f4511e]" />
                           <div>
                             <p className="text-[0.875rem] font-semibold text-[#1a1a1a]">
                               {action === "invite" ? "Create & Send Invitation" : action === "approve" ? "Create & Approve" : "Create (Pending Review)"}
@@ -945,7 +945,7 @@ export default function QuoteDetail({
 
         {/* ── Order Conversion card ── */}
         <div className="rounded-2xl bg-white p-6 shadow-sm">
-          <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+          <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
             Order Conversion
           </p>
 
@@ -962,7 +962,7 @@ export default function QuoteDetail({
               {effectiveOrderId != null ? (
                 <Link
                   href={`/admin/orders/${effectiveOrderId}`}
-                  className="flex items-center gap-1.5 rounded-full border border-[#E85C1A] px-5 py-2.5 text-[0.83rem] font-semibold text-[#E85C1A] transition hover:bg-[#E85C1A] hover:text-white"
+                  className="flex items-center gap-1.5 rounded-full border border-[#f4511e] px-5 py-2.5 text-[0.83rem] font-semibold text-[#f4511e] transition hover:bg-[#f4511e] hover:text-white"
                 >
                   <ExternalLink size={13} />
                   View Order
@@ -970,7 +970,7 @@ export default function QuoteDetail({
               ) : (
                 <Link
                   href={`/admin/orders?q=${encodeURIComponent(effectiveOrderRef ?? "")}`}
-                  className="flex items-center gap-1.5 rounded-full border border-[#E85C1A] px-5 py-2.5 text-[0.83rem] font-semibold text-[#E85C1A] transition hover:bg-[#E85C1A] hover:text-white"
+                  className="flex items-center gap-1.5 rounded-full border border-[#f4511e] px-5 py-2.5 text-[0.83rem] font-semibold text-[#f4511e] transition hover:bg-[#f4511e] hover:text-white"
                 >
                   <ExternalLink size={13} />
                   View Order
@@ -1037,7 +1037,7 @@ export default function QuoteDetail({
                   <button
                     type="button"
                     onClick={() => setShowConvertModal(true)}
-                    className="flex items-center gap-2 rounded-full bg-[#E85C1A] px-6 py-2.5 text-[0.875rem] font-semibold text-white transition hover:bg-[#d14f14]"
+                    className="flex items-center gap-2 rounded-full bg-[#f4511e] px-6 py-2.5 text-[0.875rem] font-semibold text-white transition hover:bg-[#df4618]"
                   >
                     <ShoppingCart size={15} />
                     Convert to Order
@@ -1242,7 +1242,7 @@ export default function QuoteDetail({
                     type="button"
                     onClick={handleDownloadAttachment}
                     disabled={downloadingAttachment}
-                    className="ml-4 flex shrink-0 items-center gap-1.5 rounded-full bg-[#E85C1A] px-4 py-2 text-[0.8rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-60"
+                    className="ml-4 flex shrink-0 items-center gap-1.5 rounded-full bg-[#f4511e] px-4 py-2 text-[0.8rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-60"
                   >
                     {downloadingAttachment
                       ? <Loader2 size={13} className="animate-spin" />

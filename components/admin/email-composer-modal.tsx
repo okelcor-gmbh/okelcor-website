@@ -162,7 +162,7 @@ export default function EmailComposerModal({
     }
   }
 
-  const inputCls = "w-full rounded-xl border border-black/[0.1] bg-[#fafafa] px-3.5 py-2.5 text-[0.85rem] text-[#1a1a1a] outline-none transition placeholder:text-[#aaa] focus:bg-white focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10";
+  const inputCls = "w-full rounded-xl border border-black/[0.1] bg-[#fafafa] px-3.5 py-2.5 text-[0.85rem] text-[#1a1a1a] outline-none transition placeholder:text-[#aaa] focus:bg-white focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-8">
@@ -174,7 +174,7 @@ export default function EmailComposerModal({
 
         <form onSubmit={handleSubmit}>
           <div className="flex items-start gap-3 border-b border-black/[0.06] px-7 py-5">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E85C1A]">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#f4511e]">
               <Send size={17} className="text-white" />
             </div>
             <div>
@@ -224,7 +224,7 @@ export default function EmailComposerModal({
                 ref={bodyRef}
                 contentEditable
                 suppressContentEditableWarning
-                className={`min-h-[160px] rounded-xl border bg-[#fafafa] px-3.5 py-2.5 text-[0.85rem] text-[#1a1a1a] outline-none transition focus:bg-white focus:ring-2 focus:ring-[#E85C1A]/10 [&_img]:max-w-full [&_p]:my-1 ${errors.body ? "border-red-400" : "border-black/[0.1] focus:border-[#E85C1A]"}`}
+                className={`min-h-[160px] rounded-xl border bg-[#fafafa] px-3.5 py-2.5 text-[0.85rem] text-[#1a1a1a] outline-none transition focus:bg-white focus:ring-2 focus:ring-[#f4511e]/10 [&_img]:max-w-full [&_p]:my-1 ${errors.body ? "border-red-400" : "border-black/[0.1] focus:border-[#f4511e]"}`}
               />
               {errors.body && <p className="mt-1 text-[0.72rem] text-red-500">{errors.body}</p>}
             </div>
@@ -238,7 +238,7 @@ export default function EmailComposerModal({
                 onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
                 onDragLeave={() => setDragOver(false)}
                 onDrop={(e) => { e.preventDefault(); setDragOver(false); if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files); }}
-                className={`flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed px-4 py-5 text-center transition ${dragOver ? "border-[#E85C1A] bg-orange-50/40" : "border-black/[0.15] bg-white hover:border-[#E85C1A]/40"}`}
+                className={`flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed px-4 py-5 text-center transition ${dragOver ? "border-[#f4511e] bg-orange-50/40" : "border-black/[0.15] bg-white hover:border-[#f4511e]/40"}`}
               >
                 <Paperclip size={16} className="text-[#9ca3af]" />
                 <span className="text-[0.8rem] text-[#5c5e62]">Drag files here, or click to browse</span>
@@ -274,7 +274,7 @@ export default function EmailComposerModal({
             </button>
             {!sentFailed && (
               <button type="submit" disabled={submitting}
-                className="flex h-10 items-center gap-2 rounded-xl bg-[#E85C1A] px-6 text-[0.82rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:opacity-50">
+                className="flex h-10 items-center gap-2 rounded-xl bg-[#f4511e] px-6 text-[0.82rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:opacity-50">
                 {submitting ? <><Loader2 size={15} className="animate-spin" /> Sending…</> : <><Send size={14} /> Send</>}
               </button>
             )}

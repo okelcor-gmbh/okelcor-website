@@ -521,7 +521,7 @@ function StatCards({
         </div>
       </div>
       <div className="flex items-center gap-4 rounded-2xl bg-white p-5 shadow-sm">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#E85C1A]">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#f4511e]">
           <ShoppingBag size={20} strokeWidth={1.8} className="text-white" />
         </div>
         <div>
@@ -619,7 +619,7 @@ function ConnectionCard({
             type="button"
             onClick={onConnect}
             disabled={connectLoading}
-            className="flex shrink-0 items-center gap-1.5 rounded-xl bg-[#E85C1A] px-4 py-2 text-[0.8rem] font-semibold text-white transition hover:bg-[#d45218] disabled:opacity-50"
+            className="flex shrink-0 items-center gap-1.5 rounded-xl bg-[#f4511e] px-4 py-2 text-[0.8rem] font-semibold text-white transition hover:bg-[#d45218] disabled:opacity-50"
           >
             {connectLoading ? <Loader2 size={13} className="animate-spin" /> : <Link2 size={13} strokeWidth={2} />}
             Connect eBay Account
@@ -770,7 +770,7 @@ function EbayOrdersPanel({ canManage }: { canManage: boolean }) {
       {/* ── Header ── */}
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
-          <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#E85C1A]">eBay Orders</p>
+          <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">eBay Orders</p>
           <p className="mt-1 text-[0.875rem] text-[#5c5e62]">
             Buyer orders synced from eBay Sell Fulfillment API.
             {typeof total === "number" && ` · ${total} orders`}
@@ -781,7 +781,7 @@ function EbayOrdersPanel({ canManage }: { canManage: boolean }) {
             type="button"
             onClick={() => void handleSync()}
             disabled={syncLoading}
-            className="flex shrink-0 items-center gap-2 rounded-xl bg-[#E85C1A] px-4 py-2.5 text-[0.83rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-50"
+            className="flex shrink-0 items-center gap-2 rounded-xl bg-[#f4511e] px-4 py-2.5 text-[0.83rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50"
           >
             {syncLoading
               ? <Loader2 size={14} className="animate-spin" />
@@ -821,7 +821,7 @@ function EbayOrdersPanel({ canManage }: { canManage: boolean }) {
         <select
           value={payFilter}
           onChange={(e) => applyPayFilter(e.target.value)}
-          className="h-9 rounded-xl border border-black/[0.09] bg-white px-3 text-[0.83rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10 cursor-pointer"
+          className="h-9 rounded-xl border border-black/[0.09] bg-white px-3 text-[0.83rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10 cursor-pointer"
         >
           <option value="">All payments</option>
           <option value="PAID">Paid</option>
@@ -831,7 +831,7 @@ function EbayOrdersPanel({ canManage }: { canManage: boolean }) {
         <select
           value={fulfillFilter}
           onChange={(e) => applyFulfillFilter(e.target.value)}
-          className="h-9 rounded-xl border border-black/[0.09] bg-white px-3 text-[0.83rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10 cursor-pointer"
+          className="h-9 rounded-xl border border-black/[0.09] bg-white px-3 text-[0.83rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10 cursor-pointer"
         >
           <option value="">All fulfillment</option>
           <option value="NOT_STARTED">Not Started</option>
@@ -918,7 +918,7 @@ function EbayOrdersPanel({ canManage }: { canManage: boolean }) {
                           onClick={() => void handleRowSync(o.ebay_order_id)}
                           disabled={rowSyncing.has(o.ebay_order_id)}
                           title="Sync this order"
-                          className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] bg-white text-[#5c5e62] transition hover:border-[#E85C1A] hover:text-[#E85C1A] disabled:opacity-40"
+                          className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] bg-white text-[#5c5e62] transition hover:border-[#f4511e] hover:text-[#f4511e] disabled:opacity-40"
                         >
                           {rowSyncing.has(o.ebay_order_id)
                             ? <Loader2   size={13} className="animate-spin" />
@@ -951,13 +951,13 @@ function EbayOrdersPanel({ canManage }: { canManage: boolean }) {
                 type="button"
                 disabled={page <= 1}
                 onClick={() => { setPage(page - 1); void fetchOrders({ pg: page - 1 }); }}
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] bg-white text-[#1a1a1a] transition hover:border-[#E85C1A] hover:text-[#E85C1A] disabled:pointer-events-none disabled:bg-[#f5f5f5] disabled:text-[#ccc]"
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] bg-white text-[#1a1a1a] transition hover:border-[#f4511e] hover:text-[#f4511e] disabled:pointer-events-none disabled:bg-[#f5f5f5] disabled:text-[#ccc]"
               >‹</button>
               <button
                 type="button"
                 disabled={page >= lastPage}
                 onClick={() => { setPage(page + 1); void fetchOrders({ pg: page + 1 }); }}
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] bg-white text-[#1a1a1a] transition hover:border-[#E85C1A] hover:text-[#E85C1A] disabled:pointer-events-none disabled:bg-[#f5f5f5] disabled:text-[#ccc]"
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] bg-white text-[#1a1a1a] transition hover:border-[#f4511e] hover:text-[#f4511e] disabled:pointer-events-none disabled:bg-[#f5f5f5] disabled:text-[#ccc]"
               >›</button>
             </div>
           </div>
@@ -1579,7 +1579,7 @@ export default function EbayPage() {
       {/* Header */}
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
-          <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#E85C1A]">Sales Channels · eBay</p>
+          <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">Sales Channels · eBay</p>
           <p className="mt-1 text-[0.875rem] text-[#5c5e62]">Manage product listings and sync buyer orders from eBay.</p>
         </div>
         <a
@@ -1839,7 +1839,7 @@ export default function EbayPage() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search by SKU, brand, name…"
-              className="h-10 w-full rounded-xl border border-black/[0.09] bg-white pl-9 pr-4 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+              className="h-10 w-full rounded-xl border border-black/[0.09] bg-white pl-9 pr-4 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
             />
           </div>
           <button type="submit" className="h-10 rounded-xl bg-[#1a1a1a] px-4 text-[0.875rem] font-semibold text-white transition hover:bg-[#333]">
@@ -1855,8 +1855,8 @@ export default function EbayPage() {
               className={[
                 "h-10 rounded-xl px-3.5 text-[0.8rem] font-semibold capitalize transition",
                 filter === f
-                  ? "bg-[#E85C1A] text-white"
-                  : "border border-black/[0.09] bg-white text-[#5c5e62] hover:border-[#E85C1A] hover:text-[#E85C1A]",
+                  ? "bg-[#f4511e] text-white"
+                  : "border border-black/[0.09] bg-white text-[#5c5e62] hover:border-[#f4511e] hover:text-[#f4511e]",
               ].join(" ")}
             >
               {f === "all" ? "All" : f === "listed" ? "eBay Live" : "Not Listed"}
@@ -1888,7 +1888,7 @@ export default function EbayPage() {
                     className="text-[#5c5e62] hover:text-[#1a1a1a] disabled:cursor-default"
                   >
                     {headerChecked
-                      ? <CheckSquare size={15} strokeWidth={2} className="text-[#E85C1A]" />
+                      ? <CheckSquare size={15} strokeWidth={2} className="text-[#f4511e]" />
                       : <Square      size={15} strokeWidth={1.8} />}
                   </button>
                 </th>
@@ -1932,11 +1932,11 @@ export default function EbayPage() {
                             <button
                               type="button"
                               onClick={() => toggleSelect(product.id)}
-                              className="text-[#5c5e62] hover:text-[#E85C1A]"
+                              className="text-[#5c5e62] hover:text-[#f4511e]"
                               title="Select for bulk list"
                             >
                               {selected.has(product.id)
-                                ? <CheckSquare size={15} strokeWidth={2} className="text-[#E85C1A]" />
+                                ? <CheckSquare size={15} strokeWidth={2} className="text-[#f4511e]" />
                                 : <Square      size={15} strokeWidth={1.8} />}
                             </button>
                           )
@@ -2098,13 +2098,13 @@ export default function EbayPage() {
                 type="button"
                 disabled={page <= 1}
                 onClick={() => { setPage(page - 1); void fetchProducts({ page: page - 1 }); }}
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] bg-white text-[#1a1a1a] transition hover:border-[#E85C1A] hover:text-[#E85C1A] disabled:pointer-events-none disabled:bg-[#f5f5f5] disabled:text-[#ccc]"
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] bg-white text-[#1a1a1a] transition hover:border-[#f4511e] hover:text-[#f4511e] disabled:pointer-events-none disabled:bg-[#f5f5f5] disabled:text-[#ccc]"
               >‹</button>
               <button
                 type="button"
                 disabled={page >= lastPage}
                 onClick={() => { setPage(page + 1); void fetchProducts({ page: page + 1 }); }}
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] bg-white text-[#1a1a1a] transition hover:border-[#E85C1A] hover:text-[#E85C1A] disabled:pointer-events-none disabled:bg-[#f5f5f5] disabled:text-[#ccc]"
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] bg-white text-[#1a1a1a] transition hover:border-[#f4511e] hover:text-[#f4511e] disabled:pointer-events-none disabled:bg-[#f5f5f5] disabled:text-[#ccc]"
               >›</button>
             </div>
           </div>

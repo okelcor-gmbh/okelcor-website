@@ -42,7 +42,7 @@ export default function PendingQuotes() {
           <FileText size={15} className="text-[#5c5e62]" />
           <p className="text-[0.9rem] font-bold text-[#1a1a1a]">Pending Quotes</p>
         </div>
-        <Link href="/admin/quotes" className="text-[0.75rem] font-semibold text-[#E85C1A] hover:underline">
+        <Link href="/admin/quotes" className="text-[0.75rem] font-semibold text-[#f4511e] hover:underline">
           View all →
         </Link>
       </div>

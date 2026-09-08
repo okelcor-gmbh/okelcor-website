@@ -30,8 +30,8 @@ type FieldErrors = Record<string, string>;
 
 const labelCls = "mb-1.5 block text-[0.78rem] font-semibold text-[#1a1a1a]";
 const inputBase =
-  "w-full rounded-xl border bg-[#fafafa] px-3.5 py-2.5 text-[0.85rem] text-[#1a1a1a] outline-none transition placeholder:text-[#aaa] focus:bg-white focus:ring-2 focus:ring-[#E85C1A]/10";
-const okBorder = "border-black/[0.1] focus:border-[#E85C1A]";
+  "w-full rounded-xl border bg-[#fafafa] px-3.5 py-2.5 text-[0.85rem] text-[#1a1a1a] outline-none transition placeholder:text-[#aaa] focus:bg-white focus:ring-2 focus:ring-[#f4511e]/10";
+const okBorder = "border-black/[0.1] focus:border-[#f4511e]";
 const errBorder = "border-red-400 focus:border-red-500";
 
 export default function EditCustomerModal({ customer, onClose, onSaved }: Props) {
@@ -156,7 +156,7 @@ export default function EditCustomerModal({ customer, onClose, onSaved }: Props)
     <Shell onClose={onClose}>
       <form onSubmit={handleSubmit}>
         <div className="flex items-start gap-3 border-b border-black/[0.06] px-7 py-5">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E85C1A]">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#f4511e]">
             <Edit3 size={18} className="text-white" />
           </div>
           <div>
@@ -177,8 +177,8 @@ export default function EditCustomerModal({ customer, onClose, onSaved }: Props)
                   onClick={() => setCustomerType(tp)}
                   className={`flex-1 rounded-xl border-2 py-2 text-[0.82rem] font-semibold uppercase transition ${
                     customerType === tp
-                      ? "border-[#E85C1A] bg-[#E85C1A] text-white"
-                      : "border-black/[0.1] bg-white text-[#5c5e62] hover:border-[#E85C1A]/40"
+                      ? "border-[#f4511e] bg-[#f4511e] text-white"
+                      : "border-black/[0.1] bg-white text-[#5c5e62] hover:border-[#f4511e]/40"
                   }`}
                 >
                   {tp}
@@ -225,7 +225,7 @@ export default function EditCustomerModal({ customer, onClose, onSaved }: Props)
             {vatChanged && (
               <label className="mt-2 flex cursor-pointer items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2.5">
                 <input type="checkbox" checked={vatConfirmed} onChange={(e) => setVatConfirmed(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 accent-[#E85C1A]" />
+                  className="mt-0.5 h-4 w-4 accent-[#f4511e]" />
                 <span className="text-[0.78rem] text-amber-800">
                   I&apos;ve confirmed this VAT number. <span className="font-normal">Otherwise the verified badge resets — changing the number without checking this marks it unverified again.</span>
                 </span>
@@ -275,7 +275,7 @@ export default function EditCustomerModal({ customer, onClose, onSaved }: Props)
             Cancel
           </button>
           <button type="submit" disabled={submitting}
-            className="flex h-10 items-center gap-2 rounded-xl bg-[#E85C1A] px-6 text-[0.82rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:opacity-50">
+            className="flex h-10 items-center gap-2 rounded-xl bg-[#f4511e] px-6 text-[0.82rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:opacity-50">
             {submitting ? <><Loader2 size={15} className="animate-spin" /> Saving…</> : <>Save Changes</>}
           </button>
         </div>

@@ -31,7 +31,7 @@ function formatLastLogin(dt: string | null): string {
 }
 
 const inputCls =
-  "h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10";
+  "h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10";
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
@@ -228,7 +228,7 @@ export default function ProfileUI({
               <button
                 type="button"
                 onClick={() => { setEditing(true); setProfileError(null); }}
-                className="text-[0.8rem] font-semibold text-[#E85C1A] transition hover:underline"
+                className="text-[0.8rem] font-semibold text-[#f4511e] transition hover:underline"
               >
                 Edit
               </button>
@@ -306,7 +306,7 @@ export default function ProfileUI({
                   type="button"
                   onClick={handleProfileSave}
                   disabled={savingProfile}
-                  className="h-9 rounded-full bg-[#E85C1A] px-5 text-[0.83rem] font-semibold text-white transition hover:bg-[#d44f12] disabled:opacity-60"
+                  className="h-9 rounded-full bg-[#f4511e] px-5 text-[0.83rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-60"
                 >
                   {savingProfile ? "Saving…" : "Save Changes"}
                 </button>
@@ -422,7 +422,7 @@ export default function ProfileUI({
                   !newPassword ||
                   !confirmPassword
                 }
-                className="h-9 rounded-full bg-[#E85C1A] px-5 text-[0.83rem] font-semibold text-white transition hover:bg-[#d44f12] disabled:opacity-60"
+                className="h-9 rounded-full bg-[#f4511e] px-5 text-[0.83rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-60"
               >
                 {savingPassword ? "Updating…" : "Update Password"}
               </button>

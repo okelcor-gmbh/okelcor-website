@@ -184,7 +184,7 @@ export default function ArticlesTable({ articles, meta, currentQ, currentPage }:
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search by title, category…"
-              className="h-10 w-full rounded-xl border border-black/[0.09] bg-white pl-9 pr-4 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+              className="h-10 w-full rounded-xl border border-black/[0.09] bg-white pl-9 pr-4 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
             />
           </div>
           <button
@@ -214,7 +214,7 @@ export default function ArticlesTable({ articles, meta, currentQ, currentPage }:
                 <tr>
                   <td colSpan={6} className="px-4 py-12 text-center text-[0.875rem] text-[#5c5e62]">
                     No articles found.{" "}
-                    <Link href="/admin/articles/new" className="font-semibold text-[#E85C1A] underline">
+                    <Link href="/admin/articles/new" className="font-semibold text-[#f4511e] underline">
                       Write the first one
                     </Link>
                     .
@@ -270,7 +270,7 @@ export default function ArticlesTable({ articles, meta, currentQ, currentPage }:
                         <div className="flex items-center gap-1.5">
                           <Link
                             href={`/admin/articles/${article.id}`}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#5c5e62] transition hover:bg-[#E85C1A]/10 hover:text-[#E85C1A]"
+                            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#5c5e62] transition hover:bg-[#f4511e]/10 hover:text-[#f4511e]"
                             title="Edit"
                           >
                             <Pencil size={14} strokeWidth={2} />
@@ -318,14 +318,14 @@ export default function ArticlesTable({ articles, meta, currentQ, currentPage }:
               <Link
                 href={hasPrev ? buildUrl({ page: currentPage - 1 }) : "#"}
                 aria-disabled={!hasPrev}
-                className={`flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] transition ${hasPrev ? "bg-white text-[#1a1a1a] hover:border-[#E85C1A] hover:text-[#E85C1A]" : "pointer-events-none bg-[#f5f5f5] text-[#ccc]"}`}
+                className={`flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] transition ${hasPrev ? "bg-white text-[#1a1a1a] hover:border-[#f4511e] hover:text-[#f4511e]" : "pointer-events-none bg-[#f5f5f5] text-[#ccc]"}`}
               >
                 <ChevronLeft size={14} />
               </Link>
               <Link
                 href={hasNext ? buildUrl({ page: currentPage + 1 }) : "#"}
                 aria-disabled={!hasNext}
-                className={`flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] transition ${hasNext ? "bg-white text-[#1a1a1a] hover:border-[#E85C1A] hover:text-[#E85C1A]" : "pointer-events-none bg-[#f5f5f5] text-[#ccc]"}`}
+                className={`flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] transition ${hasNext ? "bg-white text-[#1a1a1a] hover:border-[#f4511e] hover:text-[#f4511e]" : "pointer-events-none bg-[#f5f5f5] text-[#ccc]"}`}
               >
                 <ChevronRight size={14} />
               </Link>

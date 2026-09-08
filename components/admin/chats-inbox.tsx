@@ -94,7 +94,7 @@ function ConvItem({
             <User size={16} strokeWidth={1.8} />
           </div>
           {conv.unread.operator > 0 && (
-            <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#E85C1A] text-[0.6rem] font-bold text-white">
+            <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#f4511e] text-[0.6rem] font-bold text-white">
               {conv.unread.operator}
             </span>
           )}
@@ -131,13 +131,13 @@ function Bubble({ msg }: { msg: Message }) {
   const isOperator = msg.from === "operator";
   return (
     <div className={`flex gap-2 ${isOperator ? "flex-row-reverse" : "flex-row"}`}>
-      <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[0.65rem] font-bold text-white ${isOperator ? "bg-[#E85C1A]" : "bg-[#5c5e62]"}`}>
+      <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[0.65rem] font-bold text-white ${isOperator ? "bg-[#f4511e]" : "bg-[#5c5e62]"}`}>
         {isOperator ? "A" : (msg.user.nickname?.[0] ?? "V").toUpperCase()}
       </div>
       <div className={`max-w-[72%] ${isOperator ? "items-end" : "items-start"} flex flex-col gap-0.5`}>
         <div className={`rounded-2xl px-4 py-2.5 text-[0.85rem] leading-relaxed ${
           isOperator
-            ? "rounded-tr-sm bg-[#E85C1A] text-white"
+            ? "rounded-tr-sm bg-[#f4511e] text-white"
             : "rounded-tl-sm bg-[#f0f2f5] text-[#1a1a1a]"
         }`}>
           {msg.content}
@@ -337,7 +337,7 @@ export default function ChatsInbox() {
             <MessageSquare size={16} strokeWidth={1.8} className="text-[#5c5e62]" />
             <span className="text-[0.875rem] font-bold text-[#1a1a1a]">Conversations</span>
             {unreadTotal > 0 && (
-              <span className="rounded-full bg-[#E85C1A] px-2 py-0.5 text-[0.68rem] font-bold text-white">
+              <span className="rounded-full bg-[#f4511e] px-2 py-0.5 text-[0.68rem] font-bold text-white">
                 {unreadTotal}
               </span>
             )}
@@ -489,13 +489,13 @@ export default function ChatsInbox() {
                   onKeyDown={handleKeyDown}
                   placeholder="Type a reply… (Enter to send, Shift+Enter for new line)"
                   rows={2}
-                  className="min-h-[48px] flex-1 resize-none rounded-xl border border-[#e5e7eb] bg-[#fafafa] px-4 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:bg-white focus:ring-2 focus:ring-[#E85C1A]/10"
+                  className="min-h-[48px] flex-1 resize-none rounded-xl border border-[#e5e7eb] bg-[#fafafa] px-4 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:bg-white focus:ring-2 focus:ring-[#f4511e]/10"
                 />
                 <button
                   type="button"
                   onClick={sendReply}
                   disabled={!reply.trim() || sending}
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#E85C1A] text-white transition hover:bg-[#d94f14] disabled:opacity-40"
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#f4511e] text-white transition hover:bg-[#d94f14] disabled:opacity-40"
                 >
                   {sending
                     ? <Loader2 size={16} className="animate-spin" />

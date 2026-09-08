@@ -82,7 +82,7 @@ export default function StaffTeamReport() {
           <div>
             <p className="font-semibold text-[#171a20]">{forbidden}</p>
             <p className="mt-1">
-              <Link href="/admin/contribution" className="text-[#E85C1A] hover:underline">
+              <Link href="/admin/contribution" className="text-[#f4511e] hover:underline">
                 Open your own record
               </Link>
             </p>
@@ -104,7 +104,7 @@ export default function StaffTeamReport() {
           <input
             type="date" value={range.from} max={range.to}
             onChange={(e) => setRange((r) => ({ ...r, from: e.target.value }))}
-            className="rounded-lg border border-black/10 bg-white px-3 py-1.5 text-[0.83rem] outline-none focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/25"
+            className="rounded-lg border border-black/10 bg-white px-3 py-1.5 text-[0.83rem] outline-none focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/25"
           />
         </label>
         <label className="flex flex-col gap-1">
@@ -112,7 +112,7 @@ export default function StaffTeamReport() {
           <input
             type="date" value={range.to} min={range.from}
             onChange={(e) => setRange((r) => ({ ...r, to: e.target.value }))}
-            className="rounded-lg border border-black/10 bg-white px-3 py-1.5 text-[0.83rem] outline-none focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/25"
+            className="rounded-lg border border-black/10 bg-white px-3 py-1.5 text-[0.83rem] outline-none focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/25"
           />
         </label>
         {loading && (
@@ -171,7 +171,7 @@ export default function StaffTeamReport() {
                         <td className={td}>
                           <Link
                             href={`/admin/contribution?admin_user_id=${p.admin_user_id}`}
-                            className="font-semibold text-[#171a20] hover:text-[#E85C1A]"
+                            className="font-semibold text-[#171a20] hover:text-[#f4511e]"
                           >
                             {p.name}
                           </Link>
@@ -223,7 +223,7 @@ export default function StaffTeamReport() {
           {/* Rendered from the payload rather than written into the page — the
               same words travel in the e-mailed digest, and a caveat that only
               exists on one of the two is a caveat half the readers never see. */}
-          <div className="rounded-2xl border-l-[3px] border-[#E85C1A] bg-[#fffaf3] p-4">
+          <div className="rounded-2xl border-l-[3px] border-[#f4511e] bg-[#fffaf3] p-4">
             <p className="mb-2 flex items-center gap-1.5 text-[0.68rem] font-bold uppercase tracking-wider text-[#8a5a2b]">
               <Info size={12} /> Before reading anything into the numbers
             </p>

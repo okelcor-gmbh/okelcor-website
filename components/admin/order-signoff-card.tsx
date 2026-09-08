@@ -364,7 +364,7 @@ export default function OrderSignoffCard({
               onChange={(e) => setNote(e.target.value)}
               rows={3}
               placeholder="e.g. Stock confirmed, pricing checked against the proposal"
-              className="w-full rounded-lg border border-black/[0.10] px-3 py-2 text-[0.83rem] focus:border-[#E85C1A] focus:outline-none"
+              className="w-full rounded-lg border border-black/[0.10] px-3 py-2 text-[0.83rem] focus:border-[#f4511e] focus:outline-none"
             />
             <div className="mt-3 flex justify-end gap-2">
               <button type="button" onClick={() => setSigning(null)} className="rounded-lg px-3 py-2 text-[0.83rem] font-semibold text-[#5c5e62]">
@@ -400,14 +400,14 @@ export default function OrderSignoffCard({
               Given by {withdrawing.signed_by}. The reason is recorded and stays in the history.
             </p>
             <label className="mb-1 block text-[0.78rem] font-semibold text-[#5c5e62]">
-              Reason <span className="text-[#E85C1A]">*</span>
+              Reason <span className="text-[#f4511e]">*</span>
             </label>
             <textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               rows={3}
               placeholder="Why is this signature being withdrawn?"
-              className="w-full rounded-lg border border-black/[0.10] px-3 py-2 text-[0.83rem] focus:border-[#E85C1A] focus:outline-none"
+              className="w-full rounded-lg border border-black/[0.10] px-3 py-2 text-[0.83rem] focus:border-[#f4511e] focus:outline-none"
             />
             {error && <p className="mt-2 text-[0.78rem] text-red-600">{error.message}</p>}
             <div className="mt-3 flex justify-end gap-2">

@@ -91,7 +91,7 @@ function BrandCard({
           onClick={() => logoInputRef.current?.click()}
           disabled={isPending}
           title="Replace logo"
-          className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition hover:bg-[#E85C1A] disabled:opacity-50"
+          className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition hover:bg-[#f4511e] disabled:opacity-50"
         >
           <Upload size={12} strokeWidth={2.5} />
         </button>
@@ -118,7 +118,7 @@ function BrandCard({
               onChange={(e) => setNameInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") handleSaveName(); if (e.key === "Escape") { setEditingName(false); setNameInput(brand.name); } }}
               autoFocus
-              className="h-8 flex-1 rounded-lg border border-[#E85C1A] bg-white px-2.5 text-[0.83rem] font-semibold text-[#1a1a1a] outline-none ring-2 ring-[#E85C1A]/10"
+              className="h-8 flex-1 rounded-lg border border-[#f4511e] bg-white px-2.5 text-[0.83rem] font-semibold text-[#1a1a1a] outline-none ring-2 ring-[#f4511e]/10"
             />
             <button
               type="button"
@@ -145,7 +145,7 @@ function BrandCard({
               <Link
                 href={`/admin/brands/${brand.id}`}
                 title="Brand content — description, spec defaults, shipping & returns for all its products"
-                className="flex h-7 w-7 items-center justify-center rounded-lg text-[#5c5e62] transition hover:bg-[#E85C1A]/10 hover:text-[#E85C1A]"
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-[#5c5e62] transition hover:bg-[#f4511e]/10 hover:text-[#f4511e]"
               >
                 <FileText size={13} strokeWidth={2} />
               </Link>
@@ -153,7 +153,7 @@ function BrandCard({
                 type="button"
                 onClick={() => { setEditingName(true); setNameInput(brand.name); }}
                 title="Edit name"
-                className="flex h-7 w-7 items-center justify-center rounded-lg text-[#5c5e62] transition hover:bg-[#E85C1A]/10 hover:text-[#E85C1A]"
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-[#5c5e62] transition hover:bg-[#f4511e]/10 hover:text-[#f4511e]"
               >
                 <Pencil size={13} strokeWidth={2} />
               </button>
@@ -173,7 +173,7 @@ function BrandCard({
       {/* Delete confirmation overlay */}
       {confirmDelete && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-2xl bg-white/95 p-5 text-center backdrop-blur-sm">
-          <p className="text-[0.83rem] font-semibold text-[#1a1a1a]">Delete <span className="text-[#E85C1A]">{brand.name}</span>?</p>
+          <p className="text-[0.83rem] font-semibold text-[#1a1a1a]">Delete <span className="text-[#f4511e]">{brand.name}</span>?</p>
           <p className="text-[0.75rem] text-[#5c5e62]">This removes the brand and its logo.</p>
           <div className="flex gap-2">
             <button
@@ -274,13 +274,13 @@ function AddBrandCard({ onAdded }: { onAdded: () => void }) {
           onChange={(e) => setName(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") handleAdd(); }}
           placeholder="Brand name"
-          className="h-8 w-full rounded-lg border border-black/[0.09] bg-white px-2.5 text-[0.83rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+          className="h-8 w-full rounded-lg border border-black/[0.09] bg-white px-2.5 text-[0.83rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
         />
         <button
           type="button"
           onClick={handleAdd}
           disabled={isPending}
-          className="flex h-8 items-center justify-center gap-1.5 rounded-lg bg-[#E85C1A] text-[0.8rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-60"
+          className="flex h-8 items-center justify-center gap-1.5 rounded-lg bg-[#f4511e] text-[0.8rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-60"
         >
           <Plus size={13} strokeWidth={2.5} />
           {isPending ? "Adding…" : "Add Brand"}

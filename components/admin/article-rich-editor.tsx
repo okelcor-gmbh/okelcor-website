@@ -89,7 +89,7 @@ function ToolBtn({
       className={[
         "flex h-7 w-7 items-center justify-center rounded-lg text-[0.75rem] transition",
         active
-          ? "bg-[#E85C1A] text-white"
+          ? "bg-[#f4511e] text-white"
           : "text-[#5c5e62] hover:bg-[#f0f2f5] hover:text-[#1a1a1a]",
         disabled ? "pointer-events-none opacity-30" : "",
       ].join(" ")}
@@ -127,11 +127,11 @@ function LinkDialog({
         onChange={(e) => setUrl(e.target.value)}
         onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); onConfirm(url); } if (e.key === "Escape") onCancel(); }}
         placeholder="https://…"
-        className="mb-2 h-8 w-full rounded-lg border border-black/[0.09] px-2.5 text-[0.83rem] text-[#1a1a1a] outline-none focus:border-[#E85C1A]"
+        className="mb-2 h-8 w-full rounded-lg border border-black/[0.09] px-2.5 text-[0.83rem] text-[#1a1a1a] outline-none focus:border-[#f4511e]"
       />
       <div className="flex gap-2">
         <button type="button" onClick={() => onConfirm(url)}
-          className="h-7 flex-1 rounded-lg bg-[#E85C1A] text-[0.78rem] font-semibold text-white transition hover:bg-[#d14f14]">
+          className="h-7 flex-1 rounded-lg bg-[#f4511e] text-[0.78rem] font-semibold text-white transition hover:bg-[#df4618]">
           Apply
         </button>
         {initialUrl && (
@@ -194,7 +194,7 @@ function ImageDialog({
         <>
           <div
             onClick={() => fileRef.current?.click()}
-            className="mb-2 flex h-16 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-black/[0.1] bg-[#fafafa] text-[0.78rem] font-semibold text-[#aaa] transition hover:border-[#E85C1A] hover:text-[#E85C1A]"
+            className="mb-2 flex h-16 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-black/[0.1] bg-[#fafafa] text-[0.78rem] font-semibold text-[#aaa] transition hover:border-[#f4511e] hover:text-[#f4511e]"
           >
             {file ? file.name : "Click to pick a file"}
           </div>
@@ -213,7 +213,7 @@ function ImageDialog({
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           placeholder="Image URL (https://…)"
-          className="mb-2 h-8 w-full rounded-lg border border-black/[0.09] px-2.5 text-[0.83rem] text-[#1a1a1a] outline-none focus:border-[#E85C1A]"
+          className="mb-2 h-8 w-full rounded-lg border border-black/[0.09] px-2.5 text-[0.83rem] text-[#1a1a1a] outline-none focus:border-[#f4511e]"
         />
       )}
 
@@ -222,7 +222,7 @@ function ImageDialog({
         value={alt}
         onChange={(e) => setAlt(e.target.value)}
         placeholder="Alt text (for SEO and accessibility)"
-        className="mb-2 h-8 w-full rounded-lg border border-black/[0.09] px-2.5 text-[0.83rem] text-[#1a1a1a] outline-none focus:border-[#E85C1A]"
+        className="mb-2 h-8 w-full rounded-lg border border-black/[0.09] px-2.5 text-[0.83rem] text-[#1a1a1a] outline-none focus:border-[#f4511e]"
       />
 
       <div className="flex gap-2">
@@ -236,7 +236,7 @@ function ImageDialog({
             }
           }}
           disabled={tab === "upload" ? !file : !url.trim()}
-          className="h-7 flex-1 rounded-lg bg-[#E85C1A] text-[0.78rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-50"
+          className="h-7 flex-1 rounded-lg bg-[#f4511e] text-[0.78rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50"
         >
           Insert
         </button>
@@ -455,7 +455,7 @@ function Toolbar({
               title={`Image width ${cls.slice(5)}%`}
               className={[
                 "flex h-7 items-center justify-center rounded-lg px-1.5 font-mono text-[0.68rem] font-bold transition",
-                imgClass.includes(cls) ? "bg-[#E85C1A] text-white" : "text-[#5c5e62] hover:bg-[#f0f2f5] hover:text-[#1a1a1a]",
+                imgClass.includes(cls) ? "bg-[#f4511e] text-white" : "text-[#5c5e62] hover:bg-[#f0f2f5] hover:text-[#1a1a1a]",
               ].join(" ")}
             >
               {cls.slice(5)}%
@@ -612,7 +612,7 @@ export default function ArticleRichEditor({
   const previewHtml = sanitizeHtml(editor?.getHTML() ?? value);
 
   return (
-    <div className="overflow-hidden rounded-xl border border-black/[0.09] bg-white transition focus-within:border-[#E85C1A] focus-within:ring-2 focus-within:ring-[#E85C1A]/10">
+    <div className="overflow-hidden rounded-xl border border-black/[0.09] bg-white transition focus-within:border-[#f4511e] focus-within:ring-2 focus-within:ring-[#f4511e]/10">
 
       {/* ── Mode tab bar ── */}
       <div className="flex items-center justify-between border-b border-black/[0.07] bg-[#fafafa] px-3 py-1.5">
@@ -668,17 +668,17 @@ export default function ArticleRichEditor({
           [&_.article-editor-content_ul]:mb-3 [&_.article-editor-content_ul]:ml-5 [&_.article-editor-content_ul]:list-disc
           [&_.article-editor-content_ol]:mb-3 [&_.article-editor-content_ol]:ml-5 [&_.article-editor-content_ol]:list-decimal
           [&_.article-editor-content_li]:mb-1
-          [&_.article-editor-content_blockquote]:border-l-4 [&_.article-editor-content_blockquote]:border-[#E85C1A]/40 [&_.article-editor-content_blockquote]:pl-4 [&_.article-editor-content_blockquote]:italic [&_.article-editor-content_blockquote]:text-[#5c5e62] [&_.article-editor-content_blockquote]:mb-3
+          [&_.article-editor-content_blockquote]:border-l-4 [&_.article-editor-content_blockquote]:border-[#f4511e]/40 [&_.article-editor-content_blockquote]:pl-4 [&_.article-editor-content_blockquote]:italic [&_.article-editor-content_blockquote]:text-[#5c5e62] [&_.article-editor-content_blockquote]:mb-3
           [&_.article-editor-content_hr]:my-4 [&_.article-editor-content_hr]:border-black/[0.1]
           [&_.article-editor-content_code]:rounded [&_.article-editor-content_code]:bg-[#f0f2f5] [&_.article-editor-content_code]:px-1.5 [&_.article-editor-content_code]:py-0.5 [&_.article-editor-content_code]:font-mono [&_.article-editor-content_code]:text-[0.82rem]
           [&_.article-editor-content_pre]:rounded-xl [&_.article-editor-content_pre]:bg-[#1a1a1a] [&_.article-editor-content_pre]:p-4 [&_.article-editor-content_pre]:font-mono [&_.article-editor-content_pre]:text-[0.82rem] [&_.article-editor-content_pre]:text-[#e0e0e0] [&_.article-editor-content_pre]:mb-3 [&_.article-editor-content_pre]:overflow-x-auto
-          [&_.article-editor-content_a]:text-[#E85C1A] [&_.article-editor-content_a]:underline
+          [&_.article-editor-content_a]:text-[#f4511e] [&_.article-editor-content_a]:underline
           [&_.article-editor-content_img]:max-w-full [&_.article-editor-content_img]:rounded-xl [&_.article-editor-content_img]:my-3
           [&_.article-editor-content_img.img-left]:float-left [&_.article-editor-content_img.img-left]:mr-4 [&_.article-editor-content_img.img-left]:mb-2 [&_.article-editor-content_img.img-left]:max-w-[50%]
           [&_.article-editor-content_img.img-right]:float-right [&_.article-editor-content_img.img-right]:ml-4 [&_.article-editor-content_img.img-right]:mb-2 [&_.article-editor-content_img.img-right]:max-w-[50%]
           [&_.article-editor-content_img.img-center]:mx-auto [&_.article-editor-content_img.img-center]:block
           [&_.article-editor-content_img.img-w25]:w-1/4 [&_.article-editor-content_img.img-w50]:w-1/2 [&_.article-editor-content_img.img-w75]:w-3/4 [&_.article-editor-content_img.img-w100]:w-full
-          [&_.article-editor-content_img.ProseMirror-selectednode]:ring-2 [&_.article-editor-content_img.ProseMirror-selectednode]:ring-[#E85C1A]
+          [&_.article-editor-content_img.ProseMirror-selectednode]:ring-2 [&_.article-editor-content_img.ProseMirror-selectednode]:ring-[#f4511e]
           [&_.article-editor-content_table]:w-full [&_.article-editor-content_table]:border-collapse [&_.article-editor-content_table]:mb-3
           [&_.article-editor-content_th]:border [&_.article-editor-content_th]:border-black/[0.12] [&_.article-editor-content_th]:bg-[#f5f5f5] [&_.article-editor-content_th]:px-3 [&_.article-editor-content_th]:py-2 [&_.article-editor-content_th]:text-left [&_.article-editor-content_th]:text-[0.82rem] [&_.article-editor-content_th]:font-bold
           [&_.article-editor-content_td]:border [&_.article-editor-content_td]:border-black/[0.09] [&_.article-editor-content_td]:px-3 [&_.article-editor-content_td]:py-2 [&_.article-editor-content_td]:text-[0.85rem]
@@ -698,11 +698,11 @@ export default function ArticleRichEditor({
             [&_ul]:mb-3 [&_ul]:ml-5 [&_ul]:list-disc
             [&_ol]:mb-3 [&_ol]:ml-5 [&_ol]:list-decimal
             [&_li]:mb-1
-            [&_blockquote]:border-l-4 [&_blockquote]:border-[#E85C1A]/40 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-[#5c5e62] [&_blockquote]:mb-3
+            [&_blockquote]:border-l-4 [&_blockquote]:border-[#f4511e]/40 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-[#5c5e62] [&_blockquote]:mb-3
             [&_hr]:my-4 [&_hr]:border-black/[0.1]
             [&_code]:rounded [&_code]:bg-[#f0f2f5] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[0.82rem]
             [&_pre]:rounded-xl [&_pre]:bg-[#1a1a1a] [&_pre]:p-4 [&_pre]:font-mono [&_pre]:text-[0.82rem] [&_pre]:text-[#e0e0e0] [&_pre]:mb-3 [&_pre]:overflow-x-auto
-            [&_a]:text-[#E85C1A] [&_a]:underline
+            [&_a]:text-[#f4511e] [&_a]:underline
             [&_img]:max-w-full [&_img]:rounded-xl [&_img]:my-3
             [&_img.img-left]:float-left [&_img.img-left]:mr-4 [&_img.img-left]:mb-2 [&_img.img-left]:max-w-[50%]
             [&_img.img-right]:float-right [&_img.img-right]:ml-4 [&_img.img-right]:mb-2 [&_img.img-right]:max-w-[50%]

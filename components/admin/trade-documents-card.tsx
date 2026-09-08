@@ -531,7 +531,7 @@ export default function TradeDocumentsCard({
           href={`/api/admin/trade-documents/${doc.id}/download`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex h-8 items-center gap-1.5 rounded-full border border-black/[0.09] bg-white px-3 text-[0.75rem] font-semibold text-[#1a1a1a] transition hover:border-[#E85C1A]/40 hover:text-[#E85C1A]"
+          className="inline-flex h-8 items-center gap-1.5 rounded-full border border-black/[0.09] bg-white px-3 text-[0.75rem] font-semibold text-[#1a1a1a] transition hover:border-[#f4511e]/40 hover:text-[#f4511e]"
         >
           <ExternalLink size={13} strokeWidth={2} />
           View
@@ -543,7 +543,7 @@ export default function TradeDocumentsCard({
         type="button"
         onClick={() => handleDownload(doc)}
         disabled={downloading === doc.id}
-        className="inline-flex h-8 items-center gap-1.5 rounded-full border border-black/[0.09] bg-white px-3 text-[0.75rem] font-semibold text-[#1a1a1a] transition hover:border-[#E85C1A]/40 hover:text-[#E85C1A] disabled:opacity-50"
+        className="inline-flex h-8 items-center gap-1.5 rounded-full border border-black/[0.09] bg-white px-3 text-[0.75rem] font-semibold text-[#1a1a1a] transition hover:border-[#f4511e]/40 hover:text-[#f4511e] disabled:opacity-50"
       >
         {downloading === doc.id
           ? <Loader2 size={13} className="animate-spin" />
@@ -576,7 +576,7 @@ export default function TradeDocumentsCard({
 
         {/* ── Header ── */}
         <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
-          <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+          <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
             Trade Documents
           </p>
 
@@ -594,7 +594,7 @@ export default function TradeDocumentsCard({
               {!hasProforma && !customerAcceptancePending && (
                 <button type="button" disabled={proforma.loading}
                   onClick={() => generateDoc(`/api/admin/orders/${orderId}/trade-documents/proforma`, setProforma, "proforma invoice")}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-[#E85C1A]/30 bg-[#fff5f2] px-3 py-1.5 text-[0.75rem] font-semibold text-[#E85C1A] transition hover:bg-[#fff0ea] disabled:opacity-60"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[#f4511e]/30 bg-[#fff5f2] px-3 py-1.5 text-[0.75rem] font-semibold text-[#f4511e] transition hover:bg-[#fff0ea] disabled:opacity-60"
                 >
                   {proforma.loading ? <Loader2 size={13} strokeWidth={2} className="animate-spin" /> : <FilePlus2 size={13} strokeWidth={2} />}
                   {proforma.loading ? "Generating…" : "Generate Proforma"}
@@ -613,7 +613,7 @@ export default function TradeDocumentsCard({
                 ) : (
                   <span
                     title="Customer acceptance required before generating proforma"
-                    className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-full border border-[#E85C1A]/30 bg-[#fff5f2] px-3 py-1.5 text-[0.75rem] font-semibold text-[#E85C1A] opacity-40"
+                    className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-full border border-[#f4511e]/30 bg-[#fff5f2] px-3 py-1.5 text-[0.75rem] font-semibold text-[#f4511e] opacity-40"
                   >
                     <FilePlus2 size={13} strokeWidth={2} />
                     Generate Proforma
@@ -907,7 +907,7 @@ export default function TradeDocumentsCard({
                   id="td-type"
                   value={uploadType}
                   onChange={(e) => setUploadType(e.target.value)}
-                  className="w-full rounded-lg border border-black/[0.1] bg-white px-3 py-2 text-[0.85rem] text-[#1a1a1a] focus:border-[#E85C1A]/50 focus:outline-none focus:ring-2 focus:ring-[#E85C1A]/10"
+                  className="w-full rounded-lg border border-black/[0.1] bg-white px-3 py-2 text-[0.85rem] text-[#1a1a1a] focus:border-[#f4511e]/50 focus:outline-none focus:ring-2 focus:ring-[#f4511e]/10"
                 >
                   {uploadOptions.documentTypes.map((opt) => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -935,7 +935,7 @@ export default function TradeDocumentsCard({
                   onChange={(e) => setUploadLabel(e.target.value)}
                   placeholder={customLabelOnly ? "Name this document" : "e.g. Bill of Lading"}
                   autoComplete="off"
-                  className="w-full rounded-lg border border-black/[0.1] bg-white px-3 py-2 text-[0.85rem] text-[#1a1a1a] placeholder:text-[#9ca3af] focus:border-[#E85C1A]/50 focus:outline-none focus:ring-2 focus:ring-[#E85C1A]/10"
+                  className="w-full rounded-lg border border-black/[0.1] bg-white px-3 py-2 text-[0.85rem] text-[#1a1a1a] placeholder:text-[#9ca3af] focus:border-[#f4511e]/50 focus:outline-none focus:ring-2 focus:ring-[#f4511e]/10"
                 />
                 <datalist id="td-file-as-options">
                   {uploadOptions.fileAsSuggestions.map((l) => (
@@ -959,7 +959,7 @@ export default function TradeDocumentsCard({
                   value={uploadNotes}
                   onChange={(e) => setUploadNotes(e.target.value)}
                   placeholder="e.g. Container TCNU1234567"
-                  className="w-full rounded-lg border border-black/[0.1] bg-white px-3 py-2 text-[0.85rem] text-[#1a1a1a] placeholder:text-[#9ca3af] focus:border-[#E85C1A]/50 focus:outline-none focus:ring-2 focus:ring-[#E85C1A]/10"
+                  className="w-full rounded-lg border border-black/[0.1] bg-white px-3 py-2 text-[0.85rem] text-[#1a1a1a] placeholder:text-[#9ca3af] focus:border-[#f4511e]/50 focus:outline-none focus:ring-2 focus:ring-[#f4511e]/10"
                 />
               </div>
 
@@ -969,7 +969,7 @@ export default function TradeDocumentsCard({
                   File <span className="text-red-500">*</span>
                 </label>
                 <div className="flex items-center gap-2">
-                  <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-black/[0.15] bg-white px-3 py-2 text-[0.82rem] text-[#5c5e62] transition hover:border-[#E85C1A]/40 hover:text-[#E85C1A]">
+                  <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-black/[0.15] bg-white px-3 py-2 text-[0.82rem] text-[#5c5e62] transition hover:border-[#f4511e]/40 hover:text-[#f4511e]">
                     <Paperclip size={14} strokeWidth={2} />
                     {uploadFile ? uploadFile.name : "Choose file…"}
                     <input
@@ -998,7 +998,7 @@ export default function TradeDocumentsCard({
                   type="button"
                   onClick={handleUpload}
                   disabled={uploading}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-[#E85C1A] px-4 py-2 text-[0.8rem] font-semibold text-white transition hover:bg-[#d04d15] disabled:opacity-60"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-[#f4511e] px-4 py-2 text-[0.8rem] font-semibold text-white transition hover:bg-[#d04d15] disabled:opacity-60"
                 >
                   {uploading ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} strokeWidth={2} />}
                   {uploading ? "Uploading…" : "Upload"}
@@ -1080,7 +1080,7 @@ export default function TradeDocumentsCard({
             {/* Modal header */}
             <div className="mb-5 flex items-start justify-between gap-3">
               <div>
-                <p className="text-[0.68rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+                <p className="text-[0.68rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
                   Send Document
                 </p>
                 <p className="mt-0.5 text-[0.95rem] font-bold text-[#1a1a1a]">
@@ -1112,7 +1112,7 @@ export default function TradeDocumentsCard({
                     setSendModal((prev) => prev ? { ...prev, recipientEmail: e.target.value } : null)
                   }
                   placeholder="customer@example.com"
-                  className="w-full rounded-lg border border-black/[0.1] bg-white px-3 py-2 text-[0.85rem] text-[#1a1a1a] placeholder:text-[#9ca3af] focus:border-[#E85C1A]/50 focus:outline-none focus:ring-2 focus:ring-[#E85C1A]/10"
+                  className="w-full rounded-lg border border-black/[0.1] bg-white px-3 py-2 text-[0.85rem] text-[#1a1a1a] placeholder:text-[#9ca3af] focus:border-[#f4511e]/50 focus:outline-none focus:ring-2 focus:ring-[#f4511e]/10"
                 />
               </div>
 
@@ -1129,7 +1129,7 @@ export default function TradeDocumentsCard({
                   placeholder="Add a note for the customer…"
                   rows={3}
                   maxLength={1000}
-                  className="w-full resize-none rounded-lg border border-black/[0.1] bg-white px-3 py-2 text-[0.85rem] text-[#1a1a1a] placeholder:text-[#9ca3af] focus:border-[#E85C1A]/50 focus:outline-none focus:ring-2 focus:ring-[#E85C1A]/10"
+                  className="w-full resize-none rounded-lg border border-black/[0.1] bg-white px-3 py-2 text-[0.85rem] text-[#1a1a1a] placeholder:text-[#9ca3af] focus:border-[#f4511e]/50 focus:outline-none focus:ring-2 focus:ring-[#f4511e]/10"
                 />
                 <p className="mt-0.5 text-right text-[0.68rem] text-[#9ca3af]">
                   {sendModal.message.length}/1000
@@ -1145,7 +1145,7 @@ export default function TradeDocumentsCard({
                   type="button"
                   disabled={sendModal.loading || !sendModal.recipientEmail.trim()}
                   onClick={handleSendEmail}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-[#E85C1A] px-4 py-2 text-[0.8rem] font-semibold text-white transition hover:bg-[#d04d15] disabled:opacity-60"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-[#f4511e] px-4 py-2 text-[0.8rem] font-semibold text-white transition hover:bg-[#d04d15] disabled:opacity-60"
                 >
                   {sendModal.loading
                     ? <Loader2 size={13} className="animate-spin" />
@@ -1190,14 +1190,14 @@ export default function TradeDocumentsCard({
             </div>
 
             <label className="mb-1 mt-3 block text-[0.78rem] font-semibold text-[#5c5e62]">
-              Why is this needed now? <span className="text-[#E85C1A]">*</span>
+              Why is this needed now? <span className="text-[#f4511e]">*</span>
             </label>
             <textarea
               value={overrideReason}
               onChange={(e) => { setOverrideReason(e.target.value); setGateError(null); }}
               rows={3}
               placeholder="e.g. Customer's bank needs it to release the transfer"
-              className="w-full rounded-lg border border-black/[0.10] px-3 py-2 text-[0.83rem] focus:border-[#E85C1A] focus:outline-none"
+              className="w-full rounded-lg border border-black/[0.10] px-3 py-2 text-[0.83rem] focus:border-[#f4511e] focus:outline-none"
             />
             <p className="mt-1 text-[0.72rem] text-[#8c8f94]">
               Recorded against the order, with your name.

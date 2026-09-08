@@ -223,7 +223,7 @@ export default function EbayLogsPanel({ canManage }: { canManage: boolean }) {
               <select
                 value={filterAction}
                 onChange={(e) => setFilterAction(e.target.value)}
-                className="h-9 rounded-lg border border-black/[0.09] bg-white px-2.5 text-[0.8rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A]"
+                className="h-9 rounded-lg border border-black/[0.09] bg-white px-2.5 text-[0.8rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e]"
               >
                 {ACTION_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>{o.label}</option>
@@ -240,7 +240,7 @@ export default function EbayLogsPanel({ canManage }: { canManage: boolean }) {
                 onChange={(e) => setFilterSku(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && applyFilters()}
                 placeholder="Filter by SKU…"
-                className="h-9 w-44 rounded-lg border border-black/[0.09] bg-white px-3 text-[0.8rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#E85C1A]"
+                className="h-9 w-44 rounded-lg border border-black/[0.09] bg-white px-3 text-[0.8rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#f4511e]"
               />
             </div>
 
@@ -251,7 +251,7 @@ export default function EbayLogsPanel({ canManage }: { canManage: boolean }) {
                 type="date"
                 value={filterFrom}
                 onChange={(e) => setFilterFrom(e.target.value)}
-                className="h-9 rounded-lg border border-black/[0.09] bg-white px-2.5 text-[0.8rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A]"
+                className="h-9 rounded-lg border border-black/[0.09] bg-white px-2.5 text-[0.8rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e]"
               />
             </div>
 
@@ -262,7 +262,7 @@ export default function EbayLogsPanel({ canManage }: { canManage: boolean }) {
                 type="date"
                 value={filterTo}
                 onChange={(e) => setFilterTo(e.target.value)}
-                className="h-9 rounded-lg border border-black/[0.09] bg-white px-2.5 text-[0.8rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A]"
+                className="h-9 rounded-lg border border-black/[0.09] bg-white px-2.5 text-[0.8rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e]"
               />
             </div>
 
@@ -411,7 +411,7 @@ export default function EbayLogsPanel({ canManage }: { canManage: boolean }) {
                     setPage(prev);
                     void fetchLogs({ page: prev });
                   }}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] bg-white text-[#1a1a1a] transition hover:border-[#E85C1A] hover:text-[#E85C1A] disabled:pointer-events-none disabled:bg-[#f5f5f5] disabled:text-[#ccc]"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] bg-white text-[#1a1a1a] transition hover:border-[#f4511e] hover:text-[#f4511e] disabled:pointer-events-none disabled:bg-[#f5f5f5] disabled:text-[#ccc]"
                 >
                   ‹
                 </button>
@@ -423,7 +423,7 @@ export default function EbayLogsPanel({ canManage }: { canManage: boolean }) {
                     setPage(next);
                     void fetchLogs({ page: next });
                   }}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] bg-white text-[#1a1a1a] transition hover:border-[#E85C1A] hover:text-[#E85C1A] disabled:pointer-events-none disabled:bg-[#f5f5f5] disabled:text-[#ccc]"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] bg-white text-[#1a1a1a] transition hover:border-[#f4511e] hover:text-[#f4511e] disabled:pointer-events-none disabled:bg-[#f5f5f5] disabled:text-[#ccc]"
                 >
                   ›
                 </button>

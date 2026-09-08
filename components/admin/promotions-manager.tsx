@@ -132,7 +132,7 @@ function PromotionForm({
           <select
             value={form.placement}
             onChange={(e) => set("placement", e.target.value as FormState["placement"])}
-            className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/15"
+            className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/15"
           >
             <option value="shop_inline">Shop Inline Banner (between filters and products)</option>
             <option value="shop_hero">Shop Hero Campaign Banner (above filters, with brand + promo code)</option>
@@ -151,7 +151,7 @@ function PromotionForm({
             value={form.brand_name}
             onChange={(e) => set("brand_name", e.target.value)}
             placeholder="e.g. Rapid"
-            className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/15"
+            className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/15"
           />
           <p className="mt-1 text-[0.72rem] text-[#9ca3af]">
             Must match the brand name on products exactly — used to show discount badges.
@@ -165,7 +165,7 @@ function PromotionForm({
           <select
             value={form.customer_type_target}
             onChange={(e) => set("customer_type_target", e.target.value as FormState["customer_type_target"])}
-            className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/15"
+            className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/15"
           >
             <option value="">— No targeting (show to all) —</option>
             <option value="all">All customers</option>
@@ -189,7 +189,7 @@ function PromotionForm({
             value={form.discount_pct}
             onChange={(e) => set("discount_pct", e.target.value)}
             placeholder="e.g. 5"
-            className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/15"
+            className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/15"
           />
           <p className="mt-1 text-[0.72rem] text-[#9ca3af]">
             Shown as a badge on matching brand products in the shop.
@@ -205,7 +205,7 @@ function PromotionForm({
             value={form.promo_code}
             onChange={(e) => set("promo_code", e.target.value.toUpperCase())}
             placeholder="e.g. RAPID5"
-            className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 font-mono text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/15"
+            className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 font-mono text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/15"
           />
           <p className="mt-1 text-[0.72rem] text-[#9ca3af]">
             Displayed on the campaign banner with a copy button. Customers apply it at checkout.
@@ -222,7 +222,7 @@ function PromotionForm({
             value={form.title}
             onChange={(e) => set("title", e.target.value)}
             placeholder="e.g. Summer Sale — Up to 30% Off"
-            className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/15"
+            className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/15"
           />
         </div>
 
@@ -237,7 +237,7 @@ function PromotionForm({
               value={form.subheadline}
               onChange={(e) => set("subheadline", e.target.value)}
               placeholder="e.g. Premium PCR & TBR tyres — limited stock"
-              className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/15"
+              className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/15"
             />
           </div>
         )}
@@ -254,7 +254,7 @@ function PromotionForm({
                 value={form.short_text}
                 onChange={(e) => set("short_text", e.target.value)}
                 placeholder="e.g. Free shipping on orders over €500"
-                className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/15"
+                className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/15"
               />
             </div>
             <div>
@@ -267,7 +267,7 @@ function PromotionForm({
                 onChange={(e) => set("emoji", e.target.value)}
                 placeholder="e.g. 🚚"
                 maxLength={4}
-                className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/15"
+                className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/15"
               />
             </div>
           </>
@@ -283,7 +283,7 @@ function PromotionForm({
             value={form.button_text}
             onChange={(e) => set("button_text", e.target.value)}
             placeholder="e.g. Shop Now"
-            className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/15"
+            className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/15"
           />
         </div>
 
@@ -297,7 +297,7 @@ function PromotionForm({
             value={form.button_link}
             onChange={(e) => set("button_link", e.target.value)}
             placeholder="e.g. /shop?type=PCR"
-            className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/15"
+            className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/15"
           />
         </div>
 
@@ -310,7 +310,7 @@ function PromotionForm({
             type="date"
             value={form.start_date}
             onChange={(e) => set("start_date", e.target.value)}
-            className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/15"
+            className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/15"
           />
         </div>
 
@@ -323,7 +323,7 @@ function PromotionForm({
             type="date"
             value={form.end_date}
             onChange={(e) => set("end_date", e.target.value)}
-            className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/15"
+            className="w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/15"
           />
         </div>
 
@@ -333,7 +333,7 @@ function PromotionForm({
             <button
               type="button"
               onClick={() => set("is_active", !form.is_active)}
-              className="shrink-0 text-[#E85C1A] transition hover:opacity-80"
+              className="shrink-0 text-[#f4511e] transition hover:opacity-80"
             >
               {form.is_active ? (
                 <ToggleRight size={28} />
@@ -359,7 +359,7 @@ function PromotionForm({
           type="button"
           onClick={onSave}
           disabled={isBusy || !form.title.trim()}
-          className="flex items-center gap-2 rounded-xl bg-[#E85C1A] px-5 py-2.5 text-[0.875rem] font-semibold text-white transition hover:bg-[#d94f14] disabled:opacity-50"
+          className="flex items-center gap-2 rounded-xl bg-[#f4511e] px-5 py-2.5 text-[0.875rem] font-semibold text-white transition hover:bg-[#d94f14] disabled:opacity-50"
         >
           <Check size={15} />
           {isBusy ? "Saving…" : editing ? "Save Changes" : "Create Promotion"}
@@ -446,7 +446,7 @@ function PromotionRow({
     <div className={[
       "rounded-2xl border bg-white p-5 transition",
       promo.is_active && !expired
-        ? "border-[#E85C1A]/30 shadow-sm"
+        ? "border-[#f4511e]/30 shadow-sm"
         : "border-black/[0.08]",
     ].join(" ")}>
       <div className="flex items-start gap-4">
@@ -581,7 +581,7 @@ function PromotionRow({
             className="flex h-9 w-9 items-center justify-center rounded-xl border border-black/[0.08] bg-white text-[#5c5e62] transition hover:bg-[#f0f2f5] disabled:opacity-50"
           >
             {promo.is_active ? (
-              <ToggleRight size={17} className="text-[#E85C1A]" />
+              <ToggleRight size={17} className="text-[#f4511e]" />
             ) : (
               <ToggleLeft size={17} />
             )}
@@ -728,7 +728,7 @@ export default function PromotionsManager({
           <button
             type="button"
             onClick={openCreate}
-            className="flex items-center gap-2 rounded-xl bg-[#E85C1A] px-4 py-2.5 text-[0.875rem] font-semibold text-white transition hover:bg-[#d94f14]"
+            className="flex items-center gap-2 rounded-xl bg-[#f4511e] px-4 py-2.5 text-[0.875rem] font-semibold text-white transition hover:bg-[#d94f14]"
           >
             <Plus size={16} />
             New Promotion

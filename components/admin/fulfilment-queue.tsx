@@ -43,14 +43,14 @@ function Section({
 
   return (
     <section className={`overflow-hidden rounded-2xl border bg-white ${
-      accent ? "border-[#E85C1A]/30" : "border-black/[0.06]"
+      accent ? "border-[#f4511e]/30" : "border-black/[0.06]"
     }`}>
       <div className="flex flex-wrap items-center gap-2 border-b border-black/[0.06] px-4 py-3">
-        <Icon size={15} className={accent ? "text-[#E85C1A]" : "text-[#5c5e62]"} />
+        <Icon size={15} className={accent ? "text-[#f4511e]" : "text-[#5c5e62]"} />
         <h2 className="text-[0.9rem] font-bold text-[#171a20]">{title}</h2>
         {total != null && (
           <span className={`rounded-full px-2 py-0.5 text-[0.72rem] font-bold tabular-nums ${
-            accent ? "bg-[#E85C1A] text-white" : "bg-[#f0f2f5] text-[#5c5e62]"
+            accent ? "bg-[#f4511e] text-white" : "bg-[#f0f2f5] text-[#5c5e62]"
           }`}>
             {total}
           </span>

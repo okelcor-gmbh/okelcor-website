@@ -127,7 +127,7 @@ export default function TierPricingBoard() {
   };
 
   if (loading) {
-    return <div className="flex min-h-[50vh] items-center justify-center"><Loader2 size={22} className="animate-spin text-[#E85C1A]" /></div>;
+    return <div className="flex min-h-[50vh] items-center justify-center"><Loader2 size={22} className="animate-spin text-[#f4511e]" /></div>;
   }
 
   if (pageError) {
@@ -137,7 +137,7 @@ export default function TierPricingBoard() {
         <p className="mb-1 text-[1rem] font-bold text-[#1a1a1a]">Tier pricing unavailable</p>
         <p className="mb-5 max-w-sm text-[0.83rem] text-[#6b7280]">{pageError}</p>
         <button type="button" onClick={() => { setLoading(true); load(); }}
-          className="flex items-center gap-2 rounded-full bg-[#E85C1A] px-5 py-2.5 text-[0.85rem] font-semibold text-white transition hover:bg-[#d14f14]">
+          className="flex items-center gap-2 rounded-full bg-[#f4511e] px-5 py-2.5 text-[0.85rem] font-semibold text-white transition hover:bg-[#df4618]">
           <RefreshCw size={14} /> Retry
         </button>
       </div>
@@ -152,7 +152,7 @@ export default function TierPricingBoard() {
       {/* Header */}
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <Calculator size={18} className="text-[#E85C1A]" strokeWidth={2} />
+          <Calculator size={18} className="text-[#f4511e]" strokeWidth={2} />
           <div>
             <h1 className="text-[1.15rem] font-extrabold text-[#1a1a1a]">Tyre Pricing</h1>
             <p className="text-[0.8rem] text-[#6b7280]">
@@ -166,7 +166,7 @@ export default function TierPricingBoard() {
           {selected.size > 0 && (
             <button type="button" disabled={applyingAll}
               onClick={() => doApply({ ids: Array.from(selected) })}
-              className="flex items-center gap-2 rounded-full bg-[#E85C1A] px-4 py-2 text-[0.8rem] font-semibold text-white transition hover:bg-[#d44f12] disabled:opacity-60">
+              className="flex items-center gap-2 rounded-full bg-[#f4511e] px-4 py-2 text-[0.8rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-60">
               {applyingAll ? <Loader2 size={13} className="animate-spin" /> : <Calculator size={13} />}
               Apply to {selected.size} selected
             </button>
@@ -196,7 +196,7 @@ export default function TierPricingBoard() {
         <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           <SummaryCard label="Products" value={counts.total} />
           <SummaryCard label="Ready to price" value={counts.ready} accent="text-emerald-600" sub="cost + tier set" />
-          <SummaryCard label="Would change" value={counts.would_change} accent={counts.would_change > 0 ? "text-[#E85C1A]" : undefined} sub="site price ≠ formula" />
+          <SummaryCard label="Would change" value={counts.would_change} accent={counts.would_change > 0 ? "text-[#f4511e]" : undefined} sub="site price ≠ formula" />
           <SummaryCard label="No tier yet" value={counts.missing_tier} accent={counts.missing_tier > 0 ? "text-amber-600" : undefined} sub="assign below" />
           <SummaryCard label="No Tyre100 cost" value={counts.missing_cost} accent={counts.missing_cost > 0 ? "text-gray-500" : undefined} sub="fill in cost price" />
         </div>
@@ -206,12 +206,12 @@ export default function TierPricingBoard() {
       <div className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl bg-white px-4 py-3 shadow-sm ring-1 ring-black/[0.06]">
         <span className="text-[0.78rem] font-bold text-[#1a1a1a]">Assign a whole brand:</span>
         <select value={sweepBrand} onChange={(e) => setSweepBrand(e.target.value)}
-          className="h-8 rounded-lg border border-black/[0.09] bg-white px-2 text-[0.78rem] outline-none focus:border-[#E85C1A]">
+          className="h-8 rounded-lg border border-black/[0.09] bg-white px-2 text-[0.78rem] outline-none focus:border-[#f4511e]">
           <option value="">Pick a brand…</option>
           {(meta?.brands ?? []).map((b) => <option key={b} value={b}>{b}</option>)}
         </select>
         <select value={sweepTier} onChange={(e) => setSweepTier(e.target.value as PriceTier)}
-          className="h-8 rounded-lg border border-black/[0.09] bg-white px-2 text-[0.78rem] outline-none focus:border-[#E85C1A]">
+          className="h-8 rounded-lg border border-black/[0.09] bg-white px-2 text-[0.78rem] outline-none focus:border-[#f4511e]">
           {TIERS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
         </select>
         <button type="button" disabled={sweeping || !sweepBrand} onClick={doSweep}
@@ -240,7 +240,7 @@ export default function TierPricingBoard() {
         <div className="relative ml-auto">
           <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9ca3af]" />
           <input type="text" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search sku, brand, size…"
-            className="h-9 w-56 rounded-full border border-black/[0.09] bg-white pl-8 pr-3 text-[0.8rem] outline-none transition focus:border-[#E85C1A]" />
+            className="h-9 w-56 rounded-full border border-black/[0.09] bg-white pl-8 pr-3 text-[0.8rem] outline-none transition focus:border-[#f4511e]" />
         </div>
       </div>
 
@@ -286,7 +286,7 @@ export default function TierPricingBoard() {
                   <td className="whitespace-nowrap px-3 py-2.5">
                     <select value={r.tier ?? ""} disabled={busyRow === r.id}
                       onChange={(e) => e.target.value && setRowTier(r, e.target.value as PriceTier)}
-                      className={`h-7 rounded-lg border px-1.5 text-[0.72rem] outline-none focus:border-[#E85C1A] ${
+                      className={`h-7 rounded-lg border px-1.5 text-[0.72rem] outline-none focus:border-[#f4511e] ${
                         r.tier === null ? "border-amber-300 bg-amber-50 text-amber-700" : "border-black/[0.09] bg-white"
                       }`}>
                       <option value="">no tier</option>

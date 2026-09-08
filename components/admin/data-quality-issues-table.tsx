@@ -130,7 +130,7 @@ export default function DataQualityIssuesTable() {
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9ca3af]" />
           <input type="text" value={q} onChange={(e) => setQ(e.target.value)}
             placeholder="Search name, email, company…"
-            className="h-9 w-full rounded-xl border border-black/[0.09] bg-white pl-8 pr-4 text-[0.83rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10" />
+            className="h-9 w-full rounded-xl border border-black/[0.09] bg-white pl-8 pr-4 text-[0.83rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10" />
           {q && (
             <button type="button" onClick={() => setQ("")} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#9ca3af] hover:text-[#1a1a1a]">
               <X size={13} />
@@ -138,11 +138,11 @@ export default function DataQualityIssuesTable() {
           )}
         </div>
         <select value={flag} onChange={(e) => setFlag(e.target.value)}
-          className="h-9 rounded-xl border border-black/[0.09] bg-white px-3 text-[0.83rem] text-[#1a1a1a] outline-none focus:border-[#E85C1A]">
+          className="h-9 rounded-xl border border-black/[0.09] bg-white px-3 text-[0.83rem] text-[#1a1a1a] outline-none focus:border-[#f4511e]">
           {FLAG_OPTIONS.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
         </select>
         <select value={status} onChange={(e) => setStatus(e.target.value)}
-          className="h-9 rounded-xl border border-black/[0.09] bg-white px-3 text-[0.83rem] text-[#1a1a1a] outline-none focus:border-[#E85C1A]">
+          className="h-9 rounded-xl border border-black/[0.09] bg-white px-3 text-[0.83rem] text-[#1a1a1a] outline-none focus:border-[#f4511e]">
           {STATUS_OPTIONS.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
         </select>
         <button type="button" onClick={fetchIssues}
@@ -164,7 +164,7 @@ export default function DataQualityIssuesTable() {
             </thead>
             <tbody className="divide-y divide-black/[0.04]">
               {loading ? (
-                <tr><td colSpan={7} className="px-4 py-10 text-center"><Loader2 size={20} className="mx-auto animate-spin text-[#E85C1A]" /></td></tr>
+                <tr><td colSpan={7} className="px-4 py-10 text-center"><Loader2 size={20} className="mx-auto animate-spin text-[#f4511e]" /></td></tr>
               ) : issues.length === 0 ? (
                 <tr><td colSpan={7} className="px-4 py-10 text-center text-[0.875rem] text-[#5c5e62]">No data quality issues found.</td></tr>
               ) : (
@@ -176,7 +176,7 @@ export default function DataQualityIssuesTable() {
                       {/* Customer */}
                       <td className="px-4 py-3">
                         <Link href={`/admin/customers/${issue.id}`}
-                          className="text-[0.875rem] font-semibold text-[#1a1a1a] hover:text-[#E85C1A]">
+                          className="text-[0.875rem] font-semibold text-[#1a1a1a] hover:text-[#f4511e]">
                           {issue.first_name} {issue.last_name}
                         </Link>
                         <p className="text-[0.73rem] text-[#5c5e62]">{issue.email}</p>
@@ -257,7 +257,7 @@ export default function DataQualityIssuesTable() {
                             </button>
                           )}
                           <Link href={`/admin/customers/${issue.id}`} title="View customer"
-                            className="flex h-7 w-7 items-center justify-center rounded-lg border border-black/[0.08] text-[#5c5e62] transition hover:bg-[#E85C1A]/10 hover:text-[#E85C1A]">
+                            className="flex h-7 w-7 items-center justify-center rounded-lg border border-black/[0.08] text-[#5c5e62] transition hover:bg-[#f4511e]/10 hover:text-[#f4511e]">
                             <ExternalLink size={12} />
                           </Link>
                         </div>
@@ -278,11 +278,11 @@ export default function DataQualityIssuesTable() {
             </p>
             <div className="flex gap-2">
               <button type="button" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] transition hover:border-[#E85C1A] disabled:cursor-not-allowed disabled:opacity-40">
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] transition hover:border-[#f4511e] disabled:cursor-not-allowed disabled:opacity-40">
                 <ChevronLeft size={14} />
               </button>
               <button type="button" disabled={page >= lastPage} onClick={() => setPage((p) => p + 1)}
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] transition hover:border-[#E85C1A] disabled:cursor-not-allowed disabled:opacity-40">
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] transition hover:border-[#f4511e] disabled:cursor-not-allowed disabled:opacity-40">
                 <ChevronRight size={14} />
               </button>
             </div>

@@ -26,7 +26,7 @@ const AUDIENCES = [
 // ── Styles ────────────────────────────────────────────────────────────────────
 
 const inputCls =
-  "w-full rounded-xl border border-black/[0.09] bg-white px-4 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10";
+  "w-full rounded-xl border border-black/[0.09] bg-white px-4 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10";
 
 const inputErrCls =
   "w-full rounded-xl border border-red-400 bg-red-50/40 px-4 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-red-500";
@@ -50,7 +50,7 @@ function Field({
     <div>
       <label className={labelCls}>
         {label}
-        {required && <span className="ml-0.5 text-[#E85C1A]">*</span>}
+        {required && <span className="ml-0.5 text-[#f4511e]">*</span>}
       </label>
       {children}
       {error && (
@@ -64,7 +64,7 @@ function Field({
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
-    <p className="col-span-full text-[0.7rem] font-bold uppercase tracking-[0.18em] text-[#E85C1A]">
+    <p className="col-span-full text-[0.7rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">
       {children}
     </p>
   );
@@ -598,7 +598,7 @@ export default function ProductForm(props: Props) {
           <div className="flex flex-col gap-2">
             <label
               htmlFor="product-image"
-              className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-black/[0.09] bg-white px-4 py-2.5 text-[0.83rem] font-semibold text-[#1a1a1a] transition hover:border-[#E85C1A] hover:text-[#E85C1A]"
+              className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-black/[0.09] bg-white px-4 py-2.5 text-[0.83rem] font-semibold text-[#1a1a1a] transition hover:border-[#f4511e] hover:text-[#f4511e]"
             >
               <Upload size={14} strokeWidth={2} />
               {imageFile ? "Change image" : isEdit ? "Replace image" : "Choose image"}
@@ -614,7 +614,7 @@ export default function ProductForm(props: Props) {
               JPG, PNG, WebP or MP4/MOV · Max 50 MB
             </p>
             {imageFile && (
-              <p className="text-[0.73rem] font-medium text-[#E85C1A]">
+              <p className="text-[0.73rem] font-medium text-[#f4511e]">
                 Selected: {imageFile.name}
               </p>
             )}
@@ -650,7 +650,7 @@ export default function ProductForm(props: Props) {
                 <button
                   type="button"
                   onClick={() => galleryInputRef.current?.click()}
-                  className="inline-flex items-center gap-2 rounded-xl border border-black/[0.09] bg-white px-4 py-2.5 text-[0.83rem] font-semibold text-[#1a1a1a] transition hover:border-[#E85C1A] hover:text-[#E85C1A]"
+                  className="inline-flex items-center gap-2 rounded-xl border border-black/[0.09] bg-white px-4 py-2.5 text-[0.83rem] font-semibold text-[#1a1a1a] transition hover:border-[#f4511e] hover:text-[#f4511e]"
                 >
                   <ImagePlus size={14} strokeWidth={2} />
                   {galleryFiles.length > 0 ? "Add more images" : "Choose gallery images"}
@@ -688,7 +688,7 @@ export default function ProductForm(props: Props) {
               onClick={() => setIsActive((v) => !v)}
               className={[
                 "relative h-6 w-11 rounded-full transition-colors",
-                isActive ? "bg-[#E85C1A]" : "bg-[#d1d5db]",
+                isActive ? "bg-[#f4511e]" : "bg-[#d1d5db]",
               ].join(" ")}
             >
               <span
@@ -711,7 +711,7 @@ export default function ProductForm(props: Props) {
         <button
           type="submit"
           disabled={isPending}
-          className="flex h-[46px] items-center justify-center rounded-full bg-[#E85C1A] px-8 text-[0.9rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-60"
+          className="flex h-[46px] items-center justify-center rounded-full bg-[#f4511e] px-8 text-[0.9rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-60"
         >
           {isPending
             ? (isEdit ? "Saving…" : "Creating…")

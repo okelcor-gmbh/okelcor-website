@@ -114,7 +114,7 @@ export default function EbayAuditBoard() {
   };
 
   if (loading) {
-    return <div className="flex min-h-[50vh] items-center justify-center"><Loader2 size={22} className="animate-spin text-[#E85C1A]" /></div>;
+    return <div className="flex min-h-[50vh] items-center justify-center"><Loader2 size={22} className="animate-spin text-[#f4511e]" /></div>;
   }
 
   if (pageError) {
@@ -124,7 +124,7 @@ export default function EbayAuditBoard() {
         <p className="mb-1 text-[1rem] font-bold text-[#1a1a1a]">eBay audit unavailable</p>
         <p className="mb-5 max-w-sm text-[0.83rem] text-[#6b7280]">{pageError}</p>
         <button type="button" onClick={() => { setLoading(true); load(); }}
-          className="flex items-center gap-2 rounded-full bg-[#E85C1A] px-5 py-2.5 text-[0.85rem] font-semibold text-white transition hover:bg-[#d14f14]">
+          className="flex items-center gap-2 rounded-full bg-[#f4511e] px-5 py-2.5 text-[0.85rem] font-semibold text-white transition hover:bg-[#df4618]">
           <RefreshCw size={14} /> Retry
         </button>
       </div>
@@ -138,7 +138,7 @@ export default function EbayAuditBoard() {
       {/* Header */}
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <TrendingUp size={18} className="text-[#E85C1A]" strokeWidth={2} />
+          <TrendingUp size={18} className="text-[#f4511e]" strokeWidth={2} />
           <div>
             <h1 className="text-[1.15rem] font-extrabold text-[#1a1a1a]">eBay Price Audit</h1>
             <p className="text-[0.8rem] text-[#6b7280]">
@@ -161,7 +161,7 @@ export default function EbayAuditBoard() {
                 setNotice(res.error ?? res.message ?? "Sync started.");
               });
             }}
-            className="flex items-center gap-2 rounded-full bg-[#E85C1A] px-4 py-2 text-[0.8rem] font-semibold text-white transition hover:bg-[#d44f12] disabled:opacity-60">
+            className="flex items-center gap-2 rounded-full bg-[#f4511e] px-4 py-2 text-[0.8rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-60">
             {syncing ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />}
             Fetch live from eBay
           </button>
@@ -221,7 +221,7 @@ export default function EbayAuditBoard() {
         <div className="relative ml-auto">
           <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9ca3af]" />
           <input type="text" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search sku, brand, size…"
-            className="h-9 w-56 rounded-full border border-black/[0.09] bg-white pl-8 pr-3 text-[0.8rem] outline-none transition focus:border-[#E85C1A]" />
+            className="h-9 w-56 rounded-full border border-black/[0.09] bg-white pl-8 pr-3 text-[0.8rem] outline-none transition focus:border-[#f4511e]" />
         </div>
       </div>
 
@@ -299,7 +299,7 @@ export default function EbayAuditBoard() {
                     <td className="whitespace-nowrap px-3 py-2.5">
                       {market === undefined && (
                         <button type="button" onClick={() => checkMarket(r)}
-                          className="rounded-full border border-black/10 px-2.5 py-1 text-[0.68rem] font-semibold text-[#5c5e62] transition hover:border-[#E85C1A] hover:text-[#E85C1A]">
+                          className="rounded-full border border-black/10 px-2.5 py-1 text-[0.68rem] font-semibold text-[#5c5e62] transition hover:border-[#f4511e] hover:text-[#f4511e]">
                           Check market
                         </button>
                       )}
@@ -325,7 +325,7 @@ export default function EbayAuditBoard() {
                       {r.suggested_price !== null ? (
                         <button type="button" title="Use as new price"
                           onClick={() => setPriceDrafts((d) => ({ ...d, [r.id]: String(r.suggested_price) }))}
-                          className="font-mono font-bold text-[#E85C1A] underline-offset-2 hover:underline">
+                          className="font-mono font-bold text-[#f4511e] underline-offset-2 hover:underline">
                           {fmt(r.suggested_price)}
                         </button>
                       ) : <HelpCircle size={13} className="ml-auto text-[#d1d5db]" />}
@@ -335,10 +335,10 @@ export default function EbayAuditBoard() {
                         <input type="number" step="0.01" min="0" placeholder="—"
                           value={priceDrafts[r.id] ?? ""}
                           onChange={(e) => setPriceDrafts((d) => ({ ...d, [r.id]: e.target.value }))}
-                          className="h-7 w-20 rounded-lg border border-black/[0.09] px-2 text-right font-mono text-[0.75rem] outline-none transition focus:border-[#E85C1A]" />
+                          className="h-7 w-20 rounded-lg border border-black/[0.09] px-2 text-right font-mono text-[0.75rem] outline-none transition focus:border-[#f4511e]" />
                         <button type="button" disabled={applying === r.id || !priceDrafts[r.id]}
                           onClick={() => doApply(r)}
-                          className="rounded-full bg-[#E85C1A] px-2.5 py-1 text-[0.68rem] font-bold text-white transition hover:bg-[#d44f12] disabled:opacity-40">
+                          className="rounded-full bg-[#f4511e] px-2.5 py-1 text-[0.68rem] font-bold text-white transition hover:bg-[#df4618] disabled:opacity-40">
                           {applying === r.id ? "…" : "Apply"}
                         </button>
                       </span>
@@ -380,7 +380,7 @@ export default function EbayAuditBoard() {
                     <td className="whitespace-nowrap px-3 py-2">
                       {um === undefined && (
                         <button type="button" onClick={() => checkUnmatchedMarket(l)}
-                          className="rounded-full border border-black/10 px-2.5 py-1 text-[0.68rem] font-semibold text-[#5c5e62] transition hover:border-[#E85C1A] hover:text-[#E85C1A]">
+                          className="rounded-full border border-black/10 px-2.5 py-1 text-[0.68rem] font-semibold text-[#5c5e62] transition hover:border-[#f4511e] hover:text-[#f4511e]">
                           Check market
                         </button>
                       )}

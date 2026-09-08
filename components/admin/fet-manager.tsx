@@ -65,7 +65,7 @@ function engineToForm(e: AdminFetEngine): EngineForm {
 
 // ── Input styles ──────────────────────────────────────────────────────────────
 
-const inputCls = "w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/15";
+const inputCls = "w-full rounded-xl border border-black/[0.12] px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/15";
 const labelCls = "mb-1 block text-[0.75rem] font-semibold text-[#5c5e62]";
 
 // ── Engine form panel ─────────────────────────────────────────────────────────
@@ -194,7 +194,7 @@ function EngineForm({
           type="button"
           onClick={onSave}
           disabled={isBusy || !form.manufacturer.trim() || !form.model_series.trim() || !form.fet_model}
-          className="flex items-center gap-2 rounded-xl bg-[#E85C1A] px-5 py-2.5 text-[0.875rem] font-semibold text-white transition hover:bg-[#d94f14] disabled:opacity-50"
+          className="flex items-center gap-2 rounded-xl bg-[#f4511e] px-5 py-2.5 text-[0.875rem] font-semibold text-white transition hover:bg-[#d94f14] disabled:opacity-50"
         >
           <Check size={15} />
           {isBusy ? "Saving…" : editing ? "Save Changes" : "Add Engine"}
@@ -394,7 +394,7 @@ export default function FetManager({
               className={[
                 "flex h-9 items-center gap-1.5 rounded-xl px-3.5 text-[0.8rem] font-semibold transition",
                 filterCat === cat
-                  ? "bg-[#E85C1A] text-white"
+                  ? "bg-[#f4511e] text-white"
                   : "border border-black/[0.1] bg-white text-[#5c5e62] hover:bg-[#f0f2f5]",
               ].join(" ")}
             >
@@ -413,13 +413,13 @@ export default function FetManager({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search…"
-              className="h-9 rounded-xl border border-black/[0.1] bg-white pl-8 pr-3 text-[0.83rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+              className="h-9 rounded-xl border border-black/[0.1] bg-white pl-8 pr-3 text-[0.83rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
             />
           </div>
           <button
             type="button"
             onClick={openCreate}
-            className="flex h-9 items-center gap-2 rounded-xl bg-[#E85C1A] px-4 text-[0.83rem] font-semibold text-white transition hover:bg-[#d94f14]"
+            className="flex h-9 items-center gap-2 rounded-xl bg-[#f4511e] px-4 text-[0.83rem] font-semibold text-white transition hover:bg-[#d94f14]"
           >
             <Plus size={14} /> Add Engine
           </button>

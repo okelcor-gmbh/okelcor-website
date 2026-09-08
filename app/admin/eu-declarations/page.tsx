@@ -43,7 +43,7 @@ export default async function EuDeclarationsPage() {
 
       {/* Header */}
       <div>
-        <p className="text-[0.7rem] font-bold uppercase tracking-[0.2em] text-[#E85C1A]">
+        <p className="text-[0.7rem] font-bold uppercase tracking-[0.2em] text-[#f4511e]">
           Compliance
         </p>
         <h1 className="text-[1.35rem] font-extrabold tracking-tight text-[#1a1a1a]">

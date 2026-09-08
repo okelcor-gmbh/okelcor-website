@@ -78,7 +78,7 @@ export default function MarketIntelligence() {
     <div className="p-6 md:p-8">
       <header className="mb-6 flex flex-wrap items-start gap-4">
         <div className="min-w-0">
-          <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#E85C1A]">
+          <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">
             Market intelligence
           </p>
           <h1 className="mt-0.5 text-[1.15rem] font-extrabold text-[#1a1a1a]">
@@ -111,14 +111,14 @@ export default function MarketIntelligence() {
             type="button"
             onClick={() => void load()}
             title="Refresh"
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-black/[0.09] bg-white text-[#5c5e62] transition hover:border-[#E85C1A] hover:text-[#E85C1A]"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-black/[0.09] bg-white text-[#5c5e62] transition hover:border-[#f4511e] hover:text-[#f4511e]"
           >
             <RefreshCw size={15} />
           </button>
 
           <a
             href={`/api/admin/analytics/markets/export?from=${daysAgo(days)}&to=${today()}`}
-            className="flex h-10 items-center gap-2 rounded-xl bg-[#E85C1A] px-5 text-[0.82rem] font-semibold text-white transition hover:bg-[#d44d10]"
+            className="flex h-10 items-center gap-2 rounded-xl bg-[#f4511e] px-5 text-[0.82rem] font-semibold text-white transition hover:bg-[#d44d10]"
           >
             <Download size={15} /> Export
           </a>
@@ -127,7 +127,7 @@ export default function MarketIntelligence() {
 
       {loading ? (
         <div className="flex justify-center py-20">
-          <Loader2 size={22} className="animate-spin text-[#E85C1A]" />
+          <Loader2 size={22} className="animate-spin text-[#f4511e]" />
         </div>
       ) : error === "not_deployed" ? (
         <Notice
@@ -156,7 +156,7 @@ export default function MarketIntelligence() {
           {opportunities.length > 0 && (
             <section>
               <h2 className="mb-3 flex items-center gap-2 text-[0.875rem] font-bold text-[#1a1a1a]">
-                <Target size={15} className="text-[#E85C1A]" />
+                <Target size={15} className="text-[#f4511e]" />
                 Openings worth acting on
                 <span className="rounded-full bg-[#f0f2f5] px-2 py-0.5 text-[0.7rem] font-semibold text-[#5c5e62]">
                   {opportunities.length}
@@ -288,7 +288,7 @@ function OpportunityCard({ market }: { market: MarketRow }) {
   const tone = SIGNAL_TONE[market.signal];
 
   return (
-    <article className="rounded-2xl border border-[#E85C1A]/25 bg-white p-5 shadow-sm">
+    <article className="rounded-2xl border border-[#f4511e]/25 bg-white p-5 shadow-sm">
       <div className="flex items-start gap-3">
         <span className="text-[1.4rem] leading-none">{flag(market.country_code)}</span>
         <div className="min-w-0 flex-1">
@@ -328,7 +328,7 @@ function OpportunityCard({ market }: { market: MarketRow }) {
       {market.signal === "interest_no_reach" && (
         <Link
           href={`/admin/marketing?country=${encodeURIComponent(market.country)}`}
-          className="mt-4 inline-flex items-center gap-1.5 text-[0.78rem] font-semibold text-[#E85C1A] transition hover:underline"
+          className="mt-4 inline-flex items-center gap-1.5 text-[0.78rem] font-semibold text-[#f4511e] transition hover:underline"
         >
           <Megaphone size={13} /> Build a list for {market.country}
         </Link>
@@ -337,7 +337,7 @@ function OpportunityCard({ market }: { market: MarketRow }) {
       {market.signal !== "interest_no_reach" && market.reach.market_slugs.length > 0 && (
         <Link
           href={`/admin/marketing?market=${encodeURIComponent(market.reach.market_slugs[0])}`}
-          className="mt-4 inline-flex items-center gap-1.5 text-[0.78rem] font-semibold text-[#E85C1A] transition hover:underline"
+          className="mt-4 inline-flex items-center gap-1.5 text-[0.78rem] font-semibold text-[#f4511e] transition hover:underline"
         >
           <Megaphone size={13} /> Campaign to {market.reach.contacts} contacts
         </Link>

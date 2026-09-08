@@ -22,7 +22,7 @@ import type { PartnerOrganisation, PartnerSaleRecord, PartnerSalesTotals } from 
 import { useAdminPermissions } from "@/hooks/use-admin-permissions";
 
 const FIELD =
-  "rounded-lg border border-black/10 bg-white px-3 py-2 text-[0.85rem] outline-none transition focus:border-[#E85C1A]/50 focus:ring-2 focus:ring-[#E85C1A]/10";
+  "rounded-lg border border-black/10 bg-white px-3 py-2 text-[0.85rem] outline-none transition focus:border-[#f4511e]/50 focus:ring-2 focus:ring-[#f4511e]/10";
 
 function money(amount: number, currency: string): string {
   try {
@@ -175,7 +175,7 @@ export default function PartnerSalesReview() {
         {canExport && (
           <a
             href={`/api/admin/partner-sales/export?${query}`}
-            className="ml-auto inline-flex items-center gap-2 rounded-lg bg-[#E85C1A] px-4 py-2 text-[0.85rem] font-semibold text-white transition hover:bg-[#d04d15]"
+            className="ml-auto inline-flex items-center gap-2 rounded-lg bg-[#f4511e] px-4 py-2 text-[0.85rem] font-semibold text-white transition hover:bg-[#d04d15]"
           >
             <Download size={15} /> Export CSV
           </a>
@@ -276,7 +276,7 @@ export default function PartnerSalesReview() {
                           <input value={note} onChange={(e) => setNote(e.target.value)} autoFocus
                             placeholder="What is wrong with this entry?" className={`${FIELD} flex-1`} />
                           <button type="button" disabled={!note.trim() || busyId === r.id} onClick={() => dispute(r.id)}
-                            className="rounded-md bg-[#E85C1A] px-3 py-1.5 text-[0.75rem] font-semibold text-white disabled:opacity-40">
+                            className="rounded-md bg-[#f4511e] px-3 py-1.5 text-[0.75rem] font-semibold text-white disabled:opacity-40">
                             Send
                           </button>
                         </div>

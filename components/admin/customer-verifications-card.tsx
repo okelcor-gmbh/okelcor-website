@@ -131,17 +131,17 @@ export default function CustomerVerificationsCard({ customerId, onVerifiedChange
             <p className="mt-1 font-mono text-[0.72rem] text-[#d1d5db]">Backend: GET /admin/customers/{"{id}"}/verifications</p>
           </div>
         ) : loading ? (
-          <div className="flex justify-center py-6"><Loader2 size={18} className="animate-spin text-[#E85C1A]" /></div>
+          <div className="flex justify-center py-6"><Loader2 size={18} className="animate-spin text-[#f4511e]" /></div>
         ) : (
           <>
             {/* Add form */}
             {showAdd && (
-              <div className="mb-4 rounded-xl border border-[#E85C1A]/20 bg-orange-50/30 p-3">
+              <div className="mb-4 rounded-xl border border-[#f4511e]/20 bg-orange-50/30 p-3">
                 <div className="flex flex-col gap-2 sm:flex-row">
                   <select
                     value={addType}
                     onChange={(e) => setAddType(e.target.value)}
-                    className="h-9 rounded-lg border border-black/[0.09] bg-white px-2.5 text-[0.8rem] text-[#1a1a1a] outline-none focus:border-[#E85C1A]"
+                    className="h-9 rounded-lg border border-black/[0.09] bg-white px-2.5 text-[0.8rem] text-[#1a1a1a] outline-none focus:border-[#f4511e]"
                   >
                     {VERIFICATION_TYPES.map((t) => <option key={t} value={t}>{VERIFICATION_TYPE_LABELS[t]}</option>)}
                   </select>
@@ -149,13 +149,13 @@ export default function CustomerVerificationsCard({ customerId, onVerifiedChange
                     value={addValue}
                     onChange={(e) => setAddValue(e.target.value)}
                     placeholder="Reference / value (optional)"
-                    className="h-9 flex-1 rounded-lg border border-black/[0.09] bg-white px-2.5 text-[0.8rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] focus:border-[#E85C1A]"
+                    className="h-9 flex-1 rounded-lg border border-black/[0.09] bg-white px-2.5 text-[0.8rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] focus:border-[#f4511e]"
                   />
                   <button
                     type="button"
                     disabled={busyId === "add"}
                     onClick={addItem}
-                    className="flex h-9 items-center gap-1.5 rounded-lg bg-[#E85C1A] px-3 text-[0.78rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:opacity-50"
+                    className="flex h-9 items-center gap-1.5 rounded-lg bg-[#f4511e] px-3 text-[0.78rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:opacity-50"
                   >
                     {busyId === "add" ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />} Add
                   </button>

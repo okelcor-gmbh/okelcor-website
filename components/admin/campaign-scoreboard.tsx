@@ -44,7 +44,7 @@ export default function CampaignScoreboard() {
   useEffect(() => { load(); }, [load]);
 
   if (loading) {
-    return <div className="flex min-h-[50vh] items-center justify-center"><Loader2 size={22} className="animate-spin text-[#E85C1A]" /></div>;
+    return <div className="flex min-h-[50vh] items-center justify-center"><Loader2 size={22} className="animate-spin text-[#f4511e]" /></div>;
   }
 
   if (error) {
@@ -54,7 +54,7 @@ export default function CampaignScoreboard() {
         <p className="mb-1 text-[1rem] font-bold text-[#1a1a1a]">Scoreboard unavailable</p>
         <p className="mb-5 max-w-sm text-[0.83rem] text-[#6b7280]">{error}</p>
         <button type="button" onClick={() => { setLoading(true); load(); }}
-          className="flex items-center gap-2 rounded-full bg-[#E85C1A] px-5 py-2.5 text-[0.85rem] font-semibold text-white transition hover:bg-[#d14f14]">
+          className="flex items-center gap-2 rounded-full bg-[#f4511e] px-5 py-2.5 text-[0.85rem] font-semibold text-white transition hover:bg-[#df4618]">
           <RefreshCw size={14} /> Retry
         </button>
       </div>
@@ -65,7 +65,7 @@ export default function CampaignScoreboard() {
     <div className="p-6 lg:p-8">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <Award size={18} className="text-[#E85C1A]" strokeWidth={2} />
+          <Award size={18} className="text-[#f4511e]" strokeWidth={2} />
           <div>
             <h1 className="text-[1.15rem] font-extrabold text-[#1a1a1a]">Campaign Scores</h1>
             <p className="text-[0.8rem] text-[#6b7280]">{meta?.score_formula}</p>

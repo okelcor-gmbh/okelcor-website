@@ -276,7 +276,7 @@ export default function ProposalCard({ quote, onStatusChange, items, itemCount }
       <div className="rounded-2xl bg-white p-6 shadow-sm">
         <div className="mb-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+            <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
               Proposal Management
             </p>
             <ProposalBadge status={expired ? "expired" : ps} />
@@ -382,7 +382,7 @@ export default function ProposalCard({ quote, onStatusChange, items, itemCount }
                 type="button"
                 disabled={loading !== null}
                 onClick={() => doAction("send")}
-                className="flex items-center gap-2 rounded-full bg-[#E85C1A] px-5 py-2.5 text-[0.875rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-50"
+                className="flex items-center gap-2 rounded-full bg-[#f4511e] px-5 py-2.5 text-[0.875rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50"
               >
                 {loading === "send" ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
                 {loading === "send" ? "Sending…" : "Send Proposal"}
@@ -524,7 +524,7 @@ export default function ProposalCard({ quote, onStatusChange, items, itemCount }
                     href={proposal.proposal_signed_copy_download_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 font-semibold text-[#E85C1A] hover:underline"
+                    className="inline-flex items-center gap-1.5 font-semibold text-[#f4511e] hover:underline"
                   >
                     <Download size={12} strokeWidth={2.2} /> Download
                   </a>
@@ -641,7 +641,7 @@ export default function ProposalCard({ quote, onStatusChange, items, itemCount }
                 onChange={(e) => setVoidReason(e.target.value)}
                 rows={3}
                 placeholder="Why is this proposal being voided?"
-                className="w-full resize-none rounded-xl border border-black/[0.09] bg-white px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#E85C1A]/40 focus:ring-2 focus:ring-[#E85C1A]/10"
+                className="w-full resize-none rounded-xl border border-black/[0.09] bg-white px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#f4511e]/40 focus:ring-2 focus:ring-[#f4511e]/10"
               />
             </div>
             <div className="flex gap-3">

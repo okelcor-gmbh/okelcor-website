@@ -39,7 +39,7 @@ function Card({
   return (
     <section
       className={`rounded-2xl border bg-white ${
-        tone === "primary" ? "border-[#E85C1A]/25 shadow-sm" : "border-black/[0.06]"
+        tone === "primary" ? "border-[#f4511e]/25 shadow-sm" : "border-black/[0.06]"
       }`}
     >
       {(title || right) && (
@@ -304,7 +304,7 @@ export default function BehaviourAnalytics() {
             subtitle="Each of these is either a product worth stocking or a term the catalogue doesn't recognise for something already sold."
             right={
               unmet.length > 0
-                ? <span className="rounded-full bg-[#E85C1A] px-2.5 py-1 text-[0.72rem] font-bold text-white">{unmet.length}</span>
+                ? <span className="rounded-full bg-[#f4511e] px-2.5 py-1 text-[0.72rem] font-bold text-white">{unmet.length}</span>
                 : undefined
             }
           >

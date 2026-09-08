@@ -168,7 +168,7 @@ export default function SecurityLoginHistory() {
             type="date"
             value={dateFrom}
             onChange={(e) => handleDateFilter(e.target.value, dateTo)}
-            className="h-8 rounded-lg border border-black/[0.09] bg-[#fafafa] px-2.5 text-[0.75rem] text-[#1a1a1a] outline-none focus:border-[#E85C1A] focus:ring-1 focus:ring-[#E85C1A]/20"
+            className="h-8 rounded-lg border border-black/[0.09] bg-[#fafafa] px-2.5 text-[0.75rem] text-[#1a1a1a] outline-none focus:border-[#f4511e] focus:ring-1 focus:ring-[#f4511e]/20"
             title="From date"
           />
           <span className="text-[0.72rem] text-[#9ca3af]">to</span>
@@ -176,7 +176,7 @@ export default function SecurityLoginHistory() {
             type="date"
             value={dateTo}
             onChange={(e) => handleDateFilter(dateFrom, e.target.value)}
-            className="h-8 rounded-lg border border-black/[0.09] bg-[#fafafa] px-2.5 text-[0.75rem] text-[#1a1a1a] outline-none focus:border-[#E85C1A] focus:ring-1 focus:ring-[#E85C1A]/20"
+            className="h-8 rounded-lg border border-black/[0.09] bg-[#fafafa] px-2.5 text-[0.75rem] text-[#1a1a1a] outline-none focus:border-[#f4511e] focus:ring-1 focus:ring-[#f4511e]/20"
             title="To date"
           />
           {(dateFrom || dateTo) && (
@@ -343,7 +343,7 @@ export default function SecurityLoginHistory() {
                     onClick={() => setPage(n)}
                     className={`flex h-7 w-7 items-center justify-center rounded-lg text-[0.75rem] font-semibold transition ${
                       n === page
-                        ? "bg-[#E85C1A] text-white"
+                        ? "bg-[#f4511e] text-white"
                         : "border border-black/[0.08] text-[#5c5e62] hover:bg-[#f5f5f7]"
                     }`}
                   >

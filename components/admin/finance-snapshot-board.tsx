@@ -73,7 +73,7 @@ function nextWeekKey(key: string): string {
 }
 
 const inputCls =
-  "h-9 w-full rounded-xl border border-black/[0.09] bg-white px-3 text-[0.83rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10";
+  "h-9 w-full rounded-xl border border-black/[0.09] bg-white px-3 text-[0.83rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10";
 
 const STATUS_COLORS: Record<string, string> = {
   Pending:        "bg-amber-100 text-amber-700",
@@ -493,7 +493,7 @@ export default function FinanceSnapshotBoard() {
   if (loading) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <Loader2 size={22} className="animate-spin text-[#E85C1A]" />
+        <Loader2 size={22} className="animate-spin text-[#f4511e]" />
       </div>
     );
   }
@@ -517,12 +517,12 @@ export default function FinanceSnapshotBoard() {
         </p>
         {restricted ? (
           <a href="/admin/my-work"
-            className="flex items-center gap-2 rounded-full bg-[#E85C1A] px-5 py-2.5 text-[0.85rem] font-semibold text-white transition hover:bg-[#d14f14]">
+            className="flex items-center gap-2 rounded-full bg-[#f4511e] px-5 py-2.5 text-[0.85rem] font-semibold text-white transition hover:bg-[#df4618]">
             Open My Work
           </a>
         ) : (
           <button type="button" onClick={() => { setLoading(true); load(); }}
-            className="flex items-center gap-2 rounded-full bg-[#E85C1A] px-5 py-2.5 text-[0.85rem] font-semibold text-white transition hover:bg-[#d14f14]">
+            className="flex items-center gap-2 rounded-full bg-[#f4511e] px-5 py-2.5 text-[0.85rem] font-semibold text-white transition hover:bg-[#df4618]">
             <RefreshCw size={14} /> Retry
           </button>
         )}
@@ -537,7 +537,7 @@ export default function FinanceSnapshotBoard() {
       {/* Header */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3 print:hidden">
         <div className="flex items-center gap-2.5">
-          <LineChart size={18} className="text-[#E85C1A]" strokeWidth={2} />
+          <LineChart size={18} className="text-[#f4511e]" strokeWidth={2} />
           <div>
             <h1 className="text-[1.15rem] font-extrabold text-[#1a1a1a]">Finance Snapshot</h1>
             <p className="text-[0.8rem] text-[#6b7280]">Pipeline by staff member, and the liquidity working</p>
@@ -569,7 +569,7 @@ export default function FinanceSnapshotBoard() {
           <button type="button" onClick={() => csvInputRef.current?.click()} className="flex items-center gap-1.5 rounded-full border border-black/10 px-3.5 py-2 text-[0.78rem] font-semibold text-[#1a1a1a] transition hover:bg-[#f0f2f5]">
             <FileUp size={13} /> Upload CSV
           </button>
-          <button type="button" onClick={() => openCreateItem()} className="flex items-center gap-1.5 rounded-full bg-[#E85C1A] px-4 py-2 text-[0.78rem] font-semibold text-white transition hover:bg-[#d44f12]">
+          <button type="button" onClick={() => openCreateItem()} className="flex items-center gap-1.5 rounded-full bg-[#f4511e] px-4 py-2 text-[0.78rem] font-semibold text-white transition hover:bg-[#df4618]">
             <Plus size={13} /> Add Record
           </button>
           <input ref={jsonInputRef} type="file" accept=".json" className="hidden" onChange={onRestoreFile} />
@@ -632,7 +632,7 @@ export default function FinanceSnapshotBoard() {
               <button
                 type="button"
                 onClick={() => openCreateItem(cat)}
-                className="mt-3 self-start text-[0.72rem] font-semibold text-[#E85C1A] transition hover:text-[#d14f14] print:hidden"
+                className="mt-3 self-start text-[0.72rem] font-semibold text-[#f4511e] transition hover:text-[#df4618] print:hidden"
               >
                 + Add to {cat.toLowerCase()}
               </button>
@@ -773,7 +773,7 @@ export default function FinanceSnapshotBoard() {
                           <td className="px-3 py-2">
                             <span className="flex justify-end gap-1.5">
                               <button type="button" title="Edit" onClick={() => openEditItem(item)}
-                                className="flex h-6 w-6 items-center justify-center rounded-md border border-black/[0.09] text-[#6b7280] transition hover:border-[#E85C1A] hover:text-[#E85C1A]">
+                                className="flex h-6 w-6 items-center justify-center rounded-md border border-black/[0.09] text-[#6b7280] transition hover:border-[#f4511e] hover:text-[#f4511e]">
                                 <Pencil size={11} />
                               </button>
                               <button type="button" title="Delete" onClick={() => removeItem(item.id)}
@@ -788,7 +788,7 @@ export default function FinanceSnapshotBoard() {
                   </table>
                 </div>
                 <button type="button" onClick={() => openCreateItem(drill.category, drill.person)}
-                  className="mt-4 flex items-center gap-1.5 rounded-full bg-[#E85C1A] px-4 py-2 text-[0.78rem] font-semibold text-white transition hover:bg-[#d44f12]">
+                  className="mt-4 flex items-center gap-1.5 rounded-full bg-[#f4511e] px-4 py-2 text-[0.78rem] font-semibold text-white transition hover:bg-[#df4618]">
                   <Plus size={13} /> Add for {drill.person}
                 </button>
               </>
@@ -846,7 +846,7 @@ export default function FinanceSnapshotBoard() {
             </Field>
             <div className="flex justify-end gap-2 pt-1">
               <button type="button" onClick={() => setItemModal(null)} className="h-9 rounded-full border border-black/10 px-4 text-[0.8rem] font-semibold text-[#1a1a1a] transition hover:bg-[#f0f2f5]">Cancel</button>
-              <button type="submit" disabled={saving} className="h-9 rounded-full bg-[#E85C1A] px-5 text-[0.8rem] font-semibold text-white transition hover:bg-[#d44f12] disabled:opacity-60">
+              <button type="submit" disabled={saving} className="h-9 rounded-full bg-[#f4511e] px-5 text-[0.8rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-60">
                 {saving ? "Saving…" : itemModal.mode === "create" ? "Save Record" : "Update"}
               </button>
             </div>
@@ -939,7 +939,7 @@ export default function FinanceSnapshotBoard() {
             <input type="number" step="0.01" value={lAmount} onChange={(e) => setLAmount(e.target.value)} placeholder="Amount (e.g. -2000)" required className={`${inputCls} min-w-[120px] flex-1`} />
             <input type="text" maxLength={3} value={lCurrency} onChange={(e) => setLCurrency(e.target.value)} className={`${inputCls} w-16 uppercase`} />
             <input type="text" value={lComment} onChange={(e) => setLComment(e.target.value)} placeholder="Comment (e.g. To Pay on 30-Sep)" className={`${inputCls} min-w-[150px] flex-[2]`} />
-            <button type="submit" disabled={saving} className="h-9 rounded-full bg-[#E85C1A] px-4 text-[0.78rem] font-semibold text-white transition hover:bg-[#d44f12] disabled:opacity-60">+ Add Line</button>
+            <button type="submit" disabled={saving} className="h-9 rounded-full bg-[#f4511e] px-4 text-[0.78rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-60">+ Add Line</button>
           </form>
           )}
         </Modal>

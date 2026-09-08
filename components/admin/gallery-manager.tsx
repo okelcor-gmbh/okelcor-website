@@ -80,7 +80,7 @@ export default function GalleryManager({ productId, images }: Props) {
     <div className="rounded-2xl bg-white p-6 shadow-sm">
       <div className="mb-5 flex items-center justify-between">
         <div>
-          <p className="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-[#E85C1A]">
+          <p className="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">
             Gallery
           </p>
           <h2 className="mt-0.5 text-[0.95rem] font-extrabold text-[#1a1a1a]">
@@ -178,7 +178,7 @@ export default function GalleryManager({ productId, images }: Props) {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-black/[0.09] bg-white px-4 py-2.5 text-[0.83rem] font-semibold text-[#1a1a1a] transition hover:border-[#E85C1A] hover:text-[#E85C1A]"
+            className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-black/[0.09] bg-white px-4 py-2.5 text-[0.83rem] font-semibold text-[#1a1a1a] transition hover:border-[#f4511e] hover:text-[#f4511e]"
           >
             <ImagePlus size={14} strokeWidth={2} />
             Choose images
@@ -217,7 +217,7 @@ export default function GalleryManager({ productId, images }: Props) {
               type="button"
               onClick={handleUpload}
               disabled={isPending}
-              className="flex items-center gap-2 rounded-full bg-[#E85C1A] px-5 py-2 text-[0.83rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-60"
+              className="flex items-center gap-2 rounded-full bg-[#f4511e] px-5 py-2 text-[0.83rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-60"
             >
               <Upload size={13} strokeWidth={2.5} />
               {isPending ? "Uploading…" : "Upload"}

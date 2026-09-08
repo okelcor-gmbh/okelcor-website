@@ -96,18 +96,18 @@ export type BehaviourMeta = {
 
 // ── Chart palette ─────────────────────────────────────────────────────────────
 // Validated for this surface rather than chosen by eye:
-//   node validate_palette.js "#E85C1A,#2a78d6" --mode light --surface "#ffffff"
+//   node validate_palette.js "#f4511e,#2a78d6" --mode light --surface "#ffffff"
 //   → lightness band PASS · chroma PASS · CVD ΔE 26.3 PASS (≥8)
 //     · normal-vision ΔE 34.2 PASS (≥15) · contrast 3.51:1 / 4.42:1 PASS (≥3:1)
-// Two series only, so two slots. `#E85C1A` is the admin accent, kept as slot 1 so
+// Two series only, so two slots. `#f4511e` is the admin accent, kept as slot 1 so
 // the page reads as part of this panel; blue is the CVD-safe partner (warm/cool).
 export const SERIES = {
-  searches: "#E85C1A",
+  searches: "#f4511e",
   empty:    "#2a78d6",
   /** Single-series bars: one hue for every bar. Never a value-ramp — bar length
    *  already encodes magnitude, and colouring by value spends the identity
    *  channel re-encoding it. */
-  bar:      "#E85C1A",
+  bar:      "#f4511e",
 } as const;
 
 export const CHART_INK = {

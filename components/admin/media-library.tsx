@@ -70,7 +70,7 @@ function UploadDialog({ onClose, onUploaded }: { onClose: () => void; onUploaded
         {/* File picker */}
         <div
           onClick={() => fileRef.current?.click()}
-          className="mb-3 flex h-24 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-black/[0.1] bg-[#fafafa] text-sm text-[#aaa] transition hover:border-[#E85C1A] hover:text-[#E85C1A]"
+          className="mb-3 flex h-24 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-black/[0.1] bg-[#fafafa] text-sm text-[#aaa] transition hover:border-[#f4511e] hover:text-[#f4511e]"
         >
           <Upload size={20} />
           <span>{file ? file.name : "Click or drag to pick a file"}</span>
@@ -88,7 +88,7 @@ function UploadDialog({ onClose, onUploaded }: { onClose: () => void; onUploaded
         <select
           value={collection}
           onChange={(e) => setCollection(e.target.value)}
-          className="mb-3 h-9 w-full rounded-lg border border-black/[0.09] bg-white px-2.5 text-sm text-[#1a1a1a] outline-none focus:border-[#E85C1A]"
+          className="mb-3 h-9 w-full rounded-lg border border-black/[0.09] bg-white px-2.5 text-sm text-[#1a1a1a] outline-none focus:border-[#f4511e]"
         >
           {COLLECTIONS.filter((c) => c.value).map((c) => (
             <option key={c.value} value={c.value}>{c.label}</option>
@@ -101,7 +101,7 @@ function UploadDialog({ onClose, onUploaded }: { onClose: () => void; onUploaded
           value={altText}
           onChange={(e) => setAltText(e.target.value)}
           placeholder="Alt text (optional)"
-          className="mb-3 h-9 w-full rounded-lg border border-black/[0.09] px-2.5 text-sm text-[#1a1a1a] outline-none focus:border-[#E85C1A]"
+          className="mb-3 h-9 w-full rounded-lg border border-black/[0.09] px-2.5 text-sm text-[#1a1a1a] outline-none focus:border-[#f4511e]"
         />
 
         {error && <p className="mb-3 text-xs text-red-600">{error}</p>}
@@ -111,7 +111,7 @@ function UploadDialog({ onClose, onUploaded }: { onClose: () => void; onUploaded
             type="button"
             onClick={handleSubmit}
             disabled={!file || uploading}
-            className="h-9 flex-1 rounded-lg bg-[#E85C1A] text-sm font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-50"
+            className="h-9 flex-1 rounded-lg bg-[#f4511e] text-sm font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50"
           >
             {uploading ? "Uploading…" : "Upload"}
           </button>
@@ -257,7 +257,7 @@ export default function MediaLibraryPanel() {
         <button
           type="button"
           onClick={() => setShowUpload(true)}
-          className="flex h-9 items-center gap-2 rounded-xl bg-[#E85C1A] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#d14f14]"
+          className="flex h-9 items-center gap-2 rounded-xl bg-[#f4511e] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#df4618]"
         >
           <Upload size={15} />
           Upload
@@ -275,7 +275,7 @@ export default function MediaLibraryPanel() {
               onClick={() => { setPage(1); setCollection(c.value as "" | MediaCollection); }}
               className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
                 collection === c.value
-                  ? "bg-[#E85C1A] text-white"
+                  ? "bg-[#f4511e] text-white"
                   : "bg-[#f0f2f5] text-[#5c5e62] hover:bg-[#e8e8e8]"
               }`}
             >
@@ -292,7 +292,7 @@ export default function MediaLibraryPanel() {
             onChange={(e) => setSearchInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             placeholder="Search by filename…"
-            className="h-9 w-48 rounded-lg border border-black/[0.09] px-3 text-sm text-[#1a1a1a] outline-none focus:border-[#E85C1A]"
+            className="h-9 w-48 rounded-lg border border-black/[0.09] px-3 text-sm text-[#1a1a1a] outline-none focus:border-[#f4511e]"
           />
           <button
             type="button"

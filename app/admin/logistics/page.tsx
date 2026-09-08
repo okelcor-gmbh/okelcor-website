@@ -24,7 +24,7 @@ export default async function LogisticsPage() {
   return (
     <div className="flex flex-col gap-6 p-6 md:p-8">
       <div>
-        <p className="text-[0.7rem] font-bold uppercase tracking-[0.2em] text-[#E85C1A]">
+        <p className="text-[0.7rem] font-bold uppercase tracking-[0.2em] text-[#f4511e]">
           Operations
         </p>
         <h1 className="text-[1.35rem] font-extrabold tracking-tight text-[#1a1a1a]">

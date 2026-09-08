@@ -91,10 +91,10 @@ function ItemFormRow({
       onChange({ ...value, [key]: e.target.value });
 
   const inputCls =
-    "h-9 w-full rounded-lg border border-black/[0.09] bg-white px-2.5 text-[0.83rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#E85C1A] focus:ring-1 focus:ring-[#E85C1A]/20";
+    "h-9 w-full rounded-lg border border-black/[0.09] bg-white px-2.5 text-[0.83rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#f4511e] focus:ring-1 focus:ring-[#f4511e]/20";
 
   return (
-    <tr className="border-t border-[#E85C1A]/20 bg-orange-50/30">
+    <tr className="border-t border-[#f4511e]/20 bg-orange-50/30">
       <td className="px-3 py-2.5">
         <input
           value={value.brand}
@@ -135,7 +135,7 @@ function ItemFormRow({
           <select
             value={value.currency}
             onChange={field("currency")}
-            className="h-9 rounded-lg border border-black/[0.09] bg-white px-1.5 text-[0.78rem] text-[#5c5e62] outline-none transition focus:border-[#E85C1A]"
+            className="h-9 rounded-lg border border-black/[0.09] bg-white px-1.5 text-[0.78rem] text-[#5c5e62] outline-none transition focus:border-[#f4511e]"
           >
             <option value="EUR">EUR</option>
             <option value="USD">USD</option>
@@ -161,7 +161,7 @@ function ItemFormRow({
               type="button"
               onClick={onSubmit}
               disabled={loading || !value.quantity}
-              className="flex h-8 items-center gap-1.5 rounded-lg bg-[#E85C1A] px-3 text-[0.78rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-50"
+              className="flex h-8 items-center gap-1.5 rounded-lg bg-[#f4511e] px-3 text-[0.78rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50"
             >
               {loading ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
               {submitLabel}
@@ -362,7 +362,7 @@ export default function QuoteItemsCard({ quoteId, onItemsChange }: Props) {
       {/* Header */}
       <div className="mb-4 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+          <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
             Quote Items
           </p>
           {!loading && (
@@ -449,7 +449,7 @@ export default function QuoteItemsCard({ quoteId, onItemsChange }: Props) {
             {loading && (
               <tr>
                 <td colSpan={6} className="px-4 py-8 text-center">
-                  <Loader2 size={18} className="mx-auto animate-spin text-[#E85C1A]" />
+                  <Loader2 size={18} className="mx-auto animate-spin text-[#f4511e]" />
                 </td>
               </tr>
             )}
@@ -464,7 +464,7 @@ export default function QuoteItemsCard({ quoteId, onItemsChange }: Props) {
                     <button
                       type="button"
                       onClick={() => { setShowAdd(true); setAddDraft(BLANK); }}
-                      className="mt-1 flex items-center gap-1.5 rounded-full border border-[#E85C1A] px-4 py-1.5 text-[0.78rem] font-semibold text-[#E85C1A] transition hover:bg-[#E85C1A] hover:text-white"
+                      className="mt-1 flex items-center gap-1.5 rounded-full border border-[#f4511e] px-4 py-1.5 text-[0.78rem] font-semibold text-[#f4511e] transition hover:bg-[#f4511e] hover:text-white"
                     >
                       <Plus size={12} />
                       Add first item

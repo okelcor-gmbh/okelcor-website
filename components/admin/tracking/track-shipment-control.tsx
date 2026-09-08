@@ -77,7 +77,7 @@ export default function TrackShipmentControl({
       <button
         type="button"
         onClick={load}
-        className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-black/[0.12] bg-white px-3 text-[0.8rem] font-semibold text-[#1a1a1a] transition hover:border-[#E85C1A] hover:text-[#E85C1A]"
+        className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-black/[0.12] bg-white px-3 text-[0.8rem] font-semibold text-[#1a1a1a] transition hover:border-[#f4511e] hover:text-[#f4511e]"
       >
         <Truck size={14} strokeWidth={2} /> Track Shipment
       </button>
@@ -90,7 +90,7 @@ export default function TrackShipmentControl({
           >
             <div className="mb-4 flex items-center justify-between">
               <p className="flex items-center gap-2 text-[0.9rem] font-bold text-[#1a1a1a]">
-                <Truck size={16} strokeWidth={2} className="text-[#E85C1A]" /> Track Shipment
+                <Truck size={16} strokeWidth={2} className="text-[#f4511e]" /> Track Shipment
               </p>
               <button type="button" onClick={() => setOpen(false)} className="rounded-lg p-1 text-[#9ca3af] hover:bg-[#f5f5f5] hover:text-[#1a1a1a]">
                 <X size={16} />
@@ -123,14 +123,14 @@ export default function TrackShipmentControl({
                           <div className={[
                             "flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[0.75rem] font-bold",
                             done ? "bg-emerald-500 text-white"
-                              : current ? "bg-[#E85C1A] text-white ring-4 ring-[#E85C1A]/20"
+                              : current ? "bg-[#f4511e] text-white ring-4 ring-[#f4511e]/20"
                               : "bg-[#f0f0f0] text-[#9ca3af]",
                           ].join(" ")}>
                             {i + 1}
                           </div>
                           {i < STAGES.length - 1 && <div className={`h-[3px] flex-1 rounded-full ${done ? "bg-emerald-500" : "bg-black/10"}`} />}
                         </div>
-                        <p className={`mt-2 text-center text-[0.72rem] font-bold ${current ? "text-[#E85C1A]" : done ? "text-emerald-600" : "text-[#9ca3af]"}`}>
+                        <p className={`mt-2 text-center text-[0.72rem] font-bold ${current ? "text-[#f4511e]" : done ? "text-emerald-600" : "text-[#9ca3af]"}`}>
                           {s.label}
                         </p>
                       </div>
@@ -149,7 +149,7 @@ export default function TrackShipmentControl({
                       href={data.tracking_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-2 inline-flex items-center gap-1.5 text-[0.78rem] font-semibold text-[#E85C1A] hover:underline"
+                      className="mt-2 inline-flex items-center gap-1.5 text-[0.78rem] font-semibold text-[#f4511e] hover:underline"
                     >
                       <ExternalLink size={12} strokeWidth={2} /> Track on {data.carrier}&apos;s site
                     </a>
@@ -160,7 +160,7 @@ export default function TrackShipmentControl({
                 <div>
                   <div className="mb-2 flex items-center justify-between">
                     <p className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62]">Tracking Events</p>
-                    <button type="button" onClick={load} className="flex items-center gap-1 text-[0.72rem] font-semibold text-[#E85C1A] hover:underline">
+                    <button type="button" onClick={load} className="flex items-center gap-1 text-[0.72rem] font-semibold text-[#f4511e] hover:underline">
                       <RefreshCw size={11} strokeWidth={2} /> Refresh
                     </button>
                   </div>

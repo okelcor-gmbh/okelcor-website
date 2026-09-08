@@ -18,7 +18,7 @@ import EmptyState from "@/components/ui/empty-state";
  */
 
 const INPUT =
-  "h-9 w-full rounded-lg border border-black/[0.10] bg-white px-3 text-[0.83rem] text-[#171a20] placeholder:text-[#8c8f94] focus:border-[#E85C1A] focus:outline-none";
+  "h-9 w-full rounded-lg border border-black/[0.10] bg-white px-3 text-[0.83rem] text-[#171a20] placeholder:text-[#8c8f94] focus:border-[#f4511e] focus:outline-none";
 const LABEL = "mb-1 block text-[0.68rem] font-bold uppercase tracking-wider text-[#8c8f94]";
 
 /** Status → select styling. Same palette logic as the to-do board. */
@@ -78,7 +78,7 @@ export default function ClaimsQueue({ initialClaim }: { initialClaim: number | n
   if (loading && claims.length === 0 && !meta) {
     return (
       <div className="flex justify-center py-20">
-        <Loader2 size={22} className="animate-spin text-[#E85C1A]" />
+        <Loader2 size={22} className="animate-spin text-[#f4511e]" />
       </div>
     );
   }
@@ -131,7 +131,7 @@ export default function ClaimsQueue({ initialClaim }: { initialClaim: number | n
         <select
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value)}
-          className="h-8 cursor-pointer rounded-lg border border-black/[0.10] bg-white px-2 text-[0.78rem] font-semibold text-[#171a20] focus:border-[#E85C1A] focus:outline-none"
+          className="h-8 cursor-pointer rounded-lg border border-black/[0.10] bg-white px-2 text-[0.78rem] font-semibold text-[#171a20] focus:border-[#f4511e] focus:outline-none"
         >
           <option value="">All types</option>
           {(meta?.types ?? []).map((t) => <option key={t.key} value={t.key}>{t.label}</option>)}
@@ -142,14 +142,14 @@ export default function ClaimsQueue({ initialClaim }: { initialClaim: number | n
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search ref, customer or order…"
-          className="h-8 w-full max-w-[220px] rounded-lg border border-black/[0.10] bg-white px-2.5 text-[0.78rem] text-[#171a20] placeholder:text-[#8c8f94] focus:border-[#E85C1A] focus:outline-none"
+          className="h-8 w-full max-w-[220px] rounded-lg border border-black/[0.10] bg-white px-2.5 text-[0.78rem] text-[#171a20] placeholder:text-[#8c8f94] focus:border-[#f4511e] focus:outline-none"
         />
 
         {mayManage && (
           <button
             type="button"
             onClick={() => setShowForm(true)}
-            className="ml-auto flex items-center gap-1.5 rounded-xl bg-[#E85C1A] px-3.5 py-2 text-[0.78rem] font-semibold text-white transition hover:bg-[#d0500f]"
+            className="ml-auto flex items-center gap-1.5 rounded-xl bg-[#f4511e] px-3.5 py-2 text-[0.78rem] font-semibold text-white transition hover:bg-[#d0500f]"
           >
             <Plus size={14} strokeWidth={2.4} /> Log a claim
           </button>
@@ -215,7 +215,7 @@ function StatCard({ label, value, hint, highlight = false }: {
   return (
     <div className="rounded-2xl bg-white p-4 shadow-sm">
       <p className="text-[0.68rem] font-bold uppercase tracking-wider text-[#8c8f94]">{label}</p>
-      <p className={`mt-1 text-[1.35rem] font-extrabold ${highlight ? "text-[#E85C1A]" : "text-[#171a20]"}`}>
+      <p className={`mt-1 text-[1.35rem] font-extrabold ${highlight ? "text-[#f4511e]" : "text-[#171a20]"}`}>
         {value}
       </p>
       {hint && <p className="mt-0.5 text-[0.68rem] text-[#b6b8bc]">{hint}</p>}
@@ -327,7 +327,7 @@ function ClaimRow({
             value={claim.status}
             disabled={busy}
             onChange={(e) => void patch({ status: e.target.value })}
-            className={`h-8 shrink-0 cursor-pointer rounded-xl border px-2 text-[0.75rem] font-semibold outline-none transition focus:border-[#E85C1A] disabled:opacity-50 ${
+            className={`h-8 shrink-0 cursor-pointer rounded-xl border px-2 text-[0.75rem] font-semibold outline-none transition focus:border-[#f4511e] disabled:opacity-50 ${
               STATUS_SELECT[claim.status] ?? "border-black/[0.09] bg-white text-[#1a1a1a]"
             }`}
           >
@@ -407,7 +407,7 @@ function ExpandedClaim({ claim, meta, mayManage, busy, onPatch }: {
               const v = e.target.value.trim();
               if (v !== (claim.outcome_note ?? "").trim()) void onPatch({ outcome_note: v || null });
             }}
-            className="w-full rounded-lg border border-black/[0.08] bg-white px-2.5 py-2 text-[0.78rem] text-[#1a1a1a] outline-none transition placeholder:text-[#b6b8bc] focus:border-[#E85C1A] disabled:opacity-50"
+            className="w-full rounded-lg border border-black/[0.08] bg-white px-2.5 py-2 text-[0.78rem] text-[#1a1a1a] outline-none transition placeholder:text-[#b6b8bc] focus:border-[#f4511e] disabled:opacity-50"
           />
         </div>
       ) : claim.outcome_note ? (
@@ -424,7 +424,7 @@ function ExpandedClaim({ claim, meta, mayManage, busy, onPatch }: {
             value={claim.assigned_admin_id ?? ""}
             disabled={busy}
             onChange={(e) => void onPatch({ assigned_admin_id: e.target.value ? Number(e.target.value) : null })}
-            className="h-8 w-full cursor-pointer rounded-lg border border-black/[0.10] bg-white px-2 text-[0.78rem] font-semibold text-[#171a20] focus:border-[#E85C1A] focus:outline-none disabled:opacity-50"
+            className="h-8 w-full cursor-pointer rounded-lg border border-black/[0.10] bg-white px-2 text-[0.78rem] font-semibold text-[#171a20] focus:border-[#f4511e] focus:outline-none disabled:opacity-50"
           >
             <option value="">Nobody yet</option>
             {(meta?.staff ?? []).map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -560,7 +560,7 @@ function NewClaimModal({ meta, onClose, onSaved }: {
               value={form.description}
               onChange={set("description")}
               rows={4}
-              className="w-full rounded-lg border border-black/[0.10] bg-white px-3 py-2 text-[0.83rem] text-[#171a20] placeholder:text-[#8c8f94] focus:border-[#E85C1A] focus:outline-none"
+              className="w-full rounded-lg border border-black/[0.10] bg-white px-3 py-2 text-[0.83rem] text-[#171a20] placeholder:text-[#8c8f94] focus:border-[#f4511e] focus:outline-none"
               placeholder="Paste it from the e-mail thread — this is the record of what was reported"
             />
           </div>
@@ -590,7 +590,7 @@ function NewClaimModal({ meta, onClose, onSaved }: {
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center gap-1.5 rounded-xl bg-[#E85C1A] px-4 py-2 text-[0.8rem] font-semibold text-white transition hover:bg-[#d0500f] disabled:opacity-50"
+            className="flex items-center gap-1.5 rounded-xl bg-[#f4511e] px-4 py-2 text-[0.8rem] font-semibold text-white transition hover:bg-[#d0500f] disabled:opacity-50"
           >
             {saving && <Loader2 size={13} className="animate-spin" />} Log the claim
           </button>

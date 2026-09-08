@@ -74,7 +74,7 @@ export default function FunnelCard() {
                 </div>
                 <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-[#f0f2f5]">
                   <div
-                    className="absolute left-0 top-0 h-full rounded-full bg-[#E85C1A] transition-all duration-700"
+                    className="absolute left-0 top-0 h-full rounded-full bg-[#f4511e] transition-all duration-700"
                     style={{ width: `${pct(step.count, top)}%` }}
                   />
                 </div>

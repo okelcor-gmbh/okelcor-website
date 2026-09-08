@@ -61,8 +61,8 @@ export default function CommunicationsInbox() {
           className={[
             "h-10 rounded-xl px-4 text-[0.8rem] font-semibold transition",
             unreadOnly
-              ? "bg-[#E85C1A] text-white"
-              : "border border-black/[0.09] bg-white text-[#5c5e62] hover:border-[#E85C1A] hover:text-[#E85C1A]",
+              ? "bg-[#f4511e] text-white"
+              : "border border-black/[0.09] bg-white text-[#5c5e62] hover:border-[#f4511e] hover:text-[#f4511e]",
           ].join(" ")}
         >
           Unread only
@@ -78,7 +78,7 @@ export default function CommunicationsInbox() {
       <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
         {loading ? (
           <div className="flex justify-center py-16">
-            <Loader2 size={22} className="animate-spin text-[#E85C1A]" />
+            <Loader2 size={22} className="animate-spin text-[#f4511e]" />
           </div>
         ) : items.length === 0 ? (
           <EmptyState
@@ -102,7 +102,7 @@ export default function CommunicationsInbox() {
             type="button"
             disabled={page <= 1}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
-            className="flex h-9 items-center gap-1 rounded-lg border border-black/[0.09] bg-white px-3 text-[0.8rem] font-semibold text-[#5c5e62] transition hover:border-[#E85C1A] hover:text-[#E85C1A] disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex h-9 items-center gap-1 rounded-lg border border-black/[0.09] bg-white px-3 text-[0.8rem] font-semibold text-[#5c5e62] transition hover:border-[#f4511e] hover:text-[#f4511e] disabled:cursor-not-allowed disabled:opacity-40"
           >
             <ChevronLeft size={14} /> Prev
           </button>
@@ -111,7 +111,7 @@ export default function CommunicationsInbox() {
             type="button"
             disabled={page >= lastPage}
             onClick={() => setPage((p) => Math.min(lastPage, p + 1))}
-            className="flex h-9 items-center gap-1 rounded-lg border border-black/[0.09] bg-white px-3 text-[0.8rem] font-semibold text-[#5c5e62] transition hover:border-[#E85C1A] hover:text-[#E85C1A] disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex h-9 items-center gap-1 rounded-lg border border-black/[0.09] bg-white px-3 text-[0.8rem] font-semibold text-[#5c5e62] transition hover:border-[#f4511e] hover:text-[#f4511e] disabled:cursor-not-allowed disabled:opacity-40"
           >
             Next <ChevronRight size={14} />
           </button>
@@ -143,7 +143,7 @@ function InboxRow({
   const channelCls = item.channel === "whatsapp" ? "bg-emerald-50 text-emerald-600 border-emerald-200" : "bg-blue-50 text-blue-600 border-blue-200";
 
   return (
-    <li className={["flex items-start gap-3 px-4 py-4 transition hover:bg-[#fafafa]", item.unread ? "bg-[#E85C1A]/[0.03]" : ""].join(" ")}>
+    <li className={["flex items-start gap-3 px-4 py-4 transition hover:bg-[#fafafa]", item.unread ? "bg-[#f4511e]/[0.03]" : ""].join(" ")}>
       <span className={["mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border", channelCls].join(" ")}>
         <ChannelIcon size={15} strokeWidth={1.9} />
       </span>
@@ -153,7 +153,7 @@ function InboxRow({
           <p className="text-[0.875rem] font-semibold text-[#1a1a1a]">
             {item.customer_name ?? "New inquiry"}
           </p>
-          {item.unread && <span className="h-2 w-2 shrink-0 rounded-full bg-[#E85C1A]" />}
+          {item.unread && <span className="h-2 w-2 shrink-0 rounded-full bg-[#f4511e]" />}
           {!item.customer_id && (
             <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[0.63rem] font-bold text-amber-700">New lead</span>
           )}
@@ -165,7 +165,7 @@ function InboxRow({
           <Link
             href={item.action_url}
             onClick={() => item.unread && onRead(item.id)}
-            className="text-[0.76rem] font-semibold text-[#E85C1A] transition hover:underline"
+            className="text-[0.76rem] font-semibold text-[#f4511e] transition hover:underline"
           >
             Open →
           </Link>
@@ -176,7 +176,7 @@ function InboxRow({
             <button
               type="button"
               onClick={() => onForward(item)}
-              className="flex items-center gap-1 text-[0.76rem] font-semibold text-[#5c5e62] transition hover:text-[#E85C1A]"
+              className="flex items-center gap-1 text-[0.76rem] font-semibold text-[#5c5e62] transition hover:text-[#f4511e]"
             >
               <Forward size={12} /> Forward to a colleague
             </button>

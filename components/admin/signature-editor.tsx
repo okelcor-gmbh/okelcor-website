@@ -78,14 +78,14 @@ export default function SignatureEditor({ initialHtml }: Props) {
         ref={ref}
         contentEditable
         suppressContentEditableWarning
-        className="min-h-[120px] rounded-xl border border-black/[0.1] bg-[#fafafa] px-4 py-3 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:bg-white focus:ring-2 focus:ring-[#E85C1A]/10 [&_img]:max-w-full [&_p]:my-1"
+        className="min-h-[120px] rounded-xl border border-black/[0.1] bg-[#fafafa] px-4 py-3 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:bg-white focus:ring-2 focus:ring-[#f4511e]/10 [&_img]:max-w-full [&_p]:my-1"
       />
 
       <button
         type="button"
         disabled={saving}
         onClick={handleSave}
-        className="mt-4 flex h-10 items-center gap-2 rounded-xl bg-[#E85C1A] px-6 text-[0.83rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:opacity-50"
+        className="mt-4 flex h-10 items-center gap-2 rounded-xl bg-[#f4511e] px-6 text-[0.83rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:opacity-50"
       >
         {saving ? <><Loader2 size={14} className="animate-spin" /> Saving…</> : "Save Signature"}
       </button>

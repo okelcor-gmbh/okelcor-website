@@ -279,7 +279,7 @@ export default function TwoFactorStatus() {
     <>
       <div className="mb-6 rounded-2xl bg-white p-6 shadow-sm">
         <div className="mb-4 flex items-center justify-between">
-          <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+          <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
             Two-Factor Authentication
           </p>
           {status === "enabled" && (
@@ -317,7 +317,7 @@ export default function TwoFactorStatus() {
             <button
               type="button"
               onClick={() => setShowSetup(true)}
-              className="flex items-center gap-2 rounded-full bg-[#E85C1A] px-5 py-2.5 text-[0.85rem] font-semibold text-white transition hover:bg-[#d14f14]"
+              className="flex items-center gap-2 rounded-full bg-[#f4511e] px-5 py-2.5 text-[0.85rem] font-semibold text-white transition hover:bg-[#df4618]"
             >
               <ShieldCheck size={14} strokeWidth={2} />
               Enable 2FA

@@ -315,7 +315,7 @@ function GenBtn({
       disabled={busy}
       onClick={() => onGenerate(orderId, docKey)}
       title={`Generate ${cap(docKey)}`}
-      className="flex items-center gap-1 rounded border border-dashed border-[#E85C1A]/40 bg-orange-50 px-2 py-0.5 text-[0.68rem] font-semibold text-[#E85C1A] transition hover:border-[#E85C1A] hover:bg-orange-100 disabled:opacity-50"
+      className="flex items-center gap-1 rounded border border-dashed border-[#f4511e]/40 bg-orange-50 px-2 py-0.5 text-[0.68rem] font-semibold text-[#f4511e] transition hover:border-[#f4511e] hover:bg-orange-100 disabled:opacity-50"
     >
       {busy ? (
         <Loader2 size={10} className="animate-spin" />
@@ -539,7 +539,7 @@ export default function LogisticsDashboard({ adminRole }: { adminRole: string })
         <select
           value={filterSource}
           onChange={(e) => applyFilter(setFilterSource, e.target.value)}
-          className="rounded-lg border border-black/[0.08] bg-[#f5f5f5] px-3 py-1.5 text-[0.83rem] text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#E85C1A]/30"
+          className="rounded-lg border border-black/[0.08] bg-[#f5f5f5] px-3 py-1.5 text-[0.83rem] text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#f4511e]/30"
         >
           <option value="">All sources</option>
           <option value="website">Website</option>
@@ -549,7 +549,7 @@ export default function LogisticsDashboard({ adminRole }: { adminRole: string })
         <select
           value={filterStatus}
           onChange={(e) => applyFilter(setFilterStatus, e.target.value)}
-          className="rounded-lg border border-black/[0.08] bg-[#f5f5f5] px-3 py-1.5 text-[0.83rem] text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#E85C1A]/30"
+          className="rounded-lg border border-black/[0.08] bg-[#f5f5f5] px-3 py-1.5 text-[0.83rem] text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#f4511e]/30"
         >
           <option value="">All statuses</option>
           <option value="pending">Pending</option>
@@ -566,7 +566,7 @@ export default function LogisticsDashboard({ adminRole }: { adminRole: string })
         <select
           value={filterPaymentStage}
           onChange={(e) => applyFilter(setFilterPaymentStage, e.target.value)}
-          className="rounded-lg border border-black/[0.08] bg-[#f5f5f5] px-3 py-1.5 text-[0.83rem] text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#E85C1A]/30"
+          className="rounded-lg border border-black/[0.08] bg-[#f5f5f5] px-3 py-1.5 text-[0.83rem] text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#f4511e]/30"
         >
           <option value="">All payment stages</option>
           <option value="pending_proforma">Pending Proforma</option>
@@ -580,7 +580,7 @@ export default function LogisticsDashboard({ adminRole }: { adminRole: string })
         <select
           value={filterAcceptance}
           onChange={(e) => applyFilter(setFilterAcceptance, e.target.value)}
-          className="rounded-lg border border-black/[0.08] bg-[#f5f5f5] px-3 py-1.5 text-[0.83rem] text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#E85C1A]/30"
+          className="rounded-lg border border-black/[0.08] bg-[#f5f5f5] px-3 py-1.5 text-[0.83rem] text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#f4511e]/30"
         >
           <option value="">All acceptance</option>
           <option value="pending">Acceptance pending</option>
@@ -591,7 +591,7 @@ export default function LogisticsDashboard({ adminRole }: { adminRole: string })
         <select
           value={filterMissingDoc}
           onChange={(e) => applyFilter(setFilterMissingDoc, e.target.value)}
-          className="rounded-lg border border-black/[0.08] bg-[#f5f5f5] px-3 py-1.5 text-[0.83rem] text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#E85C1A]/30"
+          className="rounded-lg border border-black/[0.08] bg-[#f5f5f5] px-3 py-1.5 text-[0.83rem] text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#f4511e]/30"
         >
           <option value="">Any missing doc</option>
           <option value="proforma_invoice">Missing PI</option>
@@ -604,7 +604,7 @@ export default function LogisticsDashboard({ adminRole }: { adminRole: string })
         <select
           value={filterRisk}
           onChange={(e) => applyFilter(setFilterRisk, e.target.value)}
-          className="rounded-lg border border-black/[0.08] bg-[#f5f5f5] px-3 py-1.5 text-[0.83rem] text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#E85C1A]/30"
+          className="rounded-lg border border-black/[0.08] bg-[#f5f5f5] px-3 py-1.5 text-[0.83rem] text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#f4511e]/30"
         >
           <option value="">All risk levels</option>
           <option value="high">High risk</option>
@@ -615,7 +615,7 @@ export default function LogisticsDashboard({ adminRole }: { adminRole: string })
         <select
           value={filterEbayFulfillment}
           onChange={(e) => applyFilter(setFilterEbayFulfillment, e.target.value)}
-          className="rounded-lg border border-black/[0.08] bg-[#f5f5f5] px-3 py-1.5 text-[0.83rem] text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#E85C1A]/30"
+          className="rounded-lg border border-black/[0.08] bg-[#f5f5f5] px-3 py-1.5 text-[0.83rem] text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#f4511e]/30"
         >
           <option value="">eBay fulfillment (all)</option>
           <option value="not_started">Not started</option>
@@ -632,7 +632,7 @@ export default function LogisticsDashboard({ adminRole }: { adminRole: string })
               setFilterRcOnly(e.target.checked);
               setPage(1);
             }}
-            className="h-4 w-4 rounded accent-[#E85C1A]"
+            className="h-4 w-4 rounded accent-[#f4511e]"
           />
           Reverse charge only
         </label>
@@ -652,7 +652,7 @@ export default function LogisticsDashboard({ adminRole }: { adminRole: string })
             type="button"
             onClick={() => void fetchData()}
             disabled={loading}
-            className="flex items-center gap-1.5 rounded-lg border border-[#E85C1A]/30 bg-orange-50 px-3 py-1.5 text-[0.78rem] font-semibold text-[#E85C1A] transition hover:bg-orange-100 disabled:opacity-50"
+            className="flex items-center gap-1.5 rounded-lg border border-[#f4511e]/30 bg-orange-50 px-3 py-1.5 text-[0.78rem] font-semibold text-[#f4511e] transition hover:bg-orange-100 disabled:opacity-50"
           >
             <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
             Refresh
@@ -678,7 +678,7 @@ export default function LogisticsDashboard({ adminRole }: { adminRole: string })
             <button
               type="button"
               onClick={() => void fetchData()}
-              className="mt-2 rounded-lg bg-[#E85C1A] px-4 py-2 text-[0.8rem] font-semibold text-white transition hover:bg-[#d04e15]"
+              className="mt-2 rounded-lg bg-[#f4511e] px-4 py-2 text-[0.8rem] font-semibold text-white transition hover:bg-[#d04e15]"
             >
               Try again
             </button>
@@ -697,7 +697,7 @@ export default function LogisticsDashboard({ adminRole }: { adminRole: string })
               <button
                 type="button"
                 onClick={resetFilters}
-                className="text-[0.8rem] text-[#E85C1A] underline hover:no-underline"
+                className="text-[0.8rem] text-[#f4511e] underline hover:no-underline"
               >
                 Clear filters
               </button>
@@ -744,7 +744,7 @@ export default function LogisticsDashboard({ adminRole }: { adminRole: string })
                       <td className="whitespace-nowrap px-4 py-3 font-semibold text-[#1a1a1a]">
                         <Link
                           href={`/admin/orders/${order.id}`}
-                          className="text-[#E85C1A] hover:underline"
+                          className="text-[#f4511e] hover:underline"
                         >
                           {order.order_ref}
                         </Link>
@@ -997,7 +997,7 @@ export default function LogisticsDashboard({ adminRole }: { adminRole: string })
                       onClick={() => setPage(item as number)}
                       className={`flex h-7 w-7 items-center justify-center rounded-lg text-[0.78rem] font-medium transition ${
                         item === pagMeta.current_page
-                          ? "bg-[#E85C1A] text-white"
+                          ? "bg-[#f4511e] text-white"
                           : "border border-black/[0.08] text-[#1a1a1a] hover:bg-[#f0f2f5]"
                       }`}
                     >

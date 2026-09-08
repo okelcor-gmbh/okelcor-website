@@ -104,7 +104,7 @@ export default function InsightsBell() {
         >
           <Sparkles size={17} strokeWidth={1.8} />
           {visible.length > 0 && (
-            <span className="absolute right-1 top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#E85C1A] px-1 text-[9px] font-extrabold text-white">
+            <span className="absolute right-1 top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#f4511e] px-1 text-[9px] font-extrabold text-white">
               {visible.length > 9 ? "9+" : visible.length}
             </span>
           )}
@@ -118,7 +118,7 @@ export default function InsightsBell() {
                 <button
                   type="button"
                   onClick={() => setDismissedIds(new Set(insights.map((i) => i.id)))}
-                  className="text-[0.72rem] font-semibold text-[#E85C1A] transition hover:underline"
+                  className="text-[0.72rem] font-semibold text-[#f4511e] transition hover:underline"
                 >
                   Clear all
                 </button>
@@ -277,7 +277,7 @@ function InsightToast({
             <Link
               href={insight.action_url}
               onClick={() => onDismiss(insight.id)}
-              className="mt-2 inline-flex items-center gap-1 text-[0.75rem] font-semibold text-[#E85C1A] transition hover:underline"
+              className="mt-2 inline-flex items-center gap-1 text-[0.75rem] font-semibold text-[#f4511e] transition hover:underline"
             >
               View →
             </Link>

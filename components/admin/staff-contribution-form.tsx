@@ -146,7 +146,7 @@ export default function StaffContributionForm({
   const label = "mb-1 block text-[0.72rem] font-bold uppercase tracking-wider text-[#5c5e62]";
   const input =
     "w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-[0.85rem] text-[#171a20] " +
-    "outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/25";
+    "outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/25";
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 sm:p-8">
@@ -316,7 +316,7 @@ export default function StaffContributionForm({
           <button
             type="submit"
             disabled={saving || !title.trim()}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-[#E85C1A] px-4 py-2 text-[0.83rem] font-semibold text-white transition hover:bg-[#d24f13] disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-[#f4511e] px-4 py-2 text-[0.83rem] font-semibold text-white transition hover:bg-[#d24f13] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving && <Loader2 size={13} className="animate-spin" />}
             {editing ? "Save changes" : "Log it"}

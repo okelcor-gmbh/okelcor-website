@@ -27,9 +27,9 @@ function CustomTooltip({ active, payload, label }: any) {
       <p className="mb-1.5 text-[0.72rem] font-semibold text-[#5c5e62]">{label}</p>
       <div className="space-y-1">
         <div className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-[#E85C1A]" />
+          <span className="h-2 w-2 rounded-full bg-[#f4511e]" />
           <span className="text-[0.72rem] text-[#5c5e62]">Confirmed</span>
-          <span className="ml-auto text-[0.85rem] font-bold tabular-nums text-[#E85C1A]">
+          <span className="ml-auto text-[0.85rem] font-bold tabular-nums text-[#f4511e]">
             €{Number(confirmed).toLocaleString("en-GB", { minimumFractionDigits: 2 })}
           </span>
         </div>
@@ -92,7 +92,7 @@ export default function RevenueChart() {
                 </strong>
               </p>
               {totals.pending > 0 && (
-                <p className="text-[0.75rem] font-semibold tabular-nums text-[#E85C1A]">
+                <p className="text-[0.75rem] font-semibold tabular-nums text-[#f4511e]">
                   + {fmtEur(totals.pending)} pending
                 </p>
               )}
@@ -100,7 +100,7 @@ export default function RevenueChart() {
           )}
         </div>
         <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#fff1ec]">
-          <span className="text-[0.7rem] font-black text-[#E85C1A]">7D</span>
+          <span className="text-[0.7rem] font-black text-[#f4511e]">7D</span>
         </div>
       </div>
 
@@ -116,8 +116,8 @@ export default function RevenueChart() {
             <AreaChart data={data ?? []} margin={{ top: 5, right: 8, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="confirmedGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%"  stopColor="#E85C1A" stopOpacity={0.20} />
-                  <stop offset="60%" stopColor="#E85C1A" stopOpacity={0} />
+                  <stop offset="5%"  stopColor="#f4511e" stopOpacity={0.20} />
+                  <stop offset="60%" stopColor="#f4511e" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="pendingGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%"  stopColor="#f4845a" stopOpacity={0.12} />
@@ -153,11 +153,11 @@ export default function RevenueChart() {
               <Area
                 type="monotone"
                 dataKey="confirmed"
-                stroke="#E85C1A"
+                stroke="#f4511e"
                 strokeWidth={2}
                 fill="url(#confirmedGrad)"
-                dot={{ r: 3, fill: "#E85C1A", strokeWidth: 0 }}
-                activeDot={{ r: 5, fill: "#E85C1A" }}
+                dot={{ r: 3, fill: "#f4511e", strokeWidth: 0 }}
+                activeDot={{ r: 5, fill: "#f4511e" }}
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -168,7 +168,7 @@ export default function RevenueChart() {
       {!loading && data !== null && (
         <div className="flex items-center gap-4 border-t border-black/[0.04] px-5 py-2.5">
           <span className="flex items-center gap-1.5 text-[0.72rem] text-[#5c5e62]">
-            <span className="h-0.5 w-4 rounded bg-[#E85C1A]" />
+            <span className="h-0.5 w-4 rounded bg-[#f4511e]" />
             Confirmed revenue
           </span>
           <span className="flex items-center gap-1.5 text-[0.72rem] text-[#9ca3af]">

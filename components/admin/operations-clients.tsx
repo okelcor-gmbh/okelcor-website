@@ -136,7 +136,7 @@ function ClientDetail({
               </div>
               {/* The actionable figure: these are the orders needing documents. */}
               <div className={`rounded-xl border p-3 ${
-                detail.totals.in_transit > 0 ? "border-[#E85C1A]/30 bg-[#fff7f3]" : "border-black/[0.06]"
+                detail.totals.in_transit > 0 ? "border-[#f4511e]/30 bg-[#fff7f3]" : "border-black/[0.06]"
               }`}>
                 <p className="text-[0.68rem] font-semibold uppercase tracking-wider text-[#5c5e62]">In transit</p>
                 <p className="mt-0.5 text-[1.15rem] font-bold tabular-nums text-[#171a20]">
@@ -257,14 +257,14 @@ export default function OperationsClients({
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search by e-mail, name or company…"
-            className="h-9 w-full rounded-lg border border-black/[0.10] bg-white pl-8 pr-3 text-[0.83rem] focus:border-[#E85C1A] focus:outline-none"
+            className="h-9 w-full rounded-lg border border-black/[0.10] bg-white pl-8 pr-3 text-[0.83rem] focus:border-[#f4511e] focus:outline-none"
           />
         </form>
 
         <select
           value={sort}
           onChange={(e) => { setSort(e.target.value); setPage(1); }}
-          className="h-9 rounded-lg border border-black/[0.10] bg-white px-3 text-[0.83rem] focus:border-[#E85C1A] focus:outline-none"
+          className="h-9 rounded-lg border border-black/[0.10] bg-white px-3 text-[0.83rem] focus:border-[#f4511e] focus:outline-none"
         >
           {SORTS.map((s) => <option key={s.value} value={s.value}>Sort: {s.label}</option>)}
         </select>

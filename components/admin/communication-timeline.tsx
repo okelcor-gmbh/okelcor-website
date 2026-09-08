@@ -154,21 +154,21 @@ export default function CommunicationTimeline({ context, entityId, compact = fal
     } finally { setSubmitting(false); }
   };
 
-  const inputCls = "w-full rounded-xl border border-black/[0.09] bg-white px-3 py-2 text-[0.83rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10";
+  const inputCls = "w-full rounded-xl border border-black/[0.09] bg-white px-3 py-2 text-[0.83rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10";
   const selectCls = inputCls;
 
   return (
     <div>
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
-        <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+        <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
           Communications
           {entries.length > 0 && <span className="ml-2 rounded-full bg-[#f0f2f5] px-2 py-0.5 text-[0.65rem] text-[#5c5e62]">{entries.length}</span>}
         </p>
         <div className="flex items-center gap-2">
           {recipientEmail && (
             <button type="button" onClick={() => { setReplyTo(null); setComposeOpen(true); }}
-              className="flex items-center gap-1.5 rounded-xl bg-[#E85C1A] px-3 py-1.5 text-[0.78rem] font-semibold text-white transition hover:bg-[#d44d10]">
+              className="flex items-center gap-1.5 rounded-xl bg-[#f4511e] px-3 py-1.5 text-[0.78rem] font-semibold text-white transition hover:bg-[#d44d10]">
               <Send size={12} /> Compose E-mail
             </button>
           )}
@@ -187,7 +187,7 @@ export default function CommunicationTimeline({ context, entityId, compact = fal
       </div>
 
       {newReplyBanner && (
-        <div className="mb-3 flex items-center gap-2 rounded-xl border border-[#E85C1A]/30 bg-orange-50 px-3.5 py-2.5 text-[0.8rem] text-[#c2410c]">
+        <div className="mb-3 flex items-center gap-2 rounded-xl border border-[#f4511e]/30 bg-orange-50 px-3.5 py-2.5 text-[0.8rem] text-[#c2410c]">
           <Mail size={13} className="shrink-0" />
           {newReplyBanner}
           <button type="button" onClick={() => setNewReplyBanner(null)} className="ml-auto text-[#c2410c]/60 hover:text-[#c2410c]"><X size={13} /></button>
@@ -262,7 +262,7 @@ export default function CommunicationTimeline({ context, entityId, compact = fal
             </div>
           )}
           <button type="submit" disabled={submitting || (!form.body.trim() && !form.subject.trim())}
-            className="flex items-center gap-2 rounded-full bg-[#E85C1A] px-5 py-2 text-[0.83rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:opacity-50">
+            className="flex items-center gap-2 rounded-full bg-[#f4511e] px-5 py-2 text-[0.83rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:opacity-50">
             {submitting ? <Loader2 size={13} className="animate-spin" /> : <Plus size={13} />}
             {submitting ? "Saving…" : "Save Entry"}
           </button>
@@ -278,7 +278,7 @@ export default function CommunicationTimeline({ context, entityId, compact = fal
 
       {/* Timeline */}
       {loading ? (
-        <div className="flex justify-center py-6"><Loader2 size={18} className="animate-spin text-[#E85C1A]" /></div>
+        <div className="flex justify-center py-6"><Loader2 size={18} className="animate-spin text-[#f4511e]" /></div>
       ) : entries.length === 0 ? (
         <p className="py-6 text-center text-[0.83rem] italic text-[#9ca3af]">No communications logged yet.</p>
       ) : (
@@ -292,7 +292,7 @@ export default function CommunicationTimeline({ context, entityId, compact = fal
             const unread = (isEmail || isWhatsApp) && entry.direction === "inbound" && !entry.staff_read_at;
             const failed = entry.status === "failed";
             return (
-              <div key={entry.id} className={`flex gap-3 rounded-xl border bg-white p-3 ${unread ? "border-[#E85C1A]/30 bg-orange-50/20" : "border-black/[0.06]"}`}>
+              <div key={entry.id} className={`flex gap-3 rounded-xl border bg-white p-3 ${unread ? "border-[#f4511e]/30 bg-orange-50/20" : "border-black/[0.06]"}`}>
                 <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${iconCls}`}>
                   <Icon size={14} strokeWidth={1.8} />
                 </div>
@@ -305,7 +305,7 @@ export default function CommunicationTimeline({ context, entityId, compact = fal
                     {entry.admin_user_name && (
                       <span className="text-[0.68rem] text-[#9ca3af]">· {entry.admin_user_name}</span>
                     )}
-                    {unread && <span className="rounded-full bg-[#E85C1A] px-1.5 py-0.5 text-[0.6rem] font-bold text-white">New</span>}
+                    {unread && <span className="rounded-full bg-[#f4511e] px-1.5 py-0.5 text-[0.6rem] font-bold text-white">New</span>}
                     {failed && <span className="flex items-center gap-1 rounded-full bg-red-100 px-1.5 py-0.5 text-[0.6rem] font-bold text-red-700"><AlertCircle size={9} /> Failed to send</span>}
                     {isWhatsApp && entry.whatsapp_template_name && (
                       <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[0.6rem] font-bold text-emerald-700">Template: {entry.whatsapp_template_name}</span>
@@ -341,7 +341,7 @@ export default function CommunicationTimeline({ context, entityId, compact = fal
                   )}
                   {isEmail && recipientEmail && (
                     <button type="button" onClick={() => { setReplyTo({ id: entry.id, subject: entry.subject }); setComposeOpen(true); }}
-                      className="mt-1.5 flex items-center gap-1 text-[0.72rem] font-semibold text-[#E85C1A] hover:underline">
+                      className="mt-1.5 flex items-center gap-1 text-[0.72rem] font-semibold text-[#f4511e] hover:underline">
                       <Reply size={11} /> Reply
                     </button>
                   )}

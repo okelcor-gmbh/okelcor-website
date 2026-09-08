@@ -89,8 +89,8 @@ export default function StaffMessagesInbox() {
             className={[
               "h-10 rounded-xl px-4 text-[0.8rem] font-semibold transition",
               unreadOnly
-                ? "bg-[#E85C1A] text-white"
-                : "border border-black/[0.09] bg-white text-[#5c5e62] hover:border-[#E85C1A] hover:text-[#E85C1A]",
+                ? "bg-[#f4511e] text-white"
+                : "border border-black/[0.09] bg-white text-[#5c5e62] hover:border-[#f4511e] hover:text-[#f4511e]",
             ].join(" ")}
           >
             Unread only
@@ -106,7 +106,7 @@ export default function StaffMessagesInbox() {
         <button
           type="button"
           onClick={() => setComposing(true)}
-          className="ml-auto flex h-10 items-center gap-2 rounded-xl bg-[#E85C1A] px-5 text-[0.82rem] font-semibold text-white transition hover:bg-[#d44d10]"
+          className="ml-auto flex h-10 items-center gap-2 rounded-xl bg-[#f4511e] px-5 text-[0.82rem] font-semibold text-white transition hover:bg-[#d44d10]"
         >
           <PenSquare size={15} /> New message
         </button>
@@ -115,7 +115,7 @@ export default function StaffMessagesInbox() {
       <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
         {loading ? (
           <div className="flex justify-center py-16">
-            <Loader2 size={22} className="animate-spin text-[#E85C1A]" />
+            <Loader2 size={22} className="animate-spin text-[#f4511e]" />
           </div>
         ) : notDeployed ? (
           <EmptyState
@@ -147,7 +147,7 @@ export default function StaffMessagesInbox() {
           <button
             type="button" disabled={page <= 1}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
-            className="flex h-9 items-center gap-1 rounded-lg border border-black/[0.09] bg-white px-3 text-[0.8rem] font-semibold text-[#5c5e62] transition hover:border-[#E85C1A] hover:text-[#E85C1A] disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex h-9 items-center gap-1 rounded-lg border border-black/[0.09] bg-white px-3 text-[0.8rem] font-semibold text-[#5c5e62] transition hover:border-[#f4511e] hover:text-[#f4511e] disabled:cursor-not-allowed disabled:opacity-40"
           >
             <ChevronLeft size={14} /> Prev
           </button>
@@ -155,7 +155,7 @@ export default function StaffMessagesInbox() {
           <button
             type="button" disabled={page >= lastPage}
             onClick={() => setPage((p) => Math.min(lastPage, p + 1))}
-            className="flex h-9 items-center gap-1 rounded-lg border border-black/[0.09] bg-white px-3 text-[0.8rem] font-semibold text-[#5c5e62] transition hover:border-[#E85C1A] hover:text-[#E85C1A] disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex h-9 items-center gap-1 rounded-lg border border-black/[0.09] bg-white px-3 text-[0.8rem] font-semibold text-[#5c5e62] transition hover:border-[#f4511e] hover:text-[#f4511e] disabled:cursor-not-allowed disabled:opacity-40"
           >
             Next <ChevronRight size={14} />
           </button>
@@ -178,7 +178,7 @@ function MessageRow({ item, box }: { item: StaffMessageRow; box: Box }) {
     : item.sender.name;
 
   return (
-    <li className={["transition hover:bg-[#fafafa]", item.unread ? "bg-[#E85C1A]/[0.03]" : ""].join(" ")}>
+    <li className={["transition hover:bg-[#fafafa]", item.unread ? "bg-[#f4511e]/[0.03]" : ""].join(" ")}>
       <Link href={`/admin/messages/${item.id}`} className="flex items-start gap-3 px-4 py-4">
         <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-black/[0.08] bg-[#f0f2f5] text-[0.68rem] font-bold text-[#5c5e62]">
           {initials(box === "sent" ? (item.recipients[0]?.name ?? "?") : item.sender.name)}
@@ -187,7 +187,7 @@ function MessageRow({ item, box }: { item: StaffMessageRow; box: Box }) {
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <p className="text-[0.875rem] font-semibold text-[#1a1a1a]">{who}</p>
-            {item.unread && <span className="h-2 w-2 shrink-0 rounded-full bg-[#E85C1A]" />}
+            {item.unread && <span className="h-2 w-2 shrink-0 rounded-full bg-[#f4511e]" />}
             {item.is_forward && (
               <span className="flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[0.63rem] font-bold text-blue-700">
                 <Forward size={9} /> Forwarded

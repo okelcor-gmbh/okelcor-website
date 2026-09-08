@@ -18,7 +18,7 @@ function countryFlag(code: string): string {
   return code.toUpperCase().split("").map(c => String.fromCodePoint(c.charCodeAt(0) + 127397)).join("");
 }
 
-const PIE_COLORS = ["#E85C1A", "#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4", "#84cc16"];
+const PIE_COLORS = ["#f4511e", "#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4", "#84cc16"];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function DonutTooltip({ active, payload }: any) {
@@ -116,7 +116,7 @@ export default function LiveAnalytics() {
                 </div>
                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#f0f2f5]">
                   <div
-                    className="h-full rounded-full bg-[#E85C1A]"
+                    className="h-full rounded-full bg-[#f4511e]"
                     style={{ width: `${Math.round((p.views / maxViews) * 100)}%` }}
                   />
                 </div>

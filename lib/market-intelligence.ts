@@ -74,7 +74,7 @@ export const SIGNAL_TONE: Record<MarketSignal, { chip: string; dot: string }> = 
   proven:                { chip: "bg-emerald-50 text-emerald-700 border-emerald-200", dot: "bg-emerald-500" },
   buying_quietly:        { chip: "bg-teal-50 text-teal-700 border-teal-200",          dot: "bg-teal-500" },
   demand_not_served:     { chip: "bg-amber-50 text-amber-800 border-amber-200",       dot: "bg-amber-500" },
-  interest_no_reach:     { chip: "bg-orange-50 text-orange-800 border-orange-200",    dot: "bg-[#E85C1A]" },
+  interest_no_reach:     { chip: "bg-orange-50 text-orange-800 border-orange-200",    dot: "bg-[#f4511e]" },
   demand_not_converting: { chip: "bg-rose-50 text-rose-700 border-rose-200",          dot: "bg-rose-500" },
   reach_no_interest:     { chip: "bg-slate-100 text-slate-700 border-slate-200",      dot: "bg-slate-400" },
   reach_unmeasured:      { chip: "bg-slate-100 text-slate-700 border-slate-200",      dot: "bg-slate-400" },

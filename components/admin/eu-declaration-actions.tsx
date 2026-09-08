@@ -130,7 +130,7 @@ export default function EuDeclarationActions({ id, initialStatus, initialAcknowl
               type="button"
               onClick={handleDownload}
               disabled={downloading}
-              className="inline-flex items-center gap-2 rounded-full border border-[#E85C1A]/30 bg-white px-4 py-2 text-[0.83rem] font-semibold text-[#E85C1A] transition hover:bg-[#fff5f2] disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-full border border-[#f4511e]/30 bg-white px-4 py-2 text-[0.83rem] font-semibold text-[#f4511e] transition hover:bg-[#fff5f2] disabled:opacity-60"
             >
               <Download size={14} strokeWidth={2.2} />
               {downloading ? "Downloading…" : "Download Certificate"}

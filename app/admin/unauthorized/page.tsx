@@ -40,7 +40,7 @@ export default async function AdminUnauthorizedPage() {
         <div className="mt-8 flex flex-col gap-3">
           <Link
             href="/admin"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-[#E85C1A] px-6 text-[0.83rem] font-semibold text-white transition hover:bg-[#d14f14]"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-[#f4511e] px-6 text-[0.83rem] font-semibold text-white transition hover:bg-[#df4618]"
           >
             <ArrowLeft size={14} />
             Return to Dashboard

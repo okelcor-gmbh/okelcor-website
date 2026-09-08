@@ -188,8 +188,8 @@ function SlideForm({
   };
 
   return (
-    <div className="rounded-2xl border border-[#E85C1A]/20 bg-white p-6 shadow-sm">
-      <p className="mb-5 text-[0.7rem] font-bold uppercase tracking-[0.18em] text-[#E85C1A]">
+    <div className="rounded-2xl border border-[#f4511e]/20 bg-white p-6 shadow-sm">
+      <p className="mb-5 text-[0.7rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">
         {isEdit ? "Edit Slide" : "New Slide"}
       </p>
 
@@ -206,7 +206,7 @@ function SlideForm({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g. Premium Tyre Supply"
-            className="h-9 rounded-xl border border-black/[0.09] bg-white px-3 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+            className="h-9 rounded-xl border border-black/[0.09] bg-white px-3 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
           />
         </div>
 
@@ -218,7 +218,7 @@ function SlideForm({
             value={order}
             onChange={(e) => setOrder(e.target.value)}
             min={1}
-            className="h-9 rounded-xl border border-black/[0.09] bg-white px-3 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+            className="h-9 rounded-xl border border-black/[0.09] bg-white px-3 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
           />
         </div>
 
@@ -230,7 +230,7 @@ function SlideForm({
             onChange={(e) => setSubtitle(e.target.value)}
             placeholder="e.g. Sourcing premium tyres for distributors worldwide"
             rows={2}
-            className="resize-none rounded-xl border border-black/[0.09] bg-white px-3 py-2 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+            className="resize-none rounded-xl border border-black/[0.09] bg-white px-3 py-2 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
           />
         </div>
 
@@ -247,7 +247,7 @@ function SlideForm({
               onClick={() => handleMediaTypeChange("image")}
               className={`flex h-8 items-center gap-1.5 rounded-lg px-3 text-[0.78rem] font-semibold transition ${
                 mediaType === "image"
-                  ? "bg-[#E85C1A] text-white"
+                  ? "bg-[#f4511e] text-white"
                   : "border border-black/[0.09] bg-white text-[#5c5e62] hover:bg-[#f0f2f5]"
               }`}
             >
@@ -259,7 +259,7 @@ function SlideForm({
               onClick={() => handleMediaTypeChange("video")}
               className={`flex h-8 items-center gap-1.5 rounded-lg px-3 text-[0.78rem] font-semibold transition ${
                 mediaType === "video"
-                  ? "bg-[#E85C1A] text-white"
+                  ? "bg-[#f4511e] text-white"
                   : "border border-black/[0.09] bg-white text-[#5c5e62] hover:bg-[#f0f2f5]"
               }`}
             >
@@ -278,7 +278,7 @@ function SlideForm({
               <img src={imagePreview} alt="" className="h-20 w-auto rounded object-contain" />
             ) : mediaFile && mediaType === "video" ? (
               <div className="flex flex-col items-center gap-1">
-                <Film size={20} className="text-[#E85C1A]" />
+                <Film size={20} className="text-[#f4511e]" />
                 <span className="max-w-[220px] truncate text-[0.72rem] text-[#5c5e62]">{mediaFile.name}</span>
               </div>
             ) : isEdit && initial?.media_type === "video" && !mediaFile ? (
@@ -309,7 +309,7 @@ function SlideForm({
           <button
             type="button"
             onClick={() => setCtaOpen((v) => !v)}
-            className="flex items-center gap-1.5 text-[0.72rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62] transition hover:text-[#E85C1A]"
+            className="flex items-center gap-1.5 text-[0.72rem] font-bold uppercase tracking-[0.1em] text-[#5c5e62] transition hover:text-[#f4511e]"
           >
             {ctaOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
             CTA Button Overrides (optional)
@@ -324,7 +324,7 @@ function SlideForm({
                   value={ctaPrimaryLabel}
                   onChange={(e) => setCtaPrimaryLabel(e.target.value)}
                   placeholder="e.g. Request a Quote"
-                  className="h-8 rounded-lg border border-black/[0.09] bg-white px-2.5 text-[0.83rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+                  className="h-8 rounded-lg border border-black/[0.09] bg-white px-2.5 text-[0.83rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
                 />
               </div>
               <div className="flex flex-col gap-1">
@@ -334,7 +334,7 @@ function SlideForm({
                   value={ctaPrimaryHref}
                   onChange={(e) => setCtaPrimaryHref(e.target.value)}
                   placeholder="/quote"
-                  className="h-8 rounded-lg border border-black/[0.09] bg-white px-2.5 text-[0.83rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+                  className="h-8 rounded-lg border border-black/[0.09] bg-white px-2.5 text-[0.83rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
                 />
               </div>
               <div className="flex flex-col gap-1">
@@ -344,7 +344,7 @@ function SlideForm({
                   value={ctaSecondaryLabel}
                   onChange={(e) => setCtaSecondaryLabel(e.target.value)}
                   placeholder="e.g. Browse Catalogue"
-                  className="h-8 rounded-lg border border-black/[0.09] bg-white px-2.5 text-[0.83rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+                  className="h-8 rounded-lg border border-black/[0.09] bg-white px-2.5 text-[0.83rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
                 />
               </div>
               <div className="flex flex-col gap-1">
@@ -354,7 +354,7 @@ function SlideForm({
                   value={ctaSecondaryHref}
                   onChange={(e) => setCtaSecondaryHref(e.target.value)}
                   placeholder="/shop"
-                  className="h-8 rounded-lg border border-black/[0.09] bg-white px-2.5 text-[0.83rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+                  className="h-8 rounded-lg border border-black/[0.09] bg-white px-2.5 text-[0.83rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
                 />
               </div>
             </div>
@@ -399,7 +399,7 @@ function SlideForm({
                 value={trans[transTab].title}
                 onChange={(e) => patchTrans(transTab, { title: e.target.value })}
                 placeholder="Translated title"
-                className="h-9 rounded-xl border border-black/[0.09] bg-white px-3 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+                className="h-9 rounded-xl border border-black/[0.09] bg-white px-3 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
               />
             </div>
             <div className="flex flex-col gap-1">
@@ -409,7 +409,7 @@ function SlideForm({
                 value={trans[transTab].cta_primary}
                 onChange={(e) => patchTrans(transTab, { cta_primary: e.target.value })}
                 placeholder="e.g. Katalog ansehen"
-                className="h-9 rounded-xl border border-black/[0.09] bg-white px-3 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+                className="h-9 rounded-xl border border-black/[0.09] bg-white px-3 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
               />
             </div>
             <div className="flex flex-col gap-1 sm:col-span-2">
@@ -419,7 +419,7 @@ function SlideForm({
                 onChange={(e) => patchTrans(transTab, { subtitle: e.target.value })}
                 placeholder="Translated subtitle"
                 rows={2}
-                className="resize-none rounded-xl border border-black/[0.09] bg-white px-3 py-2 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+                className="resize-none rounded-xl border border-black/[0.09] bg-white px-3 py-2 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
               />
             </div>
             <div className="flex flex-col gap-1">
@@ -429,7 +429,7 @@ function SlideForm({
                 value={trans[transTab].cta_secondary}
                 onChange={(e) => patchTrans(transTab, { cta_secondary: e.target.value })}
                 placeholder="e.g. Angebot anfordern"
-                className="h-9 rounded-xl border border-black/[0.09] bg-white px-3 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+                className="h-9 rounded-xl border border-black/[0.09] bg-white px-3 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
               />
             </div>
           </div>
@@ -441,7 +441,7 @@ function SlideForm({
           type="button"
           onClick={handleSave}
           disabled={isPending}
-          className="flex h-9 items-center gap-1.5 rounded-full bg-[#E85C1A] px-5 text-[0.83rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-60"
+          className="flex h-9 items-center gap-1.5 rounded-full bg-[#f4511e] px-5 text-[0.83rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-60"
         >
           <Check size={13} strokeWidth={2.5} />
           {isPending ? "Saving…" : isEdit ? "Save Changes" : "Create Slide"}
@@ -529,7 +529,7 @@ function SlideRow({
             type="button"
             onClick={onEdit}
             title="Edit slide"
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#5c5e62] transition hover:bg-[#E85C1A]/10 hover:text-[#E85C1A]"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#5c5e62] transition hover:bg-[#f4511e]/10 hover:text-[#f4511e]"
           >
             <Pencil size={13} strokeWidth={2} />
           </button>
@@ -551,7 +551,7 @@ function SlideRow({
       {confirmDelete && (
         <div className="flex flex-wrap items-center gap-3 rounded-xl bg-red-50 px-4 py-3">
           <p className="flex-1 text-[0.78rem] font-semibold text-[#1a1a1a]">
-            Delete <span className="text-[#E85C1A]">"{slide.title}"</span>? This removes the slide and its media.
+            Delete <span className="text-[#f4511e]">"{slide.title}"</span>? This removes the slide and its media.
           </p>
           <div className="flex gap-2">
             <button
@@ -608,7 +608,7 @@ export default function HeroSlidesManager({ slides }: { slides: AdminHeroSlide[]
         <button
           type="button"
           onClick={() => setMode("add")}
-          className="flex h-10 w-fit items-center gap-2 rounded-full bg-[#E85C1A] px-5 text-[0.83rem] font-semibold text-white transition hover:bg-[#d14f14]"
+          className="flex h-10 w-fit items-center gap-2 rounded-full bg-[#f4511e] px-5 text-[0.83rem] font-semibold text-white transition hover:bg-[#df4618]"
         >
           <Plus size={14} strokeWidth={2.5} />
           Add Slide

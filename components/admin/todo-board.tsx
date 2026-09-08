@@ -15,7 +15,7 @@ import { useAdminPermissions } from "@/hooks/use-admin-permissions";
  */
 
 const INPUT =
-  "h-9 w-full rounded-lg border border-black/[0.10] bg-white px-3 text-[0.83rem] text-[#171a20] placeholder:text-[#8c8f94] focus:border-[#E85C1A] focus:outline-none";
+  "h-9 w-full rounded-lg border border-black/[0.10] bg-white px-3 text-[0.83rem] text-[#171a20] placeholder:text-[#8c8f94] focus:border-[#f4511e] focus:outline-none";
 const LABEL = "mb-1 block text-[0.68rem] font-bold uppercase tracking-wider text-[#8c8f94]";
 
 const PRIORITY_BADGE: Record<string, string> = {
@@ -181,7 +181,7 @@ export default function TodoBoard({ initialTodo }: { initialTodo: number | null 
             <select
               value={department}
               onChange={(e) => setDepartment(e.target.value)}
-              className="h-8 cursor-pointer rounded-full border border-black/[0.10] bg-white px-2.5 text-[0.78rem] font-semibold text-[#171a20] outline-none transition focus:border-[#E85C1A]"
+              className="h-8 cursor-pointer rounded-full border border-black/[0.10] bg-white px-2.5 text-[0.78rem] font-semibold text-[#171a20] outline-none transition focus:border-[#f4511e]"
             >
               <option value="">All departments</option>
               {Object.entries(meta.departments)
@@ -194,7 +194,7 @@ export default function TodoBoard({ initialTodo }: { initialTodo: number | null 
         )}
         {!adding && !editing && (
           <button type="button" onClick={() => setAdding(true)}
-            className="ml-auto flex items-center gap-1.5 rounded-full bg-[#E85C1A] px-3.5 py-1.5 text-[0.8rem] font-semibold text-white transition hover:bg-[#d44f12]">
+            className="ml-auto flex items-center gap-1.5 rounded-full bg-[#f4511e] px-3.5 py-1.5 text-[0.8rem] font-semibold text-white transition hover:bg-[#df4618]">
             <Plus size={13} /> Add to-do
           </button>
         )}
@@ -271,7 +271,7 @@ export default function TodoBoard({ initialTodo }: { initialTodo: number | null 
                     <p className="mt-0.5 whitespace-normal break-words text-[0.78rem] text-[#5c5e62]">{todo.details}</p>
                   )}
                   {todo.assignee_note && (
-                    <p className="mt-1 whitespace-pre-wrap break-words border-l-2 border-[#E85C1A]/40 pl-2 text-[0.78rem] text-[#5c5e62]">
+                    <p className="mt-1 whitespace-pre-wrap break-words border-l-2 border-[#f4511e]/40 pl-2 text-[0.78rem] text-[#5c5e62]">
                       <span className="font-semibold text-[#8c8f94]">Note back:</span> {todo.assignee_note}
                     </p>
                   )}
@@ -300,7 +300,7 @@ export default function TodoBoard({ initialTodo }: { initialTodo: number | null 
 
                 <select value={todo.status} disabled={!todo.you_may_edit}
                   onChange={(e) => void patch(todo, { status: e.target.value })}
-                  className={`h-8 shrink-0 cursor-pointer rounded-xl border px-2 text-[0.75rem] font-semibold outline-none transition focus:border-[#E85C1A] disabled:cursor-default disabled:opacity-60 ${STATUS_SELECT[todo.status] ?? ""}`}>
+                  className={`h-8 shrink-0 cursor-pointer rounded-xl border px-2 text-[0.75rem] font-semibold outline-none transition focus:border-[#f4511e] disabled:cursor-default disabled:opacity-60 ${STATUS_SELECT[todo.status] ?? ""}`}>
                   {(meta?.statuses ?? []).map((s) => <option key={s.key} value={s.key}>{s.label}</option>)}
                 </select>
 
@@ -313,7 +313,7 @@ export default function TodoBoard({ initialTodo }: { initialTodo: number | null 
                 */}
                 {todo.you_may_edit && (
                   <button type="button" onClick={() => { setEditing(todo); setAdding(false); }}
-                    className="flex shrink-0 items-center gap-1 rounded-lg border border-black/[0.10] bg-white px-2.5 py-1.5 text-[0.73rem] font-semibold text-[#5c5e62] transition hover:border-[#E85C1A] hover:text-[#171a20]">
+                    className="flex shrink-0 items-center gap-1 rounded-lg border border-black/[0.10] bg-white px-2.5 py-1.5 text-[0.73rem] font-semibold text-[#5c5e62] transition hover:border-[#f4511e] hover:text-[#171a20]">
                     <Pencil size={12} /> Edit
                   </button>
                 )}
@@ -448,7 +448,7 @@ function TodoForm({
       </div>
       <div className="flex items-center gap-2">
         <button type="submit" disabled={busy}
-          className="flex items-center gap-1.5 rounded-full bg-[#E85C1A] px-4 py-1.5 text-[0.78rem] font-semibold text-white transition hover:bg-[#d44f12] disabled:opacity-50">
+          className="flex items-center gap-1.5 rounded-full bg-[#f4511e] px-4 py-1.5 text-[0.78rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50">
           {busy && <Loader2 size={12} className="animate-spin" />} {editing ? "Save changes" : "Add to-do"}
         </button>
         <button type="button" onClick={onCancel}

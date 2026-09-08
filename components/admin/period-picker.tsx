@@ -29,7 +29,7 @@ export default function PeriodPicker({ from, to }: { from: string; to: string })
   }
 
   const input =
-    "h-9 rounded-lg border border-black/[0.10] bg-white px-2.5 text-[0.8rem] text-[#171a20] focus:border-[#E85C1A] focus:outline-none";
+    "h-9 rounded-lg border border-black/[0.10] bg-white px-2.5 text-[0.8rem] text-[#171a20] focus:border-[#f4511e] focus:outline-none";
 
   return (
     <form onSubmit={apply} className="flex flex-wrap items-center gap-1.5">

@@ -66,7 +66,7 @@ export default function StaffMessageThread({ messageId }: { messageId: number })
   if (loading) {
     return (
       <div className="flex justify-center py-20">
-        <Loader2 size={22} className="animate-spin text-[#E85C1A]" />
+        <Loader2 size={22} className="animate-spin text-[#f4511e]" />
       </div>
     );
   }
@@ -95,7 +95,7 @@ export default function StaffMessageThread({ messageId }: { messageId: number })
     <>
       <Link
         href="/admin/messages"
-        className="mb-4 inline-flex items-center gap-1.5 text-[0.8rem] font-semibold text-[#5c5e62] transition hover:text-[#E85C1A]"
+        className="mb-4 inline-flex items-center gap-1.5 text-[0.8rem] font-semibold text-[#5c5e62] transition hover:text-[#f4511e]"
       >
         <ArrowLeft size={14} /> All messages
       </Link>
@@ -148,7 +148,7 @@ function MessageCard({ message }: { message: StaffMessage }) {
 
       {/* Sanitized server-side by RichEmailHtmlSanitizer before storage. */}
       <div
-        className="mt-4 text-[0.875rem] leading-relaxed text-[#1a1a1a] [&_a]:text-[#E85C1A] [&_a]:underline [&_img]:max-w-full [&_p]:my-2"
+        className="mt-4 text-[0.875rem] leading-relaxed text-[#1a1a1a] [&_a]:text-[#f4511e] [&_a]:underline [&_img]:max-w-full [&_p]:my-2"
         dangerouslySetInnerHTML={{ __html: message.body }}
       />
 
@@ -158,7 +158,7 @@ function MessageCard({ message }: { message: StaffMessage }) {
             <a
               key={i}
               href={attachmentUrl(message.id, i)}
-              className="flex items-center gap-2 rounded-lg border border-black/[0.07] bg-[#fafafa] px-3 py-2 text-[0.8rem] text-[#1a1a1a] transition hover:border-[#E85C1A]/40"
+              className="flex items-center gap-2 rounded-lg border border-black/[0.07] bg-[#fafafa] px-3 py-2 text-[0.8rem] text-[#1a1a1a] transition hover:border-[#f4511e]/40"
             >
               <Paperclip size={13} className="shrink-0 text-[#9ca3af]" />
               <span className="min-w-0 flex-1 truncate">{a.name ?? "Attachment"}</span>
@@ -240,14 +240,14 @@ function ReplyBox({ parentId, onSent }: { parentId: number; onSent: () => void }
   return (
     <form onSubmit={submit} className="mt-5 rounded-2xl bg-white p-6 shadow-sm">
       <p className="mb-3 flex items-center gap-2 text-[0.8rem] font-bold text-[#1a1a1a]">
-        <CornerUpLeft size={14} className="text-[#E85C1A]" /> Reply
+        <CornerUpLeft size={14} className="text-[#f4511e]" /> Reply
       </p>
 
       <div
         ref={bodyRef}
         contentEditable
         suppressContentEditableWarning
-        className="min-h-[110px] rounded-xl border border-black/[0.1] bg-[#fafafa] px-3.5 py-2.5 text-[0.85rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:bg-white focus:ring-2 focus:ring-[#E85C1A]/10 [&_p]:my-1"
+        className="min-h-[110px] rounded-xl border border-black/[0.1] bg-[#fafafa] px-3.5 py-2.5 text-[0.85rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:bg-white focus:ring-2 focus:ring-[#f4511e]/10 [&_p]:my-1"
       />
 
       {attachments.length > 0 && (
@@ -279,12 +279,12 @@ function ReplyBox({ parentId, onSent }: { parentId: number; onSent: () => void }
           <input
             type="checkbox" checked={replyAll}
             onChange={(e) => setReplyAll(e.target.checked)}
-            className="h-4 w-4 accent-[#E85C1A]"
+            className="h-4 w-4 accent-[#f4511e]"
           />
           Reply to everyone on this message
         </label>
 
-        <label className="flex cursor-pointer items-center gap-1.5 text-[0.8rem] text-[#5c5e62] transition hover:text-[#E85C1A]">
+        <label className="flex cursor-pointer items-center gap-1.5 text-[0.8rem] text-[#5c5e62] transition hover:text-[#f4511e]">
           <Paperclip size={14} /> Attach
           <input
             type="file" multiple
@@ -297,7 +297,7 @@ function ReplyBox({ parentId, onSent }: { parentId: number; onSent: () => void }
 
         <button
           type="submit" disabled={submitting}
-          className="ml-auto flex h-10 items-center gap-2 rounded-xl bg-[#E85C1A] px-6 text-[0.82rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:opacity-50"
+          className="ml-auto flex h-10 items-center gap-2 rounded-xl bg-[#f4511e] px-6 text-[0.82rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:opacity-50"
         >
           {submitting ? <><Loader2 size={15} className="animate-spin" /> Sending…</> : <><Send size={14} /> Reply</>}
         </button>

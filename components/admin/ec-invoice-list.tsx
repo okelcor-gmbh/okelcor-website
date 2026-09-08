@@ -22,7 +22,7 @@ import { useAdminPermissions } from "@/hooks/use-admin-permissions";
  */
 
 const INPUT =
-  "h-8 w-full rounded-lg border border-black/[0.10] bg-white px-2 text-[0.78rem] text-[#171a20] placeholder:text-[#8c8f94] focus:border-[#E85C1A] focus:outline-none disabled:bg-[#f8f9fa] disabled:text-[#8c8f94]";
+  "h-8 w-full rounded-lg border border-black/[0.10] bg-white px-2 text-[0.78rem] text-[#171a20] placeholder:text-[#8c8f94] focus:border-[#f4511e] focus:outline-none disabled:bg-[#f8f9fa] disabled:text-[#8c8f94]";
 const LABEL = "mb-1 block text-[0.68rem] font-bold uppercase tracking-wider text-[#8c8f94]";
 const TH = "px-3 py-2 text-left text-[0.68rem] font-bold uppercase tracking-wider text-[#5c5e62]";
 
@@ -330,7 +330,7 @@ export default function EcInvoiceList({
           </button>
           {canManage && (
             <button type="button" onClick={() => setAddingGroup(true)}
-              className="flex items-center gap-1.5 rounded-full bg-[#E85C1A] px-3.5 py-2 text-[0.78rem] font-semibold text-white transition hover:bg-[#d44f12]">
+              className="flex items-center gap-1.5 rounded-full bg-[#f4511e] px-3.5 py-2 text-[0.78rem] font-semibold text-white transition hover:bg-[#df4618]">
               <Plus size={13} /> Add country / customer
             </button>
           )}
@@ -429,7 +429,7 @@ export default function EcInvoiceList({
             </div>
             <div className="flex justify-end gap-2 border-t border-black/[0.06] px-6 py-4">
               <button type="button" onClick={downloadXml}
-                className="flex items-center gap-1.5 rounded-full bg-[#E85C1A] px-4 py-2 text-[0.78rem] font-semibold text-white transition hover:bg-[#d44f12]">
+                className="flex items-center gap-1.5 rounded-full bg-[#f4511e] px-4 py-2 text-[0.78rem] font-semibold text-white transition hover:bg-[#df4618]">
                 <Download size={13} /> Download .xml
               </button>
               <button type="button" onClick={() => setXmlOpen(false)}
@@ -502,7 +502,7 @@ function GroupRows({
               <span className="text-[0.75rem] font-bold text-[#5c5e62]">Itemized invoices &amp; audit attachments</span>
               {canManage && !addingLine && (
                 <button type="button" onClick={onAddLine}
-                  className="flex items-center gap-1 rounded-full bg-[#E85C1A] px-3 py-1 text-[0.72rem] font-semibold text-white transition hover:bg-[#d44f12]">
+                  className="flex items-center gap-1 rounded-full bg-[#f4511e] px-3 py-1 text-[0.72rem] font-semibold text-white transition hover:bg-[#df4618]">
                   <Plus size={11} /> Add invoice line
                 </button>
               )}
@@ -574,7 +574,7 @@ function LineRow({
     if (!canManage) return <span className="text-[0.72rem] text-[#8c8f94]">missing</span>;
 
     return (
-      <label className="inline-flex cursor-pointer items-center gap-1 rounded border border-dashed border-[#E85C1A]/60 bg-[#fff7f2] px-2 py-1 text-[0.68rem] font-semibold text-[#E85C1A]">
+      <label className="inline-flex cursor-pointer items-center gap-1 rounded border border-dashed border-[#f4511e]/60 bg-[#fff7f2] px-2 py-1 text-[0.68rem] font-semibold text-[#f4511e]">
         <Paperclip size={10} /> Attach
         <input type="file" accept={kind === "invoice" ? ".pdf,.jpg,.jpeg,.png" : ".pdf,.png,.jpg,.jpeg"} className="hidden"
           onChange={(e) => { const f = e.target.files?.[0]; if (f) void onAttach(line, kind, f); e.target.value = ""; }} />
@@ -738,7 +738,7 @@ function GroupForm({
       </div>
       <div className="flex items-center gap-2">
         <button type="submit" disabled={busy}
-          className="flex items-center gap-1.5 rounded-full bg-[#E85C1A] px-4 py-1.5 text-[0.78rem] font-semibold text-white transition hover:bg-[#d44f12] disabled:opacity-50">
+          className="flex items-center gap-1.5 rounded-full bg-[#f4511e] px-4 py-1.5 text-[0.78rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50">
           {busy && <Loader2 size={12} className="animate-spin" />} Add group
         </button>
         <button type="button" onClick={onCancel}
@@ -830,7 +830,7 @@ function LineForm({
       </div>
       <div className="flex items-center gap-2">
         <button type="submit" disabled={busy}
-          className="flex items-center gap-1.5 rounded-full bg-[#E85C1A] px-4 py-1.5 text-[0.78rem] font-semibold text-white transition hover:bg-[#d44f12] disabled:opacity-50">
+          className="flex items-center gap-1.5 rounded-full bg-[#f4511e] px-4 py-1.5 text-[0.78rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50">
           {busy ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle2 size={12} />} Save invoice line
         </button>
         <button type="button" onClick={onCancel}

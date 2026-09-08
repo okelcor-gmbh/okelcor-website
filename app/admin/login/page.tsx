@@ -90,7 +90,7 @@ function PasswordForm({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="admin@okelcor.com"
-            className="w-full rounded-xl border border-black/[0.10] bg-[#f5f5f5] px-4 py-3 text-[0.93rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#E85C1A] focus:bg-white focus:ring-2 focus:ring-[#E85C1A]/15"
+            className="w-full rounded-xl border border-black/[0.10] bg-[#f5f5f5] px-4 py-3 text-[0.93rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#f4511e] focus:bg-white focus:ring-2 focus:ring-[#f4511e]/15"
           />
         </div>
 
@@ -105,14 +105,14 @@ function PasswordForm({
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
-            className="w-full rounded-xl border border-black/[0.10] bg-[#f5f5f5] px-4 py-3 text-[0.93rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#E85C1A] focus:bg-white focus:ring-2 focus:ring-[#E85C1A]/15"
+            className="w-full rounded-xl border border-black/[0.10] bg-[#f5f5f5] px-4 py-3 text-[0.93rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#f4511e] focus:bg-white focus:ring-2 focus:ring-[#f4511e]/15"
           />
         </div>
 
         <button
           type="submit"
           disabled={isPending}
-          className="mt-1 flex h-[52px] w-full items-center justify-center rounded-full bg-[#E85C1A] text-[0.95rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-60"
+          className="mt-1 flex h-[52px] w-full items-center justify-center rounded-full bg-[#f4511e] text-[0.95rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-60"
         >
           {isPending ? (
             <span className="flex items-center gap-2"><Spinner />Signing in…</span>
@@ -164,8 +164,8 @@ function TwoFactorChallenge({
   return (
     <div className="rounded-2xl bg-white p-8 shadow-2xl shadow-black/40">
       <div className="mb-5 text-center">
-        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#E85C1A]/10">
-          <svg className="h-6 w-6 text-[#E85C1A]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#f4511e]/10">
+          <svg className="h-6 w-6 text-[#f4511e]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
           </svg>
         </div>
@@ -193,14 +193,14 @@ function TwoFactorChallenge({
             onChange={(e) => handleInput(e.target.value)}
             placeholder="000000"
             maxLength={6}
-            className="w-full rounded-xl border border-black/[0.10] bg-[#f5f5f5] px-4 py-3 text-center text-[1.4rem] font-bold tracking-[0.35em] text-[#1a1a1a] outline-none placeholder:text-[#ccc] placeholder:tracking-normal transition focus:border-[#E85C1A] focus:bg-white focus:ring-2 focus:ring-[#E85C1A]/15"
+            className="w-full rounded-xl border border-black/[0.10] bg-[#f5f5f5] px-4 py-3 text-center text-[1.4rem] font-bold tracking-[0.35em] text-[#1a1a1a] outline-none placeholder:text-[#ccc] placeholder:tracking-normal transition focus:border-[#f4511e] focus:bg-white focus:ring-2 focus:ring-[#f4511e]/15"
           />
         </div>
 
         <button
           type="submit"
           disabled={isPending || code.length !== 6}
-          className="flex h-[52px] w-full items-center justify-center rounded-full bg-[#E85C1A] text-[0.95rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-60"
+          className="flex h-[52px] w-full items-center justify-center rounded-full bg-[#f4511e] text-[0.95rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-60"
         >
           {isPending ? (
             <span className="flex items-center gap-2"><Spinner />Verifying…</span>
@@ -342,7 +342,7 @@ function MandatoryTwoFactorSetupFlow() {
         <button
           type="button"
           onClick={handleFinish}
-          className="flex h-[52px] w-full items-center justify-center rounded-full bg-[#E85C1A] text-[0.95rem] font-semibold text-white transition hover:bg-[#d14f14]"
+          className="flex h-[52px] w-full items-center justify-center rounded-full bg-[#f4511e] text-[0.95rem] font-semibold text-white transition hover:bg-[#df4618]"
         >
           Continue to admin panel
         </button>
@@ -354,8 +354,8 @@ function MandatoryTwoFactorSetupFlow() {
   return (
     <div className="rounded-2xl bg-white p-8 shadow-2xl shadow-black/40">
       <div className="mb-5 text-center">
-        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#E85C1A]/10">
-          <svg className="h-6 w-6 text-[#E85C1A]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#f4511e]/10">
+          <svg className="h-6 w-6 text-[#f4511e]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
           </svg>
         </div>
@@ -406,14 +406,14 @@ function MandatoryTwoFactorSetupFlow() {
             onChange={(e) => { setCode(e.target.value.replace(/\D/g, "").slice(0, 6)); if (error) setError(null); }}
             placeholder="000000"
             maxLength={6}
-            className="w-full rounded-xl border border-black/[0.10] bg-[#f5f5f5] px-4 py-3 text-center text-[1.4rem] font-bold tracking-[0.35em] text-[#1a1a1a] outline-none placeholder:text-[#ccc] placeholder:tracking-normal transition focus:border-[#E85C1A] focus:bg-white focus:ring-2 focus:ring-[#E85C1A]/15"
+            className="w-full rounded-xl border border-black/[0.10] bg-[#f5f5f5] px-4 py-3 text-center text-[1.4rem] font-bold tracking-[0.35em] text-[#1a1a1a] outline-none placeholder:text-[#ccc] placeholder:tracking-normal transition focus:border-[#f4511e] focus:bg-white focus:ring-2 focus:ring-[#f4511e]/15"
           />
         </div>
 
         <button
           type="submit"
           disabled={isPending || code.length !== 6}
-          className="flex h-[52px] w-full items-center justify-center rounded-full bg-[#E85C1A] text-[0.95rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-60"
+          className="flex h-[52px] w-full items-center justify-center rounded-full bg-[#f4511e] text-[0.95rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-60"
         >
           {isPending ? (
             <span className="flex items-center gap-2"><Spinner />Enabling 2FA…</span>
@@ -454,47 +454,81 @@ export default function AdminLoginPage() {
                                "Sign in to manage your content";
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#111111] p-4">
-      <div className="w-full max-w-[420px]">
+    <div className="flex min-h-screen bg-[#101216]">
 
-        <div className="mb-8 flex flex-col items-center gap-3 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E85C1A]">
-            <span className="text-xl font-extrabold tracking-tight text-white">OK</span>
-          </div>
-          <div>
-            <p className="text-[1.4rem] font-extrabold text-white">Okelcor Admin</p>
-            <p className="mt-0.5 text-[0.83rem] text-white/40">{subtitle}</p>
-          </div>
+      {/* ── Brand panel — the wordmark carries the identity, not a monogram ── */}
+      <div className="relative hidden flex-1 flex-col justify-between overflow-hidden p-12 lg:flex xl:p-16">
+        {/* One restrained brand glow — premium is one gesture, not five */}
+        <div aria-hidden className="pointer-events-none absolute -left-40 bottom-[-30%] h-[70vh] w-[70vh] rounded-full bg-[#f4511e]/[0.14] blur-[140px]" />
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.04),transparent_55%)]" />
+
+        <div className="relative">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo/okelcor-logo.png" alt="Okelcor" className="h-8 w-auto brightness-0 invert" />
+          <p className="mt-2 text-[0.68rem] font-bold uppercase tracking-[0.32em] text-[#f4511e]">
+            Growing Together
+          </p>
         </div>
 
-        {/* URL-param banners (session expired, 2FA required) */}
-        {view === "password" && (
-          <Suspense fallback={null}>
-            <LoginBanners />
-          </Suspense>
-        )}
+        <div className="relative max-w-md">
+          <h2 className="text-[2rem] font-extrabold leading-tight tracking-tight text-white xl:text-[2.4rem]">
+            The whole operation,
+            <br />
+            one panel.
+          </h2>
+          <p className="mt-4 text-[0.95rem] leading-relaxed text-white/50">
+            Catalogue, orders, quotes, pricing, finance and after-sales —
+            the desk your customers never see, kept in order.
+          </p>
+        </div>
 
-        {view === "password" && (
-          <PasswordForm
-            onTwoFaRequired={(token) => { setTwoFaToken(token); setView("2fa_challenge"); }}
-            onSetupRequired={() => setView("2fa_setup")}
-          />
-        )}
-
-        {view === "2fa_challenge" && (
-          <TwoFactorChallenge
-            sessionToken={twoFaSessionToken}
-            onBack={() => setView("password")}
-          />
-        )}
-
-        {view === "2fa_setup" && (
-          <MandatoryTwoFactorSetupFlow />
-        )}
-
-        <p className="mt-6 text-center text-[0.75rem] text-white/25">
-          Okelcor GmbH · Admin Panel
+        <p className="relative text-[0.72rem] text-white/30">
+          Okelcor GmbH · Munich · Internal use only
         </p>
+      </div>
+
+      {/* ── Sign-in column ─────────────────────────────────────────────────── */}
+      <div className="flex w-full flex-col items-center justify-center p-4 sm:p-8 lg:w-[520px] lg:shrink-0 lg:border-l lg:border-white/[0.05] lg:bg-[#14161b]">
+        <div className="w-full max-w-[400px]">
+
+          <div className="mb-8 flex flex-col items-center gap-3 text-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo/okelcor-logo.png" alt="Okelcor" className="h-6 w-auto brightness-0 invert lg:hidden" />
+            <div>
+              <p className="text-[1.3rem] font-extrabold text-white">Admin Panel</p>
+              <p className="mt-0.5 text-[0.83rem] text-white/40">{subtitle}</p>
+            </div>
+          </div>
+
+          {/* URL-param banners (session expired, 2FA required) */}
+          {view === "password" && (
+            <Suspense fallback={null}>
+              <LoginBanners />
+            </Suspense>
+          )}
+
+          {view === "password" && (
+            <PasswordForm
+              onTwoFaRequired={(token) => { setTwoFaToken(token); setView("2fa_challenge"); }}
+              onSetupRequired={() => setView("2fa_setup")}
+            />
+          )}
+
+          {view === "2fa_challenge" && (
+            <TwoFactorChallenge
+              sessionToken={twoFaSessionToken}
+              onBack={() => setView("password")}
+            />
+          )}
+
+          {view === "2fa_setup" && (
+            <MandatoryTwoFactorSetupFlow />
+          )}
+
+          <p className="mt-6 text-center text-[0.75rem] text-white/25">
+            Okelcor GmbH · Admin Panel
+          </p>
+        </div>
       </div>
     </div>
   );

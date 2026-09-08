@@ -148,7 +148,7 @@ function ToggleField({
           onClick={() => onChange(field.key, on ? "false" : "true")}
           className={[
             "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200",
-            on ? "bg-[#E85C1A]" : "bg-gray-200",
+            on ? "bg-[#f4511e]" : "bg-gray-200",
           ].join(" ")}
         >
           <span
@@ -185,7 +185,7 @@ function PasswordField({
         value={value}
         placeholder={field.hint ?? ""}
         onChange={(e) => onChange(field.key, e.target.value)}
-        className="h-10 w-full rounded-xl border border-black/[0.09] bg-white pl-3.5 pr-10 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+        className="h-10 w-full rounded-xl border border-black/[0.09] bg-white pl-3.5 pr-10 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
       />
       <button
         type="button"
@@ -226,7 +226,7 @@ function SettingField({
           placeholder={field.hint ?? ""}
           onChange={(e) => onChange(field.key, e.target.value)}
           rows={3}
-          className="w-full resize-none rounded-xl border border-black/[0.09] bg-white px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+          className="w-full resize-none rounded-xl border border-black/[0.09] bg-white px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
         />
       ) : field.type === "password" ? (
         <PasswordField field={field} value={value} onChange={onChange} />
@@ -236,7 +236,7 @@ function SettingField({
           value={value}
           placeholder={field.hint ?? ""}
           onChange={(e) => onChange(field.key, e.target.value)}
-          className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+          className="h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
         />
       )}
 
@@ -285,7 +285,7 @@ function SettingsGroup({
     <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
       {/* Header */}
       <div className="border-b border-black/[0.06] px-6 py-4">
-        <p className="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-[#E85C1A]">
+        <p className="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">
           {def.label}
         </p>
       </div>
@@ -319,7 +319,7 @@ function SettingsGroup({
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="h-9 rounded-full bg-[#E85C1A] px-5 text-[0.8rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-50"
+          className="h-9 rounded-full bg-[#f4511e] px-5 text-[0.8rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50"
         >
           {saving ? "Saving…" : `Save ${def.label}`}
         </button>

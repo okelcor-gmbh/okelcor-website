@@ -112,7 +112,7 @@ function StepScan({
       <button
         type="button"
         onClick={onNext}
-        className="flex h-[46px] w-full items-center justify-center rounded-full bg-[#E85C1A] text-[0.9rem] font-semibold text-white transition hover:bg-[#d14f14]"
+        className="flex h-[46px] w-full items-center justify-center rounded-full bg-[#f4511e] text-[0.9rem] font-semibold text-white transition hover:bg-[#df4618]"
       >
         Next: Verify code
       </button>
@@ -203,14 +203,14 @@ function StepVerify({
           onChange={(e) => handleInput(e.target.value)}
           placeholder="000000"
           maxLength={6}
-          className="w-full rounded-xl border border-black/[0.10] bg-[#f5f5f5] px-4 py-3 text-center text-[1.4rem] font-bold tracking-[0.35em] text-[#1a1a1a] outline-none placeholder:text-[#ccc] placeholder:tracking-normal transition focus:border-[#E85C1A] focus:bg-white focus:ring-2 focus:ring-[#E85C1A]/15"
+          className="w-full rounded-xl border border-black/[0.10] bg-[#f5f5f5] px-4 py-3 text-center text-[1.4rem] font-bold tracking-[0.35em] text-[#1a1a1a] outline-none placeholder:text-[#ccc] placeholder:tracking-normal transition focus:border-[#f4511e] focus:bg-white focus:ring-2 focus:ring-[#f4511e]/15"
         />
       </div>
 
       <button
         type="submit"
         disabled={verifying || code.length !== 6}
-        className="flex h-[46px] w-full items-center justify-center rounded-full bg-[#E85C1A] text-[0.9rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-60"
+        className="flex h-[46px] w-full items-center justify-center rounded-full bg-[#f4511e] text-[0.9rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-60"
       >
         {verifying
           ? <span className="flex items-center gap-2"><Loader2 size={15} className="animate-spin" />Verifying…</span>
@@ -271,7 +271,7 @@ function StepCodes({
           type="checkbox"
           checked={confirmed}
           onChange={(e) => setConfirmed(e.target.checked)}
-          className="mt-0.5 h-4 w-4 rounded accent-[#E85C1A]"
+          className="mt-0.5 h-4 w-4 rounded accent-[#f4511e]"
         />
         <span className="text-[0.82rem] text-[#5c5e62]">
           I have saved my recovery codes in a safe place.
@@ -340,10 +340,10 @@ export default function TwoFactorSetup({
   };
 
   const STEP_ICONS: Record<Step, React.ReactNode> = {
-    generating: <Loader2 size={20} className="animate-spin text-[#E85C1A]" />,
-    scan:       <QrCode size={20} className="text-[#E85C1A]" />,
-    verify:     <ShieldCheck size={20} className="text-[#E85C1A]" />,
-    codes:      <KeyRound size={20} className="text-[#E85C1A]" />,
+    generating: <Loader2 size={20} className="animate-spin text-[#f4511e]" />,
+    scan:       <QrCode size={20} className="text-[#f4511e]" />,
+    verify:     <ShieldCheck size={20} className="text-[#f4511e]" />,
+    codes:      <KeyRound size={20} className="text-[#f4511e]" />,
   };
 
   return (
@@ -371,9 +371,9 @@ export default function TwoFactorSetup({
             <div key={s} className="flex flex-1 items-center gap-1">
               <div className={`h-1.5 flex-1 rounded-full transition-colors ${
                 step === "generating" ? "bg-[#efefef]"
-                : s === "scan"   && ["scan","verify","codes"].includes(step) ? "bg-[#E85C1A]"
-                : s === "verify" && ["verify","codes"].includes(step) ? "bg-[#E85C1A]"
-                : s === "codes"  && step === "codes" ? "bg-[#E85C1A]"
+                : s === "scan"   && ["scan","verify","codes"].includes(step) ? "bg-[#f4511e]"
+                : s === "verify" && ["verify","codes"].includes(step) ? "bg-[#f4511e]"
+                : s === "codes"  && step === "codes" ? "bg-[#f4511e]"
                 : "bg-[#efefef]"
               }`} />
               {i < 2 && <div className="w-1" />}
@@ -392,14 +392,14 @@ export default function TwoFactorSetup({
                   <button
                     type="button"
                     onClick={generate}
-                    className="mt-2 rounded-full bg-[#E85C1A] px-6 py-2 text-[0.85rem] font-semibold text-white transition hover:bg-[#d14f14]"
+                    className="mt-2 rounded-full bg-[#f4511e] px-6 py-2 text-[0.85rem] font-semibold text-white transition hover:bg-[#df4618]"
                   >
                     Try again
                   </button>
                 </>
               ) : (
                 <>
-                  <Loader2 size={32} className="animate-spin text-[#E85C1A]" />
+                  <Loader2 size={32} className="animate-spin text-[#f4511e]" />
                   <p className="text-[0.85rem] text-[#5c5e62]">Generating secure secret…</p>
                 </>
               )}

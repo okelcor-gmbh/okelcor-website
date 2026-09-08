@@ -151,7 +151,7 @@ function EventRow({
           {event.customer_email && (
             <span>
               {event.customer_id ? (
-                <Link href={`/admin/customers/${event.customer_id}`} className="text-[#E85C1A] hover:underline">
+                <Link href={`/admin/customers/${event.customer_id}`} className="text-[#f4511e] hover:underline">
                   {event.customer_email}
                 </Link>
               ) : (
@@ -389,7 +389,7 @@ export default function SecurityPage() {
                 type="button"
                 onClick={handleSendNotices}
                 disabled={sendingNotices}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#E85C1A] px-4 py-2.5 text-[0.83rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-60"
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#f4511e] px-4 py-2.5 text-[0.83rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-60"
               >
                 {sendingNotices ? (
                   <><Loader2 size={14} className="animate-spin" /> Sending…</>
@@ -409,9 +409,9 @@ export default function SecurityPage() {
         </Link>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-[#E85C1A]">Admin</p>
+            <p className="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">Admin</p>
             <h1 className="mt-0.5 flex items-center gap-2 text-2xl font-extrabold text-[#1a1a1a]">
-              <ShieldAlert size={22} className="text-[#E85C1A]" />
+              <ShieldAlert size={22} className="text-[#f4511e]" />
               Security & Events Log
             </h1>
           </div>
@@ -467,7 +467,7 @@ export default function SecurityPage() {
                 type="button"
                 onClick={() => setShowNoticeModal(true)}
                 disabled={sendingNotices}
-                className="ml-auto flex items-center gap-1.5 rounded-xl bg-[#E85C1A] px-3 py-1.5 text-[0.75rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-60"
+                className="ml-auto flex items-center gap-1.5 rounded-xl bg-[#f4511e] px-3 py-1.5 text-[0.75rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-60"
               >
                 <Mail size={12} />
                 Send 2FA notice to admins
@@ -601,7 +601,7 @@ export default function SecurityPage() {
               onClick={() => handleFilterChange(t.key)}
               className={`shrink-0 rounded-lg px-3 py-1.5 text-[0.75rem] font-semibold transition ${
                 filter === t.key
-                  ? "bg-[#E85C1A] text-white"
+                  ? "bg-[#f4511e] text-white"
                   : "text-[#5c5e62] hover:bg-[#f5f5f7] hover:text-[#1a1a1a]"
               }`}
             >
@@ -635,7 +635,7 @@ export default function SecurityPage() {
               type="date"
               value={eventsDateFrom}
               onChange={e => { setEventsDateFrom(e.target.value); setPage(1); }}
-              className="h-7 rounded-lg border border-black/[0.09] bg-white px-2 text-[0.72rem] text-[#1a1a1a] outline-none focus:border-[#E85C1A] focus:ring-1 focus:ring-[#E85C1A]/20"
+              className="h-7 rounded-lg border border-black/[0.09] bg-white px-2 text-[0.72rem] text-[#1a1a1a] outline-none focus:border-[#f4511e] focus:ring-1 focus:ring-[#f4511e]/20"
               title="From date"
             />
             <span className="text-[0.68rem] text-[#9ca3af]">to</span>
@@ -643,7 +643,7 @@ export default function SecurityPage() {
               type="date"
               value={eventsDateTo}
               onChange={e => { setEventsDateTo(e.target.value); setPage(1); }}
-              className="h-7 rounded-lg border border-black/[0.09] bg-white px-2 text-[0.72rem] text-[#1a1a1a] outline-none focus:border-[#E85C1A] focus:ring-1 focus:ring-[#E85C1A]/20"
+              className="h-7 rounded-lg border border-black/[0.09] bg-white px-2 text-[0.72rem] text-[#1a1a1a] outline-none focus:border-[#f4511e] focus:ring-1 focus:ring-[#f4511e]/20"
               title="To date"
             />
             {(eventsDateFrom || eventsDateTo) && (
@@ -724,7 +724,7 @@ export default function SecurityPage() {
                     onClick={() => setPage(n)}
                     className={`flex h-7 w-7 items-center justify-center rounded-lg text-[0.75rem] font-semibold transition ${
                       n === page
-                        ? "bg-[#E85C1A] text-white"
+                        ? "bg-[#f4511e] text-white"
                         : "border border-black/[0.08] text-[#5c5e62] hover:bg-[#f5f5f7]"
                     }`}
                   >

@@ -462,7 +462,7 @@ export default function ProductsTable({
                 type="button"
                 onClick={() => void applyBulkAudience()}
                 disabled={bulkAudiencePending}
-                className="flex h-10 flex-1 items-center justify-center rounded-full bg-[#E85C1A] text-[0.875rem] font-semibold text-white transition hover:bg-[#d44f12] disabled:opacity-60"
+                className="flex h-10 flex-1 items-center justify-center rounded-full bg-[#f4511e] text-[0.875rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-60"
               >
                 {bulkAudiencePending ? "Applying…" : "Confirm"}
               </button>
@@ -500,7 +500,7 @@ export default function ProductsTable({
           disabled={bulkAudiencePending}
           onChange={(e) => { if (e.target.value) void surveyBulkAudience(e.target.value); e.target.value = ""; }}
           aria-label="Set audience for the current scope"
-          className="h-[38px] cursor-pointer rounded-xl border border-black/[0.09] bg-white px-3 text-[0.8rem] font-semibold text-[#5c5e62] outline-none transition hover:border-[#E85C1A] disabled:opacity-50"
+          className="h-[38px] cursor-pointer rounded-xl border border-black/[0.09] bg-white px-3 text-[0.8rem] font-semibold text-[#5c5e62] outline-none transition hover:border-[#f4511e] disabled:opacity-50"
         >
           <option value="">
             {bulkAudiencePending ? "Surveying…" : `Set audience: ${type !== "all" ? type : "all products"}…`}
@@ -542,7 +542,7 @@ export default function ProductsTable({
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search by SKU, brand, name…"
-              className="h-10 w-full rounded-xl border border-black/[0.09] bg-white pl-9 pr-4 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+              className="h-10 w-full rounded-xl border border-black/[0.09] bg-white pl-9 pr-4 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
             />
           </div>
           <button
@@ -563,8 +563,8 @@ export default function ProductsTable({
               className={[
                 "h-10 whitespace-nowrap rounded-xl px-3.5 text-[0.8rem] font-semibold transition",
                 type === t
-                  ? "bg-[#E85C1A] text-white"
-                  : "bg-white text-[#5c5e62] border border-black/[0.09] hover:border-[#E85C1A] hover:text-[#E85C1A]",
+                  ? "bg-[#f4511e] text-white"
+                  : "bg-white text-[#5c5e62] border border-black/[0.09] hover:border-[#f4511e] hover:text-[#f4511e]",
               ].join(" ")}
             >
               {t === "all" ? "All Types" : t}
@@ -577,7 +577,7 @@ export default function ProductsTable({
           value={audience}
           onChange={(e) => handleAudienceChange(e.target.value)}
           aria-label="Filter by audience"
-          className="h-10 cursor-pointer rounded-xl border border-black/[0.09] bg-white px-3 text-[0.8rem] font-semibold text-[#5c5e62] outline-none transition hover:border-[#E85C1A]"
+          className="h-10 cursor-pointer rounded-xl border border-black/[0.09] bg-white px-3 text-[0.8rem] font-semibold text-[#5c5e62] outline-none transition hover:border-[#f4511e]"
         >
           <option value="all">All audiences</option>
           <option value="both">Both</option>
@@ -742,7 +742,7 @@ export default function ProductsTable({
                           {/* Edit */}
                           <Link
                             href={`/admin/products/${product.id}`}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#5c5e62] transition hover:bg-[#E85C1A]/10 hover:text-[#E85C1A]"
+                            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#5c5e62] transition hover:bg-[#f4511e]/10 hover:text-[#f4511e]"
                             title="Edit"
                           >
                             <Pencil size={14} strokeWidth={2} />
@@ -812,7 +812,7 @@ export default function ProductsTable({
                 className={[
                   "flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] transition",
                   hasPrev
-                    ? "bg-white text-[#1a1a1a] hover:border-[#E85C1A] hover:text-[#E85C1A]"
+                    ? "bg-white text-[#1a1a1a] hover:border-[#f4511e] hover:text-[#f4511e]"
                     : "pointer-events-none bg-[#f5f5f5] text-[#ccc]",
                 ].join(" ")}
               >
@@ -824,7 +824,7 @@ export default function ProductsTable({
                 className={[
                   "flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] transition",
                   hasNext
-                    ? "bg-white text-[#1a1a1a] hover:border-[#E85C1A] hover:text-[#E85C1A]"
+                    ? "bg-white text-[#1a1a1a] hover:border-[#f4511e] hover:text-[#f4511e]"
                     : "pointer-events-none bg-[#f5f5f5] text-[#ccc]",
                 ].join(" ")}
               >

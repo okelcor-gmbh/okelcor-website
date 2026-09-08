@@ -179,18 +179,18 @@ function ToastCard({
         style={{ animation: "crispSlideIn 0.25s ease-out forwards" }}
       >
         {/* Orange left accent stripe */}
-        <div className="absolute left-0 top-0 h-full w-1 bg-[#E85C1A]" />
+        <div className="absolute left-0 top-0 h-full w-1 bg-[#f4511e]" />
 
         {/* Icon */}
-        <div className="ml-1 mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#E85C1A]/10">
-          <MessageCircle size={16} className="text-[#E85C1A]" />
+        <div className="ml-1 mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#f4511e]/10">
+          <MessageCircle size={16} className="text-[#f4511e]" />
         </div>
 
         {/* Body */}
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-1">
             <div>
-              <p className="text-[0.72rem] font-bold uppercase tracking-[0.13em] text-[#E85C1A]">
+              <p className="text-[0.72rem] font-bold uppercase tracking-[0.13em] text-[#f4511e]">
                 New Message
               </p>
               <p className="mt-0.5 text-[0.82rem] font-semibold text-[#1a1a1a]">
@@ -214,7 +214,7 @@ function ToastCard({
           <Link
             href="/admin/chats"
             onClick={() => onDismiss(toast.id)}
-            className="mt-2.5 inline-flex items-center gap-1 text-[0.75rem] font-semibold text-[#E85C1A] transition hover:underline"
+            className="mt-2.5 inline-flex items-center gap-1 text-[0.75rem] font-semibold text-[#f4511e] transition hover:underline"
           >
             Open chat →
           </Link>
@@ -224,7 +224,7 @@ function ToastCard({
         <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#f0f2f5]">
           <div
             ref={progressRef}
-            className="h-full bg-[#E85C1A] opacity-50"
+            className="h-full bg-[#f4511e] opacity-50"
             style={{ width: "100%" }}
           />
         </div>

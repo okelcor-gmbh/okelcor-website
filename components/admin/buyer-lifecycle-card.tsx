@@ -193,7 +193,7 @@ export default function BuyerLifecycleCard({ customerId, lifecycle, access, onPa
             <select
               value={tierDraft}
               onChange={(e) => setTierDraft(e.target.value)}
-              className="h-9 flex-1 rounded-xl border border-black/[0.09] bg-white px-3 text-[0.83rem] text-[#1a1a1a] outline-none focus:border-[#E85C1A]"
+              className="h-9 flex-1 rounded-xl border border-black/[0.09] bg-white px-3 text-[0.83rem] text-[#1a1a1a] outline-none focus:border-[#f4511e]"
             >
               {BUYER_TIERS.map((t) => <option key={t} value={t}>{BUYER_TIER_LABELS[t]}</option>)}
             </select>
@@ -221,7 +221,7 @@ export default function BuyerLifecycleCard({ customerId, lifecycle, access, onPa
             <select
               value={riskDraft}
               onChange={(e) => setRiskDraft(e.target.value)}
-              className="h-9 flex-1 rounded-xl border border-black/[0.09] bg-white px-3 text-[0.83rem] text-[#1a1a1a] outline-none focus:border-[#E85C1A]"
+              className="h-9 flex-1 rounded-xl border border-black/[0.09] bg-white px-3 text-[0.83rem] text-[#1a1a1a] outline-none focus:border-[#f4511e]"
             >
               {RISK_LEVELS.map((r) => <option key={r} value={r}>{RISK_LEVEL_LABELS[r]}</option>)}
             </select>

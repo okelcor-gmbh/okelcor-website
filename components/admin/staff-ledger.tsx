@@ -136,7 +136,7 @@ export default function StaffLedger({ initialAdminUserId }: { initialAdminUserId
             <select
               value={subjectId ?? self?.id ?? ""}
               onChange={(e) => setSubjectId(Number(e.target.value))}
-              className="rounded-lg border border-black/10 bg-white px-3 py-1.5 text-[0.83rem] text-[#171a20] outline-none focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/25"
+              className="rounded-lg border border-black/10 bg-white px-3 py-1.5 text-[0.83rem] text-[#171a20] outline-none focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/25"
             >
               {members.map((m) => (
                 <option key={m.id} value={m.id}>
@@ -152,7 +152,7 @@ export default function StaffLedger({ initialAdminUserId }: { initialAdminUserId
           <input
             type="date" value={range.from} max={range.to}
             onChange={(e) => setRange((r) => ({ ...r, from: e.target.value }))}
-            className="rounded-lg border border-black/10 bg-white px-3 py-1.5 text-[0.83rem] outline-none focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/25"
+            className="rounded-lg border border-black/10 bg-white px-3 py-1.5 text-[0.83rem] outline-none focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/25"
           />
         </label>
 
@@ -161,7 +161,7 @@ export default function StaffLedger({ initialAdminUserId }: { initialAdminUserId
           <input
             type="date" value={range.to} min={range.from}
             onChange={(e) => setRange((r) => ({ ...r, to: e.target.value }))}
-            className="rounded-lg border border-black/10 bg-white px-3 py-1.5 text-[0.83rem] outline-none focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/25"
+            className="rounded-lg border border-black/10 bg-white px-3 py-1.5 text-[0.83rem] outline-none focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/25"
           />
         </label>
 
@@ -233,7 +233,7 @@ export default function StaffLedger({ initialAdminUserId }: { initialAdminUserId
               rather than only in a label somebody has to read */}
           <div className="rounded-2xl border border-dashed border-black/20 bg-[#fcfcfd] p-5">
             <div className="flex items-center gap-2">
-              <PenLine size={15} className="text-[#E85C1A]" />
+              <PenLine size={15} className="text-[#f4511e]" />
               <h2 className="text-[0.83rem] font-bold uppercase tracking-wider text-[#171a20]">
                 Self-reported work
               </h2>
@@ -299,7 +299,7 @@ export default function StaffLedger({ initialAdminUserId }: { initialAdminUserId
             onClick={() => setTab(value)}
             className={`-mb-px border-b-2 px-3 py-2 text-[0.83rem] font-semibold transition ${
               tab === value
-                ? "border-[#E85C1A] text-[#171a20]"
+                ? "border-[#f4511e] text-[#171a20]"
                 : "border-transparent text-[#5c5e62] hover:text-[#171a20]"
             }`}
           >
@@ -441,7 +441,7 @@ function SubjectLink({
   return (
     <Link
       href={href}
-      className="inline-flex items-center gap-0.5 font-mono text-[0.72rem] text-[#E85C1A] hover:underline"
+      className="inline-flex items-center gap-0.5 font-mono text-[0.72rem] text-[#f4511e] hover:underline"
     >
       {label}<ExternalLink size={10} />
     </Link>
@@ -545,7 +545,7 @@ function ContributionList({
           <button
             type="button"
             onClick={() => setFormFor(null)}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-[#E85C1A] px-3.5 py-2 text-[0.83rem] font-semibold text-white transition hover:bg-[#d24f13]"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-[#f4511e] px-3.5 py-2 text-[0.83rem] font-semibold text-white transition hover:bg-[#d24f13]"
           >
             <Plus size={14} /> Log work
           </button>
@@ -611,7 +611,7 @@ function ContributionList({
                 {row.link && (
                   <a
                     href={row.link} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-[#E85C1A] hover:underline"
+                    className="inline-flex items-center gap-1 text-[#f4511e] hover:underline"
                   >
                     <ExternalLink size={11} /> Open link
                   </a>
@@ -619,7 +619,7 @@ function ContributionList({
                 {row.has_file && (
                   <a
                     href={`/api/admin/staff/contributions/${row.id}/file`}
-                    className="inline-flex items-center gap-1 text-[#E85C1A] hover:underline"
+                    className="inline-flex items-center gap-1 text-[#f4511e] hover:underline"
                   >
                     <Paperclip size={11} /> {row.file_name ?? "Evidence"}
                   </a>
@@ -710,7 +710,7 @@ function Bar({
       <span className="w-[9.5rem] shrink-0 truncate text-[0.76rem] text-[#5c5e62]">{label}</span>
       <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#f0f1f3]">
         <span
-          className={`block h-full rounded-full ${muted ? "bg-[#E85C1A]/60" : "bg-emerald-500/70"}`}
+          className={`block h-full rounded-full ${muted ? "bg-[#f4511e]/60" : "bg-emerald-500/70"}`}
           style={{ width: `${pct}%` }}
         />
       </span>

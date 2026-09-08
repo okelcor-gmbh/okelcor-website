@@ -76,13 +76,13 @@ export default function StaffRecipientPicker({
         {label}{" "}
         {optional
           ? <span className="font-normal text-[#9ca3af]">(optional)</span>
-          : <span className="text-[#E85C1A]">*</span>}
+          : <span className="text-[#f4511e]">*</span>}
       </label>
 
       <div
         className={[
           "flex flex-wrap items-center gap-1.5 rounded-xl border bg-[#fafafa] px-2 py-2 transition",
-          error ? "border-red-400" : "border-black/[0.1] focus-within:border-[#E85C1A]",
+          error ? "border-red-400" : "border-black/[0.1] focus-within:border-[#f4511e]",
         ].join(" ")}
       >
         {selected.map((id) => {
@@ -125,7 +125,7 @@ export default function StaffRecipientPicker({
         <div className="absolute z-20 mt-1.5 max-h-64 w-full overflow-y-auto rounded-xl border border-black/[0.08] bg-white shadow-lg">
           {loading ? (
             <div className="flex items-center justify-center gap-2 px-4 py-6 text-[0.8rem] text-[#5c5e62]">
-              <Loader2 size={14} className="animate-spin text-[#E85C1A]" /> Loading the team…
+              <Loader2 size={14} className="animate-spin text-[#f4511e]" /> Loading the team…
             </div>
           ) : directory.length === 0 ? (
             <p className="px-4 py-6 text-center text-[0.8rem] text-[#5c5e62]">

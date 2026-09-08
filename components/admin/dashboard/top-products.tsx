@@ -30,7 +30,7 @@ export default function TopProducts() {
   return (
     <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
       <div className="flex items-center gap-2.5 border-b border-black/[0.06] px-5 py-4">
-        <Flame size={15} className="text-[#E85C1A]" />
+        <Flame size={15} className="text-[#f4511e]" />
         <div>
           <p className="text-[0.9rem] font-bold text-[#1a1a1a]">Top Products</p>
           <p className="text-[0.68rem] text-[#9ca3af]">Most viewed · last 7 days</p>
@@ -64,7 +64,7 @@ export default function TopProducts() {
                 </div>
                 <div className="h-2 w-full overflow-hidden rounded-full bg-[#f0f2f5]">
                   <div
-                    className="h-full rounded-full bg-[#E85C1A] transition-all duration-700"
+                    className="h-full rounded-full bg-[#f4511e] transition-all duration-700"
                     style={{ width: `${Math.round((p.views / maxViews) * 100)}%` }}
                   />
                 </div>
@@ -74,7 +74,7 @@ export default function TopProducts() {
         )}
       </div>
       <div className="border-t border-black/[0.04] px-5 py-3">
-        <Link href="/admin/products" className="text-[0.75rem] font-semibold text-[#E85C1A] hover:underline">
+        <Link href="/admin/products" className="text-[0.75rem] font-semibold text-[#f4511e] hover:underline">
           View all products →
         </Link>
       </div>

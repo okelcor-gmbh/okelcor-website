@@ -21,7 +21,7 @@ import { useAdminPermissions } from "@/hooks/use-admin-permissions";
 type Draft = { bank_balance: string; expected_in: string; expected_out: string; notes: string };
 
 const INPUT =
-  "h-9 w-full rounded-lg border border-black/[0.10] bg-white px-3 text-right text-[0.83rem] tabular-nums text-[#171a20] placeholder:text-[#8c8f94] focus:border-[#E85C1A] focus:outline-none disabled:bg-[#f8f9fa] disabled:text-[#8c8f94]";
+  "h-9 w-full rounded-lg border border-black/[0.10] bg-white px-3 text-right text-[0.83rem] tabular-nums text-[#171a20] placeholder:text-[#8c8f94] focus:border-[#f4511e] focus:outline-none disabled:bg-[#f8f9fa] disabled:text-[#8c8f94]";
 const LABEL = "mb-1 block text-[0.68rem] font-bold uppercase tracking-wider text-[#8c8f94]";
 
 function toDraft(w: LiquidityWeekRow): Draft {
@@ -150,7 +150,7 @@ export default function LiquidityLadder() {
             <div
               key={w.week_key}
               className={`rounded-2xl border bg-white p-4 ${
-                w.is_current ? "border-[#E85C1A]/40 ring-1 ring-[#E85C1A]/20" : "border-black/[0.06]"
+                w.is_current ? "border-[#f4511e]/40 ring-1 ring-[#f4511e]/20" : "border-black/[0.06]"
               }`}
             >
               <div className="mb-3 flex items-start justify-between">
@@ -159,7 +159,7 @@ export default function LiquidityLadder() {
                   <p className="text-[0.7rem] text-[#8c8f94]">{w.starts_on} → {w.ends_on}</p>
                 </div>
                 {w.is_current && (
-                  <span className="rounded-full bg-[#E85C1A]/10 px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-wider text-[#E85C1A]">
+                  <span className="rounded-full bg-[#f4511e]/10 px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-wider text-[#f4511e]">
                     This week
                   </span>
                 )}
@@ -220,7 +220,7 @@ export default function LiquidityLadder() {
                   type="button"
                   onClick={() => void save(w.week_key)}
                   disabled={saving === w.week_key}
-                  className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-full bg-[#E85C1A] px-3 py-1.5 text-[0.78rem] font-semibold text-white transition hover:bg-[#d44f12] disabled:opacity-50"
+                  className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-full bg-[#f4511e] px-3 py-1.5 text-[0.78rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50"
                 >
                   {saving === w.week_key ? <Loader2 size={13} className="animate-spin" /> : saved === w.week_key ? <CheckCircle2 size={13} /> : null}
                   {saved === w.week_key ? "Saved" : "Save week"}

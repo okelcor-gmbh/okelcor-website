@@ -215,13 +215,13 @@ function ConfirmModal({ title, body, confirmLabel, danger = false, reason, onRea
               onChange={(e) => onReasonChange!(e.target.value.slice(0, 500))}
               rows={3}
               placeholder="e.g. Their mail filter blocks our links; confirmed the address by phone"
-              className="w-full resize-none rounded-xl border border-black/[0.1] bg-white px-3 py-2 text-[0.83rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] focus:border-[#E85C1A]/50 focus:ring-2 focus:ring-[#E85C1A]/10"
+              className="w-full resize-none rounded-xl border border-black/[0.1] bg-white px-3 py-2 text-[0.83rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] focus:border-[#f4511e]/50 focus:ring-2 focus:ring-[#f4511e]/10"
             />
           </div>
         )}
         <div className="mt-6 flex gap-3">
           <button type="button" onClick={onCancel} className="flex-1 h-10 rounded-xl border border-black/[0.1] text-[0.83rem] font-semibold text-[#5c5e62] hover:bg-[#f0f2f5]">Cancel</button>
-          <button type="button" onClick={onConfirm} disabled={tooShort} className={`flex-1 h-10 rounded-xl text-[0.83rem] font-semibold text-white disabled:opacity-50 ${danger ? "bg-red-600 hover:bg-red-700" : "bg-[#E85C1A] hover:bg-[#d44d10]"}`}>{confirmLabel}</button>
+          <button type="button" onClick={onConfirm} disabled={tooShort} className={`flex-1 h-10 rounded-xl text-[0.83rem] font-semibold text-white disabled:opacity-50 ${danger ? "bg-red-600 hover:bg-red-700" : "bg-[#f4511e] hover:bg-[#d44d10]"}`}>{confirmLabel}</button>
         </div>
       </div>
     </div>
@@ -504,7 +504,7 @@ export default function CustomerProfilePage() {
   if (loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center p-8">
-        <Loader2 size={28} className="animate-spin text-[#E85C1A]" />
+        <Loader2 size={28} className="animate-spin text-[#f4511e]" />
       </div>
     );
   }
@@ -514,7 +514,7 @@ export default function CustomerProfilePage() {
       <div className="p-8 text-center">
         <AlertCircle size={32} className="mx-auto mb-3 text-red-400" />
         <p className="text-[0.9rem] font-semibold text-[#1a1a1a]">{error ?? "Customer not found."}</p>
-        <Link href="/admin/customers" className="mt-4 inline-flex items-center gap-1.5 text-[0.83rem] text-[#E85C1A] hover:underline">
+        <Link href="/admin/customers" className="mt-4 inline-flex items-center gap-1.5 text-[0.83rem] text-[#f4511e] hover:underline">
           <ChevronLeft size={14} /> Back to customers
         </Link>
       </div>
@@ -697,7 +697,7 @@ export default function CustomerProfilePage() {
                     {customer.admin_notes || <span className="text-[#9ca3af]">No notes yet.</span>}
                   </p>
                   <button type="button" onClick={() => setEditNotes(true)}
-                    className="mt-3 flex items-center gap-1.5 text-[0.78rem] font-semibold text-[#E85C1A] hover:underline">
+                    className="mt-3 flex items-center gap-1.5 text-[0.78rem] font-semibold text-[#f4511e] hover:underline">
                     <Edit3 size={12} /> Edit notes
                   </button>
                 </>
@@ -705,12 +705,12 @@ export default function CustomerProfilePage() {
                 <>
                   <textarea
                     value={notes} onChange={e => setNotes(e.target.value)} rows={4}
-                    className="w-full resize-none rounded-xl border border-black/[0.1] bg-[#fafafa] p-3 text-[0.83rem] text-[#1a1a1a] outline-none focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+                    className="w-full resize-none rounded-xl border border-black/[0.1] bg-[#fafafa] p-3 text-[0.83rem] text-[#1a1a1a] outline-none focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
                     placeholder="Internal notes — not visible to the customer…"
                   />
                   <div className="mt-2 flex gap-2">
                     <button type="button" disabled={savingNotes} onClick={saveNotes}
-                      className="flex items-center gap-1.5 rounded-xl bg-[#E85C1A] px-3.5 py-1.5 text-[0.78rem] font-semibold text-white hover:bg-[#d44d10] disabled:opacity-50">
+                      className="flex items-center gap-1.5 rounded-xl bg-[#f4511e] px-3.5 py-1.5 text-[0.78rem] font-semibold text-white hover:bg-[#d44d10] disabled:opacity-50">
                       {savingNotes ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />} Save
                     </button>
                     <button type="button" onClick={() => { setEditNotes(false); setNotes(customer.admin_notes ?? ""); }}
@@ -738,7 +738,7 @@ export default function CustomerProfilePage() {
                 <p className="mb-1 text-[0.7rem] font-semibold uppercase tracking-wide text-[#9ca3af]">Segment</p>
                 <select value={access.customer_segment}
                   onChange={(e) => setAccess((p) => ({ ...p, customer_segment: e.target.value }))}
-                  className="w-full rounded-xl border border-black/[0.09] bg-white px-3 py-2 text-[0.83rem] text-[#1a1a1a] outline-none focus:border-[#E85C1A]">
+                  className="w-full rounded-xl border border-black/[0.09] bg-white px-3 py-2 text-[0.83rem] text-[#1a1a1a] outline-none focus:border-[#f4511e]">
                   {["unknown","private_buyer","dealer","workshop","fleet","exporter","distributor","partner"].map((s) => (
                     <option key={s} value={s}>{s.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}</option>
                   ))}
@@ -750,7 +750,7 @@ export default function CustomerProfilePage() {
                 <p className="mb-1 text-[0.7rem] font-semibold uppercase tracking-wide text-[#9ca3af]">Access Level</p>
                 <select value={access.access_level}
                   onChange={(e) => setAccess((p) => ({ ...p, access_level: e.target.value }))}
-                  className="w-full rounded-xl border border-black/[0.09] bg-white px-3 py-2 text-[0.83rem] text-[#1a1a1a] outline-none focus:border-[#E85C1A]">
+                  className="w-full rounded-xl border border-black/[0.09] bg-white px-3 py-2 text-[0.83rem] text-[#1a1a1a] outline-none focus:border-[#f4511e]">
                   {[
                     ["inquiry_only",    "Inquiry Only"],
                     ["quote_only",      "Quote Only"],
@@ -767,7 +767,7 @@ export default function CustomerProfilePage() {
                 <p className="mb-1 text-[0.7rem] font-semibold uppercase tracking-wide text-[#9ca3af]">Market Region</p>
                 <select value={access.market_region}
                   onChange={(e) => setAccess((p) => ({ ...p, market_region: e.target.value }))}
-                  className="w-full rounded-xl border border-black/[0.09] bg-white px-3 py-2 text-[0.83rem] text-[#1a1a1a] outline-none focus:border-[#E85C1A]">
+                  className="w-full rounded-xl border border-black/[0.09] bg-white px-3 py-2 text-[0.83rem] text-[#1a1a1a] outline-none focus:border-[#f4511e]">
                   {[["unknown","Unknown"],["eu","EU"],["africa","Africa"],["middle_east","Middle East"],["global","Global"]].map(([v, l]) => (
                     <option key={v} value={v}>{l}</option>
                   ))}
@@ -788,14 +788,14 @@ export default function CustomerProfilePage() {
                       <span className="text-[0.82rem] text-[#1a1a1a]">{label}</span>
                       <input type="checkbox" checked={access[key]}
                         onChange={(e) => setAccess((p) => ({ ...p, [key]: e.target.checked }))}
-                        className="h-4 w-4 rounded accent-[#E85C1A]" />
+                        className="h-4 w-4 rounded accent-[#f4511e]" />
                     </label>
                   ))}
                 </div>
               </div>
 
               <button type="button" disabled={accessSaving} onClick={saveAccess}
-                className="flex w-full items-center justify-center gap-2 rounded-full bg-[#E85C1A] py-2.5 text-[0.83rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:opacity-50">
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-[#f4511e] py-2.5 text-[0.83rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:opacity-50">
                 {accessSaving ? <><Loader2 size={13} className="animate-spin" /> Saving…</> : "Save Access Settings"}
               </button>
             </div>
@@ -883,7 +883,7 @@ export default function CustomerProfilePage() {
             {sessUnavail ? (
               <Unavailable endpoint="GET /admin/customers/{id}?section=sessions" />
             ) : sessions === null ? (
-              <div className="flex justify-center py-6"><Loader2 size={18} className="animate-spin text-[#E85C1A]" /></div>
+              <div className="flex justify-center py-6"><Loader2 size={18} className="animate-spin text-[#f4511e]" /></div>
             ) : sessions.length === 0 ? (
               <EmptyState message="No active sessions." />
             ) : (
@@ -908,7 +908,7 @@ export default function CustomerProfilePage() {
             {loginUnavail ? (
               <Unavailable endpoint="GET /admin/security/events?customer_id={id}" />
             ) : loginHistory === null ? (
-              <div className="flex justify-center py-6"><Loader2 size={18} className="animate-spin text-[#E85C1A]" /></div>
+              <div className="flex justify-center py-6"><Loader2 size={18} className="animate-spin text-[#f4511e]" /></div>
             ) : loginHistory.length === 0 ? (
               <EmptyState message="No login history available." />
             ) : (
@@ -955,7 +955,7 @@ export default function CustomerProfilePage() {
             }
           >
             {orders === null ? (
-              <div className="flex justify-center py-6"><Loader2 size={18} className="animate-spin text-[#E85C1A]" /></div>
+              <div className="flex justify-center py-6"><Loader2 size={18} className="animate-spin text-[#f4511e]" /></div>
             ) : orders.length === 0 ? (
               <EmptyState message="No orders found for this customer." />
             ) : (
@@ -972,7 +972,7 @@ export default function CustomerProfilePage() {
                     {orders.map(o => (
                       <tr key={o.id} className="hover:bg-[#fafafa]">
                         <td className="px-5 py-2.5">
-                          <Link href={`/admin/orders/${o.id}`} className="text-[0.82rem] font-semibold text-[#E85C1A] hover:underline">{o.order_ref}</Link>
+                          <Link href={`/admin/orders/${o.id}`} className="text-[0.82rem] font-semibold text-[#f4511e] hover:underline">{o.order_ref}</Link>
                         </td>
                         <td className="px-5 py-2.5">
                           <OrderStatusBadge status={o.status} paymentStatus={o.payment_status} />
@@ -1107,7 +1107,7 @@ export default function CustomerProfilePage() {
           {/* Quote history */}
           <SectionCard title="Quote Requests" icon={FileText}>
             {quotes === null ? (
-              <div className="flex justify-center py-6"><Loader2 size={18} className="animate-spin text-[#E85C1A]" /></div>
+              <div className="flex justify-center py-6"><Loader2 size={18} className="animate-spin text-[#f4511e]" /></div>
             ) : quotes.length === 0 ? (
               <EmptyState message="No quote requests found for this customer." />
             ) : (
@@ -1124,7 +1124,7 @@ export default function CustomerProfilePage() {
                     {quotes.map(q => (
                       <tr key={q.id} className="hover:bg-[#fafafa]">
                         <td className="px-5 py-2.5">
-                          <Link href={`/admin/quotes/${q.id}`} className="text-[0.82rem] font-semibold text-[#E85C1A] hover:underline">{q.ref_number}</Link>
+                          <Link href={`/admin/quotes/${q.id}`} className="text-[0.82rem] font-semibold text-[#f4511e] hover:underline">{q.ref_number}</Link>
                         </td>
                         <td className="px-5 py-2.5 text-[0.82rem] text-[#5c5e62]">{q.tyre_category}</td>
                         <td className="px-5 py-2.5">

@@ -92,7 +92,7 @@ export default function MyWork({
   if (loading) {
     return (
       <div className="flex justify-center py-20">
-        <Loader2 size={22} className="animate-spin text-[#E85C1A]" />
+        <Loader2 size={22} className="animate-spin text-[#f4511e]" />
       </div>
     );
   }
@@ -346,7 +346,7 @@ function WorkRow({
             disabled={updating}
             onBlur={(e) => void saveNote(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
-            className="mt-1.5 h-8 w-full max-w-md rounded-lg border border-black/[0.08] bg-white px-2.5 text-[0.78rem] text-[#1a1a1a] outline-none placeholder:text-[#b6b8bc] transition focus:border-[#E85C1A] disabled:opacity-50"
+            className="mt-1.5 h-8 w-full max-w-md rounded-lg border border-black/[0.08] bg-white px-2.5 text-[0.78rem] text-[#1a1a1a] outline-none placeholder:text-[#b6b8bc] transition focus:border-[#f4511e] disabled:opacity-50"
           />
         )}
       </div>
@@ -356,7 +356,7 @@ function WorkRow({
           value={item.status ?? "Pending"}
           disabled={updating}
           onChange={(e) => void setStatus(e.target.value)}
-          className="h-8 shrink-0 cursor-pointer rounded-xl border border-black/[0.09] bg-white px-2 text-[0.75rem] font-semibold text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] disabled:opacity-50"
+          className="h-8 shrink-0 cursor-pointer rounded-xl border border-black/[0.09] bg-white px-2 text-[0.75rem] font-semibold text-[#1a1a1a] outline-none transition focus:border-[#f4511e] disabled:opacity-50"
         >
           {item.status_options
             ? item.status_options.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)
@@ -480,7 +480,7 @@ function WorkRow({
               rows={2}
               disabled={updating}
               onBlur={(e) => void saveClaimNote(e.target.value)}
-              className="w-full rounded-lg border border-black/[0.08] bg-white px-2.5 py-2 text-[0.78rem] text-[#1a1a1a] outline-none transition placeholder:text-[#b6b8bc] focus:border-[#E85C1A] disabled:opacity-50"
+              className="w-full rounded-lg border border-black/[0.08] bg-white px-2.5 py-2 text-[0.78rem] text-[#1a1a1a] outline-none transition placeholder:text-[#b6b8bc] focus:border-[#f4511e] disabled:opacity-50"
             />
             <p className="mt-1 text-[0.7rem] text-[#8c8f94]">
               Whoever logged this claim is notified when the status changes, so the customer&apos;s thread gets answered.
@@ -530,7 +530,7 @@ function WorkRow({
               rows={2}
               disabled={updating}
               onBlur={(e) => void saveTodoNote(e.target.value)}
-              className="w-full rounded-lg border border-black/[0.08] bg-white px-2.5 py-2 text-[0.78rem] text-[#1a1a1a] outline-none transition placeholder:text-[#b6b8bc] focus:border-[#E85C1A] disabled:opacity-50"
+              className="w-full rounded-lg border border-black/[0.08] bg-white px-2.5 py-2 text-[0.78rem] text-[#1a1a1a] outline-none transition placeholder:text-[#b6b8bc] focus:border-[#f4511e] disabled:opacity-50"
             />
             <p className="mt-1 text-[0.7rem] text-[#8c8f94]">
               {item.creator

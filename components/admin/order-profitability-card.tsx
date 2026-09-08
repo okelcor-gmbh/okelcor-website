@@ -21,7 +21,7 @@ import { useAdminPermissions } from "@/hooks/use-admin-permissions";
  */
 
 const INPUT =
-  "h-9 w-full rounded-lg border border-black/[0.10] bg-white px-3 text-[0.83rem] text-[#171a20] placeholder:text-[#8c8f94] focus:border-[#E85C1A] focus:outline-none";
+  "h-9 w-full rounded-lg border border-black/[0.10] bg-white px-3 text-[0.83rem] text-[#171a20] placeholder:text-[#8c8f94] focus:border-[#f4511e] focus:outline-none";
 const LABEL = "mb-1 block text-[0.75rem] font-semibold text-[#5c5e62]";
 const TH = "px-3 py-2 text-left text-[0.68rem] font-bold uppercase tracking-wider text-[#5c5e62]";
 const TD = "px-3 py-2 text-[0.8rem] text-[#171a20]";
@@ -151,7 +151,7 @@ export default function OrderProfitabilityCard({
 
       {/* ── The bottom line ─────────────────────────────────────────────── */}
       <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-black/[0.06]">
-        <p className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+        <p className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
           Profitability
         </p>
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -227,12 +227,12 @@ export default function OrderProfitabilityCard({
       {/* ── Revenue invoice ─────────────────────────────────────────────── */}
       <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-black/[0.06]">
         <div className="mb-3 flex items-center justify-between">
-          <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+          <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
             Revenue invoice
           </p>
           {canManage && !revenueFormOpen && (
             <button type="button" onClick={() => setRevenueFormOpen(true)}
-              className="rounded-full bg-[#E85C1A] px-3.5 py-1.5 text-[0.78rem] font-semibold text-white transition hover:bg-[#d44f12]">
+              className="rounded-full bg-[#f4511e] px-3.5 py-1.5 text-[0.78rem] font-semibold text-white transition hover:bg-[#df4618]">
               {revenue ? "Replace" : "Record"}
             </button>
           )}
@@ -301,12 +301,12 @@ export default function OrderProfitabilityCard({
       {/* ── Costs ───────────────────────────────────────────────────────── */}
       <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-black/[0.06]">
         <div className="mb-3 flex items-center justify-between">
-          <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+          <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
             Supplier invoices &amp; fees
           </p>
           {canManage && !costFormOpen && (
             <button type="button" onClick={() => setCostFormOpen(true)}
-              className="flex items-center gap-1.5 rounded-full bg-[#E85C1A] px-3.5 py-1.5 text-[0.78rem] font-semibold text-white transition hover:bg-[#d44f12]">
+              className="flex items-center gap-1.5 rounded-full bg-[#f4511e] px-3.5 py-1.5 text-[0.78rem] font-semibold text-white transition hover:bg-[#df4618]">
               <Plus size={13} /> Add cost
             </button>
           )}
@@ -477,7 +477,7 @@ function RevenueForm({
       </div>
       <div className="flex flex-wrap items-center gap-4">
         <label className="flex items-center gap-2 text-[0.8rem] text-[#171a20]">
-          <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="accent-[#E85C1A]" />
+          <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="accent-[#f4511e]" />
           The customer agreed to this invoice
         </label>
         <label className="text-[0.8rem] text-[#5c5e62]">
@@ -487,7 +487,7 @@ function RevenueForm({
       </div>
       <div className="flex items-center gap-2">
         <button type="submit" disabled={busy}
-          className="flex items-center gap-1.5 rounded-full bg-[#E85C1A] px-4 py-1.5 text-[0.78rem] font-semibold text-white transition hover:bg-[#d44f12] disabled:opacity-50">
+          className="flex items-center gap-1.5 rounded-full bg-[#f4511e] px-4 py-1.5 text-[0.78rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50">
           {busy && <Loader2 size={12} className="animate-spin" />} Save revenue invoice
         </button>
         <button type="button" onClick={onCancel}
@@ -608,7 +608,7 @@ function CostForm({
       </div>
       <div className="flex items-center gap-2">
         <button type="submit" disabled={busy}
-          className="flex items-center gap-1.5 rounded-full bg-[#E85C1A] px-4 py-1.5 text-[0.78rem] font-semibold text-white transition hover:bg-[#d44f12] disabled:opacity-50">
+          className="flex items-center gap-1.5 rounded-full bg-[#f4511e] px-4 py-1.5 text-[0.78rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50">
           {busy && <Loader2 size={12} className="animate-spin" />} Save cost
         </button>
         <button type="button" onClick={onCancel}

@@ -79,7 +79,7 @@ function CompleteModal({
         </p>
         <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3}
           placeholder="Add a completion note (optional)…"
-          className="mb-3 w-full resize-none rounded-xl border border-black/[0.09] bg-white px-3 py-2.5 text-[0.83rem] outline-none focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10" />
+          className="mb-3 w-full resize-none rounded-xl border border-black/[0.09] bg-white px-3 py-2.5 text-[0.83rem] outline-none focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10" />
         {err && <p className="mb-3 text-[0.78rem] text-red-600">{err}</p>}
         <div className="flex gap-3">
           <button type="button" onClick={onCancel}
@@ -132,11 +132,11 @@ function RescheduleModal({
         <div className="mb-3">
           <label className="mb-1 block text-[0.7rem] font-semibold uppercase tracking-wide text-[#9ca3af]">New Date &amp; Time</label>
           <input type="datetime-local" value={date} onChange={(e) => setDate(e.target.value)}
-            className="w-full rounded-xl border border-black/[0.09] bg-white px-3 py-2.5 text-[0.83rem] outline-none focus:border-[#E85C1A]" />
+            className="w-full rounded-xl border border-black/[0.09] bg-white px-3 py-2.5 text-[0.83rem] outline-none focus:border-[#f4511e]" />
         </div>
         <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2}
           placeholder="Reason for reschedule (optional)…"
-          className="mb-3 w-full resize-none rounded-xl border border-black/[0.09] bg-white px-3 py-2.5 text-[0.83rem] outline-none focus:border-[#E85C1A]" />
+          className="mb-3 w-full resize-none rounded-xl border border-black/[0.09] bg-white px-3 py-2.5 text-[0.83rem] outline-none focus:border-[#f4511e]" />
         {err && <p className="mb-3 text-[0.78rem] text-red-600">{err}</p>}
         <div className="flex gap-3">
           <button type="button" onClick={onCancel}
@@ -207,7 +207,7 @@ export default function FollowUpsTable({ initialFilter = "all" }: { initialFilte
         {filterTabs.map(({ key, label }) => (
           <button key={key} type="button" onClick={() => setFilter(key)}
             className={["h-9 whitespace-nowrap rounded-xl px-3.5 text-[0.8rem] font-semibold transition",
-              filter === key ? "bg-[#E85C1A] text-white" : "border border-black/[0.09] bg-white text-[#5c5e62] hover:border-[#E85C1A] hover:text-[#E85C1A]",
+              filter === key ? "bg-[#f4511e] text-white" : "border border-black/[0.09] bg-white text-[#5c5e62] hover:border-[#f4511e] hover:text-[#f4511e]",
             ].join(" ")}>
             {label}
           </button>
@@ -227,7 +227,7 @@ export default function FollowUpsTable({ initialFilter = "all" }: { initialFilte
             </thead>
             <tbody className="divide-y divide-black/[0.04]">
               {loading ? (
-                <tr><td colSpan={8} className="px-4 py-10 text-center"><Loader2 size={20} className="mx-auto animate-spin text-[#E85C1A]" /></td></tr>
+                <tr><td colSpan={8} className="px-4 py-10 text-center"><Loader2 size={20} className="mx-auto animate-spin text-[#f4511e]" /></td></tr>
               ) : items.length === 0 ? (
                 <tr><td colSpan={8} className="px-4 py-10 text-center text-[0.875rem] text-[#5c5e62]">No follow-ups found.</td></tr>
               ) : (
@@ -236,7 +236,7 @@ export default function FollowUpsTable({ initialFilter = "all" }: { initialFilte
                   return (
                     <tr key={item.id} className={`group transition hover:bg-[#fafafa] ${fuStatus === "overdue" ? "bg-red-50/30" : ""}`}>
                       <td className="px-4 py-3">
-                        <Link href={`/admin/quotes/${item.id}`} className="text-[0.875rem] font-semibold text-[#1a1a1a] hover:text-[#E85C1A]">
+                        <Link href={`/admin/quotes/${item.id}`} className="text-[0.875rem] font-semibold text-[#1a1a1a] hover:text-[#f4511e]">
                           {item.full_name}
                         </Link>
                         <p className="text-[0.73rem] text-[#5c5e62]">{item.email}</p>

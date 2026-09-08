@@ -226,7 +226,7 @@ export default function OrdersCsvActions() {
             {/* Header */}
             <div className="mb-5 flex items-start justify-between gap-4">
               <div>
-                <p className="text-[0.72rem] font-bold uppercase tracking-[0.18em] text-[#E85C1A]">
+                <p className="text-[0.72rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">
                   Orders
                 </p>
                 <h2 className="mt-0.5 text-[1.1rem] font-extrabold text-[#171a20]">
@@ -247,8 +247,8 @@ export default function OrdersCsvActions() {
             {(modal.phase === "picking" || modal.phase === "uploading") && (
               <div className="flex flex-col gap-5">
                 {/* File picker */}
-                <label className="flex cursor-pointer flex-col items-center gap-3 rounded-[14px] border-2 border-dashed border-black/[0.12] bg-[#f5f5f5] px-6 py-8 text-center transition hover:border-[#E85C1A]/40 hover:bg-[#fff7f5]">
-                  <Upload size={28} strokeWidth={1.5} className="text-[#E85C1A]" />
+                <label className="flex cursor-pointer flex-col items-center gap-3 rounded-[14px] border-2 border-dashed border-black/[0.12] bg-[#f5f5f5] px-6 py-8 text-center transition hover:border-[#f4511e]/40 hover:bg-[#fff7f5]">
+                  <Upload size={28} strokeWidth={1.5} className="text-[#f4511e]" />
                   <div>
                     <p className="text-[0.9rem] font-semibold text-[#171a20]">
                       {selectedFile ? selectedFile.name : "Choose a CSV file"}
@@ -278,7 +278,7 @@ export default function OrdersCsvActions() {
                     type="button"
                     onClick={handleImport}
                     disabled={modal.phase === "uploading" || !fileInputRef.current?.files?.[0]}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-full bg-[#E85C1A] py-3 text-[0.9rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex flex-1 items-center justify-center gap-2 rounded-full bg-[#f4511e] py-3 text-[0.9rem] font-semibold text-white transition hover:bg-[#df4618] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {modal.phase === "uploading" ? (
                       <>
@@ -368,7 +368,7 @@ export default function OrdersCsvActions() {
                   <button
                     type="button"
                     onClick={() => setModal({ phase: "picking" })}
-                    className="flex-1 rounded-full bg-[#E85C1A] py-3 text-[0.9rem] font-semibold text-white transition hover:bg-[#d14f14]"
+                    className="flex-1 rounded-full bg-[#f4511e] py-3 text-[0.9rem] font-semibold text-white transition hover:bg-[#df4618]"
                   >
                     Try Again
                   </button>

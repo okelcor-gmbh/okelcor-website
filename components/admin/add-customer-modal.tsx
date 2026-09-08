@@ -21,8 +21,8 @@ type FieldErrors = Record<string, string>;
 
 const labelCls = "mb-1.5 block text-[0.78rem] font-semibold text-[#1a1a1a]";
 const inputBase =
-  "w-full rounded-xl border bg-[#fafafa] px-3.5 py-2.5 text-[0.85rem] text-[#1a1a1a] outline-none transition placeholder:text-[#aaa] focus:bg-white focus:ring-2 focus:ring-[#E85C1A]/10";
-const okBorder = "border-black/[0.1] focus:border-[#E85C1A]";
+  "w-full rounded-xl border bg-[#fafafa] px-3.5 py-2.5 text-[0.85rem] text-[#1a1a1a] outline-none transition placeholder:text-[#aaa] focus:bg-white focus:ring-2 focus:ring-[#f4511e]/10";
+const okBorder = "border-black/[0.1] focus:border-[#f4511e]";
 const errBorder = "border-red-400 focus:border-red-500";
 
 export default function AddCustomerModal({ onClose, onCreated }: Props) {
@@ -150,7 +150,7 @@ export default function AddCustomerModal({ onClose, onCreated }: Props) {
           <button
             type="button"
             onClick={onCreated}
-            className="mt-7 h-10 rounded-full bg-[#E85C1A] px-7 text-[0.85rem] font-semibold text-white transition hover:bg-[#d44d10]"
+            className="mt-7 h-10 rounded-full bg-[#f4511e] px-7 text-[0.85rem] font-semibold text-white transition hover:bg-[#d44d10]"
           >
             Done
           </button>
@@ -164,7 +164,7 @@ export default function AddCustomerModal({ onClose, onCreated }: Props) {
     <Shell onClose={onClose}>
       <form onSubmit={handleSubmit}>
         <div className="flex items-start gap-3 border-b border-black/[0.06] px-7 py-5">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E85C1A]">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#f4511e]">
             <UserPlus size={18} className="text-white" />
           </div>
           <div>
@@ -187,8 +187,8 @@ export default function AddCustomerModal({ onClose, onCreated }: Props) {
                   onClick={() => setCustomerType(tp)}
                   className={`flex-1 rounded-xl border-2 py-2 text-[0.82rem] font-semibold uppercase transition ${
                     customerType === tp
-                      ? "border-[#E85C1A] bg-[#E85C1A] text-white"
-                      : "border-black/[0.1] bg-white text-[#5c5e62] hover:border-[#E85C1A]/40"
+                      ? "border-[#f4511e] bg-[#f4511e] text-white"
+                      : "border-black/[0.1] bg-white text-[#5c5e62] hover:border-[#f4511e]/40"
                   }`}
                 >
                   {tp}
@@ -267,7 +267,7 @@ export default function AddCustomerModal({ onClose, onCreated }: Props) {
           {/* Send invitation */}
           <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-black/[0.08] bg-[#fafafa] px-4 py-3">
             <input type="checkbox" checked={sendInvitation} onChange={(e) => setSendInvitation(e.target.checked)}
-              className="mt-0.5 h-4 w-4 accent-[#E85C1A]" />
+              className="mt-0.5 h-4 w-4 accent-[#f4511e]" />
             <span>
               <span className="block text-[0.82rem] font-semibold text-[#1a1a1a]">Send invitation email now</span>
               <span className="block text-[0.74rem] text-[#5c5e62]">
@@ -291,7 +291,7 @@ export default function AddCustomerModal({ onClose, onCreated }: Props) {
             Cancel
           </button>
           <button type="submit" disabled={submitting}
-            className="flex h-10 items-center gap-2 rounded-xl bg-[#E85C1A] px-6 text-[0.82rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:opacity-50">
+            className="flex h-10 items-center gap-2 rounded-xl bg-[#f4511e] px-6 text-[0.82rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:opacity-50">
             {submitting ? <><Loader2 size={15} className="animate-spin" /> Creating…</> : <><UserPlus size={15} /> Create Customer</>}
           </button>
         </div>

@@ -55,6 +55,8 @@ import CrispNotifier from "@/components/admin/crisp-notifier";
 import NotificationsBell from "@/components/admin/notifications-bell";
 import InsightsBell from "@/components/admin/insights-bell";
 import CommandPalette from "@/components/admin/command-palette";
+import WhatsNew from "@/components/admin/whats-new";
+import { WHATS_NEW, WHATS_NEW_SEEN_EVENT, getSeenId, isUnseen } from "@/lib/whats-new";
 import { NAV_GROUPS, getAdminBreadcrumb, type NavItem } from "@/lib/admin-nav";
 
 // ── Navigation ────────────────────────────────────────────────────────────────
@@ -96,6 +98,21 @@ function Sidebar({
 
   const [filter, setFilter] = useState("");
   const [folded, setFolded] = useState<Record<string, boolean>>({});
+
+  // "New" pills: pages a What's New entry points at, until the person opens
+  // the What's New panel (which fires the seen event and clears these live).
+  const [newHrefs, setNewHrefs] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    const compute = () => {
+      const seen = getSeenId();
+      setNewHrefs(new Set(
+        WHATS_NEW.filter((e) => e.href && isUnseen(e, seen)).map((e) => e.href as string)
+      ));
+    };
+    compute();
+    window.addEventListener(WHATS_NEW_SEEN_EVENT, compute);
+    return () => window.removeEventListener(WHATS_NEW_SEEN_EVENT, compute);
+  }, []);
 
   // Remembered across visits. Someone who never touches Content should not have
   // to fold it away every morning.
@@ -160,12 +177,12 @@ function Sidebar({
           />
         )}
         {!collapsed && (
-          <span className="rounded-full bg-[#E85C1A]/15 px-2.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-[0.18em] text-[#E85C1A]">
+          <span className="rounded-full bg-[#f4511e]/15 px-2.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">
             {roleLabel || "Admin"}
           </span>
         )}
         {collapsed && (
-          <span className="text-[0.7rem] font-extrabold tracking-widest text-[#E85C1A]">OK</span>
+          <span className="text-[0.7rem] font-extrabold tracking-widest text-[#f4511e]">OK</span>
         )}
       </div>
 
@@ -183,7 +200,7 @@ function Sidebar({
               onChange={(e) => setFilter(e.target.value)}
               placeholder="Filter menu…"
               aria-label="Filter the menu"
-              className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] py-1.5 pl-7 pr-7 text-[0.78rem] text-white outline-none transition placeholder:text-white/30 focus:border-[#E85C1A]/60 focus:bg-white/[0.07]"
+              className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] py-1.5 pl-7 pr-7 text-[0.78rem] text-white outline-none transition placeholder:text-white/30 focus:border-[#f4511e]/60 focus:bg-white/[0.07]"
             />
             {filter && (
               <button
@@ -237,6 +254,7 @@ function Sidebar({
               {group.items.map(({ label, href, icon: Icon }) => {
                 const active = isActive(href);
                 const showBadge = label === "Live Chats" && pendingChats > 0;
+                const showNew = !showBadge && newHrefs.has(href);
                 return (
                   <Link
                     key={href}
@@ -254,21 +272,29 @@ function Sidebar({
                   >
                     {/* Active accent bar */}
                     {active && (
-                      <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-[#E85C1A]" />
+                      <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-[#f4511e]" />
                     )}
                     <Icon
                       size={16}
                       strokeWidth={active ? 2.2 : 1.8}
-                      className={["shrink-0 transition-colors", active ? "text-[#E85C1A]" : ""].join(" ")}
+                      className={["shrink-0 transition-colors", active ? "text-[#f4511e]" : ""].join(" ")}
                     />
                     {!collapsed && <span className="flex-1 truncate">{label}</span>}
                     {!collapsed && showBadge && (
-                      <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#E85C1A] px-1 text-[9px] font-extrabold text-white">
+                      <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#f4511e] px-1 text-[9px] font-extrabold text-white">
                         {pendingChats > 9 ? "9+" : pendingChats}
                       </span>
                     )}
                     {collapsed && showBadge && (
-                      <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-[#E85C1A]" />
+                      <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-[#f4511e]" />
+                    )}
+                    {!collapsed && showNew && (
+                      <span className="rounded-full bg-[#f4511e]/15 px-1.5 py-0.5 text-[8px] font-extrabold uppercase tracking-wider text-[#f4511e]">
+                        New
+                      </span>
+                    )}
+                    {collapsed && showNew && (
+                      <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-[#f4511e]" />
                     )}
                   </Link>
                 );
@@ -512,6 +538,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
           {/* Right: notifications + role badge + avatar dropdown */}
           <div className="flex items-center gap-3">
+            <WhatsNew />
             <InsightsBell />
             <NotificationsBell />
 
@@ -533,7 +560,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                 className="flex items-center gap-2 rounded-full border border-black/[0.08] bg-white py-1 pl-1 pr-3 transition hover:bg-[#f0f2f5]"
                 aria-label="Account menu"
               >
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#E85C1A] text-[0.68rem] font-extrabold text-white">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f4511e] text-[0.68rem] font-extrabold text-white">
                   {avatarInitials}
                 </span>
                 <span className="hidden max-w-[120px] truncate text-[0.82rem] font-semibold text-[#1a1a1a] sm:block">

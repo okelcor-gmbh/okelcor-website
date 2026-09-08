@@ -190,7 +190,7 @@ export default function CommandPalette({ role }: { role: string }) {
                     <Icon
                       size={16}
                       strokeWidth={1.9}
-                      className={active ? "shrink-0 text-[#E85C1A]" : "shrink-0 text-[#8c8f94]"}
+                      className={active ? "shrink-0 text-[#f4511e]" : "shrink-0 text-[#8c8f94]"}
                     />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-[0.88rem] font-medium text-[#171a20]">

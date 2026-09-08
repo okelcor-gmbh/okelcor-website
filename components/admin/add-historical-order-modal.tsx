@@ -66,8 +66,8 @@ const BLANK_DOC_ROW: DocRow = { file: null, label: "", customLabel: "", notes: "
 
 const labelCls = "mb-1.5 block text-[0.78rem] font-semibold text-[#1a1a1a]";
 const inputBase =
-  "w-full rounded-xl border bg-[#fafafa] px-3.5 py-2.5 text-[0.85rem] text-[#1a1a1a] outline-none transition placeholder:text-[#aaa] focus:bg-white focus:ring-2 focus:ring-[#E85C1A]/10";
-const okBorder = "border-black/[0.1] focus:border-[#E85C1A]";
+  "w-full rounded-xl border bg-[#fafafa] px-3.5 py-2.5 text-[0.85rem] text-[#1a1a1a] outline-none transition placeholder:text-[#aaa] focus:bg-white focus:ring-2 focus:ring-[#f4511e]/10";
+const okBorder = "border-black/[0.1] focus:border-[#f4511e]";
 const errBorder = "border-red-400 focus:border-red-500";
 
 export default function AddHistoricalOrderModal({
@@ -260,7 +260,7 @@ export default function AddHistoricalOrderModal({
     return (
       <Shell onClose={finish}>
         <div className="flex items-start gap-3 border-b border-black/[0.06] px-7 py-5">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E85C1A]">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#f4511e]">
             <Paperclip size={18} className="text-white" />
           </div>
           <div>
@@ -327,7 +327,7 @@ export default function AddHistoricalOrderModal({
               <div className="mt-3 flex flex-wrap items-center gap-3">
                 {row.status !== "done" ? (
                   <>
-                    <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-black/[0.15] bg-white px-3 py-2 text-[0.82rem] text-[#5c5e62] transition hover:border-[#E85C1A]/40 hover:text-[#E85C1A]">
+                    <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-black/[0.15] bg-white px-3 py-2 text-[0.82rem] text-[#5c5e62] transition hover:border-[#f4511e]/40 hover:text-[#f4511e]">
                       <Paperclip size={14} strokeWidth={2} />
                       {row.file ? row.file.name : "Choose file…"}
                       <input
@@ -379,7 +379,7 @@ export default function AddHistoricalOrderModal({
           ))}
 
           <button type="button" onClick={addDocRow}
-            className="flex items-center gap-1.5 text-[0.78rem] font-semibold text-[#E85C1A] hover:underline">
+            className="flex items-center gap-1.5 text-[0.78rem] font-semibold text-[#f4511e] hover:underline">
             <Plus size={13} /> Add another document
           </button>
         </div>
@@ -390,7 +390,7 @@ export default function AddHistoricalOrderModal({
             Skip for now
           </button>
           <button type="button" onClick={finish}
-            className="flex h-10 items-center gap-2 rounded-xl bg-[#E85C1A] px-6 text-[0.82rem] font-semibold text-white transition hover:bg-[#d44d10]">
+            className="flex h-10 items-center gap-2 rounded-xl bg-[#f4511e] px-6 text-[0.82rem] font-semibold text-white transition hover:bg-[#d44d10]">
             Done — View Order
           </button>
         </div>
@@ -403,7 +403,7 @@ export default function AddHistoricalOrderModal({
     <Shell onClose={onClose}>
       <form onSubmit={handleSubmit}>
         <div className="flex items-start gap-3 border-b border-black/[0.06] px-7 py-5">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E85C1A]">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#f4511e]">
             <PackagePlus size={18} className="text-white" />
           </div>
           <div>
@@ -561,7 +561,7 @@ export default function AddHistoricalOrderModal({
                   </div>
                 ))}
                 <button type="button" onClick={addItemRow}
-                  className="flex items-center gap-1.5 text-[0.78rem] font-semibold text-[#E85C1A] hover:underline">
+                  className="flex items-center gap-1.5 text-[0.78rem] font-semibold text-[#f4511e] hover:underline">
                   <Plus size={13} /> Add line item
                 </button>
                 {errors.items && <p className="mt-1 text-[0.72rem] text-red-500">{errors.items}</p>}
@@ -589,7 +589,7 @@ export default function AddHistoricalOrderModal({
             Cancel
           </button>
           <button type="submit" disabled={submitting}
-            className="flex h-10 items-center gap-2 rounded-xl bg-[#E85C1A] px-6 text-[0.82rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:opacity-50">
+            className="flex h-10 items-center gap-2 rounded-xl bg-[#f4511e] px-6 text-[0.82rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:opacity-50">
             {submitting ? <><Loader2 size={15} className="animate-spin" /> Creating…</> : <><PackagePlus size={15} /> Create Order</>}
           </button>
         </div>

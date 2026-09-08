@@ -18,7 +18,7 @@ export default function ChannelNotice({ count }: { count: number | null }) {
   return (
     <Link
       href="/admin/orders/ebay"
-      className="mb-4 flex items-center gap-2 rounded-xl border border-black/[0.07] bg-white px-4 py-2.5 text-[0.83rem] text-[#5c5e62] transition hover:border-[#E85C1A]/40 hover:text-[#171a20]"
+      className="mb-4 flex items-center gap-2 rounded-xl border border-black/[0.07] bg-white px-4 py-2.5 text-[0.83rem] text-[#5c5e62] transition hover:border-[#f4511e]/40 hover:text-[#171a20]"
     >
       <ShoppingBag size={14} className="text-green-600" />
       <span>

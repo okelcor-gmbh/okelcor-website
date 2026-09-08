@@ -237,7 +237,7 @@ function ConfirmModal({
             Cancel
           </button>
           <button type="button" onClick={onConfirm}
-            className={`flex-1 h-10 rounded-xl text-[0.83rem] font-semibold text-white transition ${danger ? "bg-red-600 hover:bg-red-700" : "bg-[#E85C1A] hover:bg-[#d44d10]"}`}>
+            className={`flex-1 h-10 rounded-xl text-[0.83rem] font-semibold text-white transition ${danger ? "bg-red-600 hover:bg-red-700" : "bg-[#f4511e] hover:bg-[#d44d10]"}`}>
             {confirmLabel}
           </button>
         </div>
@@ -404,12 +404,12 @@ export default function CustomersPage() {
       {/* Page header */}
       <div className="mb-7 flex items-start justify-between gap-4">
         <div>
-          <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#E85C1A]">Customer Management</p>
+          <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">Customer Management</p>
           <p className="mt-1 text-[0.875rem] text-[#5c5e62]">Manage accounts, review status, and monitor security.</p>
         </div>
         {can("customers.create") && (
           <button type="button" onClick={() => setAddOpen(true)}
-            className="flex h-[42px] shrink-0 items-center gap-2 rounded-full bg-[#E85C1A] px-5 text-[0.875rem] font-semibold text-white transition hover:bg-[#d44d10]">
+            className="flex h-[42px] shrink-0 items-center gap-2 rounded-full bg-[#f4511e] px-5 text-[0.875rem] font-semibold text-white transition hover:bg-[#d44d10]">
             <Plus size={16} /> Add Customer
           </button>
         )}
@@ -426,7 +426,7 @@ export default function CustomersPage() {
       {/* ── Import card ── */}
       <div className="mb-6 rounded-2xl bg-white p-6 shadow-sm">
         <div className="mb-4 flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E85C1A]">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#f4511e]">
             <FileText size={18} strokeWidth={1.8} className="text-white" />
           </div>
           <div>
@@ -435,14 +435,14 @@ export default function CustomersPage() {
           </div>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <label className="flex flex-1 cursor-pointer items-center gap-3 rounded-xl border border-dashed border-black/[0.12] bg-[#fafafa] px-4 py-3 transition hover:border-[#E85C1A]/40 hover:bg-orange-50/30">
+          <label className="flex flex-1 cursor-pointer items-center gap-3 rounded-xl border border-dashed border-black/[0.12] bg-[#fafafa] px-4 py-3 transition hover:border-[#f4511e]/40 hover:bg-orange-50/30">
             <Upload size={16} className="shrink-0 text-[#5c5e62]" />
             <span className="truncate text-[0.875rem] text-[#5c5e62]">{file ? file.name : "Choose a .csv file…"}</span>
             <input ref={fileRef} type="file" accept=".csv" className="hidden"
               onChange={e => { setFile(e.target.files?.[0] ?? null); setImportResult(null); setImportError(null); }} />
           </label>
           <button type="button" disabled={!file || importing} onClick={handleImport}
-            className="flex h-[42px] items-center gap-2 rounded-full bg-[#E85C1A] px-6 text-[0.875rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:cursor-not-allowed disabled:opacity-50">
+            className="flex h-[42px] items-center gap-2 rounded-full bg-[#f4511e] px-6 text-[0.875rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:cursor-not-allowed disabled:opacity-50">
             {importing ? <><Loader2 size={15} className="animate-spin" /> Importing…</> : <><Upload size={15} /> Import</>}
           </button>
         </div>
@@ -490,7 +490,7 @@ export default function CustomersPage() {
           <div className="mb-2.5 flex flex-wrap gap-1">
             {STATUS_TABS.map(({ key, label }) => (
               <button key={key} type="button" onClick={() => setStatusTab(key)}
-                className={`rounded-full px-3 py-1 text-[0.75rem] font-semibold transition ${statusTab === key ? "bg-[#E85C1A] text-white" : "text-[#5c5e62] hover:bg-[#f0f2f5]"}`}>
+                className={`rounded-full px-3 py-1 text-[0.75rem] font-semibold transition ${statusTab === key ? "bg-[#f4511e] text-white" : "text-[#5c5e62] hover:bg-[#f0f2f5]"}`}>
                 {label}
               </button>
             ))}
@@ -509,7 +509,7 @@ export default function CustomersPage() {
               <div className="relative">
                 <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#aaa]" />
                 <input type="search" placeholder="Name, email, company…" value={search} onChange={e => setSearch(e.target.value)}
-                  className="h-8 w-60 rounded-xl border border-black/[0.09] bg-[#fafafa] pl-8 pr-3 text-[0.8rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10" />
+                  className="h-8 w-60 rounded-xl border border-black/[0.09] bg-[#fafafa] pl-8 pr-3 text-[0.8rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10" />
               </div>
               <button type="button" onClick={handleExport}
                 className="flex h-8 items-center gap-1.5 rounded-xl border border-black/[0.09] bg-white px-3 text-[0.78rem] font-semibold text-[#5c5e62] transition hover:bg-[#f0f2f5]">
@@ -531,7 +531,7 @@ export default function CustomersPage() {
             </thead>
             <tbody className="divide-y divide-black/[0.04]">
               {loading ? (
-                <tr><td colSpan={6} className="px-5 py-10 text-center"><Loader2 size={20} className="mx-auto animate-spin text-[#E85C1A]" /></td></tr>
+                <tr><td colSpan={6} className="px-5 py-10 text-center"><Loader2 size={20} className="mx-auto animate-spin text-[#f4511e]" /></td></tr>
               ) : tableError ? (
                 <tr><td colSpan={6} className="px-5 py-8 text-center text-[0.875rem] text-red-500">{tableError}</td></tr>
               ) : customers.length === 0 ? (
@@ -591,7 +591,7 @@ export default function CustomersPage() {
                       {/* Actions */}
                       <td className="px-5 py-3">
                         {isPending ? (
-                          <Loader2 size={16} className="animate-spin text-[#E85C1A]" />
+                          <Loader2 size={16} className="animate-spin text-[#f4511e]" />
                         ) : (
                           <div className="flex items-center gap-1.5">
                             {/* View */}

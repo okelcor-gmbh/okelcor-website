@@ -159,7 +159,7 @@ function SectionCard({ title, icon: Icon, children, muted = false }: {
   );
 }
 
-function MiniBarRow({ label, value, max, color = "bg-[#E85C1A]" }: {
+function MiniBarRow({ label, value, max, color = "bg-[#f4511e]" }: {
   label: string; value: number; max: number; color?: string;
 }) {
   const pct = max > 0 ? Math.round((value / max) * 100) : 0;
@@ -176,7 +176,7 @@ function MiniBarRow({ label, value, max, color = "bg-[#E85C1A]" }: {
   );
 }
 
-function Sparkline({ data, field, color = "#E85C1A" }: {
+function Sparkline({ data, field, color = "#f4511e" }: {
   data: { date: string; sessions: number; pageViews: number }[];
   field: "sessions" | "pageViews";
   color?: string;
@@ -358,7 +358,7 @@ export default async function AnalyticsPage() {
     return (
       <div className="p-6 md:p-8">
         <div className="mb-7">
-          <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#E85C1A]">Analytics</p>
+          <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">Analytics</p>
           <p className="mt-1 text-[0.875rem] text-[#5c5e62]">Google Analytics 4</p>
         </div>
         <NotConfigured />
@@ -386,7 +386,7 @@ export default async function AnalyticsPage() {
       {/* Page header */}
       <div className="mb-8 flex items-start justify-between">
         <div>
-          <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#E85C1A]">Analytics</p>
+          <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">Analytics</p>
           <p className="mt-1 text-[0.875rem] text-[#5c5e62]">
             Google Analytics 4 &mdash; split by domain
           </p>
@@ -408,7 +408,7 @@ export default async function AnalyticsPage() {
 
         {/* Section label */}
         <div className="mb-5 flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#E85C1A]">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#f4511e]">
             <Zap size={16} strokeWidth={2} className="text-white" />
           </div>
           <div>
@@ -428,7 +428,7 @@ export default async function AnalyticsPage() {
         {/* Stat cards */}
         {currOverview ? (
           <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-            <StatCard label="Active Users"  value={fmtNum(currOverview.activeUsers)}  icon={Users}            accent="bg-[#E85C1A]" />
+            <StatCard label="Active Users"  value={fmtNum(currOverview.activeUsers)}  icon={Users}            accent="bg-[#f4511e]" />
             <StatCard label="Sessions"      value={fmtNum(currOverview.sessions)}      icon={MousePointerClick} accent="bg-blue-500" />
             <StatCard label="Page Views"    value={fmtNum(currOverview.pageViews)}     icon={Eye}              accent="bg-violet-500" />
             <StatCard label="Avg. Duration" value={fmtDuration(currOverview.avgSessionDuration)} icon={Clock} accent="bg-emerald-500" />
@@ -448,7 +448,7 @@ export default async function AnalyticsPage() {
               <BarChart2 size={15} className="text-[#5c5e62]" />
             </div>
             <div className="px-5 pt-4 pb-2">
-              <Sparkline data={currTrend} field="sessions" color="#E85C1A" />
+              <Sparkline data={currTrend} field="sessions" color="#f4511e" />
             </div>
             <div className="flex justify-between border-t border-black/[0.04] px-5 py-3">
               <span className="text-[0.72rem] text-[#5c5e62]">{currTrend[0]?.date}</span>
@@ -484,7 +484,7 @@ export default async function AnalyticsPage() {
                 ) : (
                   currSources.map((s) => (
                     <MiniBarRow key={s.source} label={s.source} value={s.sessions}
-                      max={currSources[0]?.sessions ?? 1} color={SOURCE_COLORS[s.source] ?? "bg-[#E85C1A]"} />
+                      max={currSources[0]?.sessions ?? 1} color={SOURCE_COLORS[s.source] ?? "bg-[#f4511e]"} />
                   ))
                 )}
               </div>

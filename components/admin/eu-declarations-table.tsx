@@ -170,7 +170,7 @@ export default function EuDeclarationsTable({ declarations }: Props) {
                 active
                   ? danger
                     ? "bg-red-600 text-white"
-                    : "bg-[#E85C1A] text-white"
+                    : "bg-[#f4511e] text-white"
                   : "border border-black/[0.09] bg-white text-[#1a1a1a] hover:bg-[#f5f5f5]"
               }`}
             >
@@ -200,7 +200,7 @@ export default function EuDeclarationsTable({ declarations }: Props) {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Order ref, customer, country…"
-            className="w-full rounded-full border border-black/[0.1] bg-[#fafafa] py-2 pl-8 pr-4 text-[0.83rem] text-[#1a1a1a] placeholder:text-[#9ca3af] focus:border-[#E85C1A]/40 focus:outline-none focus:ring-2 focus:ring-[#E85C1A]/10"
+            className="w-full rounded-full border border-black/[0.1] bg-[#fafafa] py-2 pl-8 pr-4 text-[0.83rem] text-[#1a1a1a] placeholder:text-[#9ca3af] focus:border-[#f4511e]/40 focus:outline-none focus:ring-2 focus:ring-[#f4511e]/10"
           />
         </div>
 
@@ -211,7 +211,7 @@ export default function EuDeclarationsTable({ declarations }: Props) {
             setStatusFilter(e.target.value as StatusFilter);
             setOverdueOnly(false);
           }}
-          className="rounded-full border border-black/[0.1] bg-[#fafafa] px-4 py-2 text-[0.83rem] text-[#1a1a1a] focus:border-[#E85C1A]/40 focus:outline-none focus:ring-2 focus:ring-[#E85C1A]/10"
+          className="rounded-full border border-black/[0.1] bg-[#fafafa] px-4 py-2 text-[0.83rem] text-[#1a1a1a] focus:border-[#f4511e]/40 focus:outline-none focus:ring-2 focus:ring-[#f4511e]/10"
         >
           <option value="all">All Statuses</option>
           <option value="pending">Pending</option>
@@ -228,7 +228,7 @@ export default function EuDeclarationsTable({ declarations }: Props) {
               setOverdueOnly(e.target.checked);
               if (e.target.checked) setStatusFilter("pending");
             }}
-            className="h-4 w-4 rounded accent-[#E85C1A]"
+            className="h-4 w-4 rounded accent-[#f4511e]"
           />
           <span className="text-[0.83rem] font-medium text-[#1a1a1a]">Overdue only</span>
           {counts.overdue > 0 && (
@@ -284,7 +284,7 @@ export default function EuDeclarationsTable({ declarations }: Props) {
                 </p>
                 <button
                   onClick={clearFilters}
-                  className="mt-1 inline-flex items-center gap-1.5 rounded-full border border-black/[0.09] bg-white px-4 py-1.5 text-[0.8rem] font-semibold text-[#1a1a1a] transition hover:border-[#E85C1A]/40 hover:text-[#E85C1A]"
+                  className="mt-1 inline-flex items-center gap-1.5 rounded-full border border-black/[0.09] bg-white px-4 py-1.5 text-[0.8rem] font-semibold text-[#1a1a1a] transition hover:border-[#f4511e]/40 hover:text-[#f4511e]"
                 >
                   <X size={12} strokeWidth={2.5} />
                   Clear filters
@@ -321,7 +321,7 @@ export default function EuDeclarationsTable({ declarations }: Props) {
                       <td className="px-4 py-3">
                         <Link
                           href={`/admin/orders/${dec.order_ref}`}
-                          className="font-mono text-[0.83rem] font-semibold text-[#E85C1A] hover:underline"
+                          className="font-mono text-[0.83rem] font-semibold text-[#f4511e] hover:underline"
                         >
                           {dec.order_ref}
                         </Link>
@@ -406,7 +406,7 @@ export default function EuDeclarationsTable({ declarations }: Props) {
                       <td className="px-4 py-3">
                         <Link
                           href={`/admin/eu-declarations/${dec.id}`}
-                          className="inline-flex h-7 items-center rounded-full border border-black/[0.09] bg-white px-3 text-[0.75rem] font-semibold text-[#1a1a1a] transition hover:border-[#E85C1A]/40 hover:text-[#E85C1A]"
+                          className="inline-flex h-7 items-center rounded-full border border-black/[0.09] bg-white px-3 text-[0.75rem] font-semibold text-[#1a1a1a] transition hover:border-[#f4511e]/40 hover:text-[#f4511e]"
                         >
                           View
                         </Link>

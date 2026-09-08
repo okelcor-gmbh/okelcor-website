@@ -40,7 +40,7 @@ export default async function AdminOperationsPage({ searchParams }: { searchPara
     <div className="p-6 md:p-8">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#E85C1A]">
+          <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">
             Operations
           </p>
           <p className="mt-0.5 text-[0.875rem] text-[#5c5e62]">

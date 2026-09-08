@@ -85,7 +85,7 @@ function Cell({
       <td className="px-3 py-2.5 text-right">
         <Link
           href={`${clientsHref}&channel=${row.channel}`}
-          className="rounded px-1 text-[0.83rem] font-semibold tabular-nums text-[#171a20] underline decoration-[#E85C1A]/40 decoration-2 underline-offset-4 transition hover:decoration-[#E85C1A]"
+          className="rounded px-1 text-[0.83rem] font-semibold tabular-nums text-[#171a20] underline decoration-[#f4511e]/40 decoration-2 underline-offset-4 transition hover:decoration-[#f4511e]"
         >
           {row.clients ?? 0}
         </Link>
@@ -99,7 +99,7 @@ function Cell({
         <Link
           href="/admin/orders/in-transit"
           title="Paid and confirmed, not yet dispatched — the paperwork queue."
-          className="rounded px-1 text-[0.83rem] font-semibold tabular-nums text-[#171a20] underline decoration-[#E85C1A]/40 decoration-2 underline-offset-4 transition hover:decoration-[#E85C1A]"
+          className="rounded px-1 text-[0.83rem] font-semibold tabular-nums text-[#171a20] underline decoration-[#f4511e]/40 decoration-2 underline-offset-4 transition hover:decoration-[#f4511e]"
         >
           {row.ready_to_ship}
         </Link>

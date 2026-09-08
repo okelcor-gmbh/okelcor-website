@@ -59,7 +59,7 @@ export default function CustomerTimelineCard({ customerId, refreshKey = 0 }: Pro
             <p className="mt-1 font-mono text-[0.72rem] text-[#d1d5db]">Backend: GET /admin/customers/{"{id}"}/timeline</p>
           </div>
         ) : loading ? (
-          <div className="flex justify-center py-6"><Loader2 size={18} className="animate-spin text-[#E85C1A]" /></div>
+          <div className="flex justify-center py-6"><Loader2 size={18} className="animate-spin text-[#f4511e]" /></div>
         ) : events.length === 0 ? (
           <p className="py-6 text-center text-[0.83rem] text-[#9ca3af]">No lifecycle events recorded yet.</p>
         ) : (

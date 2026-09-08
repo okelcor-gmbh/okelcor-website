@@ -102,7 +102,7 @@ export default function NotificationsBell() {
       >
         <Bell size={18} strokeWidth={1.8} />
         {unreadCount > 0 && (
-          <span className="absolute right-1 top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#E85C1A] px-1 text-[9px] font-extrabold text-white">
+          <span className="absolute right-1 top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#f4511e] px-1 text-[9px] font-extrabold text-white">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
@@ -116,7 +116,7 @@ export default function NotificationsBell() {
               <button
                 type="button"
                 onClick={markAllRead}
-                className="flex items-center gap-1 text-[0.72rem] font-semibold text-[#E85C1A] transition hover:underline"
+                className="flex items-center gap-1 text-[0.72rem] font-semibold text-[#f4511e] transition hover:underline"
               >
                 <CheckCheck size={12} strokeWidth={2} />
                 Mark all read
@@ -148,7 +148,7 @@ export default function NotificationsBell() {
             <Link
               href="/admin/notifications"
               onClick={() => setOpen(false)}
-              className="block px-4 py-2.5 text-center text-[0.78rem] font-semibold text-[#E85C1A] transition hover:bg-[#f0f2f5]"
+              className="block px-4 py-2.5 text-center text-[0.78rem] font-semibold text-[#f4511e] transition hover:bg-[#f0f2f5]"
             >
               View all
             </Link>
@@ -186,7 +186,7 @@ function NotificationRow({
     <div
       className={[
         "flex items-start gap-2.5 px-4 py-3 text-left transition hover:bg-[#f0f2f5]",
-        unread ? "bg-[#E85C1A]/[0.04]" : "",
+        unread ? "bg-[#f4511e]/[0.04]" : "",
       ].join(" ")}
     >
       <span className={["mt-0.5 shrink-0", sev.icon].join(" ")}>

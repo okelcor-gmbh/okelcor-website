@@ -59,7 +59,7 @@ export default function SecurityAlertCard() {
           <ShieldAlert size={15} className="text-[#5c5e62]" />
           <p className="text-[0.9rem] font-bold text-[#1a1a1a]">Security Overview</p>
         </div>
-        <Link href="/admin/security" className="text-[0.75rem] font-semibold text-[#E85C1A] hover:underline">
+        <Link href="/admin/security" className="text-[0.75rem] font-semibold text-[#f4511e] hover:underline">
           View log →
         </Link>
       </div>

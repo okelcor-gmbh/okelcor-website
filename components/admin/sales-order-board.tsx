@@ -21,7 +21,7 @@ import { useAdminPermissions } from "@/hooks/use-admin-permissions";
  */
 
 const INPUT =
-  "h-8 w-full rounded-lg border border-black/[0.10] bg-white px-2 text-[0.78rem] text-[#171a20] placeholder:text-[#8c8f94] focus:border-[#E85C1A] focus:outline-none disabled:bg-[#f8f9fa] disabled:text-[#8c8f94]";
+  "h-8 w-full rounded-lg border border-black/[0.10] bg-white px-2 text-[0.78rem] text-[#171a20] placeholder:text-[#8c8f94] focus:border-[#f4511e] focus:outline-none disabled:bg-[#f8f9fa] disabled:text-[#8c8f94]";
 const LABEL = "mb-1 block text-[0.68rem] font-bold uppercase tracking-wider text-[#8c8f94]";
 const TH = "px-3 py-2 text-left text-[0.68rem] font-bold uppercase tracking-wider text-[#5c5e62]";
 
@@ -196,13 +196,13 @@ export default function SalesOrderBoard() {
           Pending proof
         </button>
         <select value={periodFilter} onChange={(e) => setPeriodFilter(e.target.value)}
-          className="h-8 cursor-pointer rounded-full border border-black/[0.10] bg-white px-3 pr-7 text-[0.78rem] font-semibold text-[#5c5e62] focus:border-[#E85C1A] focus:outline-none">
+          className="h-8 cursor-pointer rounded-full border border-black/[0.10] bg-white px-3 pr-7 text-[0.78rem] font-semibold text-[#5c5e62] focus:border-[#f4511e] focus:outline-none">
           <option value="">All months</option>
           {(meta?.known_periods ?? []).map((p) => <option key={p} value={p}>{monthLabel(p)}</option>)}
         </select>
         {canManage && !adding && (
           <button type="button" onClick={() => setAdding(true)}
-            className="ml-auto flex items-center gap-1.5 rounded-full bg-[#E85C1A] px-3.5 py-1.5 text-[0.8rem] font-semibold text-white transition hover:bg-[#d44f12]">
+            className="ml-auto flex items-center gap-1.5 rounded-full bg-[#f4511e] px-3.5 py-1.5 text-[0.8rem] font-semibold text-white transition hover:bg-[#df4618]">
             <Plus size={13} /> Add new order
           </button>
         )}
@@ -381,7 +381,7 @@ function EntryRows({
               <span className="text-[0.75rem] font-bold text-[#5c5e62]">Itemized invoices &amp; transaction lines</span>
               {canManage && !addingLine && (
                 <button type="button" onClick={onAddLine}
-                  className="flex items-center gap-1 rounded-full bg-[#E85C1A] px-3 py-1 text-[0.72rem] font-semibold text-white transition hover:bg-[#d44f12]">
+                  className="flex items-center gap-1 rounded-full bg-[#f4511e] px-3 py-1 text-[0.72rem] font-semibold text-white transition hover:bg-[#df4618]">
                   <Plus size={11} /> Add line
                 </button>
               )}
@@ -487,7 +487,7 @@ function LineRow({
         ) : !canManage ? (
           <span className="text-[0.72rem] text-[#8c8f94]">missing</span>
         ) : (
-          <label className="inline-flex cursor-pointer items-center gap-1 rounded border border-dashed border-[#E85C1A]/60 bg-[#fff7f2] px-2 py-1 text-[0.68rem] font-semibold text-[#E85C1A]">
+          <label className="inline-flex cursor-pointer items-center gap-1 rounded border border-dashed border-[#f4511e]/60 bg-[#fff7f2] px-2 py-1 text-[0.68rem] font-semibold text-[#f4511e]">
             <Paperclip size={10} /> Attach proof
             <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden"
               onChange={(e) => { const f = e.target.files?.[0]; if (f) void onAttach(line, f); e.target.value = ""; }} />
@@ -582,7 +582,7 @@ function OrderForm({
       </p>
       <div className="flex items-center gap-2">
         <button type="submit" disabled={busy}
-          className="flex items-center gap-1.5 rounded-full bg-[#E85C1A] px-4 py-1.5 text-[0.78rem] font-semibold text-white transition hover:bg-[#d44f12] disabled:opacity-50">
+          className="flex items-center gap-1.5 rounded-full bg-[#f4511e] px-4 py-1.5 text-[0.78rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50">
           {busy && <Loader2 size={12} className="animate-spin" />} Add order
         </button>
         <button type="button" onClick={onCancel}
@@ -666,7 +666,7 @@ function LineForm({
       </div>
       <div className="flex items-center gap-2">
         <button type="submit" disabled={busy}
-          className="flex items-center gap-1.5 rounded-full bg-[#E85C1A] px-4 py-1.5 text-[0.78rem] font-semibold text-white transition hover:bg-[#d44f12] disabled:opacity-50">
+          className="flex items-center gap-1.5 rounded-full bg-[#f4511e] px-4 py-1.5 text-[0.78rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50">
           {busy && <Loader2 size={12} className="animate-spin" />} Save line
         </button>
         <button type="button" onClick={onCancel}

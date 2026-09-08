@@ -102,7 +102,7 @@ export default function CrispPanel() {
           <p className="text-[0.9rem] font-bold text-[#1a1a1a]">Open Conversations</p>
           <StatusDot status={status} />
         </div>
-        <Link href="/admin/chats" className="text-[0.75rem] font-semibold text-[#E85C1A] hover:underline">
+        <Link href="/admin/chats" className="text-[0.75rem] font-semibold text-[#f4511e] hover:underline">
           Inbox →
         </Link>
       </div>

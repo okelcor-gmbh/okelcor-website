@@ -6,7 +6,7 @@ import { Eye, EyeOff, ShieldAlert, CheckCircle } from "lucide-react";
 import { changePassword } from "@/app/admin/profile/actions";
 
 const inputCls =
-  "h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10";
+  "h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10";
 
 function PasswordField({
   label,
@@ -169,7 +169,7 @@ export default function ChangePasswordPage() {
               <button
                 type="submit"
                 disabled={saving || success || !currentPassword || !newPassword || !confirmPassword}
-                className="h-9 rounded-full bg-[#E85C1A] px-6 text-[0.83rem] font-semibold text-white transition hover:bg-[#d44f12] disabled:opacity-60"
+                className="h-9 rounded-full bg-[#f4511e] px-6 text-[0.83rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-60"
               >
                 {saving ? "Updating…" : "Set New Password"}
               </button>

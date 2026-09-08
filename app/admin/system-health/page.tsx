@@ -423,7 +423,7 @@ export default function SystemHealthPage() {
         <button
           type="button"
           onClick={fetchAll}
-          className="flex items-center gap-2 rounded-full bg-[#E85C1A] px-5 py-2.5 text-[0.85rem] font-semibold text-white transition hover:bg-[#d14f14]"
+          className="flex items-center gap-2 rounded-full bg-[#f4511e] px-5 py-2.5 text-[0.85rem] font-semibold text-white transition hover:bg-[#df4618]"
         >
           <RefreshCw size={14} strokeWidth={2.2} />
           Retry
@@ -441,7 +441,7 @@ export default function SystemHealthPage() {
       <div className="mb-6 flex flex-wrap items-start gap-4">
         <div className="flex-1">
           <div className="flex items-center gap-2.5">
-            <Activity size={18} className="text-[#E85C1A]" strokeWidth={2} />
+            <Activity size={18} className="text-[#f4511e]" strokeWidth={2} />
             <h1 className="text-[1.15rem] font-extrabold text-[#1a1a1a]">System Health</h1>
           </div>
           <p className="mt-0.5 text-[0.82rem] text-[#6b7280]">

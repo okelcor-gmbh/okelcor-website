@@ -268,7 +268,7 @@ export default function CarFinder({ onSizeSelect }: Props) {
                 <button
                   type="submit"
                   disabled={!canSearch}
-                  className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#f4511e] px-6 text-[0.88rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:self-end"
+                  className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#f4511e] px-6 text-[0.88rem] font-semibold text-white transition hover:bg-[#df4618] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:self-end"
                 >
                   {isLoading
                     ? <Loader2 size={15} className="animate-spin" />

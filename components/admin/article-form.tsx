@@ -110,10 +110,10 @@ function Field({
 }
 
 const inputCls =
-  "h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10";
+  "h-10 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10";
 
 const textareaCls =
-  "w-full resize-y rounded-xl border border-black/[0.09] bg-white px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10";
+  "w-full resize-y rounded-xl border border-black/[0.09] bg-white px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10";
 
 // ── Character counter ─────────────────────────────────────────────────────────
 
@@ -155,7 +155,7 @@ function SerpPreview({
       <div className="max-w-[540px] font-sans">
         {/* Favicon + URL breadcrumb */}
         <div className="mb-1 flex items-center gap-2">
-          <div className="flex h-4 w-4 items-center justify-center rounded-sm bg-[#E85C1A] text-[0.5rem] font-bold text-white">
+          <div className="flex h-4 w-4 items-center justify-center rounded-sm bg-[#f4511e] text-[0.5rem] font-bold text-white">
             O
           </div>
           <span className="text-[0.78rem] text-[#1a1a1a]">Okelcor</span>
@@ -421,7 +421,7 @@ export default function ArticleForm(props: Props) {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-2 rounded-xl border border-black/[0.1] bg-white px-4 py-2 text-[0.83rem] font-semibold text-[#1a1a1a] transition hover:border-[#E85C1A] hover:text-[#E85C1A]"
+                  className="flex items-center gap-2 rounded-xl border border-black/[0.1] bg-white px-4 py-2 text-[0.83rem] font-semibold text-[#1a1a1a] transition hover:border-[#f4511e] hover:text-[#f4511e]"
                 >
                   <Upload size={13} />
                   {imagePreview ? "Replace" : "Upload"}
@@ -457,7 +457,7 @@ export default function ArticleForm(props: Props) {
                 <button
                   type="button"
                   onClick={() => ogFileInputRef.current?.click()}
-                  className="flex items-center gap-2 rounded-xl border border-black/[0.1] bg-white px-4 py-2 text-[0.83rem] font-semibold text-[#1a1a1a] transition hover:border-[#E85C1A] hover:text-[#E85C1A]"
+                  className="flex items-center gap-2 rounded-xl border border-black/[0.1] bg-white px-4 py-2 text-[0.83rem] font-semibold text-[#1a1a1a] transition hover:border-[#f4511e] hover:text-[#f4511e]"
                 >
                   <Upload size={13} />
                   {ogImagePreview ? "Replace" : "Upload"}
@@ -516,7 +516,7 @@ export default function ArticleForm(props: Props) {
                 role="switch"
                 aria-checked={isPublished}
                 onClick={() => setIsPublished((v) => !v)}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-[#E85C1A]/30 ${isPublished ? "bg-emerald-500" : "bg-gray-200"}`}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-[#f4511e]/30 ${isPublished ? "bg-emerald-500" : "bg-gray-200"}`}
               >
                 <span
                   className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${isPublished ? "translate-x-5" : "translate-x-0"}`}
@@ -709,7 +709,7 @@ export default function ArticleForm(props: Props) {
         <button
           type="submit"
           disabled={saving}
-          className="h-10 rounded-full bg-[#E85C1A] px-6 text-[0.875rem] font-semibold text-white transition hover:bg-[#d44f12] disabled:opacity-60"
+          className="h-10 rounded-full bg-[#f4511e] px-6 text-[0.875rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-60"
         >
           {saving ? "Saving…" : isEdit ? "Save Changes" : "Create Article"}
         </button>

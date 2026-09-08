@@ -113,7 +113,7 @@ function ConfirmModal({
               onChange={(e) => onNoteChange(e.target.value)}
               rows={3}
               placeholder="Add a note…"
-              className="w-full resize-none rounded-xl border border-black/[0.09] bg-white px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#E85C1A]/40 focus:ring-2 focus:ring-[#E85C1A]/10"
+              className="w-full resize-none rounded-xl border border-black/[0.09] bg-white px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#f4511e]/40 focus:ring-2 focus:ring-[#f4511e]/10"
             />
           </div>
         )}
@@ -621,7 +621,7 @@ export default function PaymentMilestonesCard({
       <div className="rounded-2xl bg-white p-6 shadow-sm">
         {/* Header */}
         <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
-          <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+          <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
             Payment Milestones
           </p>
           <div className="flex flex-wrap items-center gap-2">
@@ -662,7 +662,7 @@ export default function PaymentMilestonesCard({
                     <button
                       type="button"
                       onClick={() => { setReqOpen(true); setReqError(null); }}
-                      className="inline-flex h-8 items-center gap-1.5 rounded-full bg-[#E85C1A] px-4 text-[0.78rem] font-semibold text-white transition hover:bg-[#d04d15]"
+                      className="inline-flex h-8 items-center gap-1.5 rounded-full bg-[#f4511e] px-4 text-[0.78rem] font-semibold text-white transition hover:bg-[#d04d15]"
                     >
                       <Send size={12} strokeWidth={2.2} />
                       Request Deposit
@@ -727,7 +727,7 @@ export default function PaymentMilestonesCard({
                         step="0.01"
                         value={reqPercent}
                         onChange={(e) => setReqPercent(e.target.value)}
-                        className="h-9 w-28 rounded-lg border border-black/[0.1] bg-white px-3 text-[0.85rem] tabular-nums text-[#1a1a1a] outline-none transition focus:border-[#E85C1A]/50 focus:ring-2 focus:ring-[#E85C1A]/10"
+                        className="h-9 w-28 rounded-lg border border-black/[0.1] bg-white px-3 text-[0.85rem] tabular-nums text-[#1a1a1a] outline-none transition focus:border-[#f4511e]/50 focus:ring-2 focus:ring-[#f4511e]/10"
                       />
                       <span className="text-[0.8rem] text-[#5c5e62]">%</span>
                       {orderTotal != null && Number(reqPercent) > 0 && (
@@ -751,7 +751,7 @@ export default function PaymentMilestonesCard({
                         value={reqAmount}
                         onChange={(e) => setReqAmount(e.target.value)}
                         placeholder="e.g. 5000"
-                        className="h-9 w-36 rounded-lg border border-black/[0.1] bg-white px-3 text-[0.85rem] tabular-nums text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#E85C1A]/50 focus:ring-2 focus:ring-[#E85C1A]/10"
+                        className="h-9 w-36 rounded-lg border border-black/[0.1] bg-white px-3 text-[0.85rem] tabular-nums text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#f4511e]/50 focus:ring-2 focus:ring-[#f4511e]/10"
                       />
                       {orderTotal != null && (
                         <span className="text-[0.75rem] tabular-nums text-[#9ca3af]">
@@ -771,7 +771,7 @@ export default function PaymentMilestonesCard({
                     type="checkbox"
                     checked={reqNotify}
                     onChange={(e) => setReqNotify(e.target.checked)}
-                    className="mt-0.5 h-4 w-4 accent-[#E85C1A]"
+                    className="mt-0.5 h-4 w-4 accent-[#f4511e]"
                   />
                   <span className="text-[0.8rem] text-[#1a1a1a]">
                     Also e-mail the customer
@@ -792,7 +792,7 @@ export default function PaymentMilestonesCard({
                     onChange={(e) => setReqNotes(e.target.value.slice(0, 500))}
                     rows={2}
                     placeholder="e.g. Agreed 40% with Mr Adeyemi on the call of 8 Aug"
-                    className="w-full resize-none rounded-lg border border-black/[0.1] bg-white px-3 py-2 text-[0.83rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#E85C1A]/50 focus:ring-2 focus:ring-[#E85C1A]/10"
+                    className="w-full resize-none rounded-lg border border-black/[0.1] bg-white px-3 py-2 text-[0.83rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#f4511e]/50 focus:ring-2 focus:ring-[#f4511e]/10"
                   />
                   <p className="mt-1 text-right text-[0.66rem] tabular-nums text-[#c0c3c8]">{reqNotes.length}/500</p>
                 </div>
@@ -808,7 +808,7 @@ export default function PaymentMilestonesCard({
                   type="button"
                   onClick={handleRequestDeposit}
                   disabled={reqLoading}
-                  className="inline-flex h-8 items-center gap-1.5 rounded-full bg-[#E85C1A] px-4 text-[0.78rem] font-semibold text-white transition hover:bg-[#d04d15] disabled:opacity-60"
+                  className="inline-flex h-8 items-center gap-1.5 rounded-full bg-[#f4511e] px-4 text-[0.78rem] font-semibold text-white transition hover:bg-[#d04d15] disabled:opacity-60"
                 >
                   {reqLoading
                     ? <><Loader2 size={12} className="animate-spin" /> Requesting…</>
@@ -835,7 +835,7 @@ export default function PaymentMilestonesCard({
                     className={[
                       "absolute -left-[9px] flex h-4 w-4 items-center justify-center rounded-full border-2 bg-white",
                       isDone  ? "border-emerald-500 bg-emerald-500"
-                              : isCurr ? "border-[#E85C1A] bg-[#E85C1A]"
+                              : isCurr ? "border-[#f4511e] bg-[#f4511e]"
                               : "border-black/20",
                     ].join(" ")}
                     style={{ marginTop: "2px" }}
@@ -902,7 +902,7 @@ export default function PaymentMilestonesCard({
                       <button
                         type="button"
                         onClick={() => { setModal(step.action!.modal); setNote(""); setError(null); }}
-                        className="inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full bg-[#E85C1A] px-3 text-[0.73rem] font-semibold text-white transition hover:bg-[#d04d15]"
+                        className="inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full bg-[#f4511e] px-3 text-[0.73rem] font-semibold text-white transition hover:bg-[#d04d15]"
                       >
                         {step.action.label}
                       </button>
@@ -967,7 +967,7 @@ export default function PaymentMilestonesCard({
                       id="corr-stage"
                       value={corrStage}
                       onChange={(e) => setCorrStage(e.target.value as PaymentStage)}
-                      className="h-9 rounded-lg border border-black/[0.1] bg-white px-3 text-[0.85rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A]/50 focus:ring-2 focus:ring-[#E85C1A]/10"
+                      className="h-9 rounded-lg border border-black/[0.1] bg-white px-3 text-[0.85rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e]/50 focus:ring-2 focus:ring-[#f4511e]/10"
                     >
                       {correctableStages.map((s) => (
                         <option key={s} value={s}>{STAGE_LABEL[s]}</option>
@@ -986,7 +986,7 @@ export default function PaymentMilestonesCard({
                       type="checkbox"
                       checked={corrReset}
                       onChange={(e) => setCorrReset(e.target.checked)}
-                      className="mt-0.5 h-4 w-4 accent-[#E85C1A]"
+                      className="mt-0.5 h-4 w-4 accent-[#f4511e]"
                     />
                     <span className="text-[0.8rem] text-[#1a1a1a]">
                       Also mark the payment as not yet received
@@ -1008,7 +1008,7 @@ export default function PaymentMilestonesCard({
                     onChange={(e) => setCorrReason(e.target.value.slice(0, 500))}
                     rows={2}
                     placeholder="e.g. Deposit has not arrived — this was never confirmed by anyone"
-                    className="w-full resize-none rounded-lg border border-black/[0.1] bg-white px-3 py-2 text-[0.83rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#E85C1A]/50 focus:ring-2 focus:ring-[#E85C1A]/10"
+                    className="w-full resize-none rounded-lg border border-black/[0.1] bg-white px-3 py-2 text-[0.83rem] text-[#1a1a1a] outline-none placeholder:text-[#bbb] transition focus:border-[#f4511e]/50 focus:ring-2 focus:ring-[#f4511e]/10"
                   />
                   <p className="mt-1 text-right text-[0.66rem] tabular-nums text-[#c0c3c8]">{corrReason.length}/500</p>
                 </div>
@@ -1101,7 +1101,7 @@ export default function PaymentMilestonesCard({
           loading={loading}
           error={error}
           confirmLabel="Release Shipment"
-          confirmClass="bg-[#E85C1A] hover:bg-[#d04d15]"
+          confirmClass="bg-[#f4511e] hover:bg-[#d04d15]"
         />
       )}
 

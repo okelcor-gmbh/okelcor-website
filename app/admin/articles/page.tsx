@@ -48,7 +48,7 @@ export default async function AdminArticlesPage({ searchParams }: Props) {
       {/* Header */}
       <div className="mb-6 flex items-center justify-between gap-4">
         <div>
-          <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#E85C1A]">
+          <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">
             Articles
           </p>
           <p className="mt-0.5 text-[0.875rem] text-[#5c5e62]">
@@ -65,7 +65,7 @@ export default async function AdminArticlesPage({ searchParams }: Props) {
           </Link>
           <Link
             href="/admin/articles/new"
-            className="flex items-center gap-2 rounded-full bg-[#E85C1A] px-4 py-2 text-[0.83rem] font-semibold text-white transition hover:bg-[#d44f12]"
+            className="flex items-center gap-2 rounded-full bg-[#f4511e] px-4 py-2 text-[0.83rem] font-semibold text-white transition hover:bg-[#df4618]"
           >
             <Plus size={14} strokeWidth={2.5} />
             New Article

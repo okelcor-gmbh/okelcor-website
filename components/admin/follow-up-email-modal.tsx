@@ -102,7 +102,7 @@ export default function FollowUpEmailModal({ quoteId, recipientName, recipientEm
             </div>
           ) : (
             <select value={selectedTemplate} onChange={(e) => setSelectedTemplate(e.target.value)}
-              className="w-full rounded-xl border border-black/[0.09] bg-white px-3 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10">
+              className="w-full rounded-xl border border-black/[0.09] bg-white px-3 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10">
               {templates.map((t) => (
                 <option key={t.key} value={t.key}>{t.label || t.key}</option>
               ))}
@@ -127,7 +127,7 @@ export default function FollowUpEmailModal({ quoteId, recipientName, recipientEm
           </label>
           <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={3}
             placeholder="Add a personal note to this email…"
-            className="w-full resize-none rounded-xl border border-black/[0.09] bg-white px-3 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition placeholder:text-[#aaa] focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10" />
+            className="w-full resize-none rounded-xl border border-black/[0.09] bg-white px-3 py-2.5 text-[0.875rem] text-[#1a1a1a] outline-none transition placeholder:text-[#aaa] focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10" />
         </div>
 
         {/* Result */}

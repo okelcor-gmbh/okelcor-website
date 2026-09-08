@@ -60,14 +60,14 @@ export default async function EditProductPage({ params }: Props) {
       <div className="mb-7">
         <Link
           href="/admin/products"
-          className="mb-4 inline-flex items-center gap-1.5 text-[0.8rem] font-medium text-[#5c5e62] transition hover:text-[#E85C1A]"
+          className="mb-4 inline-flex items-center gap-1.5 text-[0.8rem] font-medium text-[#5c5e62] transition hover:text-[#f4511e]"
         >
           <ArrowLeft size={14} strokeWidth={2} />
           Back to Products
         </Link>
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#E85C1A]">
+            <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">
               Edit Product
             </p>
             <p className="mt-0.5 text-[0.875rem] text-[#5c5e62]">

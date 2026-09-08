@@ -20,7 +20,7 @@ import { useAdminPermissions } from "@/hooks/use-admin-permissions";
  */
 
 const INPUT =
-  "h-9 w-full rounded-lg border border-black/[0.10] bg-white px-3 text-[0.83rem] text-[#171a20] placeholder:text-[#8c8f94] focus:border-[#E85C1A] focus:outline-none";
+  "h-9 w-full rounded-lg border border-black/[0.10] bg-white px-3 text-[0.83rem] text-[#171a20] placeholder:text-[#8c8f94] focus:border-[#f4511e] focus:outline-none";
 const LABEL = "mb-1 block text-[0.75rem] font-semibold text-[#5c5e62]";
 
 type Tab = "invoices" | "reconciliation";
@@ -354,13 +354,13 @@ function InvoiceForm({
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <label className={LABEL}>sevDesk number <span className="text-[#E85C1A]">*</span></label>
+          <label className={LABEL}>sevDesk number <span className="text-[#f4511e]">*</span></label>
           <input value={form.external_number} onChange={(e) => set("external_number", e.target.value)}
                  required placeholder="SD-114" className={INPUT} />
           {err("external_number") && <p className="mt-1 text-[0.72rem] text-red-600">{err("external_number")}</p>}
         </div>
         <div>
-          <label className={LABEL}>Issued on <span className="text-[#E85C1A]">*</span></label>
+          <label className={LABEL}>Issued on <span className="text-[#f4511e]">*</span></label>
           <input type="date" value={form.issued_on} onChange={(e) => set("issued_on", e.target.value)}
                  required className={INPUT} />
           {err("issued_on") && <p className="mt-1 text-[0.72rem] text-red-600">{err("issued_on")}</p>}
@@ -578,7 +578,7 @@ export default function FinanceInvoicesPanel({
           <button
             type="button"
             onClick={() => setAdding(true)}
-            className="ml-auto flex items-center gap-1.5 rounded-full bg-[#E85C1A] px-3.5 py-1.5 text-[0.8rem] font-semibold text-white transition hover:bg-[#d24f13]"
+            className="ml-auto flex items-center gap-1.5 rounded-full bg-[#f4511e] px-3.5 py-1.5 text-[0.8rem] font-semibold text-white transition hover:bg-[#d24f13]"
           >
             <Plus size={13} /> Record an invoice
           </button>
@@ -750,7 +750,7 @@ export default function FinanceInvoicesPanel({
                             <a
                               href={`/api/admin/finance-invoices/${r.id}/download`}
                               title={r.file_name ?? "Download"}
-                              className="inline-flex items-center gap-1 text-[0.75rem] font-semibold text-[#E85C1A] hover:underline"
+                              className="inline-flex items-center gap-1 text-[0.75rem] font-semibold text-[#f4511e] hover:underline"
                             >
                               <Download size={11} /> Download
                             </a>

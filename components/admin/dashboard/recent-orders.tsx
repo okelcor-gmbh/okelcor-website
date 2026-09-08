@@ -16,7 +16,7 @@ type Order = {
 
 // Status badge colours — pending is orange/prominent to draw attention
 const STATUS_STYLES: Record<string, string> = {
-  pending:    "bg-[#fff1ec] text-[#E85C1A] ring-1 ring-[#E85C1A]/30",
+  pending:    "bg-[#fff1ec] text-[#f4511e] ring-1 ring-[#f4511e]/30",
   processing: "bg-amber-50  text-amber-700  ring-1 ring-amber-300/40",
   confirmed:  "bg-blue-50   text-blue-700   ring-1 ring-blue-300/40",
   shipped:    "bg-purple-50 text-purple-700 ring-1 ring-purple-300/40",
@@ -71,7 +71,7 @@ function Row({
             onClick={() => onConfirm(o.id)}
             disabled={confirming}
             title="Mark as confirmed + paid"
-            className="flex items-center gap-1 rounded-lg bg-[#E85C1A] px-2.5 py-1 text-[0.7rem] font-semibold text-white transition hover:bg-[#d04d15] disabled:opacity-50"
+            className="flex items-center gap-1 rounded-lg bg-[#f4511e] px-2.5 py-1 text-[0.7rem] font-semibold text-white transition hover:bg-[#d04d15] disabled:opacity-50"
           >
             {confirming ? (
               <Loader2 size={11} className="animate-spin" />
@@ -146,12 +146,12 @@ export default function RecentOrders() {
           </span>
           <p className="text-[0.9rem] font-bold text-[#1a1a1a]">Recent Orders</p>
           {pendingCount > 0 && (
-            <span className="rounded-full bg-[#E85C1A] px-1.5 py-0.5 text-[0.65rem] font-bold text-white">
+            <span className="rounded-full bg-[#f4511e] px-1.5 py-0.5 text-[0.65rem] font-bold text-white">
               {pendingCount} pending
             </span>
           )}
         </div>
-        <Link href="/admin/orders" className="text-[0.75rem] font-semibold text-[#E85C1A] hover:underline">
+        <Link href="/admin/orders" className="text-[0.75rem] font-semibold text-[#f4511e] hover:underline">
           View all →
         </Link>
       </div>
@@ -167,7 +167,7 @@ export default function RecentOrders() {
         ) : orders === null ? (
           <p className="px-5 py-8 text-center text-[0.83rem] text-[#9ca3af]">
             Could not load orders.{" "}
-            <button type="button" onClick={() => void refresh()} className="font-semibold text-[#E85C1A] hover:underline">
+            <button type="button" onClick={() => void refresh()} className="font-semibold text-[#f4511e] hover:underline">
               Retry
             </button>
           </p>
@@ -187,8 +187,8 @@ export default function RecentOrders() {
 
       {/* Summary footer when pending orders exist */}
       {!loading && pendingCount > 0 && (
-        <div className="border-t border-[#E85C1A]/10 bg-[#fffaf8] px-5 py-2.5">
-          <p className="text-[0.72rem] font-semibold text-[#E85C1A]">
+        <div className="border-t border-[#f4511e]/10 bg-[#fffaf8] px-5 py-2.5">
+          <p className="text-[0.72rem] font-semibold text-[#f4511e]">
             {pendingCount} order{pendingCount > 1 ? "s" : ""} awaiting payment confirmation
           </p>
         </div>

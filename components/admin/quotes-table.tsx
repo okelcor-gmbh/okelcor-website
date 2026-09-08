@@ -294,7 +294,7 @@ export default function QuotesTable({
               <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#5c5e62]" />
               <input type="text" value={q} onChange={(e) => setQ(e.target.value)}
                 placeholder="Search by ref, name, email, or company…"
-                className="h-10 w-full rounded-xl border border-black/[0.09] bg-white pl-9 pr-4 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10" />
+                className="h-10 w-full rounded-xl border border-black/[0.09] bg-white pl-9 pr-4 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10" />
             </div>
             <button type="submit" className="h-10 rounded-xl bg-[#1a1a1a] px-4 text-[0.875rem] font-semibold text-white transition hover:bg-[#333]">
               Search
@@ -325,7 +325,7 @@ export default function QuotesTable({
           {QUAL_TABS.map(({ key, label }) => (
             <button key={key} type="button" onClick={() => router.push(buildUrl({ qualification_status: key, page: 1 }))}
               className={["h-7 whitespace-nowrap rounded-lg px-2.5 text-[0.73rem] font-semibold transition",
-                currentQualificationStatus === key ? "bg-[#E85C1A] text-white" : "border border-black/[0.09] bg-white text-[#5c5e62] hover:border-[#E85C1A] hover:text-[#E85C1A]",
+                currentQualificationStatus === key ? "bg-[#f4511e] text-white" : "border border-black/[0.09] bg-white text-[#5c5e62] hover:border-[#f4511e] hover:text-[#f4511e]",
               ].join(" ")}>
               {label}
             </button>
@@ -436,7 +436,7 @@ export default function QuotesTable({
                           <ProposalBadge status={quote.proposal_status} />
                         </div>
                         {isPending ? (
-                          <Loader2 size={13} className="mt-1 animate-spin text-[#E85C1A]" />
+                          <Loader2 size={13} className="mt-1 animate-spin text-[#f4511e]" />
                         ) : (
                           effectiveQualStatus !== "qualified" &&
                           effectiveQualStatus !== "spam" &&
@@ -485,7 +485,7 @@ export default function QuotesTable({
                       {/* View */}
                       <td className="px-4 py-3">
                         <Link href={`/admin/quotes/${quote.id}`}
-                          className="flex h-8 w-8 items-center justify-center rounded-lg text-[#5c5e62] transition hover:bg-[#E85C1A]/10 hover:text-[#E85C1A]"
+                          className="flex h-8 w-8 items-center justify-center rounded-lg text-[#5c5e62] transition hover:bg-[#f4511e]/10 hover:text-[#f4511e]"
                           title="View quote">
                           <Eye size={14} strokeWidth={2} />
                         </Link>
@@ -507,11 +507,11 @@ export default function QuotesTable({
             </p>
             <div className="flex gap-2">
               <Link href={hasPrev ? buildUrl({ page: currentPage - 1 }) : "#"} aria-disabled={!hasPrev}
-                className={`flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] transition ${hasPrev ? "bg-white text-[#1a1a1a] hover:border-[#E85C1A] hover:text-[#E85C1A]" : "pointer-events-none bg-[#f5f5f5] text-[#ccc]"}`}>
+                className={`flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] transition ${hasPrev ? "bg-white text-[#1a1a1a] hover:border-[#f4511e] hover:text-[#f4511e]" : "pointer-events-none bg-[#f5f5f5] text-[#ccc]"}`}>
                 <ChevronLeft size={14} />
               </Link>
               <Link href={hasNext ? buildUrl({ page: currentPage + 1 }) : "#"} aria-disabled={!hasNext}
-                className={`flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] transition ${hasNext ? "bg-white text-[#1a1a1a] hover:border-[#E85C1A] hover:text-[#E85C1A]" : "pointer-events-none bg-[#f5f5f5] text-[#ccc]"}`}>
+                className={`flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] transition ${hasNext ? "bg-white text-[#1a1a1a] hover:border-[#f4511e] hover:text-[#f4511e]" : "pointer-events-none bg-[#f5f5f5] text-[#ccc]"}`}>
                 <ChevronRight size={14} />
               </Link>
             </div>

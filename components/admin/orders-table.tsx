@@ -168,7 +168,7 @@ export default function OrdersTable({
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search by order ref or customer…"
-              className="h-10 w-full rounded-xl border border-black/[0.09] bg-white pl-9 pr-4 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+              className="h-10 w-full rounded-xl border border-black/[0.09] bg-white pl-9 pr-4 text-[0.875rem] text-[#1a1a1a] outline-none placeholder:text-[#aaa] transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
             />
           </div>
           <button
@@ -192,7 +192,7 @@ export default function OrdersTable({
         <select
           value={currentStatus === "all" ? "" : currentStatus}
           onChange={(e) => router.push(buildUrl({ status: e.target.value || "all", page: 1 }))}
-          className="h-10 rounded-xl border border-black/[0.09] bg-white px-3 pr-8 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10 cursor-pointer"
+          className="h-10 rounded-xl border border-black/[0.09] bg-white px-3 pr-8 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10 cursor-pointer"
         >
           <option value="">All statuses</option>
           {STATUS_OPTIONS.filter((s) => s !== "all").map((s) => (
@@ -204,7 +204,7 @@ export default function OrdersTable({
         <select
           value={currentPaymentStatus === "all" ? "" : currentPaymentStatus}
           onChange={(e) => router.push(buildUrl({ paymentStatus: e.target.value || "all", page: 1 }))}
-          className="h-10 rounded-xl border border-black/[0.09] bg-white px-3 pr-8 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10 cursor-pointer"
+          className="h-10 rounded-xl border border-black/[0.09] bg-white px-3 pr-8 text-[0.875rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10 cursor-pointer"
         >
           <option value="">All payments</option>
           {PAYMENT_STATUS_OPTIONS.filter((ps) => ps !== "all").map((ps) => (
@@ -281,7 +281,7 @@ export default function OrdersTable({
                     <td className="px-4 py-3">
                       <Link
                         href={`/admin/orders/${order.id}`}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg text-[#5c5e62] transition hover:bg-[#E85C1A]/10 hover:text-[#E85C1A]"
+                        className="flex h-8 w-8 items-center justify-center rounded-lg text-[#5c5e62] transition hover:bg-[#f4511e]/10 hover:text-[#f4511e]"
                         title="View order"
                       >
                         <Eye size={14} strokeWidth={2} />
@@ -305,14 +305,14 @@ export default function OrdersTable({
               <Link
                 href={hasPrev ? buildUrl({ page: currentPage - 1 }) : "#"}
                 aria-disabled={!hasPrev}
-                className={`flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] transition ${hasPrev ? "bg-white text-[#1a1a1a] hover:border-[#E85C1A] hover:text-[#E85C1A]" : "pointer-events-none bg-[#f5f5f5] text-[#ccc]"}`}
+                className={`flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] transition ${hasPrev ? "bg-white text-[#1a1a1a] hover:border-[#f4511e] hover:text-[#f4511e]" : "pointer-events-none bg-[#f5f5f5] text-[#ccc]"}`}
               >
                 <ChevronLeft size={14} />
               </Link>
               <Link
                 href={hasNext ? buildUrl({ page: currentPage + 1 }) : "#"}
                 aria-disabled={!hasNext}
-                className={`flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] transition ${hasNext ? "bg-white text-[#1a1a1a] hover:border-[#E85C1A] hover:text-[#E85C1A]" : "pointer-events-none bg-[#f5f5f5] text-[#ccc]"}`}
+                className={`flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] transition ${hasNext ? "bg-white text-[#1a1a1a] hover:border-[#f4511e] hover:text-[#f4511e]" : "pointer-events-none bg-[#f5f5f5] text-[#ccc]"}`}
               >
                 <ChevronRight size={14} />
               </Link>

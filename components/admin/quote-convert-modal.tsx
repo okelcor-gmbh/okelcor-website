@@ -106,7 +106,7 @@ function Input({ value, onChange, placeholder, type = "text", min, step, classNa
       step={step}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className={`w-full rounded-xl border border-black/[0.09] bg-white px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] placeholder:text-[#9ca3af] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10 ${className}`}
+      className={`w-full rounded-xl border border-black/[0.09] bg-white px-3.5 py-2.5 text-[0.875rem] text-[#1a1a1a] placeholder:text-[#9ca3af] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10 ${className}`}
     />
   );
 }
@@ -232,7 +232,7 @@ export default function QuoteConvertModal({ quote, onClose, onSuccess }: Props) 
         {/* Header */}
         <div className="flex items-center justify-between border-b border-black/[0.07] px-6 py-5">
           <div>
-            <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+            <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
               Convert to Order
             </p>
             <p className="mt-0.5 text-[0.95rem] font-bold text-[#1a1a1a]">
@@ -262,7 +262,7 @@ export default function QuoteConvertModal({ quote, onClose, onSuccess }: Props) 
 
           {/* ── Delivery ── */}
           <section>
-            <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+            <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
               Delivery
             </p>
             <div className="grid gap-4 sm:grid-cols-2">
@@ -312,13 +312,13 @@ export default function QuoteConvertModal({ quote, onClose, onSuccess }: Props) 
           {/* ── Items ── */}
           <section>
             <div className="mb-3 flex items-center justify-between">
-              <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+              <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
                 Items
               </p>
               <button
                 type="button"
                 onClick={addItem}
-                className="flex items-center gap-1.5 rounded-full border border-[#E85C1A] px-3.5 py-1.5 text-[0.78rem] font-semibold text-[#E85C1A] transition hover:bg-[#E85C1A] hover:text-white"
+                className="flex items-center gap-1.5 rounded-full border border-[#f4511e] px-3.5 py-1.5 text-[0.78rem] font-semibold text-[#f4511e] transition hover:bg-[#f4511e] hover:text-white"
               >
                 <Plus size={13} />
                 Add Item
@@ -423,7 +423,7 @@ export default function QuoteConvertModal({ quote, onClose, onSuccess }: Props) 
 
           {/* ── Summary ── */}
           <section>
-            <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+            <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
               Order Summary
             </p>
             <div className="rounded-xl border border-black/[0.08] bg-[#fafafa] p-4">
@@ -444,13 +444,13 @@ export default function QuoteConvertModal({ quote, onClose, onSuccess }: Props) 
                     step="0.01"
                     value={deliveryCost}
                     onChange={(e) => setDeliveryCost(e.target.value)}
-                    className="w-28 rounded-lg border border-black/[0.09] bg-white px-3 py-1.5 text-right text-[0.83rem] text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+                    className="w-28 rounded-lg border border-black/[0.09] bg-white px-3 py-1.5 text-right text-[0.83rem] text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
                   />
                 </div>
                 <div className="border-t border-black/[0.07] pt-3">
                   <div className="flex items-center justify-between">
                     <span className="text-[0.875rem] font-bold text-[#1a1a1a]">Total</span>
-                    <span className="text-[1rem] font-extrabold text-[#E85C1A]">
+                    <span className="text-[1rem] font-extrabold text-[#f4511e]">
                       {fmtEur(total)}
                     </span>
                   </div>
@@ -461,14 +461,14 @@ export default function QuoteConvertModal({ quote, onClose, onSuccess }: Props) 
 
           {/* ── Payment Method ── */}
           <section>
-            <p className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+            <p className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
               Payment Method
             </p>
             <div className="relative inline-block">
               <select
                 value={paymentMethod}
                 onChange={(e) => setPaymentMethod(e.target.value)}
-                className="h-10 appearance-none rounded-xl border border-black/[0.09] bg-white pl-3.5 pr-9 text-[0.875rem] font-semibold text-[#1a1a1a] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+                className="h-10 appearance-none rounded-xl border border-black/[0.09] bg-white pl-3.5 pr-9 text-[0.875rem] font-semibold text-[#1a1a1a] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
               >
                 {PAYMENT_METHODS.map((pm) => (
                   <option key={pm.value} value={pm.value}>
@@ -485,7 +485,7 @@ export default function QuoteConvertModal({ quote, onClose, onSuccess }: Props) 
 
           {/* ── Admin Notes ── */}
           <section>
-            <p className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#E85C1A]">
+            <p className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-[#f4511e]">
               Admin Notes
             </p>
             <textarea
@@ -493,7 +493,7 @@ export default function QuoteConvertModal({ quote, onClose, onSuccess }: Props) 
               onChange={(e) => setAdminNotes(e.target.value)}
               rows={3}
               placeholder="Optional internal notes for this order…"
-              className="w-full resize-none rounded-xl border border-black/[0.09] bg-white px-4 py-3 text-[0.875rem] text-[#1a1a1a] placeholder:text-[#9ca3af] outline-none transition focus:border-[#E85C1A] focus:ring-2 focus:ring-[#E85C1A]/10"
+              className="w-full resize-none rounded-xl border border-black/[0.09] bg-white px-4 py-3 text-[0.875rem] text-[#1a1a1a] placeholder:text-[#9ca3af] outline-none transition focus:border-[#f4511e] focus:ring-2 focus:ring-[#f4511e]/10"
             />
           </section>
 
@@ -513,7 +513,7 @@ export default function QuoteConvertModal({ quote, onClose, onSuccess }: Props) 
             type="button"
             onClick={handleSubmit}
             disabled={isPending}
-            className="flex h-10 items-center gap-2 rounded-full bg-[#E85C1A] px-7 text-[0.875rem] font-semibold text-white transition hover:bg-[#d14f14] disabled:opacity-60"
+            className="flex h-10 items-center gap-2 rounded-full bg-[#f4511e] px-7 text-[0.875rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-60"
           >
             {isPending && <Loader2 size={14} className="animate-spin" />}
             {isPending ? "Converting…" : "Convert to Order"}

@@ -131,7 +131,7 @@ export default function MediaPickerModal({ onSelect, onClose, defaultCollection 
               onClick={() => { setPage(1); setCollection(c.value as "" | MediaCollection); }}
               className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
                 collection === c.value
-                  ? "bg-[#E85C1A] text-white"
+                  ? "bg-[#f4511e] text-white"
                   : "bg-[#f0f2f5] text-[#5c5e62] hover:bg-[#e8e8e8]"
               }`}
             >
@@ -143,7 +143,7 @@ export default function MediaPickerModal({ onSelect, onClose, defaultCollection 
               type="button"
               onClick={() => fileInput.current?.click()}
               disabled={uploading}
-              className="flex h-8 items-center gap-1.5 rounded-lg bg-[#E85C1A] px-3 text-xs font-semibold text-white transition hover:bg-[#d24f13] disabled:opacity-60"
+              className="flex h-8 items-center gap-1.5 rounded-lg bg-[#f4511e] px-3 text-xs font-semibold text-white transition hover:bg-[#d24f13] disabled:opacity-60"
             >
               {uploading ? <RefreshCw size={13} className="animate-spin" /> : <Upload size={13} />}
               {uploading ? "Uploading…" : "Upload"}
@@ -165,7 +165,7 @@ export default function MediaPickerModal({ onSelect, onClose, defaultCollection 
               onChange={(e) => setSearchInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
               placeholder="Search…"
-              className="h-8 w-40 rounded-lg border border-black/[0.09] px-2.5 text-sm text-[#1a1a1a] outline-none focus:border-[#E85C1A]"
+              className="h-8 w-40 rounded-lg border border-black/[0.09] px-2.5 text-sm text-[#1a1a1a] outline-none focus:border-[#f4511e]"
             />
             <button
               type="button"
@@ -186,7 +186,7 @@ export default function MediaPickerModal({ onSelect, onClose, defaultCollection 
 
         {/* Grid — also the drop target, so dragging an image straight in works */}
         <div
-          className={`relative flex-1 overflow-y-auto px-5 py-4 ${dragging ? "bg-[#E85C1A]/[0.04]" : ""}`}
+          className={`relative flex-1 overflow-y-auto px-5 py-4 ${dragging ? "bg-[#f4511e]/[0.04]" : ""}`}
           onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
           onDragLeave={(e) => { e.preventDefault(); setDragging(false); }}
           onDrop={(e) => {
@@ -197,7 +197,7 @@ export default function MediaPickerModal({ onSelect, onClose, defaultCollection 
           }}
         >
           {dragging && (
-            <div className="pointer-events-none absolute inset-3 z-10 flex items-center justify-center rounded-xl border-2 border-dashed border-[#E85C1A] bg-white/80 text-sm font-semibold text-[#E85C1A]">
+            <div className="pointer-events-none absolute inset-3 z-10 flex items-center justify-center rounded-xl border-2 border-dashed border-[#f4511e] bg-white/80 text-sm font-semibold text-[#f4511e]">
               Drop to upload and insert
             </div>
           )}
@@ -210,7 +210,7 @@ export default function MediaPickerModal({ onSelect, onClose, defaultCollection 
               <button
                 type="button"
                 onClick={() => fileInput.current?.click()}
-                className="text-xs font-semibold text-[#E85C1A] hover:underline"
+                className="text-xs font-semibold text-[#f4511e] hover:underline"
               >
                 Upload one instead — or drag it in
               </button>
@@ -227,7 +227,7 @@ export default function MediaPickerModal({ onSelect, onClose, defaultCollection 
                     onMouseEnter={() => setHovered(item.id)}
                     onMouseLeave={() => setHovered(null)}
                     className={`group relative overflow-hidden rounded-xl border-2 transition ${
-                      hovered === item.id ? "border-[#E85C1A] shadow-md" : "border-black/[0.07]"
+                      hovered === item.id ? "border-[#f4511e] shadow-md" : "border-black/[0.07]"
                     }`}
                   >
                     <div className="relative aspect-square bg-[#f5f5f5]">
@@ -245,8 +245,8 @@ export default function MediaPickerModal({ onSelect, onClose, defaultCollection 
                         </div>
                       )}
                       {hovered === item.id && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-[#E85C1A]/60">
-                          <span className="rounded-full bg-white px-2 py-0.5 text-[0.65rem] font-bold text-[#E85C1A]">
+                        <div className="absolute inset-0 flex items-center justify-center bg-[#f4511e]/60">
+                          <span className="rounded-full bg-white px-2 py-0.5 text-[0.65rem] font-bold text-[#f4511e]">
                             Insert
                           </span>
                         </div>
