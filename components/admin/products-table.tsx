@@ -600,7 +600,7 @@ export default function ProductsTable({
                   (h) => (
                     <th
                       key={h}
-                      className="px-4 py-3 text-[0.7rem] font-bold uppercase tracking-[0.12em] text-[#5c5e62]"
+                      className={`px-4 py-3 text-[0.7rem] font-bold uppercase tracking-[0.12em] text-[#5c5e62] ${["Wholesale", "Retail", "Price"].includes(h) ? "text-right" : ""}`}
                     >
                       {h}
                     </th>
@@ -696,8 +696,8 @@ export default function ProductsTable({
                         {product.size}
                       </td>
 
-                      {/* Price */}
-                      <td className="px-4 py-3">
+                      {/* Price — right-aligned tabular numerals, the console rule */}
+                      <td className="px-4 py-3 text-right tabular-nums">
                         {currentView === "b2b" ? (
                           <span className="text-[0.875rem] font-semibold text-green-700">
                             €{Number(product.price_b2b).toFixed(2)}

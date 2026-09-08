@@ -11,6 +11,7 @@ import {
 import { BUYER_TIER_STYLES, BUYER_TIER_LABELS, RISK_LEVEL_STYLES, RISK_LEVEL_LABELS } from "@/lib/crm8";
 import { useAdminPermissions } from "@/hooks/use-admin-permissions";
 import AddCustomerModal from "@/components/admin/add-customer-modal";
+import PageHeader from "@/components/admin/page-header";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -237,7 +238,7 @@ function ConfirmModal({
             Cancel
           </button>
           <button type="button" onClick={onConfirm}
-            className={`flex-1 h-10 rounded-xl text-[0.83rem] font-semibold text-white transition ${danger ? "bg-red-600 hover:bg-red-700" : "bg-[#f4511e] hover:bg-[#d44d10]"}`}>
+            className={`flex-1 h-10 rounded-xl text-[0.83rem] font-semibold text-white transition ${danger ? "bg-red-600 hover:bg-red-700" : "bg-[#f4511e] hover:bg-[#df4618]"}`}>
             {confirmLabel}
           </button>
         </div>
@@ -401,19 +402,18 @@ export default function CustomersPage() {
   return (
     <div className="p-6 md:p-8">
 
-      {/* Page header */}
-      <div className="mb-7 flex items-start justify-between gap-4">
-        <div>
-          <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">Customer Management</p>
-          <p className="mt-1 text-[0.875rem] text-[#5c5e62]">Manage accounts, review status, and monitor security.</p>
-        </div>
+      <PageHeader
+        eyebrow="Customers & CRM"
+        title="Customers"
+        sub="Manage accounts, review status, and monitor security."
+      >
         {can("customers.create") && (
           <button type="button" onClick={() => setAddOpen(true)}
-            className="flex h-[42px] shrink-0 items-center gap-2 rounded-full bg-[#f4511e] px-5 text-[0.875rem] font-semibold text-white transition hover:bg-[#d44d10]">
+            className="flex h-[42px] shrink-0 items-center gap-2 rounded-full bg-[#f4511e] px-5 text-[0.875rem] font-semibold text-white transition hover:bg-[#df4618]">
             <Plus size={16} /> Add Customer
           </button>
         )}
-      </div>
+      </PageHeader>
 
       {/* Add-customer modal */}
       {addOpen && (
@@ -442,7 +442,7 @@ export default function CustomersPage() {
               onChange={e => { setFile(e.target.files?.[0] ?? null); setImportResult(null); setImportError(null); }} />
           </label>
           <button type="button" disabled={!file || importing} onClick={handleImport}
-            className="flex h-[42px] items-center gap-2 rounded-full bg-[#f4511e] px-6 text-[0.875rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:cursor-not-allowed disabled:opacity-50">
+            className="flex h-[42px] items-center gap-2 rounded-full bg-[#f4511e] px-6 text-[0.875rem] font-semibold text-white transition hover:bg-[#df4618] disabled:cursor-not-allowed disabled:opacity-50">
             {importing ? <><Loader2 size={15} className="animate-spin" /> Importing…</> : <><Upload size={15} /> Import</>}
           </button>
         </div>

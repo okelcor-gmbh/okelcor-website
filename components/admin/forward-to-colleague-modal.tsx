@@ -164,7 +164,7 @@ export default function ForwardToColleagueModal({
               <div className="mt-5 flex gap-3">
                 <Link
                   href={`/admin/messages/${sent.id}`}
-                  className="flex h-10 items-center rounded-xl bg-[#f4511e] px-5 text-[0.82rem] font-semibold text-white transition hover:bg-[#d44d10]"
+                  className="flex h-10 items-center rounded-xl bg-[#f4511e] px-5 text-[0.82rem] font-semibold text-white transition hover:bg-[#df4618]"
                 >
                   Open the thread
                 </Link>
@@ -221,7 +221,7 @@ export default function ForwardToColleagueModal({
               </button>
               <button
                 type="submit" disabled={submitting}
-                className="flex h-10 items-center gap-2 rounded-xl bg-[#f4511e] px-6 text-[0.82rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:opacity-50"
+                className="flex h-10 items-center gap-2 rounded-xl bg-[#f4511e] px-6 text-[0.82rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50"
               >
                 {submitting ? <><Loader2 size={15} className="animate-spin" /> Forwarding…</> : <><Forward size={14} /> Forward</>}
               </button>

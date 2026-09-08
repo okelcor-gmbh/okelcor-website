@@ -118,7 +118,7 @@ export default function MarketIntelligence() {
 
           <a
             href={`/api/admin/analytics/markets/export?from=${daysAgo(days)}&to=${today()}`}
-            className="flex h-10 items-center gap-2 rounded-xl bg-[#f4511e] px-5 text-[0.82rem] font-semibold text-white transition hover:bg-[#d44d10]"
+            className="flex h-10 items-center gap-2 rounded-xl bg-[#f4511e] px-5 text-[0.82rem] font-semibold text-white transition hover:bg-[#df4618]"
           >
             <Download size={15} /> Export
           </a>

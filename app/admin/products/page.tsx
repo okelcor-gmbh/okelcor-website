@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import PageHeader from "@/components/admin/page-header";
 import { Plus, Trash2 } from "lucide-react";
 import {
   adminApiFetch,
@@ -67,18 +68,13 @@ export default async function AdminProductsPage({
 
   return (
     <div className="p-6 md:p-8">
-      {/* Header */}
-      <div className="mb-4 flex items-start justify-between gap-4">
-        <div>
-          <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">
-            Catalogue
-          </p>
-          <p className="mt-0.5 text-[0.875rem] text-[#5c5e62]">
-            {typeof meta.total === "number"
-              ? `${meta.total} product${meta.total !== 1 ? "s" : ""} total`
-              : "Manage your product catalogue"}
-          </p>
-        </div>
+      <PageHeader
+        eyebrow="Catalogue"
+        title="Products"
+        sub={typeof meta.total === "number"
+          ? `${meta.total} product${meta.total !== 1 ? "s" : ""} total`
+          : "Manage your product catalogue"}
+      >
         <div className="flex shrink-0 items-center gap-2">
           <CsvActions currentView={currentView} />
           <Link
@@ -96,7 +92,7 @@ export default async function AdminProductsPage({
             Add Product
           </Link>
         </div>
-      </div>
+      </PageHeader>
 
       {/* B2B / B2C segment tabs */}
       <div className="mb-6">

@@ -175,7 +175,7 @@ export default function PartnerSalesReview() {
         {canExport && (
           <a
             href={`/api/admin/partner-sales/export?${query}`}
-            className="ml-auto inline-flex items-center gap-2 rounded-lg bg-[#f4511e] px-4 py-2 text-[0.85rem] font-semibold text-white transition hover:bg-[#d04d15]"
+            className="ml-auto inline-flex items-center gap-2 rounded-lg bg-[#f4511e] px-4 py-2 text-[0.85rem] font-semibold text-white transition hover:bg-[#df4618]"
           >
             <Download size={15} /> Export CSV
           </a>

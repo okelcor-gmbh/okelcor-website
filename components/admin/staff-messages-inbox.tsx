@@ -106,7 +106,7 @@ export default function StaffMessagesInbox() {
         <button
           type="button"
           onClick={() => setComposing(true)}
-          className="ml-auto flex h-10 items-center gap-2 rounded-xl bg-[#f4511e] px-5 text-[0.82rem] font-semibold text-white transition hover:bg-[#d44d10]"
+          className="ml-auto flex h-10 items-center gap-2 rounded-xl bg-[#f4511e] px-5 text-[0.82rem] font-semibold text-white transition hover:bg-[#df4618]"
         >
           <PenSquare size={15} /> New message
         </button>

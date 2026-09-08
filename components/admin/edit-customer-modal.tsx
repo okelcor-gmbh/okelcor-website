@@ -275,7 +275,7 @@ export default function EditCustomerModal({ customer, onClose, onSaved }: Props)
             Cancel
           </button>
           <button type="submit" disabled={submitting}
-            className="flex h-10 items-center gap-2 rounded-xl bg-[#f4511e] px-6 text-[0.82rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:opacity-50">
+            className="flex h-10 items-center gap-2 rounded-xl bg-[#f4511e] px-6 text-[0.82rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50">
             {submitting ? <><Loader2 size={15} className="animate-spin" /> Saving…</> : <>Save Changes</>}
           </button>
         </div>

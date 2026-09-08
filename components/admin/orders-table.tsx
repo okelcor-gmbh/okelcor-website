@@ -220,7 +220,7 @@ export default function OrdersTable({
             <thead>
               <tr className="border-b border-black/[0.06] bg-[#fafafa]">
                 {["Order Ref", "Customer", "Status", "Payment", "Total", "Date", ""].map((h) => (
-                  <th key={h} className="px-4 py-3 text-[0.7rem] font-bold uppercase tracking-[0.12em] text-[#5c5e62]">
+                  <th key={h} className={`px-4 py-3 text-[0.7rem] font-bold uppercase tracking-[0.12em] text-[#5c5e62] ${h === "Total" ? "text-right" : ""}`}>
                     {h}
                   </th>
                 ))}
@@ -272,7 +272,7 @@ export default function OrdersTable({
                         </span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-[0.875rem] font-semibold text-[#1a1a1a]">
+                    <td className="px-4 py-3 text-right text-[0.875rem] font-semibold tabular-nums text-[#1a1a1a]">
                       {formatMoney(order.total, order.currency)}
                     </td>
                     <td className="px-4 py-3 text-[0.83rem] text-[#5c5e62]">

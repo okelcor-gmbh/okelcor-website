@@ -71,7 +71,7 @@ function Row({
             onClick={() => onConfirm(o.id)}
             disabled={confirming}
             title="Mark as confirmed + paid"
-            className="flex items-center gap-1 rounded-lg bg-[#f4511e] px-2.5 py-1 text-[0.7rem] font-semibold text-white transition hover:bg-[#d04d15] disabled:opacity-50"
+            className="flex items-center gap-1 rounded-lg bg-[#f4511e] px-2.5 py-1 text-[0.7rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50"
           >
             {confirming ? (
               <Loader2 size={11} className="animate-spin" />

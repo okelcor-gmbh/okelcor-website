@@ -75,7 +75,11 @@ export default async function AdminDashboard() {
         </DashboardErrorBoundary>
       )}
 
-      <PageHeader eyebrow="Overview" title="Dashboard">
+      <PageHeader
+        eyebrow="Overview"
+        title="Dashboard"
+        sub={new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+      >
         <div className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-[0.72rem] font-semibold text-emerald-700">
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
           Live · auto-refreshes every 30s

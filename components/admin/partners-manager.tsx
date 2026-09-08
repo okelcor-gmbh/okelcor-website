@@ -94,7 +94,7 @@ export default function PartnersManager() {
           <button
             type="button"
             onClick={() => setCreating((v) => !v)}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#f4511e] px-4 py-2 text-[0.85rem] font-semibold text-white transition hover:bg-[#d04d15]"
+            className="inline-flex items-center gap-2 rounded-lg bg-[#f4511e] px-4 py-2 text-[0.85rem] font-semibold text-white transition hover:bg-[#df4618]"
           >
             <Plus size={15} /> Add partner
           </button>
@@ -284,7 +284,7 @@ function CreatePartnerForm({ onDone, onCancel }: { onDone: () => void; onCancel:
 
       <div className="mt-5 flex gap-2">
         <button type="submit" disabled={!valid || busy}
-          className="rounded-lg bg-[#f4511e] px-4 py-2 text-[0.85rem] font-semibold text-white transition hover:bg-[#d04d15] disabled:opacity-40">
+          className="rounded-lg bg-[#f4511e] px-4 py-2 text-[0.85rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-40">
           {busy ? "Creating…" : "Create partner"}
         </button>
         <button type="button" onClick={onCancel}

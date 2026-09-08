@@ -221,7 +221,7 @@ function ConfirmModal({ title, body, confirmLabel, danger = false, reason, onRea
         )}
         <div className="mt-6 flex gap-3">
           <button type="button" onClick={onCancel} className="flex-1 h-10 rounded-xl border border-black/[0.1] text-[0.83rem] font-semibold text-[#5c5e62] hover:bg-[#f0f2f5]">Cancel</button>
-          <button type="button" onClick={onConfirm} disabled={tooShort} className={`flex-1 h-10 rounded-xl text-[0.83rem] font-semibold text-white disabled:opacity-50 ${danger ? "bg-red-600 hover:bg-red-700" : "bg-[#f4511e] hover:bg-[#d44d10]"}`}>{confirmLabel}</button>
+          <button type="button" onClick={onConfirm} disabled={tooShort} className={`flex-1 h-10 rounded-xl text-[0.83rem] font-semibold text-white disabled:opacity-50 ${danger ? "bg-red-600 hover:bg-red-700" : "bg-[#f4511e] hover:bg-[#df4618]"}`}>{confirmLabel}</button>
         </div>
       </div>
     </div>
@@ -710,7 +710,7 @@ export default function CustomerProfilePage() {
                   />
                   <div className="mt-2 flex gap-2">
                     <button type="button" disabled={savingNotes} onClick={saveNotes}
-                      className="flex items-center gap-1.5 rounded-xl bg-[#f4511e] px-3.5 py-1.5 text-[0.78rem] font-semibold text-white hover:bg-[#d44d10] disabled:opacity-50">
+                      className="flex items-center gap-1.5 rounded-xl bg-[#f4511e] px-3.5 py-1.5 text-[0.78rem] font-semibold text-white hover:bg-[#df4618] disabled:opacity-50">
                       {savingNotes ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />} Save
                     </button>
                     <button type="button" onClick={() => { setEditNotes(false); setNotes(customer.admin_notes ?? ""); }}
@@ -795,7 +795,7 @@ export default function CustomerProfilePage() {
               </div>
 
               <button type="button" disabled={accessSaving} onClick={saveAccess}
-                className="flex w-full items-center justify-center gap-2 rounded-full bg-[#f4511e] py-2.5 text-[0.83rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:opacity-50">
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-[#f4511e] py-2.5 text-[0.83rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50">
                 {accessSaving ? <><Loader2 size={13} className="animate-spin" /> Saving…</> : "Save Access Settings"}
               </button>
             </div>

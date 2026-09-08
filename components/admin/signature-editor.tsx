@@ -85,7 +85,7 @@ export default function SignatureEditor({ initialHtml }: Props) {
         type="button"
         disabled={saving}
         onClick={handleSave}
-        className="mt-4 flex h-10 items-center gap-2 rounded-xl bg-[#f4511e] px-6 text-[0.83rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:opacity-50"
+        className="mt-4 flex h-10 items-center gap-2 rounded-xl bg-[#f4511e] px-6 text-[0.83rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50"
       >
         {saving ? <><Loader2 size={14} className="animate-spin" /> Saving…</> : "Save Signature"}
       </button>

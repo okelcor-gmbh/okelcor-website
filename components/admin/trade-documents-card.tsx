@@ -998,7 +998,7 @@ export default function TradeDocumentsCard({
                   type="button"
                   onClick={handleUpload}
                   disabled={uploading}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-[#f4511e] px-4 py-2 text-[0.8rem] font-semibold text-white transition hover:bg-[#d04d15] disabled:opacity-60"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-[#f4511e] px-4 py-2 text-[0.8rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-60"
                 >
                   {uploading ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} strokeWidth={2} />}
                   {uploading ? "Uploading…" : "Upload"}
@@ -1145,7 +1145,7 @@ export default function TradeDocumentsCard({
                   type="button"
                   disabled={sendModal.loading || !sendModal.recipientEmail.trim()}
                   onClick={handleSendEmail}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-[#f4511e] px-4 py-2 text-[0.8rem] font-semibold text-white transition hover:bg-[#d04d15] disabled:opacity-60"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-[#f4511e] px-4 py-2 text-[0.8rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-60"
                 >
                   {sendModal.loading
                     ? <Loader2 size={13} className="animate-spin" />

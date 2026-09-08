@@ -192,7 +192,7 @@ export default function AccessProfileModal({
             disabled={applying}
             onClick={() => onApply(selected, notes.trim())}
             className={`flex flex-1 h-11 items-center justify-center gap-2 rounded-full text-[0.875rem] font-semibold text-white transition disabled:opacity-50 ${
-              profile.tone === "danger" ? "bg-red-600 hover:bg-red-700" : "bg-[#f4511e] hover:bg-[#d44d10]"
+              profile.tone === "danger" ? "bg-red-600 hover:bg-red-700" : "bg-[#f4511e] hover:bg-[#df4618]"
             }`}
           >
             {applying ? <Loader2 size={15} className="animate-spin" /> : <Check size={15} />}

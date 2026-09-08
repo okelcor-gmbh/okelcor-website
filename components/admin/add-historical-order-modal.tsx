@@ -390,7 +390,7 @@ export default function AddHistoricalOrderModal({
             Skip for now
           </button>
           <button type="button" onClick={finish}
-            className="flex h-10 items-center gap-2 rounded-xl bg-[#f4511e] px-6 text-[0.82rem] font-semibold text-white transition hover:bg-[#d44d10]">
+            className="flex h-10 items-center gap-2 rounded-xl bg-[#f4511e] px-6 text-[0.82rem] font-semibold text-white transition hover:bg-[#df4618]">
             Done — View Order
           </button>
         </div>
@@ -589,7 +589,7 @@ export default function AddHistoricalOrderModal({
             Cancel
           </button>
           <button type="submit" disabled={submitting}
-            className="flex h-10 items-center gap-2 rounded-xl bg-[#f4511e] px-6 text-[0.82rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:opacity-50">
+            className="flex h-10 items-center gap-2 rounded-xl bg-[#f4511e] px-6 text-[0.82rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50">
             {submitting ? <><Loader2 size={15} className="animate-spin" /> Creating…</> : <><PackagePlus size={15} /> Create Order</>}
           </button>
         </div>

@@ -150,7 +150,7 @@ export default function AddCustomerModal({ onClose, onCreated }: Props) {
           <button
             type="button"
             onClick={onCreated}
-            className="mt-7 h-10 rounded-full bg-[#f4511e] px-7 text-[0.85rem] font-semibold text-white transition hover:bg-[#d44d10]"
+            className="mt-7 h-10 rounded-full bg-[#f4511e] px-7 text-[0.85rem] font-semibold text-white transition hover:bg-[#df4618]"
           >
             Done
           </button>
@@ -291,7 +291,7 @@ export default function AddCustomerModal({ onClose, onCreated }: Props) {
             Cancel
           </button>
           <button type="submit" disabled={submitting}
-            className="flex h-10 items-center gap-2 rounded-xl bg-[#f4511e] px-6 text-[0.82rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:opacity-50">
+            className="flex h-10 items-center gap-2 rounded-xl bg-[#f4511e] px-6 text-[0.82rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50">
             {submitting ? <><Loader2 size={15} className="animate-spin" /> Creating…</> : <><UserPlus size={15} /> Create Customer</>}
           </button>
         </div>

@@ -662,7 +662,7 @@ export default function PaymentMilestonesCard({
                     <button
                       type="button"
                       onClick={() => { setReqOpen(true); setReqError(null); }}
-                      className="inline-flex h-8 items-center gap-1.5 rounded-full bg-[#f4511e] px-4 text-[0.78rem] font-semibold text-white transition hover:bg-[#d04d15]"
+                      className="inline-flex h-8 items-center gap-1.5 rounded-full bg-[#f4511e] px-4 text-[0.78rem] font-semibold text-white transition hover:bg-[#df4618]"
                     >
                       <Send size={12} strokeWidth={2.2} />
                       Request Deposit
@@ -808,7 +808,7 @@ export default function PaymentMilestonesCard({
                   type="button"
                   onClick={handleRequestDeposit}
                   disabled={reqLoading}
-                  className="inline-flex h-8 items-center gap-1.5 rounded-full bg-[#f4511e] px-4 text-[0.78rem] font-semibold text-white transition hover:bg-[#d04d15] disabled:opacity-60"
+                  className="inline-flex h-8 items-center gap-1.5 rounded-full bg-[#f4511e] px-4 text-[0.78rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-60"
                 >
                   {reqLoading
                     ? <><Loader2 size={12} className="animate-spin" /> Requesting…</>
@@ -902,7 +902,7 @@ export default function PaymentMilestonesCard({
                       <button
                         type="button"
                         onClick={() => { setModal(step.action!.modal); setNote(""); setError(null); }}
-                        className="inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full bg-[#f4511e] px-3 text-[0.73rem] font-semibold text-white transition hover:bg-[#d04d15]"
+                        className="inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full bg-[#f4511e] px-3 text-[0.73rem] font-semibold text-white transition hover:bg-[#df4618]"
                       >
                         {step.action.label}
                       </button>
@@ -1101,7 +1101,7 @@ export default function PaymentMilestonesCard({
           loading={loading}
           error={error}
           confirmLabel="Release Shipment"
-          confirmClass="bg-[#f4511e] hover:bg-[#d04d15]"
+          confirmClass="bg-[#f4511e] hover:bg-[#df4618]"
         />
       )}
 

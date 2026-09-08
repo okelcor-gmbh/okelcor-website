@@ -297,7 +297,7 @@ function ReplyBox({ parentId, onSent }: { parentId: number; onSent: () => void }
 
         <button
           type="submit" disabled={submitting}
-          className="ml-auto flex h-10 items-center gap-2 rounded-xl bg-[#f4511e] px-6 text-[0.82rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:opacity-50"
+          className="ml-auto flex h-10 items-center gap-2 rounded-xl bg-[#f4511e] px-6 text-[0.82rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50"
         >
           {submitting ? <><Loader2 size={15} className="animate-spin" /> Sending…</> : <><Send size={14} /> Reply</>}
         </button>

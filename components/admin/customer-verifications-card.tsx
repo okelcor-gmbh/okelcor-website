@@ -155,7 +155,7 @@ export default function CustomerVerificationsCard({ customerId, onVerifiedChange
                     type="button"
                     disabled={busyId === "add"}
                     onClick={addItem}
-                    className="flex h-9 items-center gap-1.5 rounded-lg bg-[#f4511e] px-3 text-[0.78rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:opacity-50"
+                    className="flex h-9 items-center gap-1.5 rounded-lg bg-[#f4511e] px-3 text-[0.78rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50"
                   >
                     {busyId === "add" ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />} Add
                   </button>

@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import PageHeader from "@/components/admin/page-header";
 import type { Metadata } from "next";
 import {
   adminApiFetch,
@@ -88,16 +89,13 @@ export default async function AdminQuotesPage({
 
   return (
     <div className="p-6 md:p-8">
-      <div className="mb-6">
-        <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">
-          Lead Pipeline
-        </p>
-        <p className="mt-0.5 text-[0.875rem] text-[#5c5e62]">
-          {typeof meta.total === "number"
-            ? `${meta.total} request${meta.total !== 1 ? "s" : ""} total`
-            : "Manage inbound quote requests and leads"}
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Sales"
+        title="Quote Requests"
+        sub={typeof meta.total === "number"
+          ? `${meta.total} request${meta.total !== 1 ? "s" : ""} total`
+          : "Manage inbound quote requests and leads"}
+      />
 
       {/* ── Pipeline summary cards ── */}
       {Object.keys(summary).length > 0 && (

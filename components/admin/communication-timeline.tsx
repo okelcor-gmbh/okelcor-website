@@ -168,7 +168,7 @@ export default function CommunicationTimeline({ context, entityId, compact = fal
         <div className="flex items-center gap-2">
           {recipientEmail && (
             <button type="button" onClick={() => { setReplyTo(null); setComposeOpen(true); }}
-              className="flex items-center gap-1.5 rounded-xl bg-[#f4511e] px-3 py-1.5 text-[0.78rem] font-semibold text-white transition hover:bg-[#d44d10]">
+              className="flex items-center gap-1.5 rounded-xl bg-[#f4511e] px-3 py-1.5 text-[0.78rem] font-semibold text-white transition hover:bg-[#df4618]">
               <Send size={12} /> Compose E-mail
             </button>
           )}
@@ -262,7 +262,7 @@ export default function CommunicationTimeline({ context, entityId, compact = fal
             </div>
           )}
           <button type="submit" disabled={submitting || (!form.body.trim() && !form.subject.trim())}
-            className="flex items-center gap-2 rounded-full bg-[#f4511e] px-5 py-2 text-[0.83rem] font-semibold text-white transition hover:bg-[#d44d10] disabled:opacity-50">
+            className="flex items-center gap-2 rounded-full bg-[#f4511e] px-5 py-2 text-[0.83rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50">
             {submitting ? <Loader2 size={13} className="animate-spin" /> : <Plus size={13} />}
             {submitting ? "Saving…" : "Save Entry"}
           </button>

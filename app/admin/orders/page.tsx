@@ -9,6 +9,7 @@ import {
 import OrdersTable from "@/components/admin/orders-table";
 import OrdersCsvActions from "@/components/admin/orders-csv-actions";
 import ChannelNotice from "@/components/admin/channel-notice";
+import PageHeader from "@/components/admin/page-header";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Orders" };
@@ -57,19 +58,15 @@ export default async function AdminOrdersPage({
 
   return (
     <div className="p-6 md:p-8">
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
-          <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">
-            Orders
-          </p>
-          <p className="mt-0.5 text-[0.875rem] text-[#5c5e62]">
-            {typeof meta.total === "number"
-              ? `${meta.total} order${meta.total !== 1 ? "s" : ""} total`
-              : "Manage customer orders"}
-          </p>
-        </div>
+      <PageHeader
+        eyebrow="Sales"
+        title="Orders"
+        sub={typeof meta.total === "number"
+          ? `${meta.total} order${meta.total !== 1 ? "s" : ""} total`
+          : "Manage customer orders"}
+      >
         <OrdersCsvActions />
-      </div>
+      </PageHeader>
 
       <ChannelNotice
         count={
