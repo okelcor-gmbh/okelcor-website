@@ -88,7 +88,21 @@ function SourceBadge({ source }: { source?: string | null }) {
   return null;
 }
 
-function StatusBadge({ status }: { status: string }) {
+function StatusBadge({ status, ebayPaid }: { status: string; ebayPaid?: boolean }) {
+  // An eBay order that eBay reports as paid but not yet started shipping:
+  // "Confirmed" reads as if the money were still open, when eBay has
+  // already collected it. eBay handles payment AND fulfilment, so until
+  // eBay ships, "Paid" is the status that tells the truth. Display-level
+  // only — the underlying pipeline status is untouched, so filters and
+  // queues keep working.
+  if (ebayPaid && (status === "pending" || status === "confirmed")) {
+    return (
+      <span title="Paid on eBay — awaiting eBay fulfilment"
+        className="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-[0.68rem] font-bold text-emerald-700">
+        Paid
+      </span>
+    );
+  }
   return (
     <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[0.68rem] font-bold ${STATUS_STYLES[status] ?? "bg-gray-100 text-gray-500"}`}>
       {STATUS_LABEL[status] ?? status.charAt(0).toUpperCase() + status.slice(1)}
@@ -245,7 +259,8 @@ export default function OrdersTable({
                       <p className="text-[0.73rem] text-[#5c5e62]">{order.customer_email}</p>
                     </td>
                     <td className="px-4 py-3">
-                      <StatusBadge status={order.status} />
+                      <StatusBadge status={order.status}
+                        ebayPaid={order.source === "ebay" && order.payment_status === "paid"} />
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex flex-col gap-1">
