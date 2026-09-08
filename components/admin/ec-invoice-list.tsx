@@ -711,8 +711,22 @@ function GroupForm({
             <input value={country} onChange={(e) => setCountry(e.target.value.toUpperCase())}
               placeholder="e.g. US, GH, GB, AE" maxLength={2} required className={`${INPUT} uppercase`} />
           ) : (
-            <select value={country} onChange={(e) => setCountry(e.target.value)} className={`${INPUT} cursor-pointer`}>
+            <select value={country}
+              onChange={(e) => {
+                // Finance's ask: Exports reachable straight from this list,
+                // without knowing to change the transaction type first.
+                // Picking it flips the type, which reshapes this control
+                // into the free-text non-EU destination field.
+                if (e.target.value === "__export__") {
+                  setType("export");
+                  setCountry("");
+                } else {
+                  setCountry(e.target.value);
+                }
+              }}
+              className={`${INPUT} cursor-pointer`}>
               {meta.countries.map((c) => <option key={c} value={c}>{c}</option>)}
+              <option value="__export__">Exports (non-EU country)</option>
             </select>
           )}
         </div>
