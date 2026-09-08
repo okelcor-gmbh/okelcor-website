@@ -46,6 +46,7 @@ export default function TierPricingBoard() {
 
   // Step-by-step guide — open by default until this person closes it once.
   const [guideOpen, setGuideOpen] = useState(true);
+  const [guideTab, setGuideTab]   = useState<"steps" | "table">("steps");
   useEffect(() => {
     try { if (localStorage.getItem("tier_pricing_guide_seen") === "1") setGuideOpen(false); } catch {}
   }, []);
@@ -205,37 +206,88 @@ export default function TierPricingBoard() {
         </div>
       )}
 
-      {/* Step-by-step guide — written for the person doing it, not the developer */}
+      {/* The guide, in the words of the person doing the work. Two tabs:
+          the four steps, and how to read every column of the table. */}
       {guideOpen && model && (
         <div className="mb-5 rounded-xl border border-[#f4511e]/20 bg-[#fff8f5] p-5">
-          <p className="mb-3 text-[0.72rem] font-bold uppercase tracking-[0.18em] text-[#f4511e]">
-            How pricing works — 4 steps
-          </p>
-          <ol className="grid gap-3 text-[0.83rem] leading-relaxed text-[#1a1a1a] md:grid-cols-2 xl:grid-cols-4">
-            <li className="rounded-lg bg-white p-3.5 ring-1 ring-black/[0.05]">
-              <span className="mb-1 block font-extrabold">1 · Cost price in</span>
-              Every product needs its <strong>Tyre100 cost</strong> (what we pay the supplier).
-              It comes in with the product CSV import — rows without it show under
-              &ldquo;No Tyre100 cost&rdquo; and are never repriced.
-            </li>
-            <li className="rounded-lg bg-white p-3.5 ring-1 ring-black/[0.05]">
-              <span className="mb-1 block font-extrabold">2 · Pick the tier</span>
-              Use &ldquo;Assign a whole brand&rdquo; below. <strong>Premium {model.margins.premium}%</strong> (Michelin,
-              Continental…), <strong>Mid-range {model.margins.midrange}%</strong> (Hankook, Falken…),
-              <strong> Budget {model.margins.budget}%</strong> (Rapid and other value brands). The tier is the profit margin.
-            </li>
-            <li className="rounded-lg bg-white p-3.5 ring-1 ring-black/[0.05]">
-              <span className="mb-1 block font-extrabold">3 · Check the new prices</span>
-              <strong>Price now</strong> = what the site charges today. <strong>New website price</strong> =
-              cost + margin + {model.stripe_fee_percent}% card fee. <strong>New eBay price</strong> = cost + margin
-              + {model.ebay_uplift_percent}% eBay charges (no card fee there — the LIVE eBay price is audited on the eBay Price Audit page). <strong>Change</strong> = New website price minus Price now: red/negative means Apply would LOWER the site price by that amount.
-            </li>
-            <li className="rounded-lg bg-white p-3.5 ring-1 ring-black/[0.05]">
-              <span className="mb-1 block font-extrabold">4 · Apply</span>
-              &ldquo;Apply formula to all&rdquo; writes the New website price to the site. eBay listings take their
-              eBay price automatically the next time they are pushed or updated — nothing to type there.
-            </li>
-          </ol>
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            {([["steps", "How pricing works"], ["table", "Reading the table"]] as ["steps" | "table", string][]).map(([key, label]) => (
+              <button key={key} type="button" onClick={() => setGuideTab(key)}
+                className={`rounded-full px-3.5 py-1.5 text-[0.72rem] font-bold uppercase tracking-[0.14em] transition ${
+                  guideTab === key ? "bg-[#f4511e] text-white" : "bg-white text-[#5c5e62] ring-1 ring-black/[0.06] hover:text-[#1a1a1a]"
+                }`}>
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {guideTab === "steps" && (
+            <ol className="grid gap-3 text-[0.83rem] leading-relaxed text-[#1a1a1a] md:grid-cols-2 xl:grid-cols-4">
+              <li className="rounded-lg bg-white p-3.5 ring-1 ring-black/[0.05]">
+                <span className="mb-1 block font-extrabold">1. Cost price in</span>
+                Every product needs its <strong>Tyre100 cost</strong>, the price we pay the supplier.
+                It arrives with the product CSV import. Rows without it show under
+                &ldquo;No Tyre100 cost&rdquo; and are never repriced.
+              </li>
+              <li className="rounded-lg bg-white p-3.5 ring-1 ring-black/[0.05]">
+                <span className="mb-1 block font-extrabold">2. Pick the tier</span>
+                Use &ldquo;Assign a whole brand&rdquo; below. <strong>Premium {model.margins.premium}%</strong> for Michelin and
+                Continental, <strong>Mid-range {model.margins.midrange}%</strong> for Hankook and Falken,
+                <strong> Budget {model.margins.budget}%</strong> for Rapid and other value brands. The tier is the profit margin.
+              </li>
+              <li className="rounded-lg bg-white p-3.5 ring-1 ring-black/[0.05]">
+                <span className="mb-1 block font-extrabold">3. Check the new prices</span>
+                Look down the <strong>Change</strong> column before anything else. Big red numbers mean big price
+                cuts. If a cut looks wrong, check the cost price first, then the tier. The
+                &ldquo;Reading the table&rdquo; tab walks through every column with a real tyre.
+              </li>
+              <li className="rounded-lg bg-white p-3.5 ring-1 ring-black/[0.05]">
+                <span className="mb-1 block font-extrabold">4. Apply</span>
+                &ldquo;Apply formula to all&rdquo; writes the New website price to the site. eBay listings take
+                their eBay price automatically the next time they are pushed or updated. Nothing to type there.
+              </li>
+            </ol>
+          )}
+
+          {guideTab === "table" && (
+            <div className="text-[0.83rem] leading-relaxed text-[#1a1a1a]">
+              <div className="mb-3 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+                <div className="rounded-lg bg-white p-3.5 ring-1 ring-black/[0.05]">
+                  <span className="mb-1 block font-extrabold">Tyre100 cost</span>
+                  What we pay the supplier for one tyre. Everything else is built on this number.
+                </div>
+                <div className="rounded-lg bg-white p-3.5 ring-1 ring-black/[0.05]">
+                  <span className="mb-1 block font-extrabold">Price now</span>
+                  What okelcor.com charges today, before the formula. The old price, nothing more.
+                </div>
+                <div className="rounded-lg bg-white p-3.5 ring-1 ring-black/[0.05]">
+                  <span className="mb-1 block font-extrabold">New website price</span>
+                  Cost, plus the tier margin, plus the {model.stripe_fee_percent}% card fee.
+                  This is what Apply writes to the site.
+                </div>
+                <div className="rounded-lg bg-white p-3.5 ring-1 ring-black/[0.05]">
+                  <span className="mb-1 block font-extrabold">New eBay price</span>
+                  Same cost and margin, but with the {model.ebay_uplift_percent}% eBay charges instead of the card
+                  fee. Pushed to eBay on the next listing update. The live eBay price sits on the eBay Price Audit page.
+                </div>
+                <div className="rounded-lg bg-white p-3.5 ring-1 ring-black/[0.05]">
+                  <span className="mb-1 block font-extrabold">Change</span>
+                  New website price minus Price now. <span className="font-semibold text-red-600">Red and negative:</span> Apply
+                  lowers the site price by that amount. <span className="font-semibold text-emerald-700">Green and positive:</span> it rises.
+                  Blank: already matching.
+                </div>
+              </div>
+              <div className="rounded-lg bg-white p-3.5 ring-1 ring-black/[0.05]">
+                <span className="mb-1 block font-extrabold">A real tyre, worked through</span>
+                A Michelin CrossClimate with a Tyre100 cost of <strong>126.93</strong> on the Premium tier:
+                126.93 plus {model.margins.premium}% margin is 145.97. Website adds the {model.stripe_fee_percent}% card
+                fee: <strong>150.35</strong>. eBay adds its {model.ebay_uplift_percent}% instead: <strong>159.84</strong>.
+                If the site charged 205.28 before, Change reads <strong className="text-red-600">minus 54.93</strong>,
+                because the agreed margin prices this tyre 54.93 below the old price. That is a decision to look
+                at before you press Apply, and exactly what the column exists to show you.
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -266,7 +318,7 @@ export default function TierPricingBoard() {
           className="rounded-full bg-[#1a1a1a] px-3.5 py-1.5 text-[0.75rem] font-bold text-white transition hover:bg-[#333] disabled:opacity-40">
           {sweeping ? "…" : "Set tier"}
         </button>
-        <span className="text-[0.72rem] text-[#9ca3af]">Tiers are usually a brand-level call — Michelin is premium everywhere.</span>
+        <span className="text-[0.72rem] text-[#9ca3af]">Tiers are usually a brand-level call. Michelin is premium everywhere.</span>
       </div>
 
       {/* Filters */}
@@ -305,7 +357,7 @@ export default function TierPricingBoard() {
                 </th>
                 <th className="px-3 py-2.5 font-bold">Product</th>
                 <th className="px-3 py-2.5 font-bold">Tier</th>
-                <th className="px-3 py-2.5 text-right font-bold" title="What we pay the supplier — imported with the product CSV">Tyre100 cost</th>
+                <th className="px-3 py-2.5 text-right font-bold" title="What we pay the supplier, imported with the product CSV">Tyre100 cost</th>
                 <th className="px-3 py-2.5 text-right font-bold" title="What the website charges right now">Price now</th>
                 <th className="px-3 py-2.5 text-right font-bold" title="What the website WILL charge after Apply: cost + margin + card fee">New website price</th>
                 <th className="px-3 py-2.5 text-right font-bold" title="What the eBay listing will be pushed at: cost + margin + eBay charges">New eBay price</th>
@@ -360,8 +412,8 @@ export default function TierPricingBoard() {
       <p className="mt-4 flex items-start gap-2 text-[0.72rem] text-[#9ca3af]">
         <AlertCircle size={13} className="mt-0.5 shrink-0" />
         <span>
-          &ldquo;Tyre100 cost&rdquo; is the supplier price (imported with the product CSV). &ldquo;Apply&rdquo; writes the New website price to the site.
-          The New eBay price is NOT pushed from here — every eBay list/update carries it automatically, so re-push listings from the eBay page
+          &ldquo;Tyre100 cost&rdquo; is the supplier price, imported with the product CSV. &ldquo;Apply&rdquo; writes the New website price to the site.
+          The New eBay price is NOT pushed from here: every eBay list or update carries it automatically, so re-push listings from the eBay page
           after repricing. Margins and fees are configurable without a deploy.
         </span>
       </p>
