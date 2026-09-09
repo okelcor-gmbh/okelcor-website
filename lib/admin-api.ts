@@ -2014,6 +2014,8 @@ export type SalesBoardLine = {
   /** customer (revenue + tyres) | supplier (cost + document). */
   party_type: string;
   party_name: string;
+  /** Per-line invoice number, e.g. the supplier invoice or the credit note ref. */
+  invoice_no?: string | null;
   tyre_qty: number;
   amount: number;
   has_file: boolean;

@@ -396,6 +396,7 @@ function EntryRows({
                 <tr className="border-b border-black/[0.06]">
                   <th className={TH}>Party</th>
                   <th className={TH}>Customer / supplier name</th>
+                  <th className={TH}>Invoice no</th>
                   <th className={`${TH} text-right`}>Tyres qty</th>
                   <th className={`${TH} text-right`}>Amount (€)</th>
                   <th className={TH}>Document</th>
@@ -445,6 +446,8 @@ function LineRow({
           }`}>
           <option value="customer">Customer</option>
           <option value="supplier">Supplier</option>
+          <option value="credit_note">Credit note</option>
+          <option value="cancelled">Cancelled</option>
         </select>
       </td>
       <td className={`${td} whitespace-normal break-words`}>
@@ -454,6 +457,15 @@ function LineRow({
               && void onPatch(line, { party_name: e.target.value.trim() })} />
         ) : (
           line.party_name
+        )}
+      </td>
+      <td className={td}>
+        {canManage ? (
+          <input defaultValue={line.invoice_no ?? ""} placeholder="INV / CN no" className={INPUT}
+            onBlur={(e) => (e.target.value.trim() || null) !== (line.invoice_no ?? null)
+              && void onPatch(line, { invoice_no: e.target.value.trim() })} />
+        ) : (
+          line.invoice_no ?? <span className="text-[#9ca3af]">n/a</span>
         )}
       </td>
       <td className={`${td} text-right tabular-nums`}>
@@ -601,8 +613,9 @@ function LineForm({
   onCancel: () => void;
   onDone: (message: string | null) => void;
 }) {
-  const [partyType, setPartyType] = useState<"customer" | "supplier">("supplier");
+  const [partyType, setPartyType] = useState<"customer" | "supplier" | "credit_note" | "cancelled">("supplier");
   const [name, setName] = useState("");
+  const [invoiceNo, setInvoiceNo] = useState("");
   const [qty, setQty] = useState("");
   const [amount, setAmount] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -617,6 +630,7 @@ function LineForm({
       const fd = new FormData();
       fd.append("party_type", partyType);
       fd.append("party_name", name);
+      if (invoiceNo.trim()) fd.append("invoice_no", invoiceNo.trim());
       if (partyType === "customer" && qty) fd.append("tyre_qty", qty);
       if (amount) fd.append("amount", amount);
       if (file) fd.append("file", file);
@@ -634,13 +648,15 @@ function LineForm({
       {formError && (
         <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[0.78rem] text-red-700">{formError}</p>
       )}
-      <div className="grid grid-cols-2 gap-2.5 md:grid-cols-5">
+      <div className="grid grid-cols-2 gap-2.5 md:grid-cols-6">
         <div>
           <label className={LABEL}>Party</label>
-          <select value={partyType} onChange={(e) => setPartyType(e.target.value as "customer" | "supplier")}
+          <select value={partyType} onChange={(e) => setPartyType(e.target.value as "customer" | "supplier" | "credit_note" | "cancelled")}
             className={`${INPUT} cursor-pointer`}>
             <option value="supplier">Supplier</option>
             <option value="customer">Customer</option>
+            <option value="credit_note">Credit note</option>
+            <option value="cancelled">Cancelled</option>
           </select>
         </div>
         <div>
@@ -653,6 +669,11 @@ function LineForm({
             <input type="number" min="0" value={qty} onChange={(e) => setQty(e.target.value)} className={INPUT} />
           </div>
         )}
+        <div>
+          <label className={LABEL}>Invoice no</label>
+          <input value={invoiceNo} onChange={(e) => setInvoiceNo(e.target.value)} maxLength={50}
+            placeholder="INV / CN no" className={INPUT} />
+        </div>
         <div>
           <label className={LABEL}>Amount (€)</label>
           <input type="number" step="0.01" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} className={INPUT} />
