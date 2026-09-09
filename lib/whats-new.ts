@@ -26,6 +26,15 @@ export type WhatsNewEntry = {
 
 export const WHATS_NEW: WhatsNewEntry[] = [
   {
+    id: "2026-09-09-tyre100-cost-refresh",
+    date: "2026-09-09",
+    title: "Tyre100 costs stay current",
+    brief:
+      "An Update Tyre100 costs button on the pricing page takes their latest price list as a CSV (sku or ean plus cost) and refreshes only the cost prices. Every cost now shows when it was last confirmed; amber means unconfirmed, so refresh before pricing on it.",
+    href: "/admin/pricing",
+    section: "pricing",
+  },
+  {
     id: "2026-09-09-tier-pricing-guide",
     date: "2026-09-09",
     title: "Tyre Pricing, explained in plain words",

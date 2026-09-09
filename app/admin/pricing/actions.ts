@@ -22,6 +22,8 @@ export type PricingRow = {
   tier: PriceTier | null;
   /** The Tyre100 supplier price. */
   cost_price: number | null;
+  /** When the cost was last confirmed against Tyre100. Null = predates tracking, treat as stale. */
+  cost_updated_at?: string | null;
   current_price: number;
   /** cost × (1 + tier margin) × (1 + Stripe 3%) — what the site should charge. */
   website_price: number | null;

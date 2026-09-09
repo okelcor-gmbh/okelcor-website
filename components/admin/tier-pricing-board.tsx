@@ -12,7 +12,7 @@
 
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import {
-  AlertCircle, AlertTriangle, BookOpen, Calculator, Loader2, RefreshCw, Search, X,
+  AlertCircle, AlertTriangle, BookOpen, Calculator, Loader2, RefreshCw, Search, Upload, X,
 } from "lucide-react";
 import {
   getPricingPreview, setTier, applyPricing,
@@ -43,6 +43,35 @@ export default function TierPricingBoard() {
   const [selected, setSelected]   = useState<Set<number>>(new Set());
   const [busyRow, setBusyRow]     = useState<number | null>(null);
   const [applyingAll, setApplyingAll] = useState(false);
+
+  // Tyre100 cost refresh upload
+  const [costModalOpen, setCostModalOpen] = useState(false);
+  const [costFile, setCostFile] = useState<File | null>(null);
+  const [costBusy, setCostBusy] = useState(false);
+  const [costResult, setCostResult] = useState<string | null>(null);
+
+  async function submitCosts(e: React.FormEvent) {
+    e.preventDefault();
+    if (!costFile) return;
+    setCostBusy(true);
+    setCostResult(null);
+    try {
+      const fd = new FormData();
+      fd.append("file", costFile);
+      const res = await fetch("/api/admin/pricing/import-costs", { method: "POST", body: fd });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) { setCostResult(json.message ?? "Import failed."); return; }
+      const un = Array.isArray(json.data?.unmatched) ? json.data.unmatched : [];
+      setCostResult(
+        `${json.data?.updated ?? 0} cost(s) updated, ${json.data?.confirmed ?? 0} confirmed current.` +
+        (un.length ? ` Unmatched: ${un.slice(0, 8).map((u: { ref: string }) => u.ref).join(", ")}${un.length > 8 ? ` and ${un.length - 8} more` : ""}.` : "")
+      );
+      setCostFile(null);
+      load();
+    } finally {
+      setCostBusy(false);
+    }
+  }
 
   // Step-by-step guide — open by default until this person closes it once.
   const [guideOpen, setGuideOpen] = useState(true);
@@ -196,6 +225,10 @@ export default function TierPricingBoard() {
             className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[0.8rem] font-semibold text-[#1a1a1a] ring-1 ring-black/[0.08] transition hover:bg-[#f0f2f5]">
             <BookOpen size={13} /> How this works
           </button>
+          <button type="button" onClick={() => { setCostModalOpen(true); setCostResult(null); }}
+            className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[0.8rem] font-semibold text-[#1a1a1a] ring-1 ring-black/[0.08] transition hover:bg-[#f0f2f5]">
+            <Upload size={13} /> Update Tyre100 costs
+          </button>
         </div>
       </div>
 
@@ -225,9 +258,10 @@ export default function TierPricingBoard() {
             <ol className="grid gap-3 text-[0.83rem] leading-relaxed text-[#1a1a1a] md:grid-cols-2 xl:grid-cols-4">
               <li className="rounded-lg bg-white p-3.5 ring-1 ring-black/[0.05]">
                 <span className="mb-1 block font-extrabold">1. Cost price in</span>
-                Every product needs its <strong>Tyre100 cost</strong>, the price we pay the supplier.
-                It arrives with the product CSV import. Rows without it show under
-                &ldquo;No Tyre100 cost&rdquo; and are never repriced.
+                Every product needs its <strong>current Tyre100 cost</strong>, the price we pay the supplier
+                today. Refresh it with the <strong>Update Tyre100 costs</strong> button above whenever Tyre100
+                publishes a new price list. An amber &ldquo;unconfirmed&rdquo; under a cost means nobody has
+                confirmed it against Tyre100 yet, so treat its prices with suspicion.
               </li>
               <li className="rounded-lg bg-white p-3.5 ring-1 ring-black/[0.05]">
                 <span className="mb-1 block font-extrabold">2. Pick the tier</span>
@@ -393,7 +427,17 @@ export default function TierPricingBoard() {
                       {TIERS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                     </select>
                   </td>
-                  <td className="whitespace-nowrap px-3 py-2.5 text-right font-mono">{fmt(r.cost_price)}</td>
+                  <td className="whitespace-nowrap px-3 py-2.5 text-right font-mono">
+                    <span>{fmt(r.cost_price)}</span>
+                    {r.cost_price !== null && (
+                      <p className={`text-[0.6rem] font-sans ${r.cost_updated_at ? "text-[#9ca3af]" : "font-semibold text-amber-600"}`}
+                        title={r.cost_updated_at ? `Cost confirmed against Tyre100 on ${new Date(r.cost_updated_at).toLocaleDateString("en-GB")}` : "This cost has never been confirmed against Tyre100. Upload a current price list via Update Tyre100 costs."}>
+                        {r.cost_updated_at
+                          ? new Date(r.cost_updated_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short" })
+                          : "unconfirmed"}
+                      </p>
+                    )}
+                  </td>
                   <td className="whitespace-nowrap px-3 py-2.5 text-right font-mono text-[#6b7280]">{fmt(r.current_price)}</td>
                   <td className="whitespace-nowrap px-3 py-2.5 text-right font-mono font-bold">{fmt(r.website_price)}</td>
                   <td className="whitespace-nowrap px-3 py-2.5 text-right font-mono font-bold text-blue-800">{fmt(r.ebay_price)}</td>
@@ -417,6 +461,43 @@ export default function TierPricingBoard() {
           after repricing. Margins and fees are configurable without a deploy.
         </span>
       </p>
+
+      {costModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true" aria-label="Update Tyre100 costs">
+          <form onSubmit={submitCosts} className="w-full max-w-md rounded-xl bg-white p-5 shadow-[0_24px_64px_rgba(0,0,0,0.18)]">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-[0.95rem] font-extrabold text-[#1a1a1a]">Update Tyre100 costs</p>
+              <button type="button" onClick={() => setCostModalOpen(false)} aria-label="Close"
+                className="text-[#9ca3af] transition hover:text-[#1a1a1a]"><X size={15} /></button>
+            </div>
+            <p className="mb-3 text-[0.8rem] leading-relaxed text-[#5c5e62]">
+              Upload the latest Tyre100 price list as a CSV with a <code className="rounded bg-[#f5f5f7] px-1 font-mono">sku</code> or
+              <code className="rounded bg-[#f5f5f7] px-1 font-mono"> ean</code> column and a
+              <code className="rounded bg-[#f5f5f7] px-1 font-mono"> cost</code> column (German headers like
+              <code className="rounded bg-[#f5f5f7] px-1 font-mono"> preis</code> or
+              <code className="rounded bg-[#f5f5f7] px-1 font-mono"> ek</code> work too). Only the cost changes:
+              names, prices, images and everything else stay untouched. Each matched product is stamped as
+              confirmed today, which clears its amber &ldquo;unconfirmed&rdquo; marker in the cost column.
+            </p>
+            <input type="file" accept=".csv,.txt" required
+              onChange={(e) => setCostFile(e.target.files?.[0] ?? null)}
+              className="mb-3 w-full text-[0.78rem] file:mr-2 file:rounded-full file:border-0 file:bg-[#171a20] file:px-3 file:py-1.5 file:text-[0.72rem] file:font-semibold file:text-white" />
+            {costResult && (
+              <p className="mb-3 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-[0.78rem] text-blue-800">{costResult}</p>
+            )}
+            <div className="flex items-center gap-2">
+              <button type="submit" disabled={costBusy || !costFile}
+                className="flex items-center gap-1.5 rounded-full bg-[#f4511e] px-4 py-2 text-[0.8rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50">
+                {costBusy && <Loader2 size={12} className="animate-spin" />} Import costs
+              </button>
+              <button type="button" onClick={() => setCostModalOpen(false)}
+                className="rounded-full border border-black/10 px-4 py-2 text-[0.8rem] font-semibold text-[#5c5e62]">
+                Close
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }
