@@ -482,12 +482,20 @@ function LineRow({
         )}
       </td>
       <td className={`${td} text-right tabular-nums`}>
+        {/* Non-customer lines pull the totals down; the minus makes that
+            visible while the stored amount stays positive. */}
         {canManage ? (
-          <input type="number" step="0.01" min="0" defaultValue={line.amount} className={`${INPUT} text-right`}
-            onBlur={(e) => Number(e.target.value) !== line.amount
-              && void onPatch(line, { amount: Number(e.target.value) || 0 })} />
-        ) : (
+          <span className="flex items-center justify-end gap-1">
+            {!isCustomer && <span className="font-bold text-red-600" title="This amount is subtracted">−</span>}
+            <input type="number" step="0.01" min="0" defaultValue={line.amount}
+              className={`${INPUT} text-right ${!isCustomer ? "text-red-600" : ""}`}
+              onBlur={(e) => Number(e.target.value) !== line.amount
+                && void onPatch(line, { amount: Number(e.target.value) || 0 })} />
+          </span>
+        ) : isCustomer ? (
           formatMoney(line.amount, "EUR")
+        ) : (
+          <span className="text-red-600">−{formatMoney(line.amount, "EUR")}</span>
         )}
       </td>
       <td className={td}>
