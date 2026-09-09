@@ -1494,9 +1494,12 @@ export default function EbayPage() {
     setPage(1);
     setSelected(new Set());
     setSelectedListed(new Set());
-    void fetchProducts({ filter: val, page: 1 });
+    void fetchProducts({ q, filter: val, page: 1 });
   };
-  const handleSearch = (e: React.FormEvent) => { e.preventDefault(); setPage(1); void fetchProducts({ page: 1 }); };
+  // fetchProducts is memoized once, so its internal fallbacks close over the
+  // INITIAL state — every caller must pass the live values explicitly, or a
+  // typed search silently sends an empty q (the "eBay search does nothing" bug).
+  const handleSearch = (e: React.FormEvent) => { e.preventDefault(); setPage(1); void fetchProducts({ q, filter, page: 1 }); };
 
   return (
     <div className="p-6 md:p-8">
@@ -1845,6 +1848,13 @@ export default function EbayPage() {
           <button type="submit" className="h-10 rounded-xl bg-[#1a1a1a] px-4 text-[0.875rem] font-semibold text-white transition hover:bg-[#333]">
             Search
           </button>
+          {q && (
+            <button type="button" aria-label="Clear search"
+              onClick={() => { setQ(""); setPage(1); void fetchProducts({ q: "", filter, page: 1 }); }}
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-black/[0.09] bg-white text-[#5c5e62] transition hover:text-red-500">
+              <X size={14} />
+            </button>
+          )}
         </form>
         <div className="flex gap-1.5">
           {(["all", "listed", "unlisted"] as const).map((f) => (
@@ -1864,7 +1874,7 @@ export default function EbayPage() {
           ))}
           <button
             type="button"
-            onClick={() => void fetchProducts()}
+            onClick={() => void fetchProducts({ q, filter, page })}
             title="Refresh"
             className="flex h-10 w-10 items-center justify-center rounded-xl border border-black/[0.09] bg-white text-[#5c5e62] transition hover:text-[#1a1a1a]"
           >
@@ -2097,13 +2107,13 @@ export default function EbayPage() {
               <button
                 type="button"
                 disabled={page <= 1}
-                onClick={() => { setPage(page - 1); void fetchProducts({ page: page - 1 }); }}
+                onClick={() => { setPage(page - 1); void fetchProducts({ q, filter, page: page - 1 }); }}
                 className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] bg-white text-[#1a1a1a] transition hover:border-[#f4511e] hover:text-[#f4511e] disabled:pointer-events-none disabled:bg-[#f5f5f5] disabled:text-[#ccc]"
               >‹</button>
               <button
                 type="button"
                 disabled={page >= lastPage}
-                onClick={() => { setPage(page + 1); void fetchProducts({ page: page + 1 }); }}
+                onClick={() => { setPage(page + 1); void fetchProducts({ q, filter, page: page + 1 }); }}
                 className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.09] bg-white text-[#1a1a1a] transition hover:border-[#f4511e] hover:text-[#f4511e] disabled:pointer-events-none disabled:bg-[#f5f5f5] disabled:text-[#ccc]"
               >›</button>
             </div>
