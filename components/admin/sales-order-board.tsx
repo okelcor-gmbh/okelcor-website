@@ -240,7 +240,7 @@ export default function SalesOrderBoard() {
             <thead>
               <tr className="border-b border-black/[0.06] bg-[#fafafa]">
                 <th className={`${TH} w-8`} />
-                <th className={TH}>Order no</th>
+                <th className={TH}>Invoice no</th>
                 <th className={TH}>Customer</th>
                 <th className={TH}>Segment</th>
                 <th className={TH}>Period</th>
@@ -537,7 +537,7 @@ function OrderForm({
         }),
       });
       const json = await res.json().catch(() => ({}));
-      if (!res.ok) { setFormError(json.message ?? "Could not add the order."); return; }
+      if (!res.ok) { setFormError(json.message ?? "Could not add the invoice."); return; }
       onDone();
     } finally {
       setBusy(false);
@@ -546,14 +546,14 @@ function OrderForm({
 
   return (
     <form onSubmit={submit} className="space-y-3 rounded-xl border border-black/[0.06] bg-white p-4">
-      <p className="text-[0.72rem] font-bold uppercase tracking-wider text-[#5c5e62]">New order</p>
+      <p className="text-[0.72rem] font-bold uppercase tracking-wider text-[#5c5e62]">New invoice</p>
       {formError && (
         <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[0.78rem] text-red-700">{formError}</p>
       )}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
         <div>
-          <label className={LABEL}>Order no</label>
-          <input value={orderNo} onChange={(e) => setOrderNo(e.target.value)} placeholder="ORD-2026-003" required className={INPUT} />
+          <label className={LABEL}>Invoice no</label>
+          <input value={orderNo} onChange={(e) => setOrderNo(e.target.value)} placeholder="INV-2026-003" required className={INPUT} />
         </div>
         <div>
           <label className={LABEL}>Customer name</label>
@@ -583,7 +583,7 @@ function OrderForm({
       <div className="flex items-center gap-2">
         <button type="submit" disabled={busy}
           className="flex items-center gap-1.5 rounded-full bg-[#f4511e] px-4 py-1.5 text-[0.78rem] font-semibold text-white transition hover:bg-[#df4618] disabled:opacity-50">
-          {busy && <Loader2 size={12} className="animate-spin" />} Add order
+          {busy && <Loader2 size={12} className="animate-spin" />} Add invoice
         </button>
         <button type="button" onClick={onCancel}
           className="rounded-full border border-black/10 px-4 py-1.5 text-[0.78rem] font-semibold text-[#5c5e62]">
