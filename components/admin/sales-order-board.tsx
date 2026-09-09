@@ -345,7 +345,7 @@ function EntryRows({
         <td className={td} onClick={stop}>
           <select value={entry.category} disabled={!canManage} className={`${INPUT} cursor-pointer`}
             onChange={(e) => void onPatchEntry(entry, { category: e.target.value })}>
-            {(meta?.categories ?? ["Tyres", "FET"]).map((c) => <option key={c} value={c}>{c}</option>)}
+            {(meta?.categories ?? ["New Tyres", "Used Tyres", "FET"]).map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
         </td>
         <td className={td}>
@@ -520,7 +520,7 @@ function OrderForm({
   const [customer, setCustomer] = useState("");
   const [segment, setSegment] = useState("B2B");
   const [period, setPeriod] = useState(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`);
-  const [category, setCategory] = useState("Tyres");
+  const [category, setCategory] = useState("New Tyres");
   const [busy, setBusy] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
