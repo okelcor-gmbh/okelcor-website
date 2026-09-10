@@ -4,7 +4,7 @@ import {
   Zap, MessageSquare, ShieldAlert, FileCheck, Truck, Activity, ScanLine,
   BellRing, Bell, Inbox, ClipboardCheck, UserCheck, Mail, Send, Images,
   Handshake, ReceiptText, LayoutGrid, LineChart, Search, BadgeCheck,
-  MessagesSquare, Globe2, Scale, LifeBuoy, Calculator,
+  MessagesSquare, Globe2, Scale, LifeBuoy, Calculator, Boxes,
 } from "lucide-react";
 
 /**
@@ -134,6 +134,7 @@ export const NAV_GROUPS: readonly NavGroup[] = [
       { label: "Profitability", href: "/admin/profitability", icon: Scale, section: "finance" , keywords: "profit margin revenue invoice supplier costs fees stripe ebay verified sign off export per order" },
       { label: "EC Invoice List", href: "/admin/ec-invoices", icon: FileCheck, section: "finance" , keywords: "zm zusammenfassende meldung elster bzst eu vat intra-community sales list delivery proof cmr audit xml" },
       { label: "Sales & Orders Board", href: "/admin/sales-orders", icon: ClipboardList, section: "finance" , keywords: "sales order management dashboard gp gross profit margin b2b b2c tyres sold avg price customer supplier proof" },
+      { label: "Stock Ledger", href: "/admin/stock", icon: Boxes, section: "finance" , keywords: "stock inventory warehouse used tyres tread grade supplier invoice customer sale pieces pcs" },
       { label: "Analytics",     href: "/admin/analytics", icon: BarChart2,  section: "analytics" , keywords: "reports stats funnel" },
       { label: "Promotion Insight", href: "/admin/analytics/product-mix", icon: Package, section: "analytics" , keywords: "used new tyres bundles sizes repeat buyers countries promote" },
       // Its own section, not "analytics": the roles the backend grants this

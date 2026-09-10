@@ -153,6 +153,7 @@ export const PATH_SECTION: Record<string, string> = {
   "/admin/ebay-audit":      "ebay",
   "/admin/ebay":            "ebay",
   "/admin/pricing":         "pricing",
+  "/admin/stock":           "finance",
   // Listed before "/admin/analytics": PATH_SECTION is matched with startsWith()
   // and the first entry wins, so the broader prefix must come second.
   "/admin/analytics/behaviour": "behaviour",

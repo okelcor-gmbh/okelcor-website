@@ -26,6 +26,15 @@ export type WhatsNewEntry = {
 
 export const WHATS_NEW: WhatsNewEntry[] = [
   {
+    id: "2026-09-10-stock-ledger",
+    date: "2026-09-10",
+    title: "The Stock Ledger arrives",
+    brief:
+      "Finance's stock section, built from their own draft: physical used-tyre stock by brand, size and condition grade. Book supplier invoices to bring pieces in, customer sale invoices to sell them out (with automatic shortage checks), and every booking lands in the transaction log.",
+    href: "/admin/stock",
+    section: "finance",
+  },
+  {
     id: "2026-09-09-tyre100-cost-refresh",
     date: "2026-09-09",
     title: "Tyre100 costs stay current",
